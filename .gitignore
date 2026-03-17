@@ -1,0 +1,33 @@
+# Maven / Gradle build outputs
+target/
+build/
+
+# IDE settings
+*.iml
+.idea/
+.vscode/
+.project
+.classpath
+.settings/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+*.swp
+
+# Spring Boot specific
+# Exclude local configuration files
+**/resources/application-local.yml
+
+# Node-related (if any frontend in gateway)
+node_modules/
+dist/
+
+# Metadata
+.metadata/
