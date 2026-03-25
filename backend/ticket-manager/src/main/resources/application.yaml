@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: ticket-manager
+  config:
+    import: optional:configserver:http://localhost:6971
+  profiles:
+    active: local
+
+server:
+  port: 7070
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6969/eureka
