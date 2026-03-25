@@ -25,9 +25,5 @@ Thumbs.db
 # Exclude local configuration files
 **/resources/application-local.yml
 
-# Node-related (if any frontend in gateway)
-node_modules/
-dist/
-
 # Metadata
 .metadata/
