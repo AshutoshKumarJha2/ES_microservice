@@ -1,0 +1,38 @@
+spring:
+  # application:
+    # name: config-server
+  main:
+    allow-bean-definition-overriding: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    show-sql: true
+  flyway:
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: your-email@gmail.com   # replace with your Gmail address
+    password: your-app-password      # replace with your Gmail App Password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+# server:
+  # port: 9090
+
+security:
+  jwt:
+    secret: nvjfenvjnjv53352434rnnc19dnwqdneciu439jn
+    expiration-ms: 3600000
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /api/v1/public
