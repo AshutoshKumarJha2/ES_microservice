@@ -1,4 +1,4 @@
-package com.cts.eventsphere.eventmanager.dto.shared;
+package com.cts.eventsphere.logmanager.dto.shared;
 
 /**
  * Marker interface for response DTOs
