@@ -1,0 +1,194 @@
+package com.cts.eventsphere.eventmanager.service.impl;
+
+import com.cts.eventsphere.eventmanager.dto.mapper.registration.RegistrationDtoMapper;
+import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
+import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
+import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.registration.DuplicateRegistrationException;
+import com.cts.eventsphere.eventmanager.exception.registration.InvalidRegistrationStatusException;
+import com.cts.eventsphere.eventmanager.exception.registration.RegistrationNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+import com.cts.eventsphere.eventmanager.model.Registration;
+import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
+import com.cts.eventsphere.eventmanager.repository.EventRepository;
+import com.cts.eventsphere.eventmanager.repository.RegistrationRepository;
+import com.cts.eventsphere.eventmanager.repository.TicketRepository;
+import com.cts.eventsphere.eventmanager.service.RegistrationService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+
+/**
+ * Implementation of {@link RegistrationService} for managing event registrations.
+ * Handles registration lifecycle: creation, status transitions, and retrieval.
+ *
+ * @author test-in-prod-10x
+ * @version 1.0
+ * @since 2026-03-26
+ */
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class RegistrationServiceImpl implements RegistrationService {
+
+    private final RegistrationRepository registrationRepo;
+    private final TicketRepository ticketRepository;
+    private final EventRepository eventRepository;
+
+    @Override
+    public GenericResponse registerForEvent(String userId, String eventId, String ticketId) {
+        if (registrationRepo.existsByEventEventIdAndAttendeeId(eventId, userId)) {
+            throw new DuplicateRegistrationException(userId, eventId);
+        }
+        var event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotFoundException(eventId));
+        var ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new TicketNotFoundException(ticketId));
+
+        var newRegistration = Registration.builder()
+                .attendeeId(userId)
+                .event(event)
+                .ticket(ticket)
+                .status(RegistrationStatus.PENDING)
+                .build();
+        registrationRepo.save(newRegistration);
+        log.info("User {} registered for event {} with ticket {}", userId, eventId, ticketId);
+        return new GenericResponse("Registration successful");
+    }
+
+    @Override
+    public GenericResponse deleteRegistration(String actorId, String registrationId) {
+        if (!registrationRepo.existsById(registrationId)) {
+            throw new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId));
+        }
+        registrationRepo.deleteById(registrationId);
+        log.info("Registration with id {} deleted by actor {}", registrationId, actorId);
+        return new GenericResponse("Registration deleted successfully");
+    }
+
+    @Override
+    public GenericResponse cancelRegistration(String actorId, String registrationId) {
+        var registration = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        registration.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepo.save(registration);
+        log.info("Registration with id {} cancelled by actor {}", registrationId, actorId);
+        return new GenericResponse("Registration cancelled successfully");
+    }
+
+    @Override
+    public GenericResponse approveRegistration(String actorId, String registrationId) {
+        var registration = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        registration.setStatus(RegistrationStatus.CONFIRMED);
+        registrationRepo.save(registration);
+        log.info("Registration with id {} approved by actor {}", registrationId, actorId);
+        return new GenericResponse("Registration approved successfully");
+    }
+
+    @Override
+    public GenericResponse checkInRegistration(String actorId, String registrationId) {
+        var registration = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        if (!registration.getStatus().equals(RegistrationStatus.CONFIRMED)) {
+            throw new InvalidRegistrationStatusException(
+                    String.format("User not confirmed for event '%s'", registration.getEvent().getEventId()));
+        }
+        registration.setStatus(RegistrationStatus.CHECKED_IN);
+        registrationRepo.save(registration);
+        log.info("Registration with id {} checked in by actor {}", registrationId, actorId);
+        return new GenericResponse("Check-in successful");
+    }
+
+    @Override
+    public GenericResponse rejectRegistration(String actorId, String registrationId) {
+        var registration = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        registration.setStatus(RegistrationStatus.CANCELLED);
+        registrationRepo.save(registration);
+        log.info("Registration with id {} rejected by actor {}", registrationId, actorId);
+        return new GenericResponse("Registration rejected successfully");
+    }
+
+    @Override
+    public RegistrationListResponseDto getRegistrationsByUserId(String actorId, String userId, int size, int page) {
+        var pageable = PageRequest.of(page, size);
+        var pages = registrationRepo.findByAttendeeId(userId, pageable);
+        var registrations = pages.getContent().stream()
+                .map(RegistrationDtoMapper::toDto)
+                .toList();
+        log.info("Fetched {} registrations for userId: {} by actor: {}", registrations.size(), userId, actorId);
+        return new RegistrationListResponseDto(
+                registrations,
+                pages.getNumber(),
+                pages.getSize(),
+                pages.getTotalElements(),
+                pages.getTotalPages()
+        );
+    }
+
+    @Override
+    public RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, int size, int page) {
+        var pageable = PageRequest.of(page, size);
+        Page<Registration> pages;
+        if (status == null || status.isEmpty()) {
+            pages = registrationRepo.findByEventEventId(eventId, pageable);
+        } else {
+            RegistrationStatus statusEnum;
+            try {
+                statusEnum = RegistrationStatus.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                throw new RegistrationNotFoundException(String.format("Invalid status value '%s'", status));
+            }
+            pages = registrationRepo.findByEventEventIdAndStatus(eventId, statusEnum, pageable);
+        }
+        var registrations = pages.getContent().stream()
+                .map(RegistrationDtoMapper::toDto)
+                .toList();
+        log.info("Fetched {} registrations for eventId: {} by actor: {}", registrations.size(), eventId, actorId);
+        return new RegistrationListResponseDto(
+                registrations,
+                pages.getNumber(),
+                pages.getSize(),
+                pages.getTotalElements(),
+                pages.getTotalPages()
+        );
+    }
+
+    @Override
+    public RegistrationListResponseDto getAllRegistrations(String actorId, int size, int page) {
+        var pageable = PageRequest.of(page, size);
+        var pages = registrationRepo.findAll(pageable);
+        var registrations = pages.getContent().stream()
+                .map(RegistrationDtoMapper::toDto)
+                .toList();
+        log.info("Fetched {} registrations by actor: {}", registrations.size(), actorId);
+        return new RegistrationListResponseDto(
+                registrations,
+                pages.getNumber(),
+                pages.getSize(),
+                pages.getTotalElements(),
+                pages.getTotalPages()
+        );
+    }
+
+    @Override
+    public RegistrationDto getRegistrationById(String actorId, String registrationId) {
+        var registration = registrationRepo.findById(registrationId)
+                .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        log.info("Fetched registration with id: {} by actor: {}", registrationId, actorId);
+        return RegistrationDtoMapper.toDto(registration);
+    }
+
+    @Override
+    public RegistrationDto getRegistrationByEventIdAndUserId(String actorId, String eventId, String userId) {
+        var registration = registrationRepo.findByAttendeeIdAndEventEventId(userId, eventId)
+                .orElseThrow(() -> new RegistrationNotFoundException(
+                        String.format("Registration for eventId: '%s' and userId: '%s' not found", eventId, userId)));
+        log.info("Fetched registration for userId: {}, eventId: {} by actor: {}", userId, eventId, actorId);
+        return RegistrationDtoMapper.toDto(registration);
+    }
+}
