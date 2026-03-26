@@ -1,8 +1,6 @@
-package com.cts.eventsphere.eventmanager.exception;
+package com.cts.eventsphere.logmanager.exception;
 
-import com.cts.eventsphere.eventmanager.dto.shared.GenericErrorResponse;
-import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
-import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+import com.cts.eventsphere.logmanager.dto.shared.GenericErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -43,33 +41,5 @@ public class GlobalExceptionHandler {
                 "An unexpected error occurred. Please contact support with traceId: " + traceId
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
-
-    /**
-     * Handles EventNotFoundException by returning a standardized error response.
-     * This method is triggered when an event lookup fails and the requested event
-     * cannot be found in the system.
-     *
-     * @param e the EventNotFoundException thrown when the event is missing
-     * @return ResponseEntity containing a GenericErrorResponse with a "Event Not Found"
-     *         message and HTTP status 404 (NOT_FOUND)
-     */
-    @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<GenericErrorResponse> handleEventNotFoundException(EventNotFoundException e) {
-        return new ResponseEntity<>(new GenericErrorResponse("Event Not Found"), HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Handles ScheduleNotFoundException by returning a standardized error response.
-     * This method is triggered when a schedule lookup fails and the requested schedule
-     * cannot be found in the system.
-     *
-     * @param e the ScheduleNotFoundException thrown when the schedule is missing
-     * @return ResponseEntity containing a GenericErrorResponse with a "Schedule Not Found"
-     *         message and HTTP status 404 (NOT_FOUND)
-     */
-    @ExceptionHandler(ScheduleNotFoundException.class)
-    public ResponseEntity<GenericErrorResponse> handleScheduleNotFoundException(ScheduleNotFoundException e) {
-        return new ResponseEntity<>(new GenericErrorResponse("Schedule Not Found"), HttpStatus.NOT_FOUND);
     }
 }

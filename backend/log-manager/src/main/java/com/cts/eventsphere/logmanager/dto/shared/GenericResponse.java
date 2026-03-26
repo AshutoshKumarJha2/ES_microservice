@@ -1,4 +1,4 @@
-package com.cts.eventsphere.eventmanager.dto.shared;
+package com.cts.eventsphere.logmanager.dto.shared;
 
 /**
  * DTO object for generic response
