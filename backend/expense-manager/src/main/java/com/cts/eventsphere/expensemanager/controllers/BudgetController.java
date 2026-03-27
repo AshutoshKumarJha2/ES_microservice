@@ -35,7 +35,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
  * @since 25-03-2026
  */
 @RestController
-@RequestMapping("/api/events/v1")
+@RequestMapping("/events")
 @Tag(name = "Budget", description = "Budget management endpoints")
 @RequiredArgsConstructor
 @Slf4j

@@ -22,7 +22,7 @@ import java.util.List;
  * @since 10-03-2026
  */
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping("/notifications")
 @RequiredArgsConstructor
 @Slf4j
 public class NotificationController {

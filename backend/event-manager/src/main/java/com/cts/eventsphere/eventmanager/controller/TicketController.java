@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 2026-03-26
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

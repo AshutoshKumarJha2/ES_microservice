@@ -32,7 +32,7 @@ public interface EventServiceClient {
      * @param eventId the UUID of the event to retrieve
      * @return the event details including organizerId, name, and status
      */
-    @GetMapping("/api/v1/events/{eventId}")
+    @GetMapping("/events/{eventId}")
     EventResponseDto getEventById(@PathVariable String eventId);
 
     /**
@@ -41,6 +41,6 @@ public interface EventServiceClient {
      * @param eventId the UUID of the event to check
      * @return {@code true} if the event exists, {@code false} otherwise
      */
-    @GetMapping("/api/v1/events/{eventId}/exists")
+    @GetMapping("/events/{eventId}/exists")
     boolean eventExists(@PathVariable String eventId);
 }
