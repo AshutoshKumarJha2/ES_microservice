@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: expense-manager
+
+  config:
+    import:
+      configserver:http://localhost:6971
+
+  profiles:
+    active: local
+
+server:
+  port: 7099
+
+eureka:
+  client:
+    service-url:
+      defaultZone:
+        http://localhost:6969/eureka
+
+services:
+  event:
+   url: http://localhost:8082
+  auth:
+   url: http://localhost:8081
+

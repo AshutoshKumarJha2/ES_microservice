@@ -2,9 +2,12 @@ spring:
   application:
     name: event-manager
   config:
-    import: optional:configserver:http://localhost:6971
+    import: configserver:http://localhost:6971
   profiles:
     active: local
+  cloud:
+    config:
+      profile: default
 
 server:
   port: 7070
