@@ -7,11 +7,14 @@ import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.service.RegistrationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class RegistrationController {
 
     private final RegistrationService registrationService;
@@ -48,8 +52,8 @@ public class RegistrationController {
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page) {
         var actorId = userDetails.userId();
         log.info("Getting registrations for eventId: {}, actorId: {}", eventId, actorId);
         return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, size, page));
