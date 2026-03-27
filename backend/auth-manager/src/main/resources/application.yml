@@ -5,6 +5,9 @@ spring:
     import: configserver:http://localhost:6971
   profiles:
     active: local
+  cloud:
+    config:
+      profile: default
 
 server:
   port: 7069
