@@ -10,6 +10,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+/**
+ * Represents a specific resource associated with a venue, such as equipment or staff.
+ * This entity tracks resource type, current availability status, and costing rates
+ * to facilitate efficient venue management and event planning.
+ *
+ * @author 2479476
+ * @version 1.0
+ * @since 2026-03-26
+ */
 @Data
 @Table(name = "resource")
 @Entity
@@ -17,7 +26,6 @@ public class Resource {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String resourceId;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "venueId", nullable = false)
@@ -47,4 +55,3 @@ public class Resource {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }
-

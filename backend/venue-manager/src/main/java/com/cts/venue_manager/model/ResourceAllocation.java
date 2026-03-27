@@ -1,19 +1,24 @@
 package com.cts.venue_manager.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+/**
+ * Manages the assignment and quantity of specific resources to events within a venue.
+ * This entity serves as a link between resources and events, ensuring tracking
+ * of resource utilization and historical allocation data.
+ *
+ * @author 2479476
+ * @version 1.0
+ * @since 2026-03-26
+ */
 @Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
 @Table(name = "resource_allocation")
 public class ResourceAllocation {
@@ -21,8 +26,7 @@ public class ResourceAllocation {
     @Id
     @Column(name = "allocationId", length = 36, nullable = false)
     @GeneratedValue(strategy = GenerationType.UUID)
-    private String allocationId ;
-
+    private String allocationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "resourceId", nullable = false)

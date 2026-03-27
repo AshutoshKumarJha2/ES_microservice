@@ -6,12 +6,20 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
+/**
+ * JPA Repository for the ResourceAllocation Entity.
+ * * @author 2479476
+ *
+ * @version 1.0
+ * @since 27-02-2026
+ */
 @Repository
 public interface ResourceAllocationRepository extends JpaRepository<ResourceAllocation,String> {
 
-    List<ResourceAllocation> findByEvent_EventId(String eventId);
+    List<ResourceAllocation> findByEventId(String eventId);
 
-    boolean existsByResourceNameAndEventEventId(String resourceName,String eventId);
+    boolean existsByResourceNameAndEventId(String resourceName,String eventId);
 
-    List<ResourceAllocation> findByEvent_EventIdAndVenue_VenueId(String eventId, String venueId);
+    List<ResourceAllocation> findByEventIdAndVenue_VenueId(String eventId, String venueId);
 }

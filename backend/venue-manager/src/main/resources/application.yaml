@@ -1,3 +1,17 @@
 spring:
   application:
     name: venue-manager
+  config:
+    import: "configserver:http://localhost:6971"
+  profiles:
+    active: local
+
+springdoc:
+  swagger-ui:
+    disable-swagger-default-url: true
+    path: /api/v1/venue-manager
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6969/eureka

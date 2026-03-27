@@ -9,6 +9,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Represents a physical venue within the management system.
+ * This entity maintains core site details including location, capacity, and status,
+ * while serving as the primary aggregate root for associated resources and bookings.
+ *
+ * @author 2479476
+ * @version 1.0
+ * @since 2026-03-26
+ */
 @Entity
 @Table(name = "venue")
 @Data
