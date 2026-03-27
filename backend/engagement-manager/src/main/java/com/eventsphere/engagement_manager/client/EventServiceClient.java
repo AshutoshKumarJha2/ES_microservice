@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @version 1.0
  * @since 26-03-2026
  */
-@FeignClient(name = "event-service", url = "${services.event.url}")
+@FeignClient(name = "event-manager")
 public interface EventServiceClient {
 
 //    @GetMapping("/api/v1/events/{eventId}")
@@ -25,8 +25,7 @@ public interface EventServiceClient {
 //        @PathVariable String eventId,
 //        @PathVariable String ticketId
 //    );
-    @GetMapping("/api/registrations/attendee/{attendeeId}/event/{eventId}")
-        // ↑ Replace this path with the actual endpoint in your RegistrationController
+    @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
     RegistrationStatusDto getRegistrationStatus(
             @PathVariable String attendeeId,
             @PathVariable String eventId
