@@ -20,7 +20,7 @@ import java.io.IOException;
  * On detecting a {@code "Bearer "} prefix in the {@code Authorization} header, the filter:
  * <ol>
  *   <li>Uses {@link JwtUtil#extractUserPrincipal} to parse and validate the token,
- *       selecting {@link TokenType#REFRESH} for the {@code /api/v1/auth/refresh} path
+ *       selecting {@link TokenType#REFRESH} for the {@code /auth/refresh} path
  *       and {@link TokenType#ACCESS} for all other paths.</li>
  *   <li>Creates a {@link org.springframework.security.authentication.UsernamePasswordAuthenticationToken}
  *       and stores it in the {@link org.springframework.security.core.context.SecurityContext}.</li>
@@ -57,7 +57,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 UserPrincipal principal;
-                if (request.getServletPath().equals("/api/v1/auth/refresh")) {
+                if (request.getServletPath().equals("/auth/refresh")) {
                     principal = jwtUtil.extractUserPrincipal(token, TokenType.REFRESH);
                 } else {
                     principal = jwtUtil.extractUserPrincipal(token, TokenType.ACCESS);
