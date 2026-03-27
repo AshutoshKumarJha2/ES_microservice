@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(grep -v '^logs$')",
+      "Bash(grep -v '^docs$')"
     ]
   }
 }

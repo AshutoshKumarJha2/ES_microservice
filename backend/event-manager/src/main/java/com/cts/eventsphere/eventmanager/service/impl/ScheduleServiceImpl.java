@@ -32,7 +32,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final EventRepository eventRepository;
     private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
-    private final NotificationService notificationService;
+//    private final NotificationService notificationService;
 
     /**
      * Updates an existing schedule by its unique identifier within a specific event
@@ -67,14 +67,14 @@ public class ScheduleServiceImpl implements ScheduleService {
         Schedule updatedSchedule = scheduleRepository.save(schedule);
         log.info("Successfully saved updated schedule ID: {}", updatedSchedule.getScheduleId());
 
-        notificationService.sendNotification(
-                event.getOrganizerId(),
-                "Schedule Updated for Event: " + event.getName() +
-                        " | Date: " + scheduleRequest.date() +
-                        " | Time Slot: " + scheduleRequest.timeSlot() +
-                        " | Activity: " + scheduleRequest.activity(),
-                scheduleRequest.status().name()
-        );
+//        notificationService.sendNotification(
+//                event.getOrganizerId(),
+//                "Schedule Updated for Event: " + event.getName() +
+//                        " | Date: " + scheduleRequest.date() +
+//                        " | Time Slot: " + scheduleRequest.timeSlot() +
+//                        " | Activity: " + scheduleRequest.activity(),
+//                scheduleRequest.status().name()
+//        );
 
         return scheduleResponseDtoMapper.toDTO(updatedSchedule);
     }
@@ -98,11 +98,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         scheduleRepository.deleteById(id);
         log.info("Successfully deleted schedule with ID: {}", id);
 
-        notificationService.sendNotification(
-                id,
-                "Schedule Deleted with ID: " + id,
-                "SCHEDULE"
-        );
+//        notificationService.sendNotification(
+//                id,
+//                "Schedule Deleted with ID: " + id,
+//                "SCHEDULE"
+//        );
 
         return true;
     }
