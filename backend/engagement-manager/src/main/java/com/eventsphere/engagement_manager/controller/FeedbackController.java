@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.*;
  * @since 26-03-2026
  */
 @RestController
-@RequestMapping("/api/v1/feedback")
+@RequestMapping("/feedback")
 @Slf4j
 @RequiredArgsConstructor
 public class FeedbackController {

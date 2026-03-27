@@ -29,7 +29,7 @@ import java.util.List;
 @RestController
 @Data
 @RequiredArgsConstructor
-@RequestMapping("/api/v1")
+@RequestMapping("")
 public class UserController {
     private final UserService userService;
 
