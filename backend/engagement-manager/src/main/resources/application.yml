@@ -1,8 +1,8 @@
 spring:
   application:
     name: engagement-manager
-#  config:
-#    import: configserver:http://localhost:6971
+  config:
+    import: "optional:http://localhost:6971"
   profiles:
     active: local
   datasource:
