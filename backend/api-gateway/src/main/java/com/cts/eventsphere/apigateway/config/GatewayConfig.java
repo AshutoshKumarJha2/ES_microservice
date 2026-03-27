@@ -27,6 +27,13 @@ public class GatewayConfig {
                                 .before(stripPrefix(1))
                                 .filter(lb("LOG-MANAGER"))
                                 .build()
+                )
+                .and(
+                        route("auth-manager")
+                                .route(path("/auth-manager/**"), http())
+                                .before(stripPrefix(1))
+                                .filter(lb("AUTH-MANAGER"))
+                                .build()
                 );
     }
 
