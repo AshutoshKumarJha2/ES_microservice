@@ -1,13 +1,13 @@
 spring:
   application:
-    name: event-manager
+    name: log-manager
   config:
     import: configserver:http://localhost:6971
   profiles:
     active: local
 
 server:
-  port: 7070
+  port: 7076
 
 eureka:
   client:
