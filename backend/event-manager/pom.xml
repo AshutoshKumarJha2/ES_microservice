@@ -124,11 +124,6 @@
             <version>1.12</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>com.cts.eventsphere</groupId>
-            <artifactId>config-server</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
     </dependencies>
 	
 	<dependencyManagement>

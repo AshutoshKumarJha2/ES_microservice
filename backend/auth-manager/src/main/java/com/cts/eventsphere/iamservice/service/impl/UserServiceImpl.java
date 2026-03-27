@@ -121,9 +121,11 @@ private final UserRepository userRepo;
     @Override
     public UserResponseDto changeUserRole(String userId, String role) {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
+        log.info("changing user role to {} for {}",  role, userId);
         UserRoles newRole = UserRoles.valueOf(role);
         user.setRole(newRole);
         User updatedUser = userRepo.save(user);
+        log.info("changing user role to {} for {}",  newRole.name(), userId);
         try{
             String message = "Your role has been changed to " + newRole;
 //            notificationService.sendNotification(userId, message, "INFO");
