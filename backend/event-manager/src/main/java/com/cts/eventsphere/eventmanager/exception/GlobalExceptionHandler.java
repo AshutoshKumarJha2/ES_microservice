@@ -2,7 +2,12 @@ package com.cts.eventsphere.eventmanager.exception;
 
 import com.cts.eventsphere.eventmanager.dto.shared.GenericErrorResponse;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.registration.DuplicateRegistrationException;
+import com.cts.eventsphere.eventmanager.exception.registration.InvalidRegistrationStatusException;
+import com.cts.eventsphere.eventmanager.exception.registration.RegistrationNotFoundException;
 import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,5 +76,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleScheduleNotFoundException(ScheduleNotFoundException e) {
         return new ResponseEntity<>(new GenericErrorResponse("Schedule Not Found"), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleTicketNotFoundException(TicketNotFoundException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(TicketAlreadyExistsException.class)
+    public ResponseEntity<GenericErrorResponse> handleTicketAlreadyExistsException(TicketAlreadyExistsException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(RegistrationNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleRegistrationNotFoundException(RegistrationNotFoundException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(DuplicateRegistrationException.class)
+    public ResponseEntity<GenericErrorResponse> handleDuplicateRegistrationException(DuplicateRegistrationException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidRegistrationStatusException.class)
+    public ResponseEntity<GenericErrorResponse> handleInvalidRegistrationStatusException(InvalidRegistrationStatusException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 }
