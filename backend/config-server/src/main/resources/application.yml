@@ -5,10 +5,10 @@ spring:
     config:
       server:
         git:
-          uri: https://github.com/AshutoshKumarJha2/EventSphere
+          uri: https://github.com/AshutoshKumarJha2/ES_microservice
           skip-ssl-validation: true
           clone-on-start: true
-          default-label: config_server
+          default-label: config
 
 server:
   port: 6971

@@ -20,6 +20,9 @@ public class GatewayConfig {
                 .route(path("/event-manager/**"), http())
                 .before(stripPrefix(1))
                 .filter(lb("EVENT-MANAGER"))
+<<<<<<< HEAD
+                .build();
+=======
                 .build()
                 .and(
                         route("log-manager")
@@ -28,6 +31,7 @@ public class GatewayConfig {
                                 .filter(lb("LOG-MANAGER"))
                                 .build()
                 );
+>>>>>>> ab4a0a80fa6119bf2b594649c9818a617f9f5c0a
     }
 
 }
