@@ -6,11 +6,11 @@ import com.cts.venue_manager.dto.venue.VenueRequestDto;
 import com.cts.venue_manager.dto.venue.VenueResponseDto;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
 import com.cts.venue_manager.model.Venue;
-import com.cts.venue_manager.model.data.AuditAction;
+//import com.cts.venue_manager.model.data.AuditAction;
 import com.cts.venue_manager.model.data.AvailabilityStatus;
 import com.cts.venue_manager.repository.VenueRepository;
-import com.cts.venue_manager.service.AuditService;
-import com.cts.venue_manager.service.NotificationService;
+//import com.cts.venue_manager.service.AuditService;
+//import com.cts.venue_manager.service.NotificationService;
 import com.cts.venue_manager.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +36,8 @@ import java.util.List;
 public class VenueServiceImpl implements VenueService {
 
     private final VenueRepository venueRepository;
-    private final AuditService auditService;
-    private final NotificationService notificationService;
+    //    private final AuditService auditService;
+//    private final NotificationService notificationService;
     private final VenueRequestDtoMapper venueRequestDtoMapper;
     private final VenueResponseDtoMapper venueResponseDtoMapper;
 
@@ -48,13 +48,13 @@ public class VenueServiceImpl implements VenueService {
      * @param message The content of the notification.
      * @param type    The category/type of notification.
      */
-    private void sendSafeNotification(String userId, String message, String type) {
-        try {
-            notificationService.sendNotification(userId, message, type);
-        } catch (Exception e) {
-            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
-        }
-    }
+//    private void sendSafeNotification(String userId, String message, String type) {
+//        try {
+//            notificationService.sendNotification(userId, message, type);
+//        } catch (Exception e) {
+//            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
+//        }
+//    }
 
     /**
      * Converts entities to DTOs and logs a READ audit for each.
@@ -65,7 +65,7 @@ public class VenueServiceImpl implements VenueService {
      */
     private List<VenueResponseDto> convertAndAudit(String actorId, List<Venue> venueList) {
         return venueList.stream()
-                .peek(v -> auditService.logAudit(actorId, AuditAction.READ, Venue.class, v.getVenueId()))
+//                .peek(v -> auditService.logAudit(actorId, AuditAction.READ, Venue.class, v.getVenueId()))
                 .map(venueResponseDtoMapper::toDto)
                 .toList();
     }
@@ -85,9 +85,9 @@ public class VenueServiceImpl implements VenueService {
         Venue savedVenue = venueRepository.save(venue);
 
         log.info("Venue created with id: {} by actor: {}", savedVenue.getVenueId(), actorId);
-        auditService.logAudit(actorId, AuditAction.CREATE, Venue.class, savedVenue.getVenueId());
-
-        sendSafeNotification(actorId, String.format("Venue '%s' has been successfully registered.", savedVenue.getName()), "VENUE");
+//        auditService.logAudit(actorId, AuditAction.CREATE, Venue.class, savedVenue.getVenueId());
+//
+//        sendSafeNotification(actorId, String.format("Venue '%s' has been successfully registered.", savedVenue.getName()), "VENUE");
 
         return venueResponseDtoMapper.toDto(savedVenue);
     }
@@ -139,9 +139,9 @@ public class VenueServiceImpl implements VenueService {
         Venue saved = venueRepository.save(updatedVenue);
 
         log.info("Venue updated with id: {} by actor: {}", venueId, actorId);
-        auditService.logAudit(actorId, AuditAction.UPDATE, Venue.class, venueId);
-
-        sendSafeNotification(actorId, String.format("Details for venue '%s' have been updated.", saved.getName()), "VENUE");
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Venue.class, venueId);
+//
+//        sendSafeNotification(actorId, String.format("Details for venue '%s' have been updated.", saved.getName()), "VENUE");
 
         return venueResponseDtoMapper.toDto(saved);
     }
@@ -165,9 +165,9 @@ public class VenueServiceImpl implements VenueService {
         venueRepository.save(venue);
 
         log.info("Venue status updated for id: {} to {} by actor: {}", venueId, status, actorId);
-        auditService.logAudit(actorId, AuditAction.UPDATE, Venue.class, venueId);
-
-        sendSafeNotification(actorId, String.format("Venue '%s' status changed to %s.", venue.getName(), status), "VENUE_STATUS");
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Venue.class, venueId);
+//
+//        sendSafeNotification(actorId, String.format("Venue '%s' status changed to %s.", venue.getName(), status), "VENUE_STATUS");
 
         return venueResponseDtoMapper.toDto(venue);
     }
@@ -189,9 +189,9 @@ public class VenueServiceImpl implements VenueService {
         venueRepository.deleteById(venueId);
 
         log.info("Venue deleted with id: {} by actor: {}", venueId, actorId);
-        auditService.logAudit(actorId, AuditAction.DELETE, Venue.class, venueId);
-
-        sendSafeNotification(actorId, String.format("Venue '%s' has been removed from the system.", venueName), "VENUE_DELETE");
+//        auditService.logAudit(actorId, AuditAction.DELETE, Venue.class, venueId);
+//
+//        sendSafeNotification(actorId, String.format("Venue '%s' has been removed from the system.", venueName), "VENUE_DELETE");
     }
 
     /**
@@ -207,11 +207,8 @@ public class VenueServiceImpl implements VenueService {
         try {
             log.info("Fetching venues for date: {} by actor: {}", date, actorId);
             LocalDate localDate = LocalDate.parse(date);
-            List<Venue> freeVenues = venueRepository.findAvailableVenues(
-                    localDate,
-                    AvailabilityStatus.available,
-                    null
-            );
+            List<Venue> freeVenues = null;
+
             return convertAndAudit(actorId, freeVenues);
         } catch (DateTimeParseException e) {
             throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd", e);

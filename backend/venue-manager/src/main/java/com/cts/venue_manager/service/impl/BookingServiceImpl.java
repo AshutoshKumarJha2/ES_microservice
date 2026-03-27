@@ -9,13 +9,13 @@ import com.cts.venue_manager.dto.mapper.booking.BookingResponseDtoMapper;
 import com.cts.venue_manager.exception.booking.BookingNotFoundException;
 import com.cts.venue_manager.model.Booking;
 import com.cts.venue_manager.model.Venue;
-import com.cts.venue_manager.model.data.AuditAction;
+//import com.cts.venue_manager.model.data.AuditAction;
 import com.cts.venue_manager.model.data.BookingStatus;
 import com.cts.venue_manager.repository.BookingRepository;
 import com.cts.venue_manager.repository.VenueRepository;
-import com.cts.venue_manager.service.AuditService;
+//import com.cts.venue_manager.service.AuditService;
 import com.cts.venue_manager.service.BookingService;
-import com.cts.venue_manager.service.NotificationService;
+//import com.cts.venue_manager.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,8 +36,8 @@ public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
     private final VenueRepository venueRepository;
-    private final AuditService auditService;
-    private final NotificationService notificationService; // Added
+//    private final AuditService auditService;
+//    private final NotificationService notificationService;
     private final BookingRequestDtoMapper requestMapper;
     private final BookingResponseDtoMapper responseMapper;
     private final BookingRepsonseVenueManagerDtoMapper venueManagerMapper;
@@ -45,13 +45,13 @@ public class BookingServiceImpl implements BookingService {
     /**
      * Helper to send notifications without interrupting the primary business transaction.
      */
-    private void sendSafeNotification(String userId, String message, String type) {
-        try {
-            notificationService.sendNotification(userId, message, type);
-        } catch (Exception e) {
-            log.error("Notification failed for user {}: {}", userId, e.getMessage());
-        }
-    }
+//    private void sendSafeNotification(String userId, String message, String type) {
+//        try {
+//            notificationService.sendNotification(userId, message, type);
+//        } catch (Exception e) {
+//            log.error("Notification failed for user {}: {}", userId, e.getMessage());
+//        }
+//    }
 
     @Override
     @Transactional
@@ -67,8 +67,8 @@ public class BookingServiceImpl implements BookingService {
         Booking saved = bookingRepository.save(booking);
 
         // Audit and Notify
-        auditService.logAudit(actorId, AuditAction.CREATE, Booking.class, saved.getBookingId());
-        sendSafeNotification(actorId, "Your booking request for venue " + venue.getName() + " is now pending approval.", "BOOKING_CREATED");
+//        auditService.logAudit(actorId, AuditAction.CREATE, Booking.class, saved.getBookingId());
+//        sendSafeNotification(actorId, "Your booking request for venue " + venue.getName() + " is now pending approval.", "BOOKING_CREATED");
 
         return responseMapper.toDto(saved, new ArrayList<>());
     }
@@ -83,8 +83,8 @@ public class BookingServiceImpl implements BookingService {
         Booking saved = bookingRepository.save(booking);
 
         // Audit and Notify
-        auditService.logAudit(actorId, AuditAction.UPDATE, Booking.class, bookingId);
-        sendSafeNotification(actorId, "Booking status for " + bookingId + " has been updated to: " + newStatus, "BOOKING_STATUS_UPDATE");
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Booking.class, bookingId);
+//        sendSafeNotification(actorId, "Booking status for " + bookingId + " has been updated to: " + newStatus, "BOOKING_STATUS_UPDATE");
 
         return responseMapper.toDto(saved, new ArrayList<>());
     }
@@ -98,8 +98,8 @@ public class BookingServiceImpl implements BookingService {
         bookingRepository.deleteById(bookingId);
 
         // Audit and Notify
-        auditService.logAudit(actorId, AuditAction.DELETE, Booking.class, bookingId);
-        sendSafeNotification(actorId, "Booking " + bookingId + " has been successfully removed from the system.", "BOOKING_DELETED");
+//        auditService.logAudit(actorId, AuditAction.DELETE, Booking.class, bookingId);
+//        sendSafeNotification(actorId, "Booking " + bookingId + " has been successfully removed from the system.", "BOOKING_DELETED");
 
         log.info("Booking {} deleted by actor {}", bookingId, actorId);
     }
@@ -108,7 +108,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getAllBookingsServ(String actorId) {
         return bookingRepository.findAll().stream()
-                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
+//                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
                 .map(b -> responseMapper.toDto(b, new ArrayList<>()))
                 .toList();
     }
@@ -116,7 +116,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseVenueManagerDto> getBookingsByVenue(String actorId, String venueId) {
         return bookingRepository.findByVenue_VenueId(venueId).stream()
-                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
+//                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
                 .map(b -> venueManagerMapper.toDto(b, new ArrayList<>()))
                 .toList();
     }
@@ -124,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingResponseDto> getBookingsByEvent(String actorId, String eventId) {
         return bookingRepository.findByEventId(eventId).stream()
-                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
+//                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
                 .map(b -> responseMapper.toDto(b, new ArrayList<>()))
                 .toList();
     }

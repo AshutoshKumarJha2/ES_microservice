@@ -1,5 +1,9 @@
 package com.cts.venue_manager.service.impl;
 
+import com.cts.venue_manager.client.microservice.EventClient;
+import com.cts.venue_manager.client.model.Event;
+import com.cts.venue_manager.dto.event.EventResponseDto;
+import com.cts.venue_manager.dto.mapper.event.EventRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.resource.ResourceRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.resource.ResourceResponseDtoMapper;
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
@@ -11,17 +15,15 @@ import com.cts.venue_manager.exception.resource.ResourceAlreadyExistsException;
 import com.cts.venue_manager.exception.resource.ResourceDuplicateAllocationException;
 import com.cts.venue_manager.exception.resource.ResourceNotFoundException;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
-import com.cts.venue_manager.model.Event;
 import com.cts.venue_manager.model.Resource;
 import com.cts.venue_manager.model.ResourceAllocation;
 import com.cts.venue_manager.model.Venue;
-import com.cts.venue_manager.model.data.AuditAction;
-import com.cts.venue_manager.repository.EventRepository;
+//import com.cts.venue_manager.model.data.AuditAction;
 import com.cts.venue_manager.repository.ResourceAllocationRepository;
 import com.cts.venue_manager.repository.ResourceRepository;
 import com.cts.venue_manager.repository.VenueRepository;
-import com.cts.venue_manager.service.AuditService;
-import com.cts.venue_manager.service.NotificationService;
+//import com.cts.venue_manager.service.AuditService;
+//import com.cts.venue_manager.service.NotificationService;
 import com.cts.venue_manager.service.ResourceService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,11 +47,12 @@ import java.util.stream.Collectors;
 public class ResourceServiceImpl implements ResourceService {
 
     private final ResourceRepository resourceRepository;
-    private final EventRepository eventRepository;
+//    private final EventRepository eventRepository;
+    private final EventClient eventClient;
     private final VenueRepository venueRepository;
     private final ResourceAllocationRepository resourceAllocationRepository;
-    private final AuditService auditService;
-    private final NotificationService notificationService;
+//    private final AuditService auditService;
+//    private final NotificationService notificationService;
 
     /**
      * Helper method to send notifications safely without breaking the main transaction.
@@ -58,13 +61,13 @@ public class ResourceServiceImpl implements ResourceService {
      * @param message The content of the notification.
      * @param type    The category/type of notification.
      */
-    private void sendSafeNotification(String userId, String message, String type) {
-        try {
-            notificationService.sendNotification(userId, message, type);
-        } catch (Exception e) {
-            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
-        }
-    }
+//    private void sendSafeNotification(String userId, String message, String type) {
+//        try {
+//            notificationService.sendNotification(userId, message, type);
+//        } catch (Exception e) {
+//            log.error("Failed to send notification to user {}: {}", userId, e.getMessage());
+//        }
+//    }
 
     /**
      * Creates a new resource associated with a specific venue.
@@ -92,11 +95,11 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setVenue(venue);
         Resource savedResource = resourceRepository.save(resource);
 
-        auditService.logAudit(actorId, AuditAction.CREATE, Resource.class, savedResource.getResourceId());
-
-        sendSafeNotification(actorId,
-                String.format("Resource '%s' successfully created for venue '%s'.", savedResource.getName(), venue.getName()),
-                "RESOURCE_CREATE");
+//        auditService.logAudit(actorId, AuditAction.CREATE, Resource.class, savedResource.getResourceId());
+//
+//        sendSafeNotification(actorId,
+//                String.format("Resource '%s' successfully created for venue '%s'.", savedResource.getName(), venue.getName()),
+//                "RESOURCE_CREATE");
 
         log.info("Resource successfully created with ID: {} by actor: {}", savedResource.getResourceId(), actorId);
 
@@ -115,7 +118,7 @@ public class ResourceServiceImpl implements ResourceService {
         List<Resource> resources = resourceRepository.findAll();
 
         return resources.stream()
-                .peek(r -> auditService.logAudit(actorId, AuditAction.READ, Resource.class, r.getResourceId()))
+//                .peek(r -> auditService.logAudit(actorId, AuditAction.READ, Resource.class, r.getResourceId()))
                 .map(ResourceResponseDtoMapper::mapToResponseDto)
                 .collect(Collectors.toList());
     }
@@ -144,11 +147,11 @@ public class ResourceServiceImpl implements ResourceService {
         resource.setUnit(resource.getUnit() - allocation.getQuantity());
         resourceRepository.save(resource);
 
-        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resource.getResourceId());
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resource.getResourceId());
 
-        sendSafeNotification(actorId,
-                String.format("Allocation for resource '%s' (Qty: %d) has been approved.", resource.getName(), allocation.getQuantity()),
-                "ALLOCATION_APPROVE");
+//        sendSafeNotification(actorId,
+//                String.format("Allocation for resource '%s' (Qty: %d) has been approved.", resource.getName(), allocation.getQuantity()),
+//                "ALLOCATION_APPROVE");
 
         log.info("Allocation approved by {}. Inventory updated for: {}", actorId, resource.getName());
     }
@@ -166,7 +169,7 @@ public class ResourceServiceImpl implements ResourceService {
         Resource resource = resourceRepository.findById(resourceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Resource not found with id: " + resourceId));
 
-        auditService.logAudit(actorId, AuditAction.READ, Resource.class, resourceId);
+//        auditService.logAudit(actorId, AuditAction.READ, Resource.class, resourceId);
         return ResourceResponseDtoMapper.mapToResponseDto(resource);
     }
 
@@ -193,11 +196,11 @@ public class ResourceServiceImpl implements ResourceService {
 
         Resource updatedResource = resourceRepository.save(existingResource);
 
-        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resourceId);
-
-        sendSafeNotification(actorId,
-                String.format("Resource '%s' has been successfully updated.", updatedResource.getName()),
-                "RESOURCE_UPDATE");
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resourceId);
+//
+//        sendSafeNotification(actorId,
+//                String.format("Resource '%s' has been successfully updated.", updatedResource.getName()),
+//                "RESOURCE_UPDATE");
 
         log.info("Resource ID: {} updated successfully by actor: {}", resourceId, actorId);
 
@@ -222,11 +225,11 @@ public class ResourceServiceImpl implements ResourceService {
         String resourceName = resource.getName();
         resourceRepository.deleteById(resourceId);
 
-        auditService.logAudit(actorId, AuditAction.DELETE, Resource.class, resourceId);
-
-        sendSafeNotification(actorId,
-                String.format("Resource '%s' has been removed from the inventory.", resourceName),
-                "RESOURCE_DELETE");
+//        auditService.logAudit(actorId, AuditAction.DELETE, Resource.class, resourceId);
+//
+//        sendSafeNotification(actorId,
+//                String.format("Resource '%s' has been removed from the inventory.", resourceName),
+//                "RESOURCE_DELETE");
 
         log.info("Resource ID: {} deleted by actor: {}", resourceId, actorId);
     }
@@ -245,8 +248,9 @@ public class ResourceServiceImpl implements ResourceService {
     public void requestAllocation(String actorId, String bookingId, String eventId, String venueId, List<ResourceListElementDto> resources) {
         log.info("Actor {} processing allocation for Event: {} at Venue: {}", actorId, eventId, venueId);
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new EventNotFoundException("Event not found: " + eventId));
+        EventResponseDto event = eventClient.getById(eventId).getBody();
+
+
         Venue venue = venueRepository.findById(venueId)
                 .orElseThrow(() -> new ResourceNotFoundException("Venue not found: " + venueId));
 
@@ -254,13 +258,13 @@ public class ResourceServiceImpl implements ResourceService {
             Resource resource = resourceRepository.findById(resourceReq.resourceId())
                     .orElseThrow(() -> new ResourceNotFoundException("Resource not found: " + resourceReq.resourceId()));
 
-            if (resourceAllocationRepository.existsByResourceNameAndEventEventId(resource.getName(), eventId)) {
+            if (resourceAllocationRepository.existsByResourceNameAndEventId(resource.getName(), eventId)) {
                 throw new ResourceDuplicateAllocationException("Resource '" + resource.getName() + "' is already allocated to this event.");
             }
 
             ResourceAllocation resourceAllocation = ResourceAllocation.builder()
                     .resource(resource)
-                    .event(event)
+                    .eventId(event.id())
                     .venue(venue)
                     .quantity(resourceReq.quantity())
                     .build();
@@ -268,11 +272,11 @@ public class ResourceServiceImpl implements ResourceService {
             resourceAllocationRepository.save(resourceAllocation);
         }
 
-        auditService.logAudit(actorId, AuditAction.UPDATE, Event.class, eventId);
-
-        sendSafeNotification(actorId,
-                String.format("Resource allocation requested for event '%s'.", event.getName()),
-                "ALLOCATION_REQUEST");
+//        auditService.logAudit(actorId, AuditAction.UPDATE, Event.class, eventId);
+//
+//        sendSafeNotification(actorId,
+//                String.format("Resource allocation requested for event '%s'.", event.getName()),
+//                "ALLOCATION_REQUEST");
 
         log.info("Resource allocation request completed for Event: {} by actor: {}", eventId, actorId);
     }
@@ -290,7 +294,7 @@ public class ResourceServiceImpl implements ResourceService {
         List<Resource> venueResources = resourceRepository.findByVenue_VenueId(venueId);
 
         return venueResources.stream()
-                .peek(r -> auditService.logAudit(actorId, AuditAction.READ, Resource.class, r.getResourceId()))
+//                .peek(r -> auditService.logAudit(actorId, AuditAction.READ, Resource.class, r.getResourceId()))
                 .map(ResourceResponseDtoMapper::mapToResponseDto)
                 .collect(Collectors.toList());
     }
