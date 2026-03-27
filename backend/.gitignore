@@ -27,3 +27,6 @@ Thumbs.db
 
 # Metadata
 .metadata/
+
+**/application-local.yaml
+hello-service/

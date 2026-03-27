@@ -1,19 +1,6 @@
 spring:
   application:
     name: api-gateway
-  cloud:
-    discovery:
-      enabled: true
-    gateway:
-      server:
-        webmvc:
-          routes:
-          - id: event-manager
-            uri: lb://EVENT-MANAGER
-            predicates:
-            - Path=/event-manager/**
-            filters:
-            - StripPrefix=1
 
 server:
   port: 6970
@@ -22,12 +9,3 @@ eureka:
     client:
       service-url:
         defaultZone: http://localhost:6969/eureka
-
-logging:
-  level:
-    org:
-      springframework:
-        cloud:
-          gateway:
-            handler:
-              RoutePredicateHandlerMapping: DEBUG
