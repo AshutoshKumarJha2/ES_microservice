@@ -2,8 +2,10 @@ package com.cts.eventsphere.eventmanager.model;
 
 import com.cts.eventsphere.eventmanager.model.data.EventStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -25,6 +27,8 @@ import java.time.LocalDateTime;
 @DynamicInsert
 @DynamicUpdate
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

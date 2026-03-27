@@ -43,6 +43,16 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final EventRepository eventRepository;
     private final LogServiceClient logServiceClient;
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Validates that the user is not already registered for the event, then
+     * creates a new registration in {@link RegistrationStatus#PENDING} state.</p>
+     *
+     * @throws DuplicateRegistrationException if the user is already registered for the event
+     * @throws EventNotFoundException         if the event does not exist
+     * @throws TicketNotFoundException        if the ticket does not exist
+     */
     @Override
     public GenericResponse registerForEvent(String userId, String eventId, String ticketId) {
         if (registrationRepo.existsByEventEventIdAndAttendeeId(eventId, userId)) {
@@ -67,6 +77,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Registration successful");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RegistrationNotFoundException if no registration exists with the given ID
+     */
     @Override
     public GenericResponse deleteRegistration(String actorId, String registrationId) {
         if (!registrationRepo.existsById(registrationId)) {
@@ -77,6 +92,13 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Registration deleted successfully");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sets the registration status to {@link RegistrationStatus#CANCELLED}.</p>
+     *
+     * @throws RegistrationNotFoundException if no registration exists with the given ID
+     */
     @Override
     public GenericResponse cancelRegistration(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
@@ -91,6 +113,13 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Registration cancelled successfully");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sets the registration status to {@link RegistrationStatus#CONFIRMED}.</p>
+     *
+     * @throws RegistrationNotFoundException if no registration exists with the given ID
+     */
     @Override
     public GenericResponse approveRegistration(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
@@ -105,6 +134,15 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Registration approved successfully");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Only registrations in {@link RegistrationStatus#CONFIRMED} state may be checked in.
+     * Sets the status to {@link RegistrationStatus#CHECKED_IN} on success.</p>
+     *
+     * @throws RegistrationNotFoundException      if no registration exists with the given ID
+     * @throws InvalidRegistrationStatusException if the registration is not in CONFIRMED state
+     */
     @Override
     public GenericResponse checkInRegistration(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
@@ -123,6 +161,13 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Check-in successful");
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Sets the registration status to {@link RegistrationStatus#CANCELLED}.</p>
+     *
+     * @throws RegistrationNotFoundException if no registration exists with the given ID
+     */
     @Override
     public GenericResponse rejectRegistration(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
@@ -137,6 +182,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         return new GenericResponse("Registration rejected successfully");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RegistrationListResponseDto getRegistrationsByUserId(String actorId, String userId, int size, int page) {
         var pageable = PageRequest.of(page, size);
@@ -154,6 +202,14 @@ public class RegistrationServiceImpl implements RegistrationService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If {@code status} is null or empty, all registrations for the event are returned.
+     * Otherwise, {@code status} is parsed as a {@link RegistrationStatus} enum value.</p>
+     *
+     * @throws RegistrationNotFoundException if {@code status} is not a valid {@link RegistrationStatus} value
+     */
     @Override
     public RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, int size, int page) {
         var pageable = PageRequest.of(page, size);
@@ -182,6 +238,9 @@ public class RegistrationServiceImpl implements RegistrationService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public RegistrationListResponseDto getAllRegistrations(String actorId, int size, int page) {
         var pageable = PageRequest.of(page, size);
@@ -199,6 +258,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         );
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RegistrationNotFoundException if no registration exists with the given ID
+     */
     @Override
     public RegistrationDto getRegistrationById(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
@@ -207,6 +271,11 @@ public class RegistrationServiceImpl implements RegistrationService {
         return RegistrationDtoMapper.toDto(registration);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws RegistrationNotFoundException if no registration exists for the given event and user combination
+     */
     @Override
     public RegistrationDto getRegistrationByEventIdAndUserId(String actorId, String eventId, String userId) {
         var registration = registrationRepo.findByAttendeeIdAndEventEventId(userId, eventId)

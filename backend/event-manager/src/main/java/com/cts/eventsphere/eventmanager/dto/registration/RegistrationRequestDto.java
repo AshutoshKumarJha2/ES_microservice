@@ -1,6 +1,6 @@
 package com.cts.eventsphere.eventmanager.dto.registration;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 
 /**
  * Request DTO for registering an attendee for an event.
@@ -9,9 +9,10 @@ import jakarta.validation.constraints.NotNull;
  * @version 1.0
  * @since 2026-03-26
  */
-
 public record RegistrationRequestDto(
-        @NotNull(message = "Ticket id is required")
+
+        @NotBlank(message = "Ticket ID must not be blank")
         String ticketId
+
 ) {
 }
