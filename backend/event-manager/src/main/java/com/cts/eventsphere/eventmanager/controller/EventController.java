@@ -27,7 +27,7 @@ import java.util.List;
  * @since 27-02-2026
  */
 @RestController
-@RequestMapping("/api/v1/events")
+@RequestMapping("/events")
 @Slf4j
 @RequiredArgsConstructor
 public class EventController {

@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v1/events/{eventId}/schedules")
+@RequestMapping("/events/{eventId}/schedules")
 public class ScheduleController {
     private final ScheduleService scheduleService;
 

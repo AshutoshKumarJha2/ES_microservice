@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/engagements")
+@RequestMapping("/engagements")
 public class EngagementController {
 
     private final EngagementService engagementService;
