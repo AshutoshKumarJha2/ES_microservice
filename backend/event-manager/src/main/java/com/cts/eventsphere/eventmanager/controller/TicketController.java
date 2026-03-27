@@ -3,7 +3,7 @@ package com.cts.eventsphere.eventmanager.controller;
 import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
 import com.cts.eventsphere.eventmanager.dto.ticket.CreateTicketRequest;
 import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
-import com.cts.eventsphere.eventmanager.security.UserPrincipal;
+import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.service.TicketService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

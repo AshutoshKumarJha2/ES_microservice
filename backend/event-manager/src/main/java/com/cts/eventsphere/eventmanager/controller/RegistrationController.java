@@ -4,7 +4,7 @@ import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationRequestDto;
 import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
-import com.cts.eventsphere.eventmanager.security.UserPrincipal;
+import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.service.RegistrationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
