@@ -34,6 +34,13 @@ public class GatewayConfig {
                                 .before(stripPrefix(1))
                                 .filter(lb("AUTH-MANAGER"))
                                 .build()
+                )
+                .and(
+                        route("venue-manager")
+                                .route(path("/venue-manager/**"), http())
+                                .before(stripPrefix(1))
+                                .filter(lb("VENUE-MANAGER"))
+                                .build()
                 );
     }
 
