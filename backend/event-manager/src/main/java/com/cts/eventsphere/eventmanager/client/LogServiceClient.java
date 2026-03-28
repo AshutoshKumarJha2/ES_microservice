@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * @version 1.0
  * @since 27-03-2026
  */
-@FeignClient(name = "log-manager", path = "/notifications")
+@FeignClient(name = "log-manager", contextId = "logServiceClient", path = "/notifications")
 public interface LogServiceClient {
 
     /**
