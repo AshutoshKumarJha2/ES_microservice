@@ -57,7 +57,7 @@ public class WebConfig {
     @Bean
     RouterFunction<ServerResponse> swaggerDocsRedirect() {
         return RouterFunctions.route()
-                .GET("/docs", request -> ServerResponse
+                .GET("/api/v1/docs", request -> ServerResponse
                         .temporaryRedirect(URI.create("/swagger-ui/index.html"))
                         .build())
                 .build();

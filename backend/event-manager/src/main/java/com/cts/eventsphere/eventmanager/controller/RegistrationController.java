@@ -78,6 +78,17 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationService.getRegistrationById(actorId, registrationId));
     }
 
+    @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
+    @PreAuthorize("hasAnyRole('ATTENDEE', 'ORGANIZER', 'ADMIN')")
+    public ResponseEntity<RegistrationDto> getRegistrationByAttendee(
+            @PathVariable String eventId,
+            @PathVariable String attendeeId,
+            @AuthenticationPrincipal UserPrincipal userDetails) {
+        var actorId = userDetails.userId();
+        log.info("Getting registration for attendee {} at event {} by actor {}", attendeeId, eventId, actorId);
+        return ResponseEntity.ok(registrationService.getRegistrationByEventIdAndUserId(actorId, eventId, attendeeId));
+    }
+
     @PatchMapping("/registrations/{registrationId}/cancel")
     @PreAuthorize("hasRole('ATTENDEE')")
     public ResponseEntity<GenericResponse> cancelRegistration(
