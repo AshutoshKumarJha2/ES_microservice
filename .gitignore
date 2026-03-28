@@ -1,2 +1,8 @@
 /.metadata/
-**/.idea/
+**/*.log
+**/*.log.*
+**/*.log.*
+**/*-local.yml
+**/*-local.yaml
+**/.idea
+**/.vscode

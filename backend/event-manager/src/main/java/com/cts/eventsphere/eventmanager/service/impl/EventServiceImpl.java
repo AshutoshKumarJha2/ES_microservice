@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
+import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
@@ -13,6 +14,7 @@ import com.cts.eventsphere.eventmanager.model.Event;
 import com.cts.eventsphere.eventmanager.model.Schedule;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+import com.cts.eventsphere.eventmanager.service.AuditService;
 import com.cts.eventsphere.eventmanager.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +42,8 @@ public class EventServiceImpl implements EventService {
     private final ScheduleRepository scheduleRepository;
     private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+    private final AuditService auditService;
 //    private final NotificationService notificationService;
-//    private final AuditService auditService;
 
     /**
      * Creates a new event in the system and triggers a notification with event details.
@@ -56,7 +58,7 @@ public class EventServiceImpl implements EventService {
         Event savedEvent = eventRepository.save(event);
         log.info("Successfully saved event with ID: {}", savedEvent.getEventId());
 
-//        auditService.logAudit(userId, AuditAction.CREATE, Event.class, savedEvent.getEventId());
+        auditService.logAudit(userId, AuditAction.CREATE, Event.class, savedEvent.getEventId());
 
         var venueId = eventRequest.venueId() == null ? "null" : eventRequest.venueId();
 
@@ -81,7 +83,7 @@ public class EventServiceImpl implements EventService {
     public List<EventResponseDto> findAllEvents(String userId) {
         log.info("Fetching all events from repository");
         List<EventResponseDto> events = eventRepository.findAll().stream()
-//                .peek(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()))
+                .peek(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()))
                 .map(eventResponseDtoMapper::toDTO)
                 .toList();
         log.debug("Found {} events in total", events.size());
@@ -103,7 +105,7 @@ public class EventServiceImpl implements EventService {
                     log.error("Event lookup failed: ID {} not found", eventId);
                     return new EventNotFoundException(eventId);
                 });
-//        auditService.logAudit(userId, AuditAction.READ, Event.class, event.getEventId());
+        auditService.logAudit(userId, AuditAction.READ, Event.class, event.getEventId());
 
         return eventResponseDtoMapper.toDTO(event);
     }
@@ -128,7 +130,7 @@ public class EventServiceImpl implements EventService {
         event.setEventId(eventId);
         eventRepository.save(event);
         log.info("Successfully updated event ID: {}", eventId);
-//        auditService.logAudit(userId, AuditAction.UPDATE, Event.class, event.getEventId());
+        auditService.logAudit(userId, AuditAction.UPDATE, Event.class, event.getEventId());
 
 //        notificationService.sendNotification(
 //                eventRequest.organizerId(),
@@ -157,7 +159,7 @@ public class EventServiceImpl implements EventService {
             throw new EventNotFoundException(eventId);
         }
         eventRepository.deleteById(eventId);
-//        auditService.logAudit(userId, AuditAction.DELETE, Event.class, eventId);
+        auditService.logAudit(userId, AuditAction.DELETE, Event.class, eventId);
         log.info("Successfully deleted event ID: {}", eventId);
 
         return true;
@@ -184,7 +186,7 @@ public class EventServiceImpl implements EventService {
         Schedule savedSchedule = scheduleRepository.save(schedule);
         log.info("Successfully added activity ID: {} to event ID: {}", savedSchedule.getScheduleId(), eventId);
 
-//        auditService.logAudit(userId, AuditAction.CREATE, Schedule.class, savedSchedule.getScheduleId());
+        auditService.logAudit(userId, AuditAction.CREATE, Schedule.class, savedSchedule.getScheduleId());
 //        notificationService.sendNotification(
 //                event.getOrganizerId(),
 //                "New Activity Added to Event: " + event.getName() +
@@ -206,7 +208,7 @@ public class EventServiceImpl implements EventService {
         log.info("Fetching all activities for event ID: {}", eventId);
         List<ScheduleResponseDto> schedules = scheduleRepository.findAll().stream()
                 .filter(s -> s.getEvent().getEventId().equals(eventId))
-//                .peek(s -> auditService.logAudit(userId, AuditAction.READ, Schedule.class, s.getScheduleId()))
+                .peek(s -> auditService.logAudit(userId, AuditAction.READ, Schedule.class, s.getScheduleId()))
                 .map(scheduleResponseDtoMapper::toDTO)
                 .toList();
         log.debug("Found {} activities matching event ID: {}", schedules.size(), eventId);
