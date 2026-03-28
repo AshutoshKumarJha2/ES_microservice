@@ -1,6 +1,7 @@
 package com.eventsphere.engagement_manager.controller;
 
 // ✅ FIXED — was com.cts.eventsphere.*, now matches this service's package
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackRequestDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackResponseDto;
 import com.eventsphere.engagement_manager.service.FeedbackService;
@@ -8,11 +9,13 @@ import com.eventsphere.engagement_manager.service.FeedbackService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -32,9 +35,9 @@ public class FeedbackController {
 
     @PostMapping
     @PreAuthorize("hasRole('ATTENDEE')")
-    public ResponseEntity<FeedbackResponseDto> create(@Valid @RequestBody FeedbackRequestDto feedbackRequestDto) {
+    public ResponseEntity<FeedbackResponseDto> create(@Valid @RequestBody FeedbackRequestDto feedbackRequestDto,@AuthenticationPrincipal UserPrincipal userPrincipal) {
         log.info("REST request to save Feedback : {}", feedbackRequestDto);
-        FeedbackResponseDto result = feedbackService.create(feedbackRequestDto);
+        FeedbackResponseDto result = feedbackService.create(feedbackRequestDto, userPrincipal);
         log.info("Feedback created successfully with data: {}", result);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }

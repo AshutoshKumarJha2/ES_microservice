@@ -1,7 +1,9 @@
 package com.eventsphere.engagement_manager.client;
 
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
 import com.eventsphere.engagement_manager.dto.client.RegistrationStatusDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 /**
@@ -25,10 +27,10 @@ public interface EventServiceClient {
 //        @PathVariable String eventId,
 //        @PathVariable String ticketId
 //    );
-    @GetMapping("/api/registrations/attendee/{attendeeId}/event/{eventId}")
-        // ↑ Replace this path with the actual endpoint in your RegistrationController
+    @GetMapping("/api/v1/events/{eventId}/my-registration")
     RegistrationStatusDto getRegistrationStatus(
-            @PathVariable String attendeeId,
-            @PathVariable String eventId
+            @PathVariable String eventId,
+            @AuthenticationPrincipal UserPrincipal userDetails
+
     );
 }

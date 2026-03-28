@@ -10,6 +10,7 @@ package com.eventsphere.engagement_manager.service;
 
 
 
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackRequestDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackResponseDto;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ import java.time.LocalDateTime;
 
 public interface FeedbackService {
 
-    FeedbackResponseDto create(FeedbackRequestDto request);
+    FeedbackResponseDto create(FeedbackRequestDto request, UserPrincipal userPrincipal);
 
     FeedbackResponseDto getById(String feedbackId);
 

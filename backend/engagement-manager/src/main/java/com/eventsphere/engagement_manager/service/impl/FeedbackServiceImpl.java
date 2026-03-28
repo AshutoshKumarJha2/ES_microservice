@@ -1,6 +1,7 @@
 package com.eventsphere.engagement_manager.service.impl;
 
 import com.eventsphere.engagement_manager.Exception.FeedbackNotFoundException;
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
 import com.eventsphere.engagement_manager.client.EventServiceClient;
 import com.eventsphere.engagement_manager.dto.client.RegistrationStatusDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackRequestDto;
@@ -45,11 +46,11 @@ public class FeedbackServiceImpl implements FeedbackService {
 //    private final AuditService auditService;
 
     @Override
-    public FeedbackResponseDto create(FeedbackRequestDto request) {
+    public FeedbackResponseDto create(FeedbackRequestDto request, UserPrincipal userPrincipal) {
         log.info("Processing feedback creation for event: {}", request.eventId());
 
         validateRating(request.rating());
-        ensureEligibleToSubmit(request.eventId(), request.attendeeId());
+        ensureEligibleToSubmit(request.eventId(),userPrincipal);
         ensureNotDuplicate(request.eventId(), request.attendeeId());
 
         Feedback entity = FeedbackRequestDtoMapper.toEntity(request);
@@ -113,11 +114,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
     }
 
-    private void ensureEligibleToSubmit(String eventId, String attendeeId) {
+    private void ensureEligibleToSubmit(String eventId, UserPrincipal userPrincipal) {
         RegistrationStatusDto registration;
         try {
             // ✅ HTTP call to registration-service via Eureka discovery
-            registration = registrationServiceClient.getRegistrationStatus(attendeeId, eventId);
+            registration = registrationServiceClient.getRegistrationStatus(eventId, userPrincipal);
         } catch (FeignException.NotFound e) {
             throw new IllegalStateException("Attendee is not registered for this event.");
         }
