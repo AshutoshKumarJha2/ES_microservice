@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @since 25-03-2026
  * @see EventResponseDto
  */
-@FeignClient(name = "event-service", url = "${services.event.url}")
+@FeignClient(name = "event-manager")
 public interface EventServiceClient {
 
     /**
@@ -32,7 +32,7 @@ public interface EventServiceClient {
      * @param eventId the UUID of the event to retrieve
      * @return the event details including organizerId, name, and status
      */
-    @GetMapping("/api/v1/events/{eventId}")
+    @GetMapping("/events/{eventId}")
     EventResponseDto getEventById(@PathVariable String eventId);
 
 //    /**

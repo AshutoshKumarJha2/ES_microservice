@@ -1,7 +1,9 @@
 package com.cts.eventsphere.eventmanager.controller;
 
+import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.service.EventService;
 import jakarta.validation.Valid;
@@ -25,7 +27,7 @@ import java.util.List;
  * @since 27-02-2026
  */
 @RestController
-@RequestMapping("/api/v1/events")
+@RequestMapping("/events")
 @Slf4j
 @RequiredArgsConstructor
 public class EventController {

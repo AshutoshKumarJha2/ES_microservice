@@ -2,6 +2,7 @@ package com.cts.eventsphere.eventmanager;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * Event Manager Application class
@@ -12,6 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 25-03-2026
  */
 @SpringBootApplication
+@EnableFeignClients
 public class EventManagerApplication {
 
 	/**

@@ -15,7 +15,7 @@ import com.cts.eventsphere.expensemanager.auth.dto.ValidateResponse;
  * @version 1.0
  * @since 26-03-2026
  */
-@FeignClient(name = "auth-manager", path = "/api/v1/auth")
+@FeignClient(name = "auth-manager", path = "/auth")
 public interface IAMClient {
     @GetMapping("/validate")
     ResponseEntity<ValidateResponse> validate(@RequestHeader("Authorization") String authHeader);
