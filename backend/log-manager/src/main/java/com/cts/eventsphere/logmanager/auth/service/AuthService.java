@@ -13,12 +13,27 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
+/**
+ * Validates bearer tokens against the auth-manager service and converts
+ * the response into a {@link UserPrincipal} for use in the security context.
+ *
+ * @author 2479623
+ * @version 1.0
+ * @since 27-03-2026
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final IAMClient iamClient;
 
+    /**
+     * Calls the IAM validate endpoint and returns a {@link UserPrincipal} on success.
+     *
+     * @param authHeader the raw {@code Authorization: Bearer <token>} header value
+     * @return the authenticated principal
+     * @throws ResponseStatusException 401 if the token is missing, invalid, or rejected by IAM
+     */
     public UserPrincipal validate(String authHeader) {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");

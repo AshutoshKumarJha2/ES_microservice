@@ -7,11 +7,14 @@ import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.service.RegistrationService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -24,9 +27,10 @@ import org.springframework.web.bind.annotation.*;
  * @since 2026-03-26
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class RegistrationController {
 
     private final RegistrationService registrationService;
@@ -48,8 +52,8 @@ public class RegistrationController {
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "0") int page) {
+            @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page) {
         var actorId = userDetails.userId();
         log.info("Getting registrations for eventId: {}, actorId: {}", eventId, actorId);
         return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, size, page));
@@ -73,6 +77,17 @@ public class RegistrationController {
         var actorId = userDetails.userId();
         log.info("Getting registration for id: {} by actor: {}", registrationId, actorId);
         return ResponseEntity.ok(registrationService.getRegistrationById(actorId, registrationId));
+    }
+
+    @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
+    @PreAuthorize("hasAnyRole('ATTENDEE', 'ORGANIZER', 'ADMIN')")
+    public ResponseEntity<RegistrationDto> getRegistrationByAttendee(
+            @PathVariable String eventId,
+            @PathVariable String attendeeId,
+            @AuthenticationPrincipal UserPrincipal userDetails) {
+        var actorId = userDetails.userId();
+        log.info("Getting registration for attendee {} at event {} by actor {}", attendeeId, eventId, actorId);
+        return ResponseEntity.ok(registrationService.getRegistrationByEventIdAndUserId(actorId, eventId, attendeeId));
     }
 
     @PatchMapping("/registrations/{registrationId}/cancel")
