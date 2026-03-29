@@ -34,13 +34,14 @@ public interface EventServiceClient {
      */
     @GetMapping("/events/{eventId}")
     EventResponseDto getEventById(@PathVariable String eventId);
-
+//
 //    /**
 //     * Checks whether an event exists.
 //     *
 //     * @param eventId the UUID of the event to check
 //     * @return {@code true} if the event exists, {@code false} otherwise
 //     */
-//    @GetMapping("/api/v1/events/{eventId}/exists")
+//    @GetMapping("/events/{eventId}/exists")
 //    boolean eventExists(@PathVariable String eventId);
+
 }
