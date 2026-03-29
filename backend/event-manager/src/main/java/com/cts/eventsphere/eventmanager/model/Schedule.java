@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Schedule model class.
@@ -23,9 +24,15 @@ import java.time.LocalDateTime;
 @Builder
 public class Schedule {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "CHAR(36)")
     private String scheduleId;
+
+    @PrePersist
+    protected void prePersist() {
+        if (scheduleId == null) {
+            scheduleId = UUID.randomUUID().toString();
+        }
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "eventId", nullable = false)

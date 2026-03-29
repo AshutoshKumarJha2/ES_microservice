@@ -141,7 +141,7 @@
 
             String paymentStatus = paymentClient.getPaymentStatus(transactionId);
 
-            if (!"APPROVED".equalsIgnoreCase(paymentStatus)) {
+            if (!"COMPLETED".equalsIgnoreCase(paymentStatus)) {
                 throw new IllegalStateException("Payment not approved. Current status: " + paymentStatus);
             }
 

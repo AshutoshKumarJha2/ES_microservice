@@ -1,10 +1,11 @@
 package com.cts.eventsphere.logmanager.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
@@ -18,8 +19,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "notification")
 @Data
-@DynamicInsert
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Notification {
 
     @Id
@@ -39,6 +41,7 @@ public class Notification {
     @Column(name = "category", nullable = false, length = 20)
     private String category;
 
+    @Builder.Default
     @Column(name = "status", nullable = false, length = 20)
     private String status = "Unread";
 

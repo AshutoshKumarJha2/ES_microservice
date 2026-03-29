@@ -52,7 +52,8 @@ public class ResilienceConfig {
         return f -> f.configure(
                 builder -> builder.circuitBreakerConfig(config),
                 "auth-manager-cb", "event-manager-cb", "log-manager-cb",
-                "engagement-manager-cb", "expense-manager-cb"
+                "engagement-manager-cb", "expense-manager-cb",
+                "venue-manager-cb", "vendor-manager-cb"
         );
     }
 
