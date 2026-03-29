@@ -5,11 +5,14 @@ import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.RegisterResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.ValidateResponse;
 import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
+import com.cts.eventsphere.iamservice.dto.user.UserResponseDto;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
 import com.cts.eventsphere.iamservice.service.AuthService;
+import com.cts.eventsphere.iamservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final UserService userService;
 
     /**
      * Registers a new user account.
@@ -88,5 +92,10 @@ public class AuthController {
     @GetMapping("/validate")
     public ResponseEntity<ValidateResponse> validate(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(authService.validateToken(authHeader));
+    }
+
+    @PostMapping("/users/userdetails")
+    public ResponseEntity<List<UserResponseDto>> getUserDetails(@RequestBody List<String> userIds) {
+        return ResponseEntity.ok(userService.getUsers(userIds));
     }
 }

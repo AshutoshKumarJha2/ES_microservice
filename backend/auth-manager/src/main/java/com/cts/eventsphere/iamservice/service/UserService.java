@@ -4,6 +4,7 @@ import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
 import com.cts.eventsphere.iamservice.dto.user.UserResponseDto;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Service contract for user management operations within the Auth Manager.
@@ -23,6 +24,8 @@ public interface UserService {
      * @return a list of {@link UserResponseDto} for every user in the system; never {@code null}
      */
     List<UserResponseDto> getAllUsers();
+
+    List<UserResponseDto> getUsers(List<String> userIds);
 
     /**
      * Retrieves a single user by their unique identifier.
