@@ -20,7 +20,7 @@ eureka:
 
 services:
   event:
-   url: http://localhost:8082
+   url: http://localhost:7070
   auth:
    url: http://localhost:8081
 

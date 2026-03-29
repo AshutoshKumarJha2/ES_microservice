@@ -13,11 +13,11 @@ import java.time.LocalDateTime;
  * @since 25-03-2026
  */
 public record EventResponseDto(
-        String eventId,
-        String name,
+        String id,
+        String eventName,
         String organizerId,
-        LocalDateTime startDate,
-        LocalDateTime endDate,
+        LocalDateTime startAt,
+        LocalDateTime endAt,
         String venueId,
         String status
 ) {}
