@@ -2,21 +2,12 @@ spring:
   application:
     name: engagement-manager
   config:
-    import: "optional:http://localhost:6971"
+    import: "configserver:http://localhost:6971"
+  cloud:
+    config:
+      profile: default
   profiles:
     active: local
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
-  devtools:
-    restart:
-      enabled: true
 
 server:
   port: 7071
@@ -34,6 +25,3 @@ services:
   auth:
     url: http://localhost:7069
 
-logging:
-  level:
-    org.springframework.web: DEBUG
