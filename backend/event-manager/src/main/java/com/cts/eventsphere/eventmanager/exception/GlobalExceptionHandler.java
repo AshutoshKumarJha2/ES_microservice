@@ -1,75 +1,189 @@
 package com.cts.eventsphere.eventmanager.exception;
 
+import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
 import com.cts.eventsphere.eventmanager.dto.shared.GenericErrorResponse;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.registration.DuplicateRegistrationException;
+import com.cts.eventsphere.eventmanager.exception.registration.InvalidRegistrationStatusException;
+import com.cts.eventsphere.eventmanager.exception.registration.RegistrationNotFoundException;
 import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+import com.cts.eventsphere.eventmanager.exception.ticket.TicketUnavailableException;
+import com.cts.eventsphere.eventmanager.service.AuditService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
-import java.util.HashMap;
-import java.util.Map;
-
-/**
- * Global Exception Handler for Validation errors and Custom made Exceptions
- *
- * @author 2479623
- * @version 1.0
- * @since 25-03-2026
- */
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String,String>> handleValidationException(
-            MethodArgumentNotValidException ex){
-        Map<String,String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(
-                e -> errors.put(e.getField(),e.getDefaultMessage())
-        );
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    private final AuditService auditService;
+
+    /**
+     * Extracts the authenticated user's ID from the Spring Security context.
+     * Returns {@code "anonymous"} if no authenticated user is present.
+     *
+     * @return The userId string of the current principal, or {@code "anonymous"}.
+     */
+    private String resolveUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.userId();
+        }
+        return "anonymous";
     }
+
+    /**
+     * Derives an {@link AuditAction} from the HTTP method of the request.
+     * Used when auditing failed operations where the original intent is inferred
+     * from the HTTP verb.
+     *
+     * @param request The current {@link HttpServletRequest}.
+     * @return The corresponding {@link AuditAction}.
+     */
+    private AuditAction resolveActionByMethod(HttpServletRequest request) {
+        return switch (request.getMethod().toUpperCase()) {
+            case "POST"         -> AuditAction.CREATE;
+            case "PUT", "PATCH" -> AuditAction.UPDATE;
+            case "DELETE"       -> AuditAction.DELETE;
+            default             -> AuditAction.READ;
+        };
+    }
+
+    // ── 400 Bad Request ──────────────────────────────────────────────────────
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<GenericErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+        String message = ex.getBindingResult().getFieldErrors().stream()
+                .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(new GenericErrorResponse(message));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<GenericErrorResponse> handleMessageNotReadable(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body(new GenericErrorResponse("Malformed or unreadable request body"));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<GenericErrorResponse> handleMissingParam(MissingServletRequestParameterException ex) {
+        return ResponseEntity.badRequest().body(new GenericErrorResponse("Missing required parameter: " + ex.getParameterName()));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<GenericErrorResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations().stream()
+                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(new GenericErrorResponse(message));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<GenericErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
+        return ResponseEntity.badRequest().body(new GenericErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidRegistrationStatusException.class)
+    public ResponseEntity<GenericErrorResponse> handleInvalidRegistrationStatus(InvalidRegistrationStatusException e,
+                                                                                HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", request.getRequestURI());
+        return ResponseEntity.badRequest().body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    // ── 403 Forbidden ────────────────────────────────────────────────────────
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<GenericErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new GenericErrorResponse("Access denied"));
+    }
+
+    // ── 404 Not Found ────────────────────────────────────────────────────────
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleNoResourceFound(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(ex.getMessage()));
+    }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleEventNotFound(EventNotFoundException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse("Event not found"));
+    }
+
+    @ExceptionHandler(ScheduleNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleScheduleNotFound(ScheduleNotFoundException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Schedule", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse("Schedule not found"));
+    }
+
+    @ExceptionHandler(TicketNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleTicketNotFound(TicketNotFoundException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Ticket", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(RegistrationNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleRegistrationNotFound(RegistrationNotFoundException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Registration", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    // ── 405 Method Not Allowed ───────────────────────────────────────────────
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<GenericErrorResponse> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new GenericErrorResponse("HTTP method not supported: " + ex.getMethod()));
+    }
+
+    // ── 409 Conflict ─────────────────────────────────────────────────────────
+
+    @ExceptionHandler(TicketAlreadyExistsException.class)
+    public ResponseEntity<GenericErrorResponse> handleTicketAlreadyExists(TicketAlreadyExistsException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Ticket", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    @ExceptionHandler(DuplicateRegistrationException.class)
+    public ResponseEntity<GenericErrorResponse> handleDuplicateRegistration(DuplicateRegistrationException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    // ── 422 Unprocessable Entity ─────────────────────────────────────────────
+
+    @ExceptionHandler(TicketUnavailableException.class)
+    public ResponseEntity<GenericErrorResponse> handleTicketUnavailable(TicketUnavailableException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Ticket", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    // ── 500 Internal Server Error (catch-all) ────────────────────────────────
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<GenericErrorResponse> handleUnexpectedExceptions(Exception ex) {
-        String traceId = java.util.UUID.randomUUID().toString();
+    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex) {
+        String traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
-        GenericErrorResponse body = new GenericErrorResponse(
-                "An unexpected error occurred. Please contact support with traceId: " + traceId
-        );
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
-    }
-
-    /**
-     * Handles EventNotFoundException by returning a standardized error response.
-     * This method is triggered when an event lookup fails and the requested event
-     * cannot be found in the system.
-     *
-     * @param e the EventNotFoundException thrown when the event is missing
-     * @return ResponseEntity containing a GenericErrorResponse with a "Event Not Found"
-     *         message and HTTP status 404 (NOT_FOUND)
-     */
-    @ExceptionHandler(EventNotFoundException.class)
-    public ResponseEntity<GenericErrorResponse> handleEventNotFoundException(EventNotFoundException e) {
-        return new ResponseEntity<>(new GenericErrorResponse("Event Not Found"), HttpStatus.NOT_FOUND);
-    }
-
-    /**
-     * Handles ScheduleNotFoundException by returning a standardized error response.
-     * This method is triggered when a schedule lookup fails and the requested schedule
-     * cannot be found in the system.
-     *
-     * @param e the ScheduleNotFoundException thrown when the schedule is missing
-     * @return ResponseEntity containing a GenericErrorResponse with a "Schedule Not Found"
-     *         message and HTTP status 404 (NOT_FOUND)
-     */
-    @ExceptionHandler(ScheduleNotFoundException.class)
-    public ResponseEntity<GenericErrorResponse> handleScheduleNotFoundException(ScheduleNotFoundException e) {
-        return new ResponseEntity<>(new GenericErrorResponse("Schedule Not Found"), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new GenericErrorResponse("An unexpected error occurred. Please contact support with traceId: " + traceId));
     }
 }

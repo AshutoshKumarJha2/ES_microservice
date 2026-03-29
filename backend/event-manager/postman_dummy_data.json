@@ -1,0 +1,349 @@
+{
+  "info": {
+    "name": "Event Manager API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "auth_token", "value": "<your_jwt_token>" },
+    { "key": "eventId", "value": "" },
+    { "key": "ticketId", "value": "" },
+      { "key": "registrationId", "value": "" },
+    { "key": "scheduleId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "Tech Conference 2026",
+                "organizerId": "org-001",
+                "startDate": "2026-05-10",
+                "endDate": "2026-05-12",
+                "venueId": "venue-001",
+                "status": "draft"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events"
+          }
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}"
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "name": "Tech Conference 2026 - Updated",
+                "organizerId": "org-001",
+                "startDate": "2026-05-10",
+                "endDate": "2026-05-13",
+                "venueId": "venue-001",
+                "status": "published"
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Schedules",
+      "item": [
+        {
+          "name": "Add Schedule to Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/schedules",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "eventId": "{{eventId}}",
+                "date": "2026-05-10",
+                "timeSlot": "09:00-10:30",
+                "activity": "Opening Keynote - Industry Trends 2026",
+                "status": "draft"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Schedules for Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/schedules"
+          }
+        },
+        {
+          "name": "Update Schedule",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/schedules/{{scheduleId}}",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "eventId": "{{eventId}}",
+                "date": "2026-05-10",
+                "timeSlot": "10:00-11:30",
+                "activity": "Opening Keynote - Industry Trends 2026 (Revised)",
+                "status": "active"
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Schedule",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/schedules/{{scheduleId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets",
+      "item": [
+        {
+          "name": "Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/tickets",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "type": "VIP",
+                "price": 199.99,
+                "status": "ACTIVE"
+              }
+            }
+          }
+        },
+        {
+          "name": "Create General Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/tickets",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "type": "GENERAL",
+                "price": 49.99,
+                "status": "ACTIVE"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get Tickets for Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/{{eventId}}/tickets?page=0&size=10",
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/tickets/{{ticketId}}",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "type": "VIP",
+                "price": 249.99,
+                "status": "ACTIVE"
+              }
+            }
+          }
+        },
+        {
+          "name": "Delete Ticket",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/tickets/{{ticketId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registrations",
+      "item": [
+        {
+          "name": "Register for Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/registrations",
+            "body": {
+              "mode": "raw",
+              "raw": {
+                "ticketId": "{{ticketId}}"
+              }
+            }
+          }
+        },
+        {
+          "name": "Get All Registrations for Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/events/{{eventId}}/registrations?page=0&size=10",
+              "query": [
+                { "key": "status", "value": "PENDING", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Registration for Event",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/events/{{eventId}}/my-registration"
+          }
+        },
+        {
+          "name": "Get Registration By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/registrations/{{registrationId}}"
+          }
+        },
+        {
+          "name": "Approve Registration",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/registrations/{{registrationId}}/approve"
+          }
+        },
+        {
+          "name": "Reject Registration",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/registrations/{{registrationId}}/reject"
+          }
+        },
+        {
+          "name": "Check In",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/registrations/{{registrationId}}/check-in"
+          }
+        },
+        {
+          "name": "Cancel Registration",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{auth_token}}" }
+            ],
+            "url": "{{base_url}}/api/v1/registrations/{{registrationId}}/cancel"
+          }
+        }
+      ]
+    }
+  ]
+}

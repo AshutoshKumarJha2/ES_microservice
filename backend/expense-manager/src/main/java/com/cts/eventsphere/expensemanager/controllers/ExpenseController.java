@@ -50,7 +50,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
  * @since 25-03-2026
  */
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("")
 @Tag(name = "Expense", description = "Expense management endpoints")
 @RequiredArgsConstructor
 @Slf4j

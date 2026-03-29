@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @since 25-03-2026
  * @see EventResponseDto
  */
-@FeignClient(name = "event-service", url = "${services.event.url}")
+@FeignClient(name = "event-manager")
 public interface EventServiceClient {
 
     /**
@@ -32,9 +32,10 @@ public interface EventServiceClient {
      * @param eventId the UUID of the event to retrieve
      * @return the event details including organizerId, name, and status
      */
-    @GetMapping("/api/v1/events/{eventId}")
+    @GetMapping("/events/{eventId}")
     EventResponseDto getEventById(@PathVariable String eventId);
 
+<<<<<<< HEAD
 //    /**
 //     * Checks whether an event exists.
 //     *
@@ -43,4 +44,14 @@ public interface EventServiceClient {
 //     */
 //    @GetMapping("/api/v1/events/{eventId}/exists")
 //    boolean eventExists(@PathVariable String eventId);
+=======
+    /**
+     * Checks whether an event exists.
+     *
+     * @param eventId the UUID of the event to check
+     * @return {@code true} if the event exists, {@code false} otherwise
+     */
+    @GetMapping("/events/{eventId}/exists")
+    boolean eventExists(@PathVariable String eventId);
+>>>>>>> 01777b8d54759cf7d7d7152d42e3d6327b89b2a1
 }
