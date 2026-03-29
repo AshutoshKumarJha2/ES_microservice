@@ -1,6 +1,7 @@
 package com.cts.eventsphere.expensemanager.service.impl;
 
 import com.cts.eventsphere.expensemanager.client.EventServiceClient;
+import com.cts.eventsphere.expensemanager.client.LogServiceClient;
 import com.cts.eventsphere.expensemanager.client.dto.EventResponseDto;
 import com.cts.eventsphere.expensemanager.dto.mapper.BudgetRequestDtoMapper;
 import com.cts.eventsphere.expensemanager.dto.mapper.BudgetResponseDtoMapper;
@@ -11,7 +12,12 @@ import com.cts.eventsphere.expensemanager.exception.BudgetAlreadyExistsException
 import com.cts.eventsphere.expensemanager.exception.BudgetNotFoundException;
 import com.cts.eventsphere.expensemanager.exception.EventServiceException;
 import com.cts.eventsphere.expensemanager.repository.BudgetRepository;
+import com.cts.eventsphere.expensemanager.service.AuditService;
+import com.cts.eventsphere.expensemanager.dto.audit.AuditAction;
 import com.cts.eventsphere.expensemanager.service.BudgetService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
+
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +45,8 @@ public class BudgetServiceImpl implements BudgetService {
 
     private final BudgetRepository budgetRepository;
     private final EventServiceClient eventServiceClient;
-
+    private final AuditService auditService;
+    private final LogServiceClient logServiceClient;
     /**
      * {@inheritDoc}
      *
@@ -55,24 +62,16 @@ public class BudgetServiceImpl implements BudgetService {
     @Transactional
     public BudgetResponseDto createBudget(String eventId, BudgetRequestDto request) {
         log.info("Creating budget for eventId: {} with plannedAmount: {}", eventId, request.plannedAmount());
-
-        
         fetchEvent(eventId);
-
         budgetRepository.findByEventId(eventId).ifPresent(existing -> {
             throw new BudgetAlreadyExistsException(eventId);
         });
-
-       
         Budget budget = BudgetRequestDtoMapper.toEntity(request, eventId);
         budget.setVariance(request.plannedAmount());
-
-        
         Budget savedBudget = budgetRepository.save(budget);
+        auditService.logAudit(getCurrentUserId(), AuditAction.CREATE, Budget.class, savedBudget.getBudgetId());
+        notifyUser(getCurrentUserId(), "Budget created for event \"" + eventId + "\" with planned amount: " + request.plannedAmount());
         log.info("Budget created successfully. budgetId: {}, eventId: {}", savedBudget.getBudgetId(), eventId);
-
-        
-
         return BudgetResponseDtoMapper.toResponseDto(savedBudget);
     }
 
@@ -85,6 +84,7 @@ public class BudgetServiceImpl implements BudgetService {
         log.info("Fetching budget for eventId: {}", eventId);
         Budget budget = budgetRepository.findByEventId(eventId)
                 .orElseThrow(() -> new BudgetNotFoundException(eventId));
+        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Budget.class, budget.getBudgetId());
         return BudgetResponseDtoMapper.toResponseDto(budget);
     }
 
@@ -105,4 +105,24 @@ public class BudgetServiceImpl implements BudgetService {
             throw new EventServiceException("Event Service unavailable", ex);
         }
     }
+    
+    private static final String NOTIFICATION_CATEGORY = "EXPENSE";
+
+    private void notifyUser(String userId, String message) {
+        try {
+            logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
+        } catch (FeignException e) {
+            log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
+    }
+    
+    private String getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.userId();
+        }
+        return "UNKNOWN";
+    }
+
+
 }

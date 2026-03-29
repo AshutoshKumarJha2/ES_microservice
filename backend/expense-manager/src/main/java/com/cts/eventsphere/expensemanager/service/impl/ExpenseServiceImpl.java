@@ -1,7 +1,9 @@
 package com.cts.eventsphere.expensemanager.service.impl;
 
 import com.cts.eventsphere.expensemanager.client.EventServiceClient;
+import com.cts.eventsphere.expensemanager.client.LogServiceClient;
 import com.cts.eventsphere.expensemanager.client.dto.EventResponseDto;
+import com.cts.eventsphere.expensemanager.dto.audit.AuditAction;
 import com.cts.eventsphere.expensemanager.dto.mapper.ExpenseRequestDtoMapper;
 import com.cts.eventsphere.expensemanager.dto.mapper.ExpenseResponseDtoMapper;
 import com.cts.eventsphere.expensemanager.dto.request.ExpenseRequestDto;
@@ -16,7 +18,11 @@ import com.cts.eventsphere.expensemanager.exception.InvalidExpenseStateException
 import com.cts.eventsphere.expensemanager.repository.BudgetRepository;
 import com.cts.eventsphere.expensemanager.repository.ExpenseRepository;
 import com.cts.eventsphere.expensemanager.repository.PaymentRepository;
+import com.cts.eventsphere.expensemanager.service.AuditService;
 import com.cts.eventsphere.expensemanager.service.ExpenseService;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
+
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +62,9 @@ public class ExpenseServiceImpl implements ExpenseService {
     private final BudgetRepository budgetRepository;
     private final EventServiceClient eventServiceClient;
     private final PaymentRepository paymentRepository;
-    
+    private final AuditService auditService;
+    private final LogServiceClient logServiceClient;
+
 
     /**
      * {@inheritDoc}
@@ -82,7 +90,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         
         Expense savedExpense = expenseRepository.save(expense);
         log.info("Expense created. expenseId: {}, eventId: {}", savedExpense.getExpenseId(), eventId);
-
+        auditService.logAudit(actorId, AuditAction.CREATE, Expense.class, expense.getExpenseId());
+        notifyUser(actorId, "Expense \"" + request.description() + "\" submitted for event \"" + eventId + "\"");
         return ExpenseResponseDtoMapper.toDto(savedExpense);
     }
 
@@ -116,10 +125,11 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         
         fetchEvent(eventId);
-
+        
         Page<ExpenseResponseDto> expenses = expenseRepository.findByEventId(eventId, pageable)
                 .map(ExpenseResponseDtoMapper::toDto);
         log.info("Retrieved {} expenses for eventId: {}", expenses.getTotalElements(), eventId);
+        auditService.logAudit(getCurrentUserId(), AuditAction.READ, "Expense", "ALL");
         return expenses;
     }
 
@@ -156,7 +166,13 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         Expense updatedExpense = expenseRepository.save(expense);
         log.info("Expense {} updated to status: {}", expenseId, status);
-
+        AuditAction statusAction = switch (status) {
+        case APPROVED -> AuditAction.APPROVE;
+        case REJECTED -> AuditAction.REJECT;
+        default -> AuditAction.UPDATE;
+    };
+    auditService.logAudit(actorId, statusAction, Expense.class, expense.getExpenseId());
+    notifyUser(actorId, "Expense \"" + expense.getDescription() + "\" status changed to " + status);
         
 
         return ExpenseResponseDtoMapper.toDto(updatedExpense);
@@ -196,7 +212,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         
         expense.setStatus(ExpenseStatus.PAID);
         expenseRepository.save(expense);
-
+        auditService.logAudit(actorId, AuditAction.CREATE, Payment.class, payment.getPaymentId());
+        notifyUser(actorId, "Payment of " + request.amount() + " processed for expense \"" + expense.getDescription() + "\"");
         
         Budget budget = budgetRepository.findByEventId(expense.getEventId())
                 .orElseThrow(() -> new BudgetNotFoundException(expense.getEventId()));
@@ -229,6 +246,8 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         expenseRepository.deleteById(expenseId);
         log.info("Expense deleted. expenseId: {}", expenseId);
+        auditService.logAudit(actorId, AuditAction.DELETE, Expense.class, expenseId);
+
     }
 
     
@@ -249,4 +268,24 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new EventServiceException("Event Service unavailable", ex);
         }
     }
+    
+    private static final String NOTIFICATION_CATEGORY = "EXPENSE";
+
+    private void notifyUser(String userId, String message) {
+        try {
+            logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
+        } catch (FeignException e) {
+            log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
+    }
+    
+    private String getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.userId();
+        }
+        return "UNKNOWN";
+    }
+
+
 }

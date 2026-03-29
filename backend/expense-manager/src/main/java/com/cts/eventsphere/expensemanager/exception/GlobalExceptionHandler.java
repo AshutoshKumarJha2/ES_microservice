@@ -8,6 +8,13 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
+import com.cts.eventsphere.expensemanager.dto.audit.AuditAction;
+import com.cts.eventsphere.expensemanager.service.AuditService;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -35,51 +42,79 @@ import java.util.Map;
  * @since 25-03-2026
  */
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
 
+    private final AuditService auditService;
     
+    /**
+     * Extracts the authenticated user's ID from the Spring Security context.
+     */
+    private String resolveUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.userId();
+        }
+        return "anonymous";
+    }
+
+    /**
+     * Derives an AuditAction from the HTTP method of the request.
+     */
+    private AuditAction resolveActionByMethod(HttpServletRequest request) {
+        return switch (request.getMethod().toUpperCase()) {
+            case "POST"         -> AuditAction.CREATE;
+            case "PUT", "PATCH" -> AuditAction.UPDATE;
+            case "DELETE"       -> AuditAction.DELETE;
+            default             -> AuditAction.READ;
+        };
+    }
+
 
     @ExceptionHandler(BudgetNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleBudgetNotFound(BudgetNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleBudgetNotFound(BudgetNotFoundException ex, HttpServletRequest request) {
         log.warn("Budget not found: {}", ex.getMessage());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Budget", request.getRequestURI());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
+
     @ExceptionHandler(ExpenseNotFoundException.class)
-    public ResponseEntity<Map<String, Object>> handleExpenseNotFound(ExpenseNotFoundException ex) {
+    public ResponseEntity<Map<String, Object>> handleExpenseNotFound(ExpenseNotFoundException ex, HttpServletRequest request) {
         log.warn("Expense not found: {}", ex.getMessage());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Expense", request.getRequestURI());
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
+
 
     
 
     @ExceptionHandler(BudgetAlreadyExistsException.class)
-    public ResponseEntity<Map<String, Object>> handleBudgetAlreadyExists(BudgetAlreadyExistsException ex) {
+    public ResponseEntity<Map<String, Object>> handleBudgetAlreadyExists(BudgetAlreadyExistsException ex, HttpServletRequest request) {
         log.warn("Duplicate budget: {}", ex.getMessage());
+        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Budget", request.getRequestURI());
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
-    @ExceptionHandler(InvalidExpenseStateException.class)
-    public ResponseEntity<Map<String, Object>> handleInvalidExpenseState(InvalidExpenseStateException ex) {
-        log.warn("Invalid expense state transition: {}", ex.getMessage());
-        return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
-    }
-
-    
 
     @ExceptionHandler(EventServiceException.class)
-    public ResponseEntity<Map<String, Object>> handleEventServiceException(EventServiceException ex) {
+    public ResponseEntity<Map<String, Object>> handleEventServiceException(EventServiceException ex, HttpServletRequest request) {
         log.error("Event Service error: {}", ex.getMessage(), ex);
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", request.getRequestURI());
 
-        // Distinguish "event not found" from "service unreachable"
         if (ex.getMessage() != null && ex.getMessage().contains("not found")) {
             return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
         }
         return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 
-    
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
+        return buildResponse(HttpStatus.FORBIDDEN, "Access denied");
+    }
+
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
