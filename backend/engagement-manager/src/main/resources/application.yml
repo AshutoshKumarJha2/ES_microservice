@@ -5,7 +5,7 @@ spring:
     import: "configserver:http://localhost:6971"
   cloud:
     config:
-      profile: default
+      profile: local
   profiles:
     active: local
 
