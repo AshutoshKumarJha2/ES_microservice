@@ -33,10 +33,13 @@ public class WebConfig {
             window.onload = function() {
               window.ui = SwaggerUIBundle({
                 urls: [
-                  { url: "/api/v1/auth-manager/v3/api-docs",    name: "auth-manager"    },
-                  { url: "/api/v1/event-manager/v3/api-docs",   name: "event-manager"   },
-                  { url: "/api/v1/log-manager/v3/api-docs",     name: "log-manager"     },
-                  { url: "/api/v1/expense-manager/v3/api-docs", name: "expense-manager" }
+                  { url: "/api/v1/auth-manager/v3/api-docs",        name: "auth-manager"        },
+                  { url: "/api/v1/event-manager/v3/api-docs",        name: "event-manager"       },
+                  { url: "/api/v1/log-manager/v3/api-docs",          name: "log-manager"         },
+                  { url: "/api/v1/expense-manager/v3/api-docs",      name: "expense-manager"     },
+                  { url: "/api/v1/engagement-manager/v3/api-docs",   name: "engagement-manager"  },
+                  { url: "/api/v1/vendor-manager/v3/api-docs",       name: "vendor-manager"      },
+                  { url: "/api/v1/venue-manager/v3/api-docs",        name: "venue-manager"       }
                 ],
                 "urls.primaryName": "event-manager",
                 dom_id: '#swagger-ui',

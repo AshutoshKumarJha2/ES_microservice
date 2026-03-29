@@ -10,7 +10,7 @@ spring:
       profile: default
 
 server:
-  port: 7070
+  port: 7072
 
 eureka:
   client:

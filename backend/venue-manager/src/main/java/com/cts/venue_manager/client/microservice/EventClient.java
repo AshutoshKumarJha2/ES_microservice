@@ -22,6 +22,6 @@ public interface EventClient {
      * @param id The unique identifier of the event to retrieve
      * @return A ResponseEntity containing the EventResponseDto
      */
-    @GetMapping("/{id}")
+    @GetMapping("/events/{id}")
     ResponseEntity<EventResponseDto> getById(@PathVariable("id") String id);
 }

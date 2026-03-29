@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.expensemanager.dto.audit.AuditAction;
@@ -131,6 +132,13 @@ public class GlobalExceptionHandler {
         body.put("error", "Validation Failed");
         body.put("messages", fieldErrors);
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidSortProperty(PropertyReferenceException ex) {
+        log.warn("Invalid sort property: {}", ex.getMessage());
+        return buildResponse(HttpStatus.BAD_REQUEST,
+                "Invalid sort field '" + ex.getPropertyName() + "'. Valid fields: createdAt, updatedAt, amount, status, description, date");
     }
 
     // ─── Type Mismatch (e.g., invalid enum in @RequestParam) ──────────

@@ -7,7 +7,7 @@ spring:
     active: local
 
 server:
-  port: 7076
+  port: 7074
 
 eureka:
   client:

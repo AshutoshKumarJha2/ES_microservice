@@ -252,6 +252,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     
 
+    @Override
+    @Transactional(readOnly = true)
+    public String getPaymentStatus(String paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ExpenseNotFoundException("Payment not found: " + paymentId));
+        return payment.getStatus().name();
+    }
+
     private Expense findExpenseOrThrow(String expenseId) {
         return expenseRepository.findById(expenseId)
                 .orElseThrow(() -> new ExpenseNotFoundException(expenseId));

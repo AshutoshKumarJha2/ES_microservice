@@ -10,7 +10,7 @@ spring:
     active: local
 
 server:
-  port: 7099
+  port: 7073
 
 eureka:
   client:
@@ -20,7 +20,7 @@ eureka:
 
 services:
   event:
-   url: http://localhost:7070
+   url: http://localhost:7072
   auth:
-   url: http://localhost:8081
+   url: http://localhost:7070
 

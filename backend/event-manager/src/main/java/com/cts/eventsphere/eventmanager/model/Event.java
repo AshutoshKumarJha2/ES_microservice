@@ -13,6 +13,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Event model class.
@@ -31,9 +32,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "CHAR(36)")
     private String eventId;
+
+    @PrePersist
+    protected void prePersist() {
+        if (eventId == null) {
+            eventId = UUID.randomUUID().toString();
+        }
+    }
 
     @Column(nullable = false, length = 150)
     private String name;
