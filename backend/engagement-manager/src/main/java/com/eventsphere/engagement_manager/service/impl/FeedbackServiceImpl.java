@@ -3,6 +3,8 @@ package com.eventsphere.engagement_manager.service.impl;
 import com.eventsphere.engagement_manager.Exception.FeedbackNotFoundException;
 import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
 import com.eventsphere.engagement_manager.client.EventServiceClient;
+import com.eventsphere.engagement_manager.client.LogServiceClient;
+import com.eventsphere.engagement_manager.dto.audit.AuditAction;
 import com.eventsphere.engagement_manager.dto.client.RegistrationStatusDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackRequestDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackResponseDto;
@@ -10,6 +12,7 @@ import com.eventsphere.engagement_manager.dto.mapper.feedback.FeedbackRequestDto
 import com.eventsphere.engagement_manager.dto.mapper.feedback.FeedbackResponseDtoMapper;
 import com.eventsphere.engagement_manager.model.Feedback;
 import com.eventsphere.engagement_manager.repository.FeedbackRepository;
+import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.FeedbackService;
 import feign.FeignException;
 import jakarta.persistence.EntityExistsException;
@@ -26,9 +29,10 @@ import java.time.LocalDateTime;
 /**
  * Service implementation for Feedback management.
  * Integrates with AuditService for activity tracking and NotificationService for user alerts.
- *  author 2480027
- *  @version 1.1
- *  @since 26-03-2026
+ *
+ * @author 2480027
+ * @version 1.1
+ * @since 26-03-2026
  */
 @Slf4j
 @Service
@@ -37,35 +41,27 @@ import java.time.LocalDateTime;
 public class FeedbackServiceImpl implements FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
-
-
     private final EventServiceClient registrationServiceClient;
+    private final AuditService auditService;
+    private final LogServiceClient logServiceClient;
 
-
-    //    private final NotificationService notificationService;
-//    private final AuditService auditService;
+    private static final String NOTIFICATION_CATEGORY = "FEEDBACK";
 
     @Override
     public FeedbackResponseDto create(FeedbackRequestDto request, UserPrincipal userPrincipal) {
         log.info("Processing feedback creation for event: {}", request.eventId());
 
         validateRating(request.rating());
-        ensureEligibleToSubmit(request.eventId(),userPrincipal);
+        ensureEligibleToSubmit(request.eventId(), userPrincipal);
         ensureNotDuplicate(request.eventId(), request.attendeeId());
 
         Feedback entity = FeedbackRequestDtoMapper.toEntity(request);
         Feedback saved = feedbackRepository.save(entity);
         log.info("Feedback saved with ID: {}", saved.getFeedbackId());
 
-        // Standard Audit Call
-//        auditService.logAudit(request.attendeeId(), AuditAction.CREATE, FeedBack.class, saved.getFeedbackId());
-
-        // Notification Call
-//        notificationService.sendNotification(
-//                request.attendeeId(),
-//                "Thank you! Your feedback for event " + request.eventId() + " has been received.",
-//                "FEEDBACK"
-//        );
+        auditService.logAudit(request.attendeeId(), AuditAction.CREATE, Feedback.class, saved.getFeedbackId());
+        notifyUser(request.attendeeId(),
+                "Thank you! Your feedback for event " + request.eventId() + " has been received.");
 
         return FeedbackResponseDtoMapper.toDTO(saved);
     }
@@ -102,8 +98,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         feedbackRepository.deleteById(feedbackId);
 
-        // Audit for deletion - using "SYSTEM" or a specific admin ID if available
-//        auditService.logAudit(feedback.getAttendeeId(), AuditAction.DELETE, FeedBack.class, feedbackId);
+        auditService.logAudit(feedback.getAttendeeId(), AuditAction.DELETE, Feedback.class, feedbackId);
     }
 
     // ===================== HELPER METHODS =====================
@@ -117,7 +112,6 @@ public class FeedbackServiceImpl implements FeedbackService {
     private void ensureEligibleToSubmit(String eventId, UserPrincipal userPrincipal) {
         RegistrationStatusDto registration;
         try {
-            // ✅ HTTP call to registration-service via Eureka discovery
             registration = registrationServiceClient.getRegistrationStatus(eventId, userPrincipal);
         } catch (FeignException.NotFound e) {
             throw new IllegalStateException("Attendee is not registered for this event.");
@@ -136,6 +130,14 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         if (exists) {
             throw new EntityExistsException("Feedback already submitted for this event.");
+        }
+    }
+
+    private void notifyUser(String userId, String message) {
+        try {
+            logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
+        } catch (FeignException e) {
+            log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
         }
     }
 }

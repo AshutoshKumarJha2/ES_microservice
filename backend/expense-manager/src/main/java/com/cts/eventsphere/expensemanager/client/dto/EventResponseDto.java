@@ -1,12 +1,12 @@
 package com.cts.eventsphere.expensemanager.client.dto;
 
-import java.time.LocalDateTime;
-
 /**
  * Local copy of the Event Service's response DTO.
  * Used by {@link com.cts.eventsphere.expensemanager.client.EventServiceClient}
  * to deserialize event data. Only the fields Finance Service actually needs
  * are included; additional fields are ignored by Jackson automatically.
+ *
+ * startAt / endAt are plain date strings ("yyyy-MM-dd") as serialized by event-manager.
  *
  * @author 2480081
  * @version 1.0
@@ -16,8 +16,8 @@ public record EventResponseDto(
         String id,
         String eventName,
         String organizerId,
-        LocalDateTime startAt,
-        LocalDateTime endAt,
+        String startAt,
+        String endAt,
         String venueId,
         String status
 ) {}

@@ -49,14 +49,18 @@ public class GatewayConfig {
                         .filter(lb("EXPENSE-MANAGER"))
                         .filter(circuitBreaker("expense-manager-cb", URI.create("forward:/fallback/expense-manager")))
                         .build())
-                .and(
-                        route("venue-manager")
-                                .route(path("/venue-manager/**"), http())
-                                .before(stripPrefix(1))
-                                .filter(lb("VENUE-MANAGER"))
-                                .filter(circuitBreaker("venue-manager-cb", URI.create("forward:/fallback/expense-manager")))
-                                .build()
-                );
+                .and(route("venue-manager")
+                        .route(path("/api/v1/venue-manager/**"), http())
+                        .before(stripPrefix(3))
+                        .filter(lb("VENUE-MANAGER"))
+                        .filter(circuitBreaker("venue-manager-cb", URI.create("forward:/fallback/venue-manager")))
+                        .build())
+                .and(route("vendor-manager")
+                        .route(path("/api/v1/vendor-manager/**"), http())
+                        .before(stripPrefix(3))
+                        .filter(lb("VENDOR-MANAGER"))
+                        .filter(circuitBreaker("vendor-manager-cb", URI.create("forward:/fallback/vendor-manager")))
+                        .build());
     }
 
 }

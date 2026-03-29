@@ -19,7 +19,7 @@ spring:
       enabled: true
 
 server:
-  port: 7070
+  port: 7072
 
 eureka:
   client:

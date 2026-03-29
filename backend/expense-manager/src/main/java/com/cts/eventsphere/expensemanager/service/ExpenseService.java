@@ -80,6 +80,15 @@ public interface ExpenseService {
     PaymentResponseDto makePayment(String actorId, String expenseId, PaymentRequestDto request);
 
     /**
+     * Returns the status string of a payment by its ID.
+     * Called by vendor-manager to verify payment before generating invoices.
+     *
+     * @param paymentId the UUID of the payment
+     * @return the payment status as a string (e.g. "COMPLETED")
+     */
+    String getPaymentStatus(String paymentId);
+
+    /**
      * Deletes an expense record.
      *
      * @param actorId   the UUID of the authenticated user

@@ -156,6 +156,16 @@ public class ExpenseController {
     }
 
     /**
+     * Returns the payment status for the given payment ID.
+     * Called by vendor-manager to verify payment before generating invoices.
+     */
+    @GetMapping("/payments/{paymentId}/status")
+    @Operation(summary = "Get payment status by payment ID")
+    public ResponseEntity<String> getPaymentStatus(@PathVariable String paymentId) {
+        return ResponseEntity.ok(expenseService.getPaymentStatus(paymentId));
+    }
+
+    /**
      * Deletes an expense record.
      */
     @DeleteMapping("/expenses/{expenseId}")

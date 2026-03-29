@@ -3,6 +3,12 @@ spring:
     name: api-gateway
   config:
     import: configserver:http://localhost:6971
+  cloud:
+    gateway:
+      mvc:
+        http-client:
+          connect-timeout: 3000
+          read-timeout: 10000
 
 server:
   port: 6970
