@@ -25,6 +25,7 @@ public  class EngagementResponseDtoMapper {
                 .eventId(entity.getEventId())
                 .attendeeId(entity.getAttendeeId())
                 .activity(entity.getActivity())
+                .activityTimestamp(entity.getCreatedAt())
                 .build();
     }
 }
