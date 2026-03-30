@@ -2,6 +2,9 @@ package com.eventsphere.engagement_manager.service.impl;
 
 import com.eventsphere.engagement_manager.Exception.EngagementNotFoundException;
 import com.eventsphere.engagement_manager.Exception.InvalidEngagementException;
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
+import com.eventsphere.engagement_manager.client.LogServiceClient;
+import com.eventsphere.engagement_manager.dto.audit.AuditAction;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
 import com.eventsphere.engagement_manager.dto.mapper.engagement.EngagementRequestDtoMapper;
@@ -9,21 +12,18 @@ import com.eventsphere.engagement_manager.dto.mapper.engagement.EngagementRespon
 import com.eventsphere.engagement_manager.model.Engagement;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
 import com.eventsphere.engagement_manager.repository.EngagementRepository;
+import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.EngagementService;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
-// COMMENTED OUT — wire these back when audit & notification services are ready
-// import com.eventsphere.engagement_manager.client.AuditServiceClient;
-// import com.eventsphere.engagement_manager.client.NotificationServiceClient;
-// import com.eventsphere.engagement_manager.dto.client.AuditRequestDto;
-// import com.eventsphere.engagement_manager.dto.client.NotificationRequestDto;
 
 /**
  * Service implementation for Engagement management.
@@ -39,12 +39,11 @@ import java.util.stream.Collectors;
 @Transactional
 public class EngagementServiceImpl implements EngagementService {
 
-    // ✅ ACTIVE — engagement DB belongs to this service
     private final EngagementRepository engagementRepository;
+    private final AuditService auditService;
+    private final LogServiceClient logServiceClient;
 
-    // COMMENTED OUT — uncomment when services are ready
-    // private final AuditServiceClient auditServiceClient;
-    // private final NotificationServiceClient notificationServiceClient;
+    private static final String NOTIFICATION_CATEGORY = "ENGAGEMENT";
 
     @Override
     public EngagementResponseDto recordEngagement(EngagementRequestDto requestDto) {
@@ -60,26 +59,9 @@ public class EngagementServiceImpl implements EngagementService {
         Engagement saved = engagementRepository.save(entity);
         log.info("Engagement recorded with id={}", saved.getEngagementId());
 
-        // COMMENTED OUT — uncomment when audit-service is ready
-        // try {
-
-        //     auditServiceClient.logAudit(new AuditRequestDto(
-        //             requestDto.attendeeId(), "CREATE", "Engagement", saved.getEngagementId()
-        //     ));
-        // } catch (Exception e) {
-        //     log.warn("audit-service call failed for engagement {}: {}", saved.getEngagementId(), e.getMessage());
-        // }
-
-        // COMMENTED OUT — uncomment when notification-service is ready
-        // try {
-        //     notificationServiceClient.sendNotification(new NotificationRequestDto(
-        //             requestDto.attendeeId(),
-        //             "Your activity '" + requestDto.activity() + "' has been successfully recorded.",
-        //             "ENGAGEMENT_RECORDED"
-        //     ));
-        // } catch (Exception e) {
-        //     log.warn("notification-service call failed for attendee {}: {}", requestDto.attendeeId(), e.getMessage());
-        // }
+        auditService.logAudit(requestDto.attendeeId(), AuditAction.CREATE, Engagement.class, saved.getEngagementId());
+        notifyUser(requestDto.attendeeId(),
+                "Your activity '" + requestDto.activity() + "' has been successfully recorded.");
 
         return EngagementResponseDtoMapper.toDTO(saved);
     }
@@ -93,6 +75,8 @@ public class EngagementServiceImpl implements EngagementService {
         if (results.isEmpty()) {
             throw new EngagementNotFoundException("No engagements found for event: " + eventId);
         }
+
+        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, eventId);
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
@@ -108,6 +92,8 @@ public class EngagementServiceImpl implements EngagementService {
         if (results.isEmpty()) {
             throw new EngagementNotFoundException("No engagements found for activity type: " + activity);
         }
+
+        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, activity.name());
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
@@ -131,8 +117,26 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementNotFoundException("No engagements match the provided filters");
         }
 
+        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, eventId);
+
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    private void notifyUser(String userId, String message) {
+        try {
+            logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
+        } catch (FeignException e) {
+            log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
+    }
+
+    private String getCurrentUserId() {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserPrincipal userPrincipal) {
+            return userPrincipal.userId();
+        }
+        return "UNKNOWN";
     }
 }

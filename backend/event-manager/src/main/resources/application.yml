@@ -1,13 +1,22 @@
 spring:
   application:
     name: event-manager
-  config:
-    import: configserver:http://localhost:6971
   profiles:
     active: local
+  main:
+    allow-bean-definition-overriding: true
+  config:
+    import: configserver:http://localhost:6971
   cloud:
     config:
       profile: default
+      override-none: false
+      fail-fast: false
+
+
+  devtools:
+    restart:
+      enabled: true
 
 server:
   port: 7072
@@ -15,4 +24,4 @@ server:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:6969/eureka
+      defaultZone: http://localhost:6969/eureka/

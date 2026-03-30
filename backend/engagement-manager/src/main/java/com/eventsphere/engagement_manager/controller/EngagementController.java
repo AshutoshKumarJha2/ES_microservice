@@ -6,6 +6,7 @@ import com.eventsphere.engagement_manager.model.data.EngagementType;
 import com.eventsphere.engagement_manager.service.EngagementService;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -26,13 +27,10 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/engagements")
+@RequiredArgsConstructor
 public class EngagementController {
 
     private final EngagementService engagementService;
-
-    public EngagementController(EngagementService engagementService) {
-        this.engagementService = engagementService;
-    }
 
     @PostMapping("/log")
     @PreAuthorize("hasRole('ATTENDEE')")

@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 
 /**
- * Implementation of {@link com.cts.eventsphere.eventmanager.service.TicketService}.
+ * Implementation of {@link TicketService}.
  * Handles business logic for creating, retrieving, updating, and deleting tickets.
  *
  * @author test-in-prod-10x

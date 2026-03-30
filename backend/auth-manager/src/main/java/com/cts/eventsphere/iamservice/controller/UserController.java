@@ -120,4 +120,9 @@ public class UserController {
         return ResponseEntity.ok(updatedUserRole);
     }
 
+//    @GetMapping("/users/userdetails")
+//    public ResponseEntity<UserResponseDto> getUserDetails(@AuthenticationPrincipal UserPrincipal userPrincipal){
+//
+//    }
+
 }

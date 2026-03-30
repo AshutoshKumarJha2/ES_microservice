@@ -1,8 +1,34 @@
 /.metadata/
+
+# Build outputs
+**/target/
+**/build/
+
+# Logs
 **/*.log
 **/*.log.*
-**/*.log.*
+
+# Local config files
 **/*-local.yml
 **/*-local.yaml
+**/application-local.yml
+**/application-local.yaml
+
+# IDE
 **/.idea
 **/.vscode
+**/*.iml
+**/.project
+**/.classpath
+**/.settings/
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Temp
+**/*.tmp
+**/*.swp
+
+# Claude
+**/.claude/
