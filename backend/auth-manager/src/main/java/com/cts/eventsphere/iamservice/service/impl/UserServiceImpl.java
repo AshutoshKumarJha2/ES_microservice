@@ -52,6 +52,13 @@ private final UserRepository userRepo;
      * {@inheritDoc}
      */
     @Override
+    public List<UserResponseDto> getUsers(List<String> userIds) {
+        return userRepo.findAllById(userIds).stream()
+                .map(UserResponseDtoMapper::toDTO)
+                .toList();
+    }
+
+    @Override
     public UserResponseDto getUser(String userId) {
         User user =userRepo.findById(userId).orElseThrow(()->new UserNotFoundException(userId));
         UserResponseDto userResponseDto = UserResponseDtoMapper.toDTO(user);
