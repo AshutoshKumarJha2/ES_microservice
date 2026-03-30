@@ -6,15 +6,6 @@ spring:
   profiles:
     active: local
 
-springdoc:
-  api-docs:
-    enabled: true
-    path: /v3/api-docs
-  swagger-ui:
-    disable-swagger-default-url: true
-    path: /api/v1/venue-manager
-  packages-to-scan: com.cts.venue_manager.controller
-
 logging:
   level:
     org.springdoc: DEBUG

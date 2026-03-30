@@ -1,0 +1,5440 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "ES_Microservice",
+    "description": "Aggregated API documentation for all EventSphere microservices",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:6970",
+      "description": "API Gateway"
+    }
+  ],
+  "tags": [
+    {
+      "name": "expense-manager | Expense",
+      "description": "Expense management endpoints"
+    },
+    {
+      "name": "expense-manager | Budget",
+      "description": "Budget management endpoints"
+    }
+  ],
+  "paths": {
+    "/api/v1/auth-manager/users/{userId}": {
+      "get": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "getUserById",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "updateUserDetails",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/auth/users/userdetails": {
+      "post": {
+        "tags": [
+          "auth-manager | auth-controller"
+        ],
+        "operationId": "getUserDetails",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/auth/register": {
+      "post": {
+        "tags": [
+          "auth-manager | auth-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth-manager | auth-controller"
+        ],
+        "operationId": "refreshToken",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/auth/login": {
+      "post": {
+        "tags": [
+          "auth-manager | auth-controller"
+        ],
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/users/{userId}/status": {
+      "patch": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "changeUserStatus",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/users/{userId}/role": {
+      "patch": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "changeUserRole",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/users": {
+      "get": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "getAllUsers",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/me": {
+      "get": {
+        "tags": [
+          "auth-manager | user-controller"
+        ],
+        "operationId": "getMyDetails",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth-manager/auth/validate": {
+      "get": {
+        "tags": [
+          "auth-manager | auth-controller"
+        ],
+        "operationId": "validate",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/tickets/{ticketId}": {
+      "get": {
+        "tags": [
+          "event-manager | ticket-controller"
+        ],
+        "operationId": "getTicketById",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "event-manager | ticket-controller"
+        ],
+        "operationId": "updateTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "event-manager | ticket-controller"
+        ],
+        "operationId": "deleteTicket",
+        "parameters": [
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{id}": {
+      "get": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events": {
+      "get": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "readAll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EventResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EventRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EventResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{id}/schedules": {
+      "get": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "getAllActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ScheduleResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "event-manager | event-controller"
+        ],
+        "operationId": "createActivity",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{eventId}/tickets": {
+      "get": {
+        "tags": [
+          "event-manager | ticket-controller"
+        ],
+        "operationId": "getTicketsByEventId",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TicketListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "event-manager | ticket-controller"
+        ],
+        "operationId": "createTicket",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTicketRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{eventId}/schedules/{id}": {
+      "post": {
+        "tags": [
+          "event-manager | schedule-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ScheduleResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "event-manager | schedule-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/Schedule"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{eventId}/registrations": {
+      "get": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "getAllRegistrationsByEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10,
+              "maximum": 100,
+              "minimum": 1
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0,
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationListResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "createRegistration",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/registrations/{registrationId}/reject": {
+      "patch": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "rejectRegistration",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/registrations/{registrationId}/check-in": {
+      "patch": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "checkInRegistration",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/registrations/{registrationId}/cancel": {
+      "patch": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "cancelRegistration",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/registrations/{registrationId}/approve": {
+      "patch": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "approveRegistration",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/registrations/{registrationId}": {
+      "get": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "getRegistrationById",
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{eventId}/registrations/attendee/{attendeeId}": {
+      "get": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "getRegistrationByAttendee",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "attendeeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/event-manager/events/{eventId}/my-registration": {
+      "get": {
+        "tags": [
+          "event-manager | registration-controller"
+        ],
+        "operationId": "getMyRegistrationForEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/log-manager/notifications/send": {
+      "post": {
+        "tags": [
+          "log-manager | notification-controller"
+        ],
+        "operationId": "sendNotification",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "message",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/log-manager/audits": {
+      "get": {
+        "tags": [
+          "log-manager | audit-controller"
+        ],
+        "operationId": "getAllAudits",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuditListResponseDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "log-manager | audit-controller"
+        ],
+        "operationId": "createAudit",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuditLogRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/log-manager/notifications/{notificationId}/read": {
+      "patch": {
+        "tags": [
+          "log-manager | notification-controller"
+        ],
+        "operationId": "markAsRead",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/log-manager/notifications/{userId}/scroll": {
+      "get": {
+        "tags": [
+          "log-manager | notification-controller"
+        ],
+        "operationId": "getNotificationsScroll",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "lastTimestamp",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Notification"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/expenses/{expenseId}/payment": {
+      "post": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Make payment on an approved expense",
+        "operationId": "makePayment",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaymentRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/events/{eventId}/expenses": {
+      "get": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Get expenses for an event (paginated)",
+        "operationId": "getEventExpenses",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageExpenseResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Create an expense for an event",
+        "operationId": "createExpense",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExpenseRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/events/{eventId}/budget": {
+      "get": {
+        "tags": [
+          "expense-manager | Budget"
+        ],
+        "summary": "Get budget for an event",
+        "operationId": "getBudget",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "expense-manager | Budget"
+        ],
+        "summary": "Set budget for an event",
+        "operationId": "setBudget",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BudgetRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BudgetResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/expenses/{expenseId}/status": {
+      "patch": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Approve or reject an expense",
+        "operationId": "updateExpenseStatus",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SUBMITTED",
+                "REJECTED",
+                "APPROVED",
+                "PAID"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/ping": {
+      "get": {
+        "tags": [
+          "expense-manager | health-check-controller"
+        ],
+        "operationId": "ping",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/payments/{paymentId}/status": {
+      "get": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Get payment status by payment ID",
+        "operationId": "getPaymentStatus",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/expenses": {
+      "get": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Get all expenses",
+        "operationId": "getAllExpenses",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpenseResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-manager/expenses/{expenseId}": {
+      "delete": {
+        "tags": [
+          "expense-manager | Expense"
+        ],
+        "summary": "Delete an expense",
+        "operationId": "deleteExpense",
+        "parameters": [
+          {
+            "name": "expenseId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/feedback": {
+      "post": {
+        "tags": [
+          "engagement-manager | feedback-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/engagements/log": {
+      "post": {
+        "tags": [
+          "engagement-manager | engagement-controller"
+        ],
+        "operationId": "logEngagement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngagementRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/feedback/{id}": {
+      "get": {
+        "tags": [
+          "engagement-manager | feedback-controller"
+        ],
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/feedback/event/{eventId}": {
+      "get": {
+        "tags": [
+          "engagement-manager | feedback-controller"
+        ],
+        "operationId": "listByEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/feedback/event/{eventId}/date-range": {
+      "get": {
+        "tags": [
+          "engagement-manager | feedback-controller"
+        ],
+        "operationId": "listByEventAndDateRange",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageFeedbackResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/engagements/filter": {
+      "get": {
+        "tags": [
+          "engagement-manager | engagement-controller"
+        ],
+        "operationId": "getDetailedFilter",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "activity",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REGISTRATION",
+                "REGISTRATION_CONFIRMATION",
+                "CHECK_IN",
+                "SESSION_BOOKMARK",
+                "SESSION_JOIN",
+                "SESSION_LEAVE",
+                "SESSION_QA_SUBMIT",
+                "SESSION_FEEDBACK_SUBMIT",
+                "POLL_VIEW",
+                "POLL_VOTE",
+                "SURVEY_SUBMIT",
+                "CHAT_MESSAGE",
+                "DIRECT_MESSAGE",
+                "BOOTH_VISIT",
+                "RESOURCE_DOWNLOAD",
+                "CTA_BUTTON_CLICK",
+                "EVENT_FEEDBACK_SUBMIT",
+                "CERTIFICATE_DOWNLOAD",
+                "RECORDING_PLAY"
+              ]
+            }
+          },
+          {
+            "name": "start",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "end",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EngagementResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/engagements/event/{eventId}/log": {
+      "get": {
+        "tags": [
+          "engagement-manager | engagement-controller"
+        ],
+        "operationId": "getByEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EngagementResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/engagements/activity/{activity}/log": {
+      "get": {
+        "tags": [
+          "engagement-manager | engagement-controller"
+        ],
+        "operationId": "getByActivity",
+        "parameters": [
+          {
+            "name": "activity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "REGISTRATION",
+                "REGISTRATION_CONFIRMATION",
+                "CHECK_IN",
+                "SESSION_BOOKMARK",
+                "SESSION_JOIN",
+                "SESSION_LEAVE",
+                "SESSION_QA_SUBMIT",
+                "SESSION_FEEDBACK_SUBMIT",
+                "POLL_VIEW",
+                "POLL_VOTE",
+                "SURVEY_SUBMIT",
+                "CHAT_MESSAGE",
+                "DIRECT_MESSAGE",
+                "BOOTH_VISIT",
+                "RESOURCE_DOWNLOAD",
+                "CTA_BUTTON_CLICK",
+                "EVENT_FEEDBACK_SUBMIT",
+                "CERTIFICATE_DOWNLOAD",
+                "RECORDING_PLAY"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EngagementResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagement-manager/feedback/{feedbackId}": {
+      "delete": {
+        "tags": [
+          "engagement-manager | feedback-controller"
+        ],
+        "operationId": "deleteFeedback",
+        "parameters": [
+          {
+            "name": "feedbackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/vendors/{id}": {
+      "get": {
+        "tags": [
+          "vendor-manager | vendor-controller"
+        ],
+        "operationId": "getById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "vendor-manager | vendor-controller"
+        ],
+        "operationId": "update",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "vendor-manager | vendor-controller"
+        ],
+        "operationId": "delete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/invoices/{id}": {
+      "get": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "getById_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "update_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "delete_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/deliveries/{id}": {
+      "get": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "getById_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "update_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "delete_2",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts/{id}": {
+      "get": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "getById_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "update_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "delete_3",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/vendors": {
+      "get": {
+        "tags": [
+          "vendor-manager | vendor-controller"
+        ],
+        "operationId": "getAll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VendorResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vendor-manager | vendor-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VendorRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VendorResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/invoices": {
+      "get": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "getAll_1",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "create_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/deliveries": {
+      "get": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "getAll_2",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DeliveryResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "create_2",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts": {
+      "get": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "getAll_3",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContractResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "create_3",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts/{contractId}/payment-callback": {
+      "post": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "handlePaymentCallback",
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "transactionId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "amount",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts/{contractId}/invoice": {
+      "post": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "createInvoice",
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InvoiceRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts/{contractId}/deliveries": {
+      "post": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "addDelivery",
+        "parameters": [
+          {
+            "name": "contractId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/deliveries/{id}/status": {
+      "patch": {
+        "tags": [
+          "vendor-manager | delivery-controller"
+        ],
+        "operationId": "updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "SCHEDULED",
+                "IN_TRANSIT",
+                "DELIVERED",
+                "FAILED",
+                "CANCELLED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/contracts/{id}/status": {
+      "patch": {
+        "tags": [
+          "vendor-manager | contract-controller"
+        ],
+        "operationId": "updateStatus_1",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "DRAFT",
+                "ACTIVE",
+                "COMPLETED",
+                "TERMINATED"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vendor-manager/api/v1/invoices/{invoiceId}/download": {
+      "get": {
+        "tags": [
+          "vendor-manager | invoice-controller"
+        ],
+        "operationId": "downloadPdf",
+        "parameters": [
+          {
+            "name": "invoiceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string",
+                  "format": "byte"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/{venueId}": {
+      "put": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "updateVenue",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VenueRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "deleteVenue",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/resources/{resourceId}": {
+      "get": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "getResourceById",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "updateResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "deleteResource",
+        "parameters": [
+          {
+            "name": "resourceId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues": {
+      "get": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "getAllVenue",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VenueResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "addVenue",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VenueRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/{venueId}/resources": {
+      "get": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "getResourcesByVenue",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "createResource",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/resources/allocation": {
+      "post": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "requestAllocation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResourceAllocationRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/bookings": {
+      "get": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "getAllBookings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "createBooking",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/{venueId}/status": {
+      "patch": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "updateVenueStatus",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "available",
+                "unavailable",
+                "maintenence"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/VenueResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/resources/allocation/{allocationId}/approve": {
+      "patch": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "approveAllocation",
+        "parameters": [
+          {
+            "name": "allocationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/bookings/{bookingId}/status": {
+      "patch": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "updateStatus",
+        "parameters": [
+          {
+            "name": "bookingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          {
+            "name": "newStatus",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pending",
+                "confirmed",
+                "cancelled"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookingResponseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/{venueId}/bookings": {
+      "get": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "getBookingsByVenue",
+        "parameters": [
+          {
+            "name": "venueId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingResponseVenueManagerDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/status/{status}": {
+      "get": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "getVenueByStatus",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "available",
+                "unavailable",
+                "maintenence"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VenueResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/location/{location}": {
+      "get": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "getVenueByLocation",
+        "parameters": [
+          {
+            "name": "location",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VenueResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/date/{date}": {
+      "get": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "getVenueByDate",
+        "parameters": [
+          {
+            "name": "date",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VenueResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/venues/capacity/{capacity}": {
+      "get": {
+        "tags": [
+          "venue-manager | venue-controller"
+        ],
+        "operationId": "getVenueByCapacity",
+        "parameters": [
+          {
+            "name": "capacity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VenueResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/resources": {
+      "get": {
+        "tags": [
+          "venue-manager | resource-controller"
+        ],
+        "operationId": "getAllResources",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResourceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/bookings/events/{eventId}": {
+      "get": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "getBookingsByEvent",
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BookingResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/venue-manager/api/v1/bookings/{id}": {
+      "delete": {
+        "tags": [
+          "venue-manager | booking-controller"
+        ],
+        "operationId": "deleteBooking",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "auth-manager_UserRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          }
+        }
+      },
+      "auth-manager_UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN",
+              "ORGANIZER",
+              "VENUE_MANAGER",
+              "FINANCE_OFFICER",
+              "ATTENDEE",
+              "VENDOR"
+            ]
+          },
+          "email": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "SUSPENDED"
+            ]
+          }
+        }
+      },
+      "auth-manager_RegisterResponseDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userName": {
+            "type": "string"
+          },
+          "userEmail": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "phoneNo": {
+            "type": "string"
+          },
+          "userStatus": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "auth-manager_LoginResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "refreshToken": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          }
+        }
+      },
+      "auth-manager_LoginRequestDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "auth-manager_ValidateResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string"
+          },
+          "userRole": {
+            "type": "string"
+          }
+        }
+      },
+      "event-manager_CreateTicketRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 0
+          },
+          "price": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          }
+        },
+        "required": [
+          "price",
+          "status",
+          "type"
+        ]
+      },
+      "event-manager_GenericResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "event-manager_EventRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "organizerId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "venueId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "completed",
+              "cancelled"
+            ]
+          }
+        },
+        "required": [
+          "endDate",
+          "name",
+          "organizerId",
+          "startDate"
+        ]
+      },
+      "event-manager_EventResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eventName": {
+            "type": "string",
+            "minLength": 1
+          },
+          "organizerId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startAt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "endAt": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "venueId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "endAt",
+          "eventName",
+          "id",
+          "organizerId",
+          "startAt",
+          "status",
+          "venueId"
+        ]
+      },
+      "event-manager_ScheduleRequestDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "timeSlot": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(\\d{2}:\\d{2}-\\d{2}:\\d{2})$"
+          },
+          "activity": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 0
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "completed",
+              "terminated"
+            ]
+          }
+        },
+        "required": [
+          "activity",
+          "date",
+          "eventId",
+          "status",
+          "timeSlot"
+        ]
+      },
+      "event-manager_ScheduleResponseDto": {
+        "type": "object",
+        "properties": {
+          "scheduleId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "date": {
+            "type": "string",
+            "minLength": 1
+          },
+          "timeSlot": {
+            "type": "string",
+            "minLength": 1
+          },
+          "activity": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "completed",
+              "terminated"
+            ]
+          }
+        },
+        "required": [
+          "activity",
+          "date",
+          "eventId",
+          "scheduleId",
+          "status",
+          "timeSlot"
+        ]
+      },
+      "event-manager_RegistrationRequestDto": {
+        "type": "object",
+        "properties": {
+          "ticketId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "ticketId"
+        ]
+      },
+      "event-manager_TicketResponseDto": {
+        "type": "object",
+        "properties": {
+          "ticketId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "price": {
+            "type": "number",
+            "format": "double"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE"
+            ]
+          }
+        }
+      },
+      "event-manager_RegistrationDto": {
+        "type": "object",
+        "properties": {
+          "registrationId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "ticketId": {
+            "type": "string"
+          },
+          "attendeeId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "event-manager_TicketListResponseDto": {
+        "type": "object",
+        "properties": {
+          "tickets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TicketResponseDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "event-manager_RegistrationListResponseDto": {
+        "type": "object",
+        "properties": {
+          "registrations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegistrationDto"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "event-manager_Event": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "organizerId": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "venueId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "published",
+              "completed",
+              "cancelled"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "event-manager_Schedule": {
+        "type": "object",
+        "properties": {
+          "scheduleId": {
+            "type": "string"
+          },
+          "event": {
+            "$ref": "#/components/schemas/Event"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "timeSlot": {
+            "type": "string"
+          },
+          "activity": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "completed",
+              "terminated"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "log-manager_AuditLogRequestDTO": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATE",
+              "UPDATE",
+              "DELETE",
+              "READ",
+              "APPROVE",
+              "REJECT",
+              "CANCEL",
+              "RESTORE",
+              "REGISTRATION_SUCCESS",
+              "REGISTRATON_FAILURE",
+              "LOGIN_SUCCESS",
+              "LOGIN_FAILURE",
+              "LOGOUT",
+              "PERMISSION_CHANGE",
+              "ACCESS_DENIED",
+              "CONFIG_CHANGE",
+              "EXPORT",
+              "SYSTEM_JOB_EXECUTION"
+            ]
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          }
+        }
+      },
+      "log-manager_GenericResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "log-manager_Notification": {
+        "type": "object",
+        "properties": {
+          "notificationId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "log-manager_AuditListResponseDTO": {
+        "type": "object",
+        "properties": {
+          "audits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuditResponseDTO"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "log-manager_AuditResponseDTO": {
+        "type": "object",
+        "properties": {
+          "auditId": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "entityId": {
+            "type": "string"
+          },
+          "entityName": {
+            "type": "string"
+          },
+          "timeStamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "expense-manager_PaymentRequestDto": {
+        "type": "object",
+        "description": "Request payload for making a payment on an approved expense",
+        "properties": {
+          "amount": {
+            "type": "number",
+            "description": "Payment amount",
+            "example": 20000,
+            "minimum": 0
+          },
+          "method": {
+            "type": "string",
+            "description": "Payment method",
+            "enum": [
+              "CREDIT_CARD",
+              "DEBIT_CARD",
+              "BANK_TRANSFER",
+              "CASH",
+              "UPI",
+              "PAYPAL"
+            ],
+            "example": "BANK_TRANSFER"
+          },
+          "paymentDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time of payment",
+            "example": "2026-03-26T14:30:00"
+          }
+        },
+        "required": [
+          "amount",
+          "method",
+          "paymentDate"
+        ]
+      },
+      "expense-manager_PaymentResponseDto": {
+        "type": "object",
+        "description": "Response payload containing payment transaction details",
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "Unique payment ID",
+            "example": "pay-uuid-1234"
+          },
+          "expenseId": {
+            "type": "string",
+            "description": "Expense ID this payment settles; null for invoice payments",
+            "example": "exp-uuid-5678"
+          },
+          "invoiceId": {
+            "type": "string",
+            "description": "Invoice ID this payment settles; null for expense payments"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Payment amount",
+            "example": 20000
+          },
+          "method": {
+            "type": "string",
+            "description": "Payment method used",
+            "enum": [
+              "CREDIT_CARD",
+              "DEBIT_CARD",
+              "BANK_TRANSFER",
+              "CASH",
+              "UPI",
+              "PAYPAL"
+            ],
+            "example": "BANK_TRANSFER"
+          },
+          "status": {
+            "type": "string",
+            "description": "Payment status",
+            "enum": [
+              "PENDING",
+              "COMPLETED",
+              "FAILED",
+              "REFUNDED"
+            ],
+            "example": "COMPLETED"
+          },
+          "paymentDate": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time of payment",
+            "example": "2026-03-26T14:30:00"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Record creation timestamp"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Record last updated timestamp"
+          }
+        }
+      },
+      "expense-manager_ExpenseRequestDto": {
+        "type": "object",
+        "description": "Request payload for creating a new expense",
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Brief description of the expense",
+            "example": "Catering charges for event hall",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount of the expense, must be greater than 0",
+            "example": 1500,
+            "minimum": 0
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date on which the expense was incurred (yyyy-MM-dd)",
+            "example": "2026-03-25"
+          }
+        },
+        "required": [
+          "amount",
+          "date"
+        ]
+      },
+      "expense-manager_ExpenseResponseDto": {
+        "type": "object",
+        "description": "Response payload containing the details of an expense",
+        "properties": {
+          "expenseId": {
+            "type": "string",
+            "description": "Unique identifier of the expense",
+            "example": "a3f1c2d4-1234-5678-abcd-ef0123456789"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Unique identifier of the event this expense belongs to",
+            "example": "evt-uuid-5678"
+          },
+          "description": {
+            "type": "string",
+            "description": "Brief description of the expense",
+            "example": "Catering charges for event hall"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Monetary amount of the expense",
+            "example": 1500
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "description": "Date on which the expense was incurred",
+            "example": "2026-03-25"
+          },
+          "approvedBy": {
+            "type": "string",
+            "description": "UUID of the user who approved the expense; null if not yet approved",
+            "example": "usr-uuid-9999"
+          },
+          "status": {
+            "type": "string",
+            "description": "Current lifecycle status of the expense",
+            "enum": [
+              "SUBMITTED",
+              "REJECTED",
+              "APPROVED",
+              "PAID"
+            ],
+            "example": "SUBMITTED"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the expense record was created",
+            "example": "2026-03-25T10:15:30"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last update to the expense record",
+            "example": "2026-03-25T12:45:00"
+          }
+        }
+      },
+      "expense-manager_BudgetRequestDto": {
+        "type": "object",
+        "description": "Request payload for creating or updating a budget for an event",
+        "properties": {
+          "plannedAmount": {
+            "type": "number",
+            "description": "The planned financial ceiling for the event; must be greater than 0",
+            "example": 50000,
+            "minimum": 0
+          }
+        },
+        "required": [
+          "plannedAmount"
+        ]
+      },
+      "expense-manager_BudgetResponseDto": {
+        "type": "object",
+        "description": "Response payload containing the financial details of an event's budget",
+        "properties": {
+          "budgetId": {
+            "type": "string",
+            "description": "Unique identifier of the budget record",
+            "example": "b1c2d3e4-1234-5678-abcd-ef0123456789"
+          },
+          "eventId": {
+            "type": "string",
+            "description": "Unique identifier of the event this budget belongs to",
+            "example": "evt-uuid-5678"
+          },
+          "plannedAmount": {
+            "type": "number",
+            "description": "The planned financial ceiling set at budget creation",
+            "example": 50000
+          },
+          "actualAmount": {
+            "type": "number",
+            "description": "Total approved expenses accumulated so far; starts at 0",
+            "example": 12500
+          },
+          "variance": {
+            "type": "number",
+            "description": "Difference between planned and actual spend (plannedAmount - actualAmount); positive means under budget, negative means over budget",
+            "example": 37500
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp when the budget record was created",
+            "example": "2026-03-25T09:00:00"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Timestamp of the last update to the budget record",
+            "example": "2026-03-25T14:30:00"
+          }
+        }
+      },
+      "expense-manager_Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "expense-manager_PageExpenseResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseResponseDto"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "expense-manager_PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "expense-manager_SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "engagement-manager_FeedbackRequestDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "attendeeId": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1
+          },
+          "comments": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "createdAt"
+        ]
+      },
+      "engagement-manager_FeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "feedbackId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "attendeeId": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comments": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "engagement-manager_EngagementRequestDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "attendeeId": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          },
+          "activity": {
+            "type": "string",
+            "enum": [
+              "REGISTRATION",
+              "REGISTRATION_CONFIRMATION",
+              "CHECK_IN",
+              "SESSION_BOOKMARK",
+              "SESSION_JOIN",
+              "SESSION_LEAVE",
+              "SESSION_QA_SUBMIT",
+              "SESSION_FEEDBACK_SUBMIT",
+              "POLL_VIEW",
+              "POLL_VOTE",
+              "SURVEY_SUBMIT",
+              "CHAT_MESSAGE",
+              "DIRECT_MESSAGE",
+              "BOOTH_VISIT",
+              "RESOURCE_DOWNLOAD",
+              "CTA_BUTTON_CLICK",
+              "EVENT_FEEDBACK_SUBMIT",
+              "CERTIFICATE_DOWNLOAD",
+              "RECORDING_PLAY"
+            ]
+          },
+          "activityTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "activity",
+          "activityTimestamp"
+        ]
+      },
+      "engagement-manager_EngagementResponseDto": {
+        "type": "object",
+        "properties": {
+          "engagementId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "attendeeId": {
+            "type": "string"
+          },
+          "activity": {
+            "type": "string",
+            "enum": [
+              "REGISTRATION",
+              "REGISTRATION_CONFIRMATION",
+              "CHECK_IN",
+              "SESSION_BOOKMARK",
+              "SESSION_JOIN",
+              "SESSION_LEAVE",
+              "SESSION_QA_SUBMIT",
+              "SESSION_FEEDBACK_SUBMIT",
+              "POLL_VIEW",
+              "POLL_VOTE",
+              "SURVEY_SUBMIT",
+              "CHAT_MESSAGE",
+              "DIRECT_MESSAGE",
+              "BOOTH_VISIT",
+              "RESOURCE_DOWNLOAD",
+              "CTA_BUTTON_CLICK",
+              "EVENT_FEEDBACK_SUBMIT",
+              "CERTIFICATE_DOWNLOAD",
+              "RECORDING_PLAY"
+            ]
+          },
+          "activityTimestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "engagement-manager_Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "engagement-manager_PageFeedbackResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackResponseDto"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "engagement-manager_PageableObject": {
+        "type": "object",
+        "properties": {
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "unpaged": {
+            "type": "boolean"
+          }
+        }
+      },
+      "engagement-manager_SortObject": {
+        "type": "object",
+        "properties": {
+          "empty": {
+            "type": "boolean"
+          },
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          }
+        }
+      },
+      "vendor-manager_VendorRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "contactInfo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "BLACKLISTED"
+            ]
+          }
+        },
+        "required": [
+          "contactInfo",
+          "name",
+          "status"
+        ]
+      },
+      "vendor-manager_VendorResponseDto": {
+        "type": "object",
+        "properties": {
+          "vendorId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contactInfo": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "INACTIVE",
+              "BLACKLISTED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "contactInfo",
+          "createdAt",
+          "name",
+          "status",
+          "updatedAt",
+          "vendorId"
+        ]
+      },
+      "vendor-manager_InvoiceRequestDto": {
+        "type": "object",
+        "properties": {
+          "contractId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ISSUED",
+              "PAID",
+              "OVERDUE",
+              "CANCELLED"
+            ]
+          },
+          "transactionId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "contractId",
+          "dueDate",
+          "status",
+          "totalAmount"
+        ]
+      },
+      "vendor-manager_InvoiceResponseDto": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contractId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "transactionId": {
+            "type": "string"
+          },
+          "issueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totalAmount": {
+            "type": "number"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ISSUED",
+              "PAID",
+              "OVERDUE",
+              "CANCELLED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "contractId",
+          "createdAt",
+          "dueDate",
+          "invoiceId",
+          "issueDate",
+          "status",
+          "totalAmount",
+          "updatedAt"
+        ]
+      },
+      "vendor-manager_DeliveryRequestDto": {
+        "type": "object",
+        "properties": {
+          "invoiceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "deliveryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "trackingNumber": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "deliveryDate",
+          "invoiceId",
+          "item",
+          "quantity",
+          "status",
+          "trackingNumber"
+        ]
+      },
+      "vendor-manager_DeliveryResponseDto": {
+        "type": "object",
+        "properties": {
+          "deliveryId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "invoiceId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "item": {
+            "type": "string",
+            "minLength": 1
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "deliveryDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "IN_TRANSIT",
+              "DELIVERED",
+              "FAILED",
+              "CANCELLED"
+            ]
+          },
+          "trackingNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "createdAt",
+          "deliveryDate",
+          "deliveryId",
+          "invoiceId",
+          "item",
+          "quantity",
+          "status",
+          "trackingNumber",
+          "updatedAt"
+        ]
+      },
+      "vendor-manager_ContractRequestDto": {
+        "type": "object",
+        "properties": {
+          "vendorId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "value": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "COMPLETED",
+              "TERMINATED"
+            ]
+          }
+        },
+        "required": [
+          "endDate",
+          "eventId",
+          "startDate",
+          "status",
+          "value",
+          "vendorId"
+        ]
+      },
+      "vendor-manager_ContractResponseDto": {
+        "type": "object",
+        "properties": {
+          "contractId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "vendorId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "value": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "DRAFT",
+              "ACTIVE",
+              "COMPLETED",
+              "TERMINATED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "contractId",
+          "createdAt",
+          "endDate",
+          "eventId",
+          "startDate",
+          "status",
+          "updatedAt",
+          "value",
+          "vendorId"
+        ]
+      },
+      "venue-manager_VenueRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 0
+          },
+          "capacity": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 1000000
+          },
+          "availabilityStatus": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable",
+              "maintenence"
+            ]
+          }
+        },
+        "required": [
+          "location",
+          "name"
+        ]
+      },
+      "venue-manager_VenueResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "capacity": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "availabilityStatus": {
+            "type": "string",
+            "enum": [
+              "available",
+              "unavailable",
+              "maintenence"
+            ]
+          }
+        }
+      },
+      "venue-manager_ResourceRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "equipment",
+              "staff"
+            ]
+          },
+          "costRate": {
+            "type": "number",
+            "minimum": 0
+          },
+          "unit": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "costRate",
+          "name",
+          "type",
+          "unit"
+        ]
+      },
+      "venue-manager_ResourceResponseDto": {
+        "type": "object",
+        "properties": {
+          "resourceId": {
+            "type": "string"
+          },
+          "venueId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "equipment",
+              "staff"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "availability": {
+            "type": "string",
+            "enum": [
+              "available",
+              "in_use",
+              "unavailable"
+            ]
+          },
+          "unit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "costRate": {
+            "type": "number"
+          }
+        }
+      },
+      "venue-manager_ResourceAllocationRequestDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "venueId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "bookingId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "resourceListElement": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceListElementDto"
+            }
+          }
+        },
+        "required": [
+          "bookingId",
+          "eventId",
+          "venueId"
+        ]
+      },
+      "venue-manager_ResourceListElementDto": {
+        "type": "object",
+        "properties": {
+          "resourceId": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "venue-manager_BookingRequestDto": {
+        "type": "object",
+        "properties": {
+          "eventId": {
+            "type": "string",
+            "minLength": 1
+          },
+          "venueId": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "eventId",
+          "venueId"
+        ]
+      },
+      "venue-manager_BookingResponseDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "venueId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "cancelled"
+            ]
+          },
+          "resourceList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceListElementDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "venue-manager_BookingResponseVenueManagerDto": {
+        "type": "object",
+        "properties": {
+          "bookingId": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "venueId": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "confirmed",
+              "cancelled"
+            ]
+          },
+          "resourceList": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResourceVenueManagerResponseDto"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "venue-manager_ResourceVenueManagerResponseDto": {
+        "type": "object",
+        "properties": {
+          "resourceName": {
+            "type": "string"
+          },
+          "requestedQuantity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      }
+    },
+    "securitySchemes": {}
+  }
+}
