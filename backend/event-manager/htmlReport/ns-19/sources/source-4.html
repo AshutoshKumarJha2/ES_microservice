@@ -1,0 +1,508 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketServiceImplTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketServiceImplTest (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TicketServiceImplTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$CreateTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (24/24)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$DeleteTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$GetAllTickets</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$GetTicketById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$GetTicketsByEventId</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketServiceImplTest$UpdateTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (21/21)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (94/94)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Ticket;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.EventStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.TicketStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.TicketRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.impl.TicketServiceImpl;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.data.domain.PageImpl;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import static org.assertj.core.api.Assertions.assertThat;
+&nbsp;import static org.assertj.core.api.Assertions.assertThatThrownBy;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.ArgumentMatchers.eq;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class TicketServiceImplTest {</b>
+&nbsp;
+&nbsp;    @Mock private TicketRepository ticketRepository;
+&nbsp;    @Mock private EventRepository eventRepository;
+&nbsp;
+&nbsp;    @InjectMocks
+&nbsp;    private TicketServiceImpl ticketService;
+&nbsp;
+&nbsp;    private static final String ACTOR_ID  = &quot;actor-001&quot;;
+&nbsp;    private static final String EVENT_ID  = &quot;event-001&quot;;
+&nbsp;    private static final String TICKET_ID = &quot;ticket-001&quot;;
+&nbsp;
+&nbsp;    private Event sampleEvent;
+&nbsp;    private Ticket sampleTicket;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        sampleEvent = Event.builder()</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .name(&quot;Test Event&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .startDate(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                .endDate(LocalDate.now().plusDays(5))</b>
+<b class="fc">&nbsp;                .status(EventStatus.published)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleTicket = Ticket.builder()</b>
+<b class="fc">&nbsp;                .ticketId(TICKET_ID)</b>
+<b class="fc">&nbsp;                .event(sampleEvent)</b>
+<b class="fc">&nbsp;                .type(&quot;general&quot;)</b>
+<b class="fc">&nbsp;                .price(BigDecimal.valueOf(50.0))</b>
+<b class="fc">&nbsp;                .status(TicketStatus.ACTIVE)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // createTicket
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;createTicket()&quot;)
+<b class="fc">&nbsp;    class CreateTicket {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – saves ticket and returns success message&quot;)
+&nbsp;        void createTicket_happyPath() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(ticketRepository.findByEventEventIdAndType(EVENT_ID, &quot;general&quot;)).thenReturn(Optional.empty());</b>
+<b class="fc">&nbsp;            when(ticketRepository.save(any(Ticket.class))).thenReturn(sampleTicket);</b>
+&nbsp;
+<b class="fc">&nbsp;            GenericResponse result = ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.message()).isEqualTo(&quot;Ticket created successfully&quot;);</b>
+<b class="fc">&nbsp;            verify(ticketRepository).save(any(Ticket.class));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – type is normalised to lowercase before duplicate check&quot;)
+&nbsp;        void createTicket_typeNormalisedToLowercase() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(ticketRepository.findByEventEventIdAndType(EVENT_ID, &quot;vip&quot;)).thenReturn(Optional.empty());</b>
+<b class="fc">&nbsp;            when(ticketRepository.save(any(Ticket.class))).thenReturn(sampleTicket);</b>
+&nbsp;
+<b class="fc">&nbsp;            ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;VIP&quot;, 200.0, TicketStatus.ACTIVE);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(ticketRepository).findByEventEventIdAndType(EVENT_ID, &quot;vip&quot;);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when event does not exist&quot;)
+&nbsp;        void createTicket_eventNotFound() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(ticketRepository, never()).save(any());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws TicketAlreadyExistsException when type already exists for event&quot;)
+&nbsp;        void createTicket_typeAlreadyExists() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(ticketRepository.findByEventEventIdAndType(EVENT_ID, &quot;general&quot;)).thenReturn(Optional.of(sampleTicket));</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(TicketAlreadyExistsException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(&quot;general&quot;)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(ticketRepository, never()).save(any());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // getTicketsByEventId
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;getTicketsByEventId()&quot;)
+<b class="fc">&nbsp;    class GetTicketsByEventId {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns paginated tickets for the given event&quot;)
+&nbsp;        void getTicketsByEventId_happyPath() {
+<b class="fc">&nbsp;            var ticketPage = new PageImpl&lt;&gt;(List.of(sampleTicket), PageRequest.of(0, 10), 1);</b>
+<b class="fc">&nbsp;            when(ticketRepository.findByEventEventId(eq(EVENT_ID), any())).thenReturn(ticketPage);</b>
+&nbsp;
+<b class="fc">&nbsp;            TicketListResponseDto result = ticketService.getTicketsByEventId(ACTOR_ID, EVENT_ID, 0, 10);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.tickets()).hasSize(1);</b>
+<b class="fc">&nbsp;            assertThat(result.tickets().get(0).ticketId()).isEqualTo(TICKET_ID);</b>
+<b class="fc">&nbsp;            assertThat(result.totalElements()).isEqualTo(1);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns empty list when no tickets exist for event&quot;)
+&nbsp;        void getTicketsByEventId_empty() {
+<b class="fc">&nbsp;            var emptyPage = new PageImpl&lt;Ticket&gt;(List.of(), PageRequest.of(0, 10), 0);</b>
+<b class="fc">&nbsp;            when(ticketRepository.findByEventEventId(eq(EVENT_ID), any())).thenReturn(emptyPage);</b>
+&nbsp;
+<b class="fc">&nbsp;            TicketListResponseDto result = ticketService.getTicketsByEventId(ACTOR_ID, EVENT_ID, 0, 10);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.tickets()).isEmpty();</b>
+<b class="fc">&nbsp;            assertThat(result.totalElements()).isZero();</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // getAllTickets
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;getAllTickets()&quot;)
+<b class="fc">&nbsp;    class GetAllTickets {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns paginated list of all tickets&quot;)
+&nbsp;        void getAllTickets_happyPath() {
+<b class="fc">&nbsp;            var ticketPage = new PageImpl&lt;&gt;(List.of(sampleTicket), PageRequest.of(0, 10), 1);</b>
+<b class="fc">&nbsp;            when(ticketRepository.findAll(any(PageRequest.class))).thenReturn(ticketPage);</b>
+&nbsp;
+<b class="fc">&nbsp;            TicketListResponseDto result = ticketService.getAllTickets(ACTOR_ID, 0, 10);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.tickets()).hasSize(1);</b>
+<b class="fc">&nbsp;            assertThat(result.totalElements()).isEqualTo(1);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // getTicketById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;getTicketById()&quot;)
+<b class="fc">&nbsp;    class GetTicketById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns mapped TicketResponseDto&quot;)
+&nbsp;        void getTicketById_happyPath() {
+<b class="fc">&nbsp;            when(ticketRepository.findById(TICKET_ID)).thenReturn(Optional.of(sampleTicket));</b>
+&nbsp;
+<b class="fc">&nbsp;            TicketResponseDto result = ticketService.getTicketById(ACTOR_ID, TICKET_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.ticketId()).isEqualTo(TICKET_ID);</b>
+<b class="fc">&nbsp;            assertThat(result.eventId()).isEqualTo(EVENT_ID);</b>
+<b class="fc">&nbsp;            assertThat(result.type()).isEqualTo(&quot;general&quot;);</b>
+<b class="fc">&nbsp;            assertThat(result.price()).isEqualTo(50.0);</b>
+<b class="fc">&nbsp;            assertThat(result.status()).isEqualTo(TicketStatus.ACTIVE);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws TicketNotFoundException when ticket does not exist&quot;)
+&nbsp;        void getTicketById_notFound() {
+<b class="fc">&nbsp;            when(ticketRepository.findById(TICKET_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; ticketService.getTicketById(ACTOR_ID, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(TicketNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(TICKET_ID);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // updateTicket
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;updateTicket()&quot;)
+<b class="fc">&nbsp;    class UpdateTicket {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – updates ticket fields and returns success message&quot;)
+&nbsp;        void updateTicket_happyPath() {
+<b class="fc">&nbsp;            when(ticketRepository.findById(TICKET_ID)).thenReturn(Optional.of(sampleTicket));</b>
+<b class="fc">&nbsp;            when(ticketRepository.save(sampleTicket)).thenReturn(sampleTicket);</b>
+&nbsp;
+<b class="fc">&nbsp;            GenericResponse result = ticketService.updateTicket(ACTOR_ID, TICKET_ID, &quot;vip&quot;, 150.0, TicketStatus.INACTIVE);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.message()).isEqualTo(&quot;Ticket updated successfully&quot;);</b>
+<b class="fc">&nbsp;            assertThat(sampleTicket.getType()).isEqualTo(&quot;vip&quot;);</b>
+<b class="fc">&nbsp;            assertThat(sampleTicket.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(150.0));</b>
+<b class="fc">&nbsp;            assertThat(sampleTicket.getStatus()).isEqualTo(TicketStatus.INACTIVE);</b>
+<b class="fc">&nbsp;            verify(ticketRepository).save(sampleTicket);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws TicketNotFoundException when ticket does not exist&quot;)
+&nbsp;        void updateTicket_notFound() {
+<b class="fc">&nbsp;            when(ticketRepository.findById(TICKET_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; ticketService.updateTicket(ACTOR_ID, TICKET_ID, &quot;vip&quot;, 150.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(TicketNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(TICKET_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(ticketRepository, never()).save(any());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // deleteTicket
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;deleteTicket()&quot;)
+<b class="fc">&nbsp;    class DeleteTicket {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – deletes ticket and returns success message&quot;)
+&nbsp;        void deleteTicket_happyPath() {
+<b class="fc">&nbsp;            when(ticketRepository.existsById(TICKET_ID)).thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            GenericResponse result = ticketService.deleteTicket(ACTOR_ID, TICKET_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.message()).isEqualTo(&quot;Ticket deleted successfully&quot;);</b>
+<b class="fc">&nbsp;            verify(ticketRepository).deleteById(TICKET_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws TicketNotFoundException when ticket does not exist&quot;)
+&nbsp;        void deleteTicket_notFound() {
+<b class="fc">&nbsp;            when(ticketRepository.existsById(TICKET_ID)).thenReturn(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; ticketService.deleteTicket(ACTOR_ID, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(TicketNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(TICKET_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(ticketRepository, never()).deleteById(any());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

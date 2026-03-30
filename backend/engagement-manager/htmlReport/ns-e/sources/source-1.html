@@ -1,0 +1,304 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditServiceImplTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.logmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditServiceImplTest (com.cts.eventsphere.logmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuditServiceImplTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AuditServiceImplTest$GetAudits</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">AuditServiceImplTest$LogAudit</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (3/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (43/43)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.logmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditListResponseDTO;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditLogRequestDTO;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditResponseDTO;
+&nbsp;import com.cts.eventsphere.logmanager.model.AuditLog;
+&nbsp;import com.cts.eventsphere.logmanager.model.data.AuditAction;
+&nbsp;import com.cts.eventsphere.logmanager.repository.AuditLogRepository;
+&nbsp;import com.cts.eventsphere.logmanager.service.impl.AuditServiceImpl;
+&nbsp;import jakarta.persistence.EntityManager;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.data.domain.PageImpl;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import static org.assertj.core.api.Assertions.assertThat;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class AuditServiceImplTest {</b>
+&nbsp;
+&nbsp;    @Mock private AuditLogRepository auditRepo;
+&nbsp;    @Mock private EntityManager entityManager;
+&nbsp;    @InjectMocks private AuditServiceImpl auditService;
+&nbsp;
+&nbsp;    private static final String USER_ID = &quot;user-001&quot;;
+&nbsp;    private AuditLog sampleAuditLog;
+&nbsp;    private AuditLogRequestDTO sampleDto;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        sampleDto = new AuditLogRequestDTO(AuditAction.CREATE, &quot;entity-001&quot;, &quot;Event&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleAuditLog = AuditLog.builder()</b>
+<b class="fc">&nbsp;                .auditId(&quot;audit-001&quot;)</b>
+<b class="fc">&nbsp;                .userId(USER_ID)</b>
+<b class="fc">&nbsp;                .action(AuditAction.CREATE.name())</b>
+<b class="fc">&nbsp;                .entityId(&quot;entity-001&quot;)</b>
+<b class="fc">&nbsp;                .entityName(&quot;Event&quot;)</b>
+<b class="fc">&nbsp;                .timeStamp(LocalDateTime.now())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // logAudit
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;logAudit(userId, dto)&quot;)
+<b class="fc">&nbsp;    class LogAudit {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – saves audit log and does not throw&quot;)
+&nbsp;        void logAudit_happyPath_savesLog() {
+<b class="fc">&nbsp;            when(auditRepo.save(any(AuditLog.class))).thenReturn(sampleAuditLog);</b>
+&nbsp;
+<b class="fc">&nbsp;            auditService.logAudit(USER_ID, sampleDto);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(auditRepo).save(any(AuditLog.class));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;saves audit log with correct userId and action from dto&quot;)
+&nbsp;        void logAudit_mapsFieldsCorrectly() {
+<b class="fc">&nbsp;            auditService.logAudit(USER_ID, sampleDto);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(auditRepo).save(argThat(log -&gt;</b>
+<b class="pc">&nbsp;                    USER_ID.equals(log.getUserId()) &amp;&amp;</b>
+<b class="pc">&nbsp;                    AuditAction.CREATE.name().equals(log.getAction()) &amp;&amp;</b>
+<b class="pc">&nbsp;                    &quot;entity-001&quot;.equals(log.getEntityId()) &amp;&amp;</b>
+<b class="fc">&nbsp;                    &quot;Event&quot;.equals(log.getEntityName())</b>
+&nbsp;            ));
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // getAudits
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;getAudits(size, page)&quot;)
+<b class="fc">&nbsp;    class GetAudits {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns paginated AuditListResponseDTO with correct metadata&quot;)
+&nbsp;        void getAudits_happyPath_returnsList() {
+<b class="fc">&nbsp;            var page = new PageImpl&lt;&gt;(List.of(sampleAuditLog), PageRequest.of(0, 10), 1);</b>
+<b class="fc">&nbsp;            when(auditRepo.findAll(any(PageRequest.class))).thenReturn(page);</b>
+&nbsp;
+<b class="fc">&nbsp;            AuditListResponseDTO result = auditService.getAudits(10, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.audits()).hasSize(1);</b>
+<b class="fc">&nbsp;            assertThat(result.page()).isEqualTo(0);</b>
+<b class="fc">&nbsp;            assertThat(result.size()).isEqualTo(10);</b>
+<b class="fc">&nbsp;            assertThat(result.totalElements()).isEqualTo(1L);</b>
+<b class="fc">&nbsp;            assertThat(result.totalPages()).isEqualTo(1);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns empty list when no audits exist&quot;)
+&nbsp;        void getAudits_empty_returnsEmptyList() {
+<b class="fc">&nbsp;            var emptyPage = new PageImpl&lt;AuditLog&gt;(List.of(), PageRequest.of(0, 10), 0);</b>
+<b class="fc">&nbsp;            when(auditRepo.findAll(any(PageRequest.class))).thenReturn(emptyPage);</b>
+&nbsp;
+<b class="fc">&nbsp;            AuditListResponseDTO result = auditService.getAudits(10, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result.audits()).isEmpty();</b>
+<b class="fc">&nbsp;            assertThat(result.totalElements()).isEqualTo(0L);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;maps audit log fields to AuditResponseDTO correctly&quot;)
+&nbsp;        void getAudits_mapsFieldsCorrectly() {
+<b class="fc">&nbsp;            var page = new PageImpl&lt;&gt;(List.of(sampleAuditLog), PageRequest.of(0, 10), 1);</b>
+<b class="fc">&nbsp;            when(auditRepo.findAll(any(PageRequest.class))).thenReturn(page);</b>
+&nbsp;
+<b class="fc">&nbsp;            AuditListResponseDTO result = auditService.getAudits(10, 0);</b>
+&nbsp;
+<b class="fc">&nbsp;            AuditResponseDTO dto = result.audits().getFirst();</b>
+<b class="fc">&nbsp;            assertThat(dto.auditId()).isEqualTo(&quot;audit-001&quot;);</b>
+<b class="fc">&nbsp;            assertThat(dto.userId()).isEqualTo(USER_ID);</b>
+<b class="fc">&nbsp;            assertThat(dto.action()).isEqualTo(AuditAction.CREATE.name());</b>
+<b class="fc">&nbsp;            assertThat(dto.entityId()).isEqualTo(&quot;entity-001&quot;);</b>
+<b class="fc">&nbsp;            assertThat(dto.entityName()).isEqualTo(&quot;Event&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 18:09</div>
+</div>
+</body>
+</html>

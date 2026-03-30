@@ -1,0 +1,333 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: EventServiceImpl (com.cts.eventsphere.eventmanager.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    83.3%
+  </span>
+  <span class="absValue">
+    (5/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (58/58)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service.impl;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.event.EventResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Schedule;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.AuditService;
+&nbsp;import com.cts.eventsphere.eventmanager.service.EventService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation for Service Interface for Event Class.
+&nbsp; * Provides business logic for creating, retrieving, updating, and deleting events,
+&nbsp; * as well as managing schedules associated with events. Also triggers notifications
+&nbsp; * with dynamic event details when events are created, updated, or deleted.
+&nbsp; *
+&nbsp; * @author 2479623
+&nbsp; * @version 1.2
+&nbsp; * @since 26-03-2026
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class EventServiceImpl implements EventService {
+&nbsp;    private final EventRepository eventRepository;
+&nbsp;    private final EventResponseDtoMapper eventResponseDtoMapper;
+&nbsp;    private final EventRequestDtoMapper eventRequestDtoMapper;
+&nbsp;    private final ScheduleRepository scheduleRepository;
+&nbsp;    private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
+&nbsp;    private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+&nbsp;    private final AuditService auditService;
+&nbsp;//    private final NotificationService notificationService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new event in the system and triggers a notification with event details.
+&nbsp;     *
+&nbsp;     * @param eventRequest the DTO containing event details to be created
+&nbsp;     * @return the response DTO representing the newly created event
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public EventResponseDto create(String userId, EventRequestDto eventRequest) {
+<b class="fc">&nbsp;        log.info(&quot;Creating a new event: {}&quot;, eventRequest.name());</b>
+<b class="fc">&nbsp;        Event event = eventRequestDtoMapper.toEntity(eventRequest);</b>
+<b class="fc">&nbsp;        Event savedEvent = eventRepository.save(event);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully saved event with ID: {}&quot;, savedEvent.getEventId());</b>
+&nbsp;
+<b class="fc">&nbsp;        auditService.logAudit(userId, AuditAction.CREATE, Event.class, savedEvent.getEventId());</b>
+&nbsp;
+<b class="pc">&nbsp;        var venueId = eventRequest.venueId() == null ? &quot;null&quot; : eventRequest.venueId();</b>
+&nbsp;
+&nbsp;//        notificationService.sendNotification(
+&nbsp;//                eventRequest.organizerId(),
+&nbsp;//                &quot;New Event Created: &quot; + eventRequest.name() +
+&nbsp;//                        &quot; at venue &quot; + venueId +
+&nbsp;//                        &quot; from &quot; + eventRequest.startDate() +
+&nbsp;//                        &quot; to &quot; + eventRequest.endDate(),
+&nbsp;//                &quot;EVENT_CREATED&quot;
+&nbsp;//        );
+&nbsp;
+<b class="fc">&nbsp;        return eventResponseDtoMapper.toDTO(savedEvent);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all events available in the system.
+&nbsp;     *
+&nbsp;     * @return a list of response DTOs representing all events
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;EventResponseDto&gt; findAllEvents(String userId) {
+<b class="fc">&nbsp;        log.info(&quot;Fetching all events from repository&quot;);</b>
+<b class="fc">&nbsp;        List&lt;EventResponseDto&gt; events = eventRepository.findAll().stream()</b>
+<b class="fc">&nbsp;                .peek(e -&gt; auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()))</b>
+<b class="fc">&nbsp;                .map(eventResponseDtoMapper::toDTO)</b>
+<b class="fc">&nbsp;                .toList();</b>
+<b class="fc">&nbsp;        log.debug(&quot;Found {} events in total&quot;, events.size());</b>
+<b class="fc">&nbsp;        return events;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds an event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event
+&nbsp;     * @return the response DTO representing the event
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public EventResponseDto findById(String eventId, String userId) throws EventNotFoundException {
+<b class="fc">&nbsp;        log.info(&quot;Searching for event with ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        Event event = eventRepository.findById(eventId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; {</b>
+<b class="fc">&nbsp;                    log.error(&quot;Event lookup failed: ID {} not found&quot;, eventId);</b>
+<b class="fc">&nbsp;                    return new EventNotFoundException(eventId);</b>
+&nbsp;                });
+<b class="fc">&nbsp;        auditService.logAudit(userId, AuditAction.READ, Event.class, event.getEventId());</b>
+&nbsp;
+<b class="fc">&nbsp;        return eventResponseDtoMapper.toDTO(event);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates an existing event by its unique identifier and triggers a notification with updated details.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to update
+&nbsp;     * @param eventRequest the DTO containing updated event details
+&nbsp;     * @return true if the update was successful, false otherwise
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean updateById(String eventId, EventRequestDto eventRequest, String userId) throws EventNotFoundException {
+<b class="fc">&nbsp;        log.info(&quot;Updating event with ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        if(!eventRepository.existsById(eventId)) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Update failed: Event ID {} does not exist&quot;, eventId);</b>
+<b class="fc">&nbsp;            throw new EventNotFoundException(eventId);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventRequestDtoMapper.toEntity(eventRequest);</b>
+<b class="fc">&nbsp;        event.setEventId(eventId);</b>
+<b class="fc">&nbsp;        eventRepository.save(event);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully updated event ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        auditService.logAudit(userId, AuditAction.UPDATE, Event.class, event.getEventId());</b>
+&nbsp;
+&nbsp;//        notificationService.sendNotification(
+&nbsp;//                eventRequest.organizerId(),
+&nbsp;//                &quot;Event Updated: &quot; + eventRequest.name() +
+&nbsp;//                        &quot; at venue &quot; + eventRequest.venueId() +
+&nbsp;//                        &quot; from &quot; + eventRequest.startDate() +
+&nbsp;//                        &quot; to &quot; + eventRequest.endDate(),
+&nbsp;//                &quot;EVENT_UPDATED&quot;
+&nbsp;//        );
+&nbsp;
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes an event by its unique identifier and triggers a notification.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to delete
+&nbsp;     * @return true if the deletion was successful, false otherwise
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean deleteById(String eventId, String userId) throws EventNotFoundException {
+<b class="fc">&nbsp;        log.info(&quot;Request to delete event with ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        if(!eventRepository.existsById(eventId)) {</b>
+<b class="fc">&nbsp;            log.warn(&quot;Delete aborted: Event ID {} not found&quot;, eventId);</b>
+<b class="fc">&nbsp;            throw new EventNotFoundException(eventId);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        eventRepository.deleteById(eventId);</b>
+<b class="fc">&nbsp;        auditService.logAudit(userId, AuditAction.DELETE, Event.class, eventId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully deleted event ID: {}&quot;, eventId);</b>
+&nbsp;
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new activity (schedule) to an existing event and triggers a notification.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to which the activity belongs
+&nbsp;     * @param scheduleRequest the DTO containing schedule details
+&nbsp;     * @return the response DTO representing the added schedule
+&nbsp;     * @throws EventNotFoundException if the parent event does not exist
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public ScheduleResponseDto addActivity(String eventId, ScheduleRequestDto scheduleRequest, String userId) {
+<b class="fc">&nbsp;        log.info(&quot;Adding new activity to event ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        Event event = eventRepository.findById(eventId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; {</b>
+<b class="fc">&nbsp;                    log.error(&quot;Activity creation failed: Parent Event ID {} not found&quot;, eventId);</b>
+<b class="fc">&nbsp;                    return new EventNotFoundException(eventId);</b>
+&nbsp;                });
+&nbsp;
+<b class="fc">&nbsp;        Schedule schedule = scheduleRequestDtoMapper.toEntity(scheduleRequest, event);</b>
+<b class="fc">&nbsp;        Schedule savedSchedule = scheduleRepository.save(schedule);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully added activity ID: {} to event ID: {}&quot;, savedSchedule.getScheduleId(), eventId);</b>
+&nbsp;
+<b class="fc">&nbsp;        auditService.logAudit(userId, AuditAction.CREATE, Schedule.class, savedSchedule.getScheduleId());</b>
+&nbsp;//        notificationService.sendNotification(
+&nbsp;//                event.getOrganizerId(),
+&nbsp;//                &quot;New Activity Added to Event: &quot; + event.getName() +
+&nbsp;//                        &quot; | Activity ID: &quot; + savedSchedule.getScheduleId(),
+&nbsp;//                &quot;SCHEDULE&quot;
+&nbsp;//        );
+&nbsp;
+<b class="fc">&nbsp;        return scheduleResponseDtoMapper.toDTO(savedSchedule);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all schedules associated with a specific event.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event
+&nbsp;     * @return a list of response DTOs representing all schedules for the event
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public List&lt;ScheduleResponseDto&gt; findAllSchedules(String eventId, String userId) {
+<b class="fc">&nbsp;        log.info(&quot;Fetching all activities for event ID: {}&quot;, eventId);</b>
+<b class="fc">&nbsp;        List&lt;ScheduleResponseDto&gt; schedules = scheduleRepository.findAll().stream()</b>
+<b class="fc">&nbsp;                .filter(s -&gt; s.getEvent().getEventId().equals(eventId))</b>
+<b class="fc">&nbsp;                .peek(s -&gt; auditService.logAudit(userId, AuditAction.READ, Schedule.class, s.getScheduleId()))</b>
+<b class="fc">&nbsp;                .map(scheduleResponseDtoMapper::toDTO)</b>
+<b class="fc">&nbsp;                .toList();</b>
+<b class="fc">&nbsp;        log.debug(&quot;Found {} activities matching event ID: {}&quot;, schedules.size(), eventId);</b>
+<b class="fc">&nbsp;        return schedules;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

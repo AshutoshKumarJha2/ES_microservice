@@ -1,0 +1,247 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketServiceImpl (com.cts.eventsphere.eventmanager.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TicketServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (55/55)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service.impl;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.ticket.TicketDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Ticket;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.TicketStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.TicketRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.TicketService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;import java.math.BigDecimal;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation of {@link com.cts.eventsphere.eventmanager.service.TicketService}.
+&nbsp; * Handles business logic for creating, retrieving, updating, and deleting tickets.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class TicketServiceImpl implements TicketService {
+&nbsp;
+&nbsp;    private final TicketRepository ticketRepository;
+&nbsp;    private final EventRepository eventRepository;
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public GenericResponse createTicket(String actorId, String eventId, String type, double price, TicketStatus status) {
+<b class="fc">&nbsp;        var event = eventRepository.findById(eventId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new EventNotFoundException(eventId));</b>
+&nbsp;
+<b class="fc">&nbsp;        var normalizedType = type.toLowerCase();</b>
+<b class="fc">&nbsp;        var existingTicket = ticketRepository.findByEventEventIdAndType(eventId, normalizedType);</b>
+<b class="fc">&nbsp;        if (existingTicket.isPresent()) {</b>
+<b class="fc">&nbsp;            throw new TicketAlreadyExistsException(String.format(&quot;Ticket type %s already exists for event %s&quot;, normalizedType, eventId));</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        var ticket = Ticket.builder()</b>
+<b class="fc">&nbsp;                .event(event)</b>
+<b class="fc">&nbsp;                .type(normalizedType)</b>
+<b class="fc">&nbsp;                .price(BigDecimal.valueOf(price))</b>
+<b class="fc">&nbsp;                .status(status)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        ticketRepository.save(ticket);</b>
+<b class="fc">&nbsp;        log.info(&quot;Ticket created with id: {}, for eventId: {} by actor: {}&quot;, ticket.getTicketId(), eventId, actorId);</b>
+&nbsp;
+<b class="fc">&nbsp;        return new GenericResponse(&quot;Ticket created successfully&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TicketListResponseDto getTicketsByEventId(String actorId, String eventId, int page, int size) {
+<b class="fc">&nbsp;        log.info(&quot;Fetching tickets for eventId: {}, page: {}, size: {} by actor: {}&quot;, eventId, page, size, actorId);</b>
+<b class="fc">&nbsp;        var ticketsPage = ticketRepository.findByEventEventId(eventId, PageRequest.of(page, size));</b>
+&nbsp;
+<b class="fc">&nbsp;        var tickets = ticketsPage.getContent().stream()</b>
+<b class="fc">&nbsp;                .map(TicketDtoMapper::toDto)</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Fetched {} tickets for eventId: {}&quot;, tickets.size(), eventId);</b>
+<b class="fc">&nbsp;        return new TicketListResponseDto(</b>
+&nbsp;                tickets,
+<b class="fc">&nbsp;                ticketsPage.getNumber(),</b>
+<b class="fc">&nbsp;                tickets.size(),</b>
+<b class="fc">&nbsp;                ticketsPage.getTotalElements(),</b>
+<b class="fc">&nbsp;                ticketsPage.getTotalPages()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TicketListResponseDto getAllTickets(String actorId, int page, int size) {
+<b class="fc">&nbsp;        log.info(&quot;Fetching all tickets, page: {}, size: {} by actor: {}&quot;, page, size, actorId);</b>
+<b class="fc">&nbsp;        var ticketsPage = ticketRepository.findAll(PageRequest.of(page, size));</b>
+&nbsp;
+<b class="fc">&nbsp;        var tickets = ticketsPage.getContent().stream()</b>
+<b class="fc">&nbsp;                .map(TicketDtoMapper::toDto)</b>
+<b class="fc">&nbsp;                .toList();</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Fetched {} tickets&quot;, tickets.size());</b>
+<b class="fc">&nbsp;        return new TicketListResponseDto(</b>
+&nbsp;                tickets,
+<b class="fc">&nbsp;                ticketsPage.getNumber(),</b>
+<b class="fc">&nbsp;                tickets.size(),</b>
+<b class="fc">&nbsp;                ticketsPage.getTotalElements(),</b>
+<b class="fc">&nbsp;                ticketsPage.getTotalPages()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public TicketResponseDto getTicketById(String actorId, String ticketId) {
+<b class="fc">&nbsp;        var ticket = ticketRepository.findById(ticketId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new TicketNotFoundException(ticketId));</b>
+<b class="fc">&nbsp;        log.info(&quot;Fetched ticket with id: {} by actor: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return TicketDtoMapper.toDto(ticket);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public GenericResponse updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status) {
+<b class="fc">&nbsp;        var ticket = ticketRepository.findById(ticketId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; new TicketNotFoundException(ticketId));</b>
+&nbsp;
+<b class="fc">&nbsp;        ticket.setType(type);</b>
+<b class="fc">&nbsp;        ticket.setPrice(BigDecimal.valueOf(price));</b>
+<b class="fc">&nbsp;        ticket.setStatus(status);</b>
+<b class="fc">&nbsp;        ticketRepository.save(ticket);</b>
+&nbsp;
+<b class="fc">&nbsp;        log.info(&quot;Updated ticket with id: {} by actor: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return new GenericResponse(&quot;Ticket updated successfully&quot;);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @Override
+&nbsp;    public GenericResponse deleteTicket(String actorId, String ticketId) {
+<b class="fc">&nbsp;        if (!ticketRepository.existsById(ticketId)) {</b>
+<b class="fc">&nbsp;            throw new TicketNotFoundException(ticketId);</b>
+&nbsp;        }
+<b class="fc">&nbsp;        ticketRepository.deleteById(ticketId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Deleted ticket with id: {} by actor: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return new GenericResponse(&quot;Ticket deleted successfully&quot;);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

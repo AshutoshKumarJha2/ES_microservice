@@ -1,0 +1,138 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventResponseDtoMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.dto.mapper.event</a>
+</div>
+
+<h1>Coverage Summary for Class: EventResponseDtoMapper (com.cts.eventsphere.eventmanager.dto.mapper.event)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventResponseDtoMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    7.1%
+  </span>
+  <span class="absValue">
+    (1/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.dto.mapper.event;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * DTO Mapper for Event Response DTO.
+&nbsp; * * @author 2479623
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; * @since 26-03-2026
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class EventResponseDtoMapper {</b>
+&nbsp;    public EventResponseDto toDTO(Event event) {
+<b class="nc">&nbsp;        return EventResponseDto.builder()</b>
+<b class="nc">&nbsp;                .id(event.getEventId())</b>
+<b class="nc">&nbsp;                .eventName(event.getName())</b>
+<b class="nc">&nbsp;                .organizerId(event.getOrganizerId())</b>
+<b class="nc">&nbsp;                .startAt(Optional.ofNullable(event.getStartDate())</b>
+<b class="nc">&nbsp;                        .map(LocalDate::toString)</b>
+<b class="nc">&nbsp;                        .orElse(null))</b>
+<b class="nc">&nbsp;                .endAt(Optional.ofNullable(event.getEndDate())</b>
+<b class="nc">&nbsp;                        .map(LocalDate::toString)</b>
+<b class="nc">&nbsp;                        .orElse(null))</b>
+<b class="nc">&nbsp;                .status(event.getStatus())</b>
+<b class="nc">&nbsp;                .venueId(event.getVenueId())</b>
+<b class="nc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

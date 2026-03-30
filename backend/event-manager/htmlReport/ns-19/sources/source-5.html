@@ -1,0 +1,156 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: EventService (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">EventService$MockitoMock$5MDOeu4R</td>
+  </tr>
+  <tr>
+    <td class="name">EventService$MockitoMock$5MDOeu4R$auxiliary$2cprRzX8</td>
+  </tr>
+  <tr>
+    <td class="name">EventService$MockitoMock$5MDOeu4R$auxiliary$Z6FrBcE2</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service Interface for Event Entity.
+&nbsp; * * @author 2479623
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; * @since 26-03-2026
+&nbsp; */
+&nbsp;public interface EventService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new event in the system.
+&nbsp;     *
+&nbsp;     * @param event the request DTO containing event details
+&nbsp;     * @return the response DTO representing the created event
+&nbsp;     */
+&nbsp;    EventResponseDto create(String userId, EventRequestDto event);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all events available in the system.
+&nbsp;     *
+&nbsp;     * @return a list of response DTOs representing all events
+&nbsp;     */
+&nbsp;    List&lt;EventResponseDto&gt; findAllEvents(String userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds an event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event
+&nbsp;     * @return the response DTO representing the event
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    EventResponseDto findById(String eventId, String userId) throws EventNotFoundException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates an existing event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to update
+&nbsp;     * @param eventRequest the request DTO containing updated event details
+&nbsp;     * @return true if the update was successful, false otherwise
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    boolean updateById(String eventId, EventRequestDto eventRequest, String userId) throws EventNotFoundException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes an event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to delete
+&nbsp;     * @return true if the deletion was successful, false otherwise
+&nbsp;     * @throws EventNotFoundException if no event exists with the given ID
+&nbsp;     */
+&nbsp;    boolean deleteById(String eventId, String userId) throws EventNotFoundException;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new activity (schedule) to an existing event.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event
+&nbsp;     * @param schedule the request DTO containing schedule details
+&nbsp;     * @return the response DTO representing the added schedule
+&nbsp;     */
+&nbsp;    ScheduleResponseDto addActivity(String eventId, ScheduleRequestDto schedule, String userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all schedules associated with a specific event.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event
+&nbsp;     * @return a list of response DTOs representing all schedules for the event
+&nbsp;     */
+&nbsp;    List&lt;ScheduleResponseDto&gt; findAllSchedules(String eventId, String userId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>
