@@ -5,13 +5,8 @@ spring:
     allow-bean-definition-overriding: true
   jpa:
     hibernate:
-      ddl-auto: validate
-      naming:
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: update
     show-sql: true
-  flyway:
-    locations: classpath:db/migration
-    baseline-on-migrate: true
   mail:
     host: smtp.gmail.com
     port: 587
