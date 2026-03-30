@@ -8,5 +8,5 @@ package com.cts.eventsphere.eventmanager.model.data;
  * @since 25-03-2026
  */
 public enum ScheduleStatus {
-    draft, active, completed, terminated
+    DRAFT, ACTIVE, COMPLETED, TERMINATED
 }
