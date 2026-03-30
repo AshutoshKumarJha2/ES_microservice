@@ -28,7 +28,7 @@ public class EventRequestDtoMapper {
                 .startDate(dto.startDate())
                 .endDate(dto.endDate())
                 .venueId(dto.venueId())
-                .status(dto.status() == null ? EventStatus.draft : dto.status())
+                .status(dto.status() == null ? EventStatus.DRAFT : dto.status())
                 .build();
     }
 }

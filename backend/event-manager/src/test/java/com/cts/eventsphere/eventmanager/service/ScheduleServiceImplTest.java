@@ -62,7 +62,7 @@ class ScheduleServiceImplTest {
                 .date(LocalDate.now().plusDays(1))
                 .timeSlot("09:00-10:00")
                 .activity("Opening Keynote")
-                .status(ScheduleStatus.active)
+                .status(ScheduleStatus.ACTIVE)
                 .build();
 
         sampleRequest = ScheduleRequestDto.builder()
@@ -70,7 +70,7 @@ class ScheduleServiceImplTest {
                 .date(LocalDate.now().plusDays(1))
                 .timeSlot("09:00-10:00")
                 .activity("Opening Keynote")
-                .status(ScheduleStatus.active)
+                .status(ScheduleStatus.ACTIVE)
                 .build();
 
         sampleResponse = ScheduleResponseDto.builder()
@@ -79,7 +79,7 @@ class ScheduleServiceImplTest {
                 .date(LocalDate.now().plusDays(1).toString())
                 .timeSlot("09:00-10:00")
                 .activity("Opening Keynote")
-                .status(ScheduleStatus.active)
+                .status(ScheduleStatus.ACTIVE)
                 .build();
     }
 

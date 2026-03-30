@@ -66,7 +66,7 @@ class ScheduleControllerTest {
                 .date(LocalDate.now().plusDays(1).toString())
                 .timeSlot("09:00-10:00")
                 .activity("Opening Keynote")
-                .status(ScheduleStatus.active)
+                .status(ScheduleStatus.ACTIVE)
                 .build();
     }
 

@@ -62,7 +62,7 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setVenue(venue);
         booking.setDate(booking.getDate() == null ? LocalDate.now() : booking.getDate());
-        booking.setStatus(BookingStatus.pending);
+        booking.setStatus(BookingStatus.PENDING);
 
         Booking saved = bookingRepository.save(booking);
 

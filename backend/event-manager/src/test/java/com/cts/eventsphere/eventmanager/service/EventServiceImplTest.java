@@ -66,7 +66,7 @@ class EventServiceImplTest {
                 .organizerId("org-001")
                 .startDate(LocalDate.now().plusDays(1))
                 .endDate(LocalDate.now().plusDays(5))
-                .status(EventStatus.draft)
+                .status(EventStatus.DRAFT)
                 .build();
 
         sampleEventResponse = EventResponseDto.builder()
@@ -75,7 +75,7 @@ class EventServiceImplTest {
                 .organizerId("org-001")
                 .startAt(LocalDate.now().plusDays(1).toString())
                 .endAt(LocalDate.now().plusDays(5).toString())
-                .status(EventStatus.draft)
+                .status(EventStatus.DRAFT)
                 .venueId("venue-001")
                 .build();
 
@@ -85,7 +85,7 @@ class EventServiceImplTest {
                 .startDate(LocalDate.now().plusDays(1))
                 .endDate(LocalDate.now().plusDays(5))
                 .venueId("venue-001")
-                .status(EventStatus.draft)
+                .status(EventStatus.DRAFT)
                 .build();
     }
 
@@ -119,7 +119,7 @@ class EventServiceImplTest {
                     .startDate(LocalDate.now().plusDays(1))
                     .endDate(LocalDate.now().plusDays(5))
                     .venueId(null)
-                    .status(EventStatus.draft)
+                    .status(EventStatus.DRAFT)
                     .build();
 
             when(eventRequestDtoMapper.toEntity(requestWithNullVenue)).thenReturn(sampleEvent);
@@ -279,7 +279,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(2))
                     .timeSlot("09:00-10:00")
                     .activity("Keynote Speech")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             Schedule schedule = Schedule.builder()
@@ -288,7 +288,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(2))
                     .timeSlot("09:00-10:00")
                     .activity("Keynote Speech")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()
@@ -297,7 +297,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(2).toString())
                     .timeSlot("09:00-10:00")
                     .activity("Keynote Speech")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));
@@ -320,7 +320,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(1))
                     .timeSlot("09:00-10:00")
                     .activity("Panel")
-                    .status(ScheduleStatus.draft)
+                    .status(ScheduleStatus.DRAFT)
                     .build();
 
             when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.empty());
@@ -350,7 +350,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(1))
                     .timeSlot("10:00-11:00")
                     .activity("Workshop")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()
@@ -359,7 +359,7 @@ class EventServiceImplTest {
                     .date(LocalDate.now().plusDays(1).toString())
                     .timeSlot("10:00-11:00")
                     .activity("Workshop")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             when(scheduleRepository.findAll()).thenReturn(List.of(schedule));

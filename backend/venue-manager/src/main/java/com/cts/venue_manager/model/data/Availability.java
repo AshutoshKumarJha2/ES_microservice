@@ -8,5 +8,5 @@ package com.cts.venue_manager.model.data;
  * @since 26-02-2026
  */
 public enum Availability {
-    available,in_use, unavailable
+    AVAILABLE, IN_USE, UNAVAILABLE
 }

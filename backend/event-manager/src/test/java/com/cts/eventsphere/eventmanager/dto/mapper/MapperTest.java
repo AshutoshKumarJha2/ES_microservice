@@ -55,7 +55,7 @@ class MapperTest {
                     .startDate(LocalDate.now().plusDays(1))
                     .endDate(LocalDate.now().plusDays(5))
                     .venueId("venue-001")
-                    .status(EventStatus.published)
+                    .status(EventStatus.PUBLISHED)
                     .build();
 
             Event event = mapper.toEntity(dto);
@@ -63,11 +63,11 @@ class MapperTest {
             assertThat(event.getName()).isEqualTo("Tech Summit");
             assertThat(event.getOrganizerId()).isEqualTo("org-001");
             assertThat(event.getVenueId()).isEqualTo("venue-001");
-            assertThat(event.getStatus()).isEqualTo(EventStatus.published);
+            assertThat(event.getStatus()).isEqualTo(EventStatus.PUBLISHED);
         }
 
         @Test
-        @DisplayName("defaults status to EventStatus.draft when dto.status() is null")
+        @DisplayName("defaults status to EventStatus.DRAFT when dto.status() is null")
         void toEntity_nullStatus_defaultsDraft() {
             EventRequestDto dto = EventRequestDto.builder()
                     .name("Draft Event")
@@ -78,7 +78,7 @@ class MapperTest {
 
             Event event = mapper.toEntity(dto);
 
-            assertThat(event.getStatus()).isEqualTo(EventStatus.draft);
+            assertThat(event.getStatus()).isEqualTo(EventStatus.DRAFT);
         }
     }
 
@@ -100,7 +100,7 @@ class MapperTest {
                     .organizerId("org-001")
                     .startDate(LocalDate.of(2026, 5, 1))
                     .endDate(LocalDate.of(2026, 5, 5))
-                    .status(EventStatus.published)
+                    .status(EventStatus.PUBLISHED)
                     .venueId("venue-001")
                     .build();
 
@@ -111,7 +111,7 @@ class MapperTest {
             assertThat(dto.organizerId()).isEqualTo("org-001");
             assertThat(dto.startAt()).isEqualTo("2026-05-01");
             assertThat(dto.endAt()).isEqualTo("2026-05-05");
-            assertThat(dto.status()).isEqualTo(EventStatus.published);
+            assertThat(dto.status()).isEqualTo(EventStatus.PUBLISHED);
             assertThat(dto.venueId()).isEqualTo("venue-001");
         }
 
@@ -155,7 +155,7 @@ class MapperTest {
                     .date(LocalDate.of(2026, 5, 2))
                     .timeSlot("09:00-10:00")
                     .activity("Keynote")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             Schedule schedule = mapper.toEntity(dto, event);
@@ -163,7 +163,7 @@ class MapperTest {
             assertThat(schedule.getEvent()).isEqualTo(event);
             assertThat(schedule.getTimeSlot()).isEqualTo("09:00-10:00");
             assertThat(schedule.getActivity()).isEqualTo("Keynote");
-            assertThat(schedule.getStatus()).isEqualTo(ScheduleStatus.active);
+            assertThat(schedule.getStatus()).isEqualTo(ScheduleStatus.ACTIVE);
         }
     }
 
@@ -186,7 +186,7 @@ class MapperTest {
                     .date(LocalDate.of(2026, 5, 2))
                     .timeSlot("09:00-10:00")
                     .activity("Workshop")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             ScheduleResponseDto dto = mapper.toDTO(schedule);
@@ -196,7 +196,7 @@ class MapperTest {
             assertThat(dto.date()).isEqualTo("2026-05-02");
             assertThat(dto.timeSlot()).isEqualTo("09:00-10:00");
             assertThat(dto.activity()).isEqualTo("Workshop");
-            assertThat(dto.status()).isEqualTo(ScheduleStatus.active);
+            assertThat(dto.status()).isEqualTo(ScheduleStatus.ACTIVE);
         }
 
         @Test
@@ -208,7 +208,7 @@ class MapperTest {
                     .event(event)
                     .timeSlot("10:00-11:00")
                     .activity("Panel")
-                    .status(ScheduleStatus.draft)
+                    .status(ScheduleStatus.DRAFT)
                     .build();
 
             ScheduleResponseDto dto = mapper.toDTO(schedule);

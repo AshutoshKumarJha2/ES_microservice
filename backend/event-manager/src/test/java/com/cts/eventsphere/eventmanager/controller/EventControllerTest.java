@@ -83,7 +83,7 @@ class EventControllerTest {
                 .organizerId("org-001")
                 .startAt(LocalDate.now().plusDays(1).toString())
                 .endAt(LocalDate.now().plusDays(5).toString())
-                .status(EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .venueId("venue-001")
                 .build();
     }
@@ -297,7 +297,7 @@ class EventControllerTest {
                     .date(LocalDate.now().plusDays(1).toString())
                     .timeSlot("09:00-10:00")
                     .activity("Keynote")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             when(eventService.addActivity(eq(EVENT_ID), any(ScheduleRequestDto.class), eq(USER_ID)))
@@ -360,7 +360,7 @@ class EventControllerTest {
                     .date(LocalDate.now().plusDays(1).toString())
                     .timeSlot("09:00-10:00")
                     .activity("Keynote")
-                    .status(ScheduleStatus.active)
+                    .status(ScheduleStatus.ACTIVE)
                     .build();
 
             when(eventService.findAllSchedules(EVENT_ID, USER_ID)).thenReturn(List.of(scheduleResponse));

@@ -59,7 +59,7 @@ class TicketServiceImplTest {
                 .organizerId("org-001")
                 .startDate(LocalDate.now().plusDays(1))
                 .endDate(LocalDate.now().plusDays(5))
-                .status(EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         sampleTicket = Ticket.builder()
