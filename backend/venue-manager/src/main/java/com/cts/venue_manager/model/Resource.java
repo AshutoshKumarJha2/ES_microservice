@@ -32,12 +32,12 @@ public class Resource {
     private Venue venue;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('equipment','staff')")
-    private ResourceType type = ResourceType.equipment;
+    @Column(columnDefinition = "ENUM('EQUIPMENT','STAFF')")
+    private ResourceType type = ResourceType.EQUIPMENT;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('available','in_use','unavailable')")
-    private Availability availability = Availability.available;
+    @Column(columnDefinition = "ENUM('AVAILABLE','IN_USE','UNAVAILABLE')")
+    private Availability availability = Availability.AVAILABLE;
 
     @Column(precision = 10, scale = 2)
     private BigDecimal costRate;

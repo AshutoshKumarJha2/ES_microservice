@@ -43,8 +43,8 @@ public class Venue {
     private String name;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('available','unavailable','maintenance')")
-    private AvailabilityStatus availabilityStatus = AvailabilityStatus.available;
+    @Column(columnDefinition = "ENUM('AVAILABLE','UNAVAILABLE','MAINTENANCE')")
+    private AvailabilityStatus availabilityStatus = AvailabilityStatus.AVAILABLE;
 
     @CreationTimestamp
     @Column(updatable = false)
