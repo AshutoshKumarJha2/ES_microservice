@@ -10,6 +10,7 @@ import com.cts.eventsphere.eventmanager.model.Event;
 import com.cts.eventsphere.eventmanager.model.Schedule;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+import com.cts.eventsphere.eventmanager.service.NotificationService;
 import com.cts.eventsphere.eventmanager.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final EventRepository eventRepository;
     private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
-//    private final NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Updates an existing schedule by its unique identifier within a specific event
@@ -67,14 +68,14 @@ public class ScheduleServiceImpl implements ScheduleService {
         Schedule updatedSchedule = scheduleRepository.save(schedule);
         log.info("Successfully saved updated schedule ID: {}", updatedSchedule.getScheduleId());
 
-//        notificationService.sendNotification(
-//                event.getOrganizerId(),
-//                "Schedule Updated for Event: " + event.getName() +
-//                        " | Date: " + scheduleRequest.date() +
-//                        " | Time Slot: " + scheduleRequest.timeSlot() +
-//                        " | Activity: " + scheduleRequest.activity(),
-//                scheduleRequest.status().name()
-//        );
+        notificationService.sendNotification(
+                event.getOrganizerId(),
+                "Schedule Updated for Event: " + event.getName() +
+                        " | Date: " + scheduleRequest.date() +
+                        " | Time Slot: " + scheduleRequest.timeSlot() +
+                        " | Activity: " + scheduleRequest.activity(),
+                "EVENT"
+        );
 
         return scheduleResponseDtoMapper.toDTO(updatedSchedule);
     }
@@ -90,19 +91,20 @@ public class ScheduleServiceImpl implements ScheduleService {
     public boolean deleteById(String id) throws ScheduleNotFoundException {
         log.info("Attempting to delete schedule with ID: {}", id);
 
-        if(!scheduleRepository.existsById(id)) {
-            log.warn("Delete aborted: Schedule ID {} not found in repository", id);
-            throw new ScheduleNotFoundException(id);
-        }
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.warn("Delete aborted: Schedule ID {} not found in repository", id);
+                    return new ScheduleNotFoundException(id);
+                });
 
         scheduleRepository.deleteById(id);
         log.info("Successfully deleted schedule with ID: {}", id);
 
-//        notificationService.sendNotification(
-//                id,
-//                "Schedule Deleted with ID: " + id,
-//                "SCHEDULE"
-//        );
+        notificationService.sendNotification(
+                schedule.getEvent().getOrganizerId(),
+                "Schedule Deleted with ID: " + id,
+                "EVENT"
+        );
 
         return true;
     }

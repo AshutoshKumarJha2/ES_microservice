@@ -16,6 +16,7 @@ import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
 import com.cts.eventsphere.eventmanager.service.AuditService;
 import com.cts.eventsphere.eventmanager.service.EventService;
+import com.cts.eventsphere.eventmanager.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class EventServiceImpl implements EventService {
     private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
     private final AuditService auditService;
-//    private final NotificationService notificationService;
+    private final NotificationService notificationService;
 
     /**
      * Creates a new event in the system and triggers a notification with event details.
@@ -62,14 +63,14 @@ public class EventServiceImpl implements EventService {
 
         var venueId = eventRequest.venueId() == null ? "null" : eventRequest.venueId();
 
-//        notificationService.sendNotification(
-//                eventRequest.organizerId(),
-//                "New Event Created: " + eventRequest.name() +
-//                        " at venue " + venueId +
-//                        " from " + eventRequest.startDate() +
-//                        " to " + eventRequest.endDate(),
-//                "EVENT_CREATED"
-//        );
+        notificationService.sendNotification(
+                eventRequest.organizerId(),
+                "New Event Created: " + eventRequest.name() +
+                        " at venue " + venueId +
+                        " from " + eventRequest.startDate() +
+                        " to " + eventRequest.endDate(),
+                "EVENT"
+        );
 
         return eventResponseDtoMapper.toDTO(savedEvent);
     }
@@ -132,14 +133,14 @@ public class EventServiceImpl implements EventService {
         log.info("Successfully updated event ID: {}", eventId);
         auditService.logAudit(userId, AuditAction.UPDATE, Event.class, event.getEventId());
 
-//        notificationService.sendNotification(
-//                eventRequest.organizerId(),
-//                "Event Updated: " + eventRequest.name() +
-//                        " at venue " + eventRequest.venueId() +
-//                        " from " + eventRequest.startDate() +
-//                        " to " + eventRequest.endDate(),
-//                "EVENT_UPDATED"
-//        );
+        notificationService.sendNotification(
+                eventRequest.organizerId(),
+                "Event Updated: " + eventRequest.name() +
+                        " at venue " + eventRequest.venueId() +
+                        " from " + eventRequest.startDate() +
+                        " to " + eventRequest.endDate(),
+                "EVENT"
+        );
 
         return true;
     }
@@ -187,12 +188,12 @@ public class EventServiceImpl implements EventService {
         log.info("Successfully added activity ID: {} to event ID: {}", savedSchedule.getScheduleId(), eventId);
 
         auditService.logAudit(userId, AuditAction.CREATE, Schedule.class, savedSchedule.getScheduleId());
-//        notificationService.sendNotification(
-//                event.getOrganizerId(),
-//                "New Activity Added to Event: " + event.getName() +
-//                        " | Activity ID: " + savedSchedule.getScheduleId(),
-//                "SCHEDULE"
-//        );
+        notificationService.sendNotification(
+                event.getOrganizerId(),
+                "New Activity Added to Event: " + event.getName() +
+                        " | Activity ID: " + savedSchedule.getScheduleId(),
+                "EVENT"
+        );
 
         return scheduleResponseDtoMapper.toDTO(savedSchedule);
     }

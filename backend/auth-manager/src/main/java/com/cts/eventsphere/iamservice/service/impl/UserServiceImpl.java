@@ -12,6 +12,7 @@ import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,7 +35,8 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-private final UserRepository userRepo;
+    private final UserRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * {@inheritDoc}
@@ -61,8 +63,7 @@ private final UserRepository userRepo;
     @Override
     public UserResponseDto getUser(String userId) {
         User user =userRepo.findById(userId).orElseThrow(()->new UserNotFoundException(userId));
-        UserResponseDto userResponseDto = UserResponseDtoMapper.toDTO(user);
-        return userResponseDto;
+        return UserResponseDtoMapper.toDTO(user);
     }
 
     /**
@@ -81,7 +82,6 @@ private final UserRepository userRepo;
 
 
         if (userRequestDto.email() != null && !userRequestDto.email().equalsIgnoreCase(user.getEmail())) {
-            // Optionally check uniqueness
             if (userRepo.existsByEmail(userRequestDto.email())) {
                 throw new EmailAlreadyExistsException(userRequestDto.email());
             }
@@ -89,14 +89,10 @@ private final UserRepository userRepo;
         }
 
         if (userRequestDto.name() != null) user.setName(userRequestDto.name());
-//        if (userRequestDto.role() != null) user.setRole(userRequestDto.role());
-
         if (userRequestDto.phone() != null) user.setPhone(userRequestDto.phone());
 
-        // Handle password (hash it)
         if (userRequestDto.password() != null && !userRequestDto.password().isBlank()) {
-            // String hashed = passwordEncoder.encode(dto.password());
-            String hashed = userRequestDto.password(); // replace with encoder above
+            String hashed = passwordEncoder.encode(userRequestDto.password());
             user.setPassword(hashed);
         }
 
