@@ -51,7 +51,7 @@ class UserServiceImplTest {
         );
         when(userRepo.findAll()).thenReturn(users);
 
-        List<UserResponseDto> result = userService.getAllUsers();
+        List<UserResponseDto> result = userService.getAllUsers(any());
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).userId()).isEqualTo("u1");
@@ -62,7 +62,7 @@ class UserServiceImplTest {
     void getAllUsers_WhenNoUsers_ShouldReturnEmptyList() {
         when(userRepo.findAll()).thenReturn(List.of());
 
-        assertThat(userService.getAllUsers()).isEmpty();
+        assertThat(userService.getAllUsers(any())).isEmpty();
     }
 
     // ─── getUsers (bulk) ──────────────────────────────────────────────────────
