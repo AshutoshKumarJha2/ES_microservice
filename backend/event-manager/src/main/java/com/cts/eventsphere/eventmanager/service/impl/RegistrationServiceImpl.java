@@ -147,6 +147,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     public GenericResponse checkInRegistration(String actorId, String registrationId) {
         var registration = registrationRepo.findById(registrationId)
                 .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
+        if (registration.getStatus().equals(RegistrationStatus.CHECKED_IN)) {
+            throw new InvalidRegistrationStatusException(
+                    String.format("User already confirmed for event '%s'", registration.getEvent().getEventId()));
+        }
         if (!registration.getStatus().equals(RegistrationStatus.CONFIRMED)) {
             throw new InvalidRegistrationStatusException(
                     String.format("User not confirmed for event '%s'", registration.getEvent().getEventId()));
