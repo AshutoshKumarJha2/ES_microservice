@@ -34,7 +34,7 @@ class BookingControllerTest {
 
     private BookingResponseDto buildBookingResponse(String id) {
         return new BookingResponseDto(id, "event-1", "v-1",
-                LocalDate.now(), BookingStatus.confirmed, List.of(),
+                LocalDate.now(), BookingStatus.CONFIRMED, List.of(),
                 LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -63,7 +63,7 @@ class BookingControllerTest {
     @Test
     void getBookingsByVenue_returns200() {
         BookingResponseVenueManagerDto dto = new BookingResponseVenueManagerDto(
-                "b-1", "event-1", "v-1", LocalDate.now(), BookingStatus.pending, List.of(),
+                "b-1", "event-1", "v-1", LocalDate.now(), BookingStatus.PENDING, List.of(),
                 LocalDateTime.now(), LocalDateTime.now());
         when(bookingService.getBookingsByVenue("user-1", "v-1")).thenReturn(List.of(dto));
 
@@ -86,9 +86,9 @@ class BookingControllerTest {
     @Test
     void updateStatus_returns200() {
         BookingResponseDto expected = buildBookingResponse("b-1");
-        when(bookingService.updateBookingStatus("user-1", "b-1", BookingStatus.confirmed)).thenReturn(expected);
+        when(bookingService.updateBookingStatus("user-1", "b-1", BookingStatus.CONFIRMED)).thenReturn(expected);
 
-        ResponseEntity<BookingResponseDto> response = bookingController.updateStatus("b-1", BookingStatus.confirmed, user);
+        ResponseEntity<BookingResponseDto> response = bookingController.updateStatus("b-1", BookingStatus.CONFIRMED, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }

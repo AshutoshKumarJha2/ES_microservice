@@ -42,16 +42,16 @@ class VenueServiceImplTest {
         venue.setName("Grand Hall");
         venue.setLocation("New York");
         venue.setCapacity(500);
-        venue.setAvailabilityStatus(AvailabilityStatus.available);
+        venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return venue;
     }
 
     private VenueResponseDto buildResponseDto(String id) {
-        return new VenueResponseDto(id, "Grand Hall", "New York", 500, AvailabilityStatus.available);
+        return new VenueResponseDto(id, "Grand Hall", "New York", 500, AvailabilityStatus.AVAILABLE);
     }
 
     private VenueRequestDto buildRequestDto() {
-        return new VenueRequestDto("Grand Hall", "New York", 500, AvailabilityStatus.available);
+        return new VenueRequestDto("Grand Hall", "New York", 500, AvailabilityStatus.AVAILABLE);
     }
 
     // ─── create ───────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ class VenueServiceImplTest {
         List<VenueResponseDto> result = venueService.findAll(ACTOR_ID);
 
         assertThat(result).hasSize(2);
-        assertThat(result.get(0).id()).isEqualTo("v1");
+        assertThat(result.getFirst().id()).isEqualTo("v1");
     }
 
     @Test
@@ -126,11 +126,11 @@ class VenueServiceImplTest {
 
     @Test
     void updateVenue_success() {
-        VenueRequestDto request = new VenueRequestDto("Updated Hall", "Boston", 300, AvailabilityStatus.unavailable);
+        VenueRequestDto request = new VenueRequestDto("Updated Hall", "Boston", 300, AvailabilityStatus.UNAVAILABLE);
         Venue existing = buildVenue(VENUE_ID);
         Venue updated = buildVenue(VENUE_ID);
         updated.setName("Updated Hall");
-        VenueResponseDto expected = new VenueResponseDto(VENUE_ID, "Updated Hall", "Boston", 300, AvailabilityStatus.unavailable);
+        VenueResponseDto expected = new VenueResponseDto(VENUE_ID, "Updated Hall", "Boston", 300, AvailabilityStatus.UNAVAILABLE);
 
         when(venueRepository.findById(VENUE_ID)).thenReturn(Optional.of(existing));
         when(venueRequestDtoMapper.toEntity(request)).thenReturn(updated);
@@ -158,23 +158,23 @@ class VenueServiceImplTest {
     @Test
     void updateVenueStatus_success() {
         Venue venue = buildVenue(VENUE_ID);
-        VenueResponseDto expected = new VenueResponseDto(VENUE_ID, "Grand Hall", "New York", 500, AvailabilityStatus.unavailable);
+        VenueResponseDto expected = new VenueResponseDto(VENUE_ID, "Grand Hall", "New York", 500, AvailabilityStatus.UNAVAILABLE);
 
         when(venueRepository.findById(VENUE_ID)).thenReturn(Optional.of(venue));
         when(venueRepository.save(venue)).thenReturn(venue);
         when(venueResponseDtoMapper.toDto(venue)).thenReturn(expected);
 
-        VenueResponseDto result = venueService.updateVenueStatus(ACTOR_ID, VENUE_ID, AvailabilityStatus.unavailable);
+        VenueResponseDto result = venueService.updateVenueStatus(ACTOR_ID, VENUE_ID, AvailabilityStatus.UNAVAILABLE);
 
-        assertThat(result.availabilityStatus()).isEqualTo(AvailabilityStatus.unavailable);
-        assertThat(venue.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.unavailable);
+        assertThat(result.availabilityStatus()).isEqualTo(AvailabilityStatus.UNAVAILABLE);
+        assertThat(venue.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.UNAVAILABLE);
     }
 
     @Test
     void updateVenueStatus_notFound_throwsVenueNotFoundException() {
         when(venueRepository.findById(VENUE_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> venueService.updateVenueStatus(ACTOR_ID, VENUE_ID, AvailabilityStatus.unavailable))
+        assertThatThrownBy(() -> venueService.updateVenueStatus(ACTOR_ID, VENUE_ID, AvailabilityStatus.UNAVAILABLE))
                 .isInstanceOf(VenueNotFoundException.class);
     }
 
@@ -249,18 +249,18 @@ class VenueServiceImplTest {
         Venue v1 = buildVenue("v1");
         VenueResponseDto dto1 = buildResponseDto("v1");
 
-        when(venueRepository.findByAvailabilityStatus(AvailabilityStatus.available)).thenReturn(List.of(v1));
+        when(venueRepository.findByAvailabilityStatus(AvailabilityStatus.AVAILABLE)).thenReturn(List.of(v1));
         when(venueResponseDtoMapper.toDto(v1)).thenReturn(dto1);
 
-        List<VenueResponseDto> result = venueService.findByAvailabilityStatus(ACTOR_ID, AvailabilityStatus.available);
+        List<VenueResponseDto> result = venueService.findByAvailabilityStatus(ACTOR_ID, AvailabilityStatus.AVAILABLE);
 
         assertThat(result).hasSize(1);
     }
 
     @Test
     void findByAvailabilityStatus_noMatch_returnsEmpty() {
-        when(venueRepository.findByAvailabilityStatus(AvailabilityStatus.maintenence)).thenReturn(List.of());
+        when(venueRepository.findByAvailabilityStatus(AvailabilityStatus.MAINTENENCE)).thenReturn(List.of());
 
-        assertThat(venueService.findByAvailabilityStatus(ACTOR_ID, AvailabilityStatus.maintenence)).isEmpty();
+        assertThat(venueService.findByAvailabilityStatus(ACTOR_ID, AvailabilityStatus.MAINTENENCE)).isEmpty();
     }
 }

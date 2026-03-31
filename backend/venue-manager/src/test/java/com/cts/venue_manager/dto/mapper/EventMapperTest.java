@@ -34,7 +34,7 @@ class EventMapperTest {
                 .startDate(start)
                 .endDate(end)
                 .venueId("venue-1")
-                .status(EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         Event entity = EventRequestDtoMapper.toEntity(dto);
@@ -45,7 +45,7 @@ class EventMapperTest {
         assertThat(entity.getStartDate()).isEqualTo(start);
         assertThat(entity.getEndDate()).isEqualTo(end);
         assertThat(entity.getVenueId()).isEqualTo("venue-1");
-        assertThat(entity.getStatus()).isEqualTo(EventStatus.published);
+        assertThat(entity.getStatus()).isEqualTo(EventStatus.PUBLISHED);
     }
 
     @Test
@@ -60,7 +60,7 @@ class EventMapperTest {
         Event entity = EventRequestDtoMapper.toEntity(dto);
 
         assertThat(entity).isNotNull();
-        assertThat(entity.getStatus()).isEqualTo(EventStatus.draft);
+        assertThat(entity.getStatus()).isEqualTo(EventStatus.DRAFT);
     }
 
     // ─── EventResponseDtoMapper ───────────────────────────────────────────────
@@ -76,7 +76,7 @@ class EventMapperTest {
                 .organizerId("org-3")
                 .startDate(start)
                 .endDate(end)
-                .status(EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .venueId("venue-3")
                 .build();
 
@@ -87,7 +87,7 @@ class EventMapperTest {
         assertThat(dto.organizerId()).isEqualTo("org-3");
         assertThat(dto.startAt()).isEqualTo(start.toString());
         assertThat(dto.endAt()).isEqualTo(end.toString());
-        assertThat(dto.status()).isEqualTo(EventStatus.published);
+        assertThat(dto.status()).isEqualTo(EventStatus.PUBLISHED);
         assertThat(dto.venueId()).isEqualTo("venue-3");
     }
 
@@ -99,7 +99,7 @@ class EventMapperTest {
                 .organizerId("org-4")
                 .startDate(null)
                 .endDate(null)
-                .status(EventStatus.draft)
+                .status(EventStatus.DRAFT)
                 .venueId("venue-4")
                 .build();
 

@@ -98,7 +98,7 @@ class AuthServiceImplTest {
 
     @Test
     void login_WithValidCredentials_ShouldReturnAccessAndRefreshTokens() {
-        LoginRequestDto dto = new LoginRequestDto("pass123", "alice@example.com", "ATTENDEE");
+        LoginRequestDto dto = new LoginRequestDto("pass123", "alice@example.com");
         User user = buildUser("user-001", "Alice", "alice@example.com",
                 "0987654321", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         user.setPassword("$2a$hashed");
@@ -117,7 +117,7 @@ class AuthServiceImplTest {
 
     @Test
     void login_WithUnregisteredEmail_ShouldThrowUserNotFoundException() {
-        LoginRequestDto dto = new LoginRequestDto("pass", "ghost@example.com", "ATTENDEE");
+        LoginRequestDto dto = new LoginRequestDto("pass", "ghost@example.com");
         when(userRepository.findByEmail("ghost@example.com")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(dto))
@@ -126,7 +126,7 @@ class AuthServiceImplTest {
 
     @Test
     void login_WithWrongPassword_ShouldThrowInvalidPasswordException() {
-        LoginRequestDto dto = new LoginRequestDto("wrong", "alice@example.com", "ATTENDEE");
+        LoginRequestDto dto = new LoginRequestDto("wrong", "alice@example.com");
         User user = buildUser("user-001", "Alice", "alice@example.com",
                 "0987654321", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         user.setPassword("$2a$hashed");

@@ -102,9 +102,9 @@ class RegistrationServiceImplTest {
             when(logServiceClient.sendNotification(any(), any(), any()))
                     .thenReturn(ResponseEntity.status(201).build());
 
-            GenericResponse result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
+            RegistrationDto result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
 
-            assertThat(result.message()).isEqualTo("Registration successful");
+            assertThat(result.status()).isEqualTo("Registration successful");
             verify(registrationRepo).save(any(Registration.class));
         }
 
@@ -510,9 +510,9 @@ class RegistrationServiceImplTest {
             when(logServiceClient.sendNotification(any(), any(), any()))
                     .thenThrow(feign.FeignException.class);
 
-            GenericResponse result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
+            RegistrationDto result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
 
-            assertThat(result.message()).isEqualTo("Registration successful");
+            assertThat(result.status()).isEqualTo("Registration successful");
         }
     }
 }
