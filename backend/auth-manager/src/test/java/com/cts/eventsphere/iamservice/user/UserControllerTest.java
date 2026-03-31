@@ -105,7 +105,7 @@ class UserControllerTest {
         when(userService.updateUserDetails("user-001", updateRequest)).thenReturn(ALICE_DTO);
 
         ResponseEntity<UserResponseDto> response =
-                userController.updateUserDetails("user-001", updateRequest);
+                userController.updateUserDetails("user-001", updateRequest, any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(ALICE_DTO);

@@ -30,12 +30,12 @@ class VenueControllerTest {
     private final UserPrincipal user = new UserPrincipal("user-1", "VENUE_MANAGER", List.of());
 
     private VenueResponseDto buildVenueResponse(String id) {
-        return new VenueResponseDto(id, "Grand Hall", "New York", 500, AvailabilityStatus.available);
+        return new VenueResponseDto(id, "Grand Hall", "New York", 500, AvailabilityStatus.AVAILABLE);
     }
 
     @Test
     void addVenue_returns201() {
-        VenueRequestDto request = new VenueRequestDto("Grand Hall", "New York", 500, AvailabilityStatus.available);
+        VenueRequestDto request = new VenueRequestDto("Grand Hall", "New York", 500, AvailabilityStatus.AVAILABLE);
         VenueResponseDto expected = buildVenueResponse("v-1");
         when(venueService.create("user-1", request)).thenReturn(expected);
 
@@ -57,7 +57,7 @@ class VenueControllerTest {
 
     @Test
     void updateVenue_returns200() {
-        VenueRequestDto request = new VenueRequestDto("Updated Hall", "Chicago", 600, AvailabilityStatus.available);
+        VenueRequestDto request = new VenueRequestDto("Updated Hall", "Chicago", 600, AvailabilityStatus.AVAILABLE);
         VenueResponseDto expected = buildVenueResponse("v-1");
         when(venueService.updateVenue("user-1", "v-1", request)).thenReturn(expected);
 
@@ -70,9 +70,9 @@ class VenueControllerTest {
     @Test
     void updateVenueStatus_returns200() {
         VenueResponseDto expected = buildVenueResponse("v-1");
-        when(venueService.updateVenueStatus("user-1", "v-1", AvailabilityStatus.unavailable)).thenReturn(expected);
+        when(venueService.updateVenueStatus("user-1", "v-1", AvailabilityStatus.UNAVAILABLE)).thenReturn(expected);
 
-        ResponseEntity<VenueResponseDto> response = venueController.updateVenueStatus("v-1", AvailabilityStatus.unavailable, user);
+        ResponseEntity<VenueResponseDto> response = venueController.updateVenueStatus("v-1", AvailabilityStatus.UNAVAILABLE, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
     }
@@ -109,10 +109,10 @@ class VenueControllerTest {
 
     @Test
     void getVenueByStatus_returns200() {
-        when(venueService.findByAvailabilityStatus("user-1", AvailabilityStatus.available))
+        when(venueService.findByAvailabilityStatus("user-1", AvailabilityStatus.AVAILABLE))
                 .thenReturn(List.of(buildVenueResponse("v-1")));
 
-        ResponseEntity<List<VenueResponseDto>> response = venueController.getVenueByStatus(AvailabilityStatus.available, user);
+        ResponseEntity<List<VenueResponseDto>> response = venueController.getVenueByStatus(AvailabilityStatus.AVAILABLE, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);

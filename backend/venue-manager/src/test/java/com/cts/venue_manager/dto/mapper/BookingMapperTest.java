@@ -32,14 +32,14 @@ class BookingMapperTest {
         venue.setName("Test Venue");
         venue.setLocation("City");
         venue.setCapacity(100);
-        venue.setAvailabilityStatus(AvailabilityStatus.available);
+        venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
 
         Booking booking = new Booking();
         booking.setBookingId(bookingId);
         booking.setEventId(eventId);
         booking.setVenue(venue);
         booking.setDate(LocalDate.of(2026, 6, 15));
-        booking.setStatus(BookingStatus.confirmed);
+        booking.setStatus(BookingStatus.CONFIRMED);
         return booking;
     }
 
@@ -67,7 +67,7 @@ class BookingMapperTest {
         assertThat(result.eventId()).isEqualTo("event-1");
         assertThat(result.venueId()).isEqualTo("v-1");
         assertThat(result.date()).isEqualTo(LocalDate.of(2026, 6, 15));
-        assertThat(result.status()).isEqualTo(BookingStatus.confirmed);
+        assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
         assertThat(result.resourceList()).isEmpty();
         assertThat(result.createdAt()).isEqualTo(now);
         assertThat(result.updatedAt()).isEqualTo(now);
@@ -91,7 +91,7 @@ class BookingMapperTest {
         assertThat(result.bookingId()).isEqualTo("b-2");
         assertThat(result.eventId()).isEqualTo("event-2");
         assertThat(result.venueId()).isEqualTo("v-2");
-        assertThat(result.status()).isEqualTo(BookingStatus.confirmed);
+        assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
         assertThat(result.resourceList()).isEmpty();
     }
 

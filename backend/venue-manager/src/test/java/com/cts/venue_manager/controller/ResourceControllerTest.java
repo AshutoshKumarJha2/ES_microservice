@@ -34,13 +34,13 @@ class ResourceControllerTest {
     private final UserPrincipal user = new UserPrincipal("user-1", "VENUE_MANAGER", List.of());
 
     private ResourceResponseDto buildResourceResponse(String id) {
-        return new ResourceResponseDto(id, "v-1", ResourceType.equipment,
-                "Projector", Availability.available, 5, BigDecimal.valueOf(200));
+        return new ResourceResponseDto(id, "v-1", ResourceType.EQUIPMENT,
+                "Projector", Availability.AVAILABLE, 5, BigDecimal.valueOf(200));
     }
 
     @Test
     void createResource_returns201() {
-        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.equipment, BigDecimal.valueOf(200), 5);
+        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.EQUIPMENT, BigDecimal.valueOf(200), 5);
         ResourceResponseDto expected = buildResourceResponse("r-1");
         when(resourceService.createResource("user-1", "v-1", request)).thenReturn(expected);
 
@@ -105,7 +105,7 @@ class ResourceControllerTest {
 
     @Test
     void updateResource_returns200() {
-        ResourceRequestDto request = new ResourceRequestDto("Microphone", ResourceType.equipment, BigDecimal.valueOf(100), 10);
+        ResourceRequestDto request = new ResourceRequestDto("Microphone", ResourceType.EQUIPMENT, BigDecimal.valueOf(100), 10);
         ResourceResponseDto expected = buildResourceResponse("r-1");
         when(resourceService.updateResource("user-1", "r-1", request)).thenReturn(expected);
 
