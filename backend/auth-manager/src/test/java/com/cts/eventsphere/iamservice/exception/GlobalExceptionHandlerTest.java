@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Unit tests for {@link GlobalExceptionHandler}.
@@ -31,7 +32,7 @@ class GlobalExceptionHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler();
+        handler = new GlobalExceptionHandler(any());
     }
 
     // ─── EmailAlreadyExistsException → 409 ────────────────────────────────────
@@ -39,7 +40,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void emailAlreadyExistsException_ShouldReturn409WithEmailAlreadyExistsMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.emailAlreadyExistsException(new EmailAlreadyExistsException("test@example.com"));
+                handler.emailAlreadyExistsException(new EmailAlreadyExistsException("test@example.com"), any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
@@ -51,7 +52,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void invalidPasswordException_ShouldReturn400WithInvalidPasswordMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.invalidPasswordException(new InvalidPasswordException("bad password"));
+                handler.invalidPasswordException(new InvalidPasswordException("bad password"),any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
@@ -64,7 +65,7 @@ class GlobalExceptionHandlerTest {
     void handleRefreshFailedException_ShouldReturn401WithExceptionMessage() {
         RefreshFailedException ex = new RefreshFailedException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleRefreshFailedException(ex);
+                handler.handleRefreshFailedException(ex,any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
@@ -76,7 +77,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void userAlreadyExistsException_ShouldReturn409WithUserAlreadyExistsMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.userAlreadyExistsException(new UserAlreadyExistsException("alice@example.com"));
+                handler.userAlreadyExistsException(new UserAlreadyExistsException("alice@example.com"),any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
@@ -89,7 +90,7 @@ class GlobalExceptionHandlerTest {
     void handleUserNotActiveException_ShouldReturn401WithExceptionMessage() {
         UserNotActiveException ex = new UserNotActiveException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleUserNotActiveException(ex);
+                handler.handleUserNotActiveException(ex,any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
@@ -101,7 +102,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void userNotFoundException_ShouldReturn404WithUserNotFoundMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.userNotFoundException(new UserNotFoundException("user-001"));
+                handler.userNotFoundException(new UserNotFoundException("user-001"),any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -114,7 +115,7 @@ class GlobalExceptionHandlerTest {
     void handleUserSuspendedException_ShouldReturn401WithExceptionMessage() {
         UserSuspendedException ex = new UserSuspendedException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleUserSuspendedException(ex);
+                handler.handleUserSuspendedException(ex,any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
