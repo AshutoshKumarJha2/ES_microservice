@@ -19,9 +19,3 @@ eureka:
   instance:
     prefer-ip-address: true
 
-services:
-  event:
-    url: http://localhost:7070
-  auth:
-    url: http://localhost:7069
-
