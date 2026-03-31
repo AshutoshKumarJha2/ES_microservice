@@ -114,7 +114,11 @@ public class FeedbackServiceImpl implements FeedbackService {
         try {
             registration = registrationServiceClient.getRegistrationStatus(eventId);
         } catch (FeignException.NotFound e) {
+            log.error(e.getMessage());
             throw new IllegalStateException("Attendee is not registered for this event.");
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
         }
 
         String status = registration.status();
