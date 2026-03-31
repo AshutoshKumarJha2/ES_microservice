@@ -54,7 +54,7 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @throws TicketNotFoundException        if the ticket does not exist
      */
     @Override
-    public GenericResponse registerForEvent(String userId, String eventId, String ticketId) {
+    public RegistrationDto registerForEvent(String userId, String eventId, String ticketId) {
         if (registrationRepo.existsByEventEventIdAndAttendeeId(eventId, userId)) {
             throw new DuplicateRegistrationException(userId, eventId);
         }
@@ -74,7 +74,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         notifyUser(userId, "Your registration for event \"" + event.getName() + "\" is pending approval.");
 
-        return new GenericResponse("Registration successful");
+        return RegistrationDtoMapper.toDto(newRegistration);
     }
 
     /**

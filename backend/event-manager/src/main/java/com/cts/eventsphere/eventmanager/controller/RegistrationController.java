@@ -36,7 +36,7 @@ public class RegistrationController {
 
     @PostMapping("/events/{eventId}/registrations")
     @PreAuthorize("hasRole('ATTENDEE')")
-    public ResponseEntity<GenericResponse> createRegistration(
+    public ResponseEntity<RegistrationDto> createRegistration(
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestBody @Valid RegistrationRequestDto request) {
