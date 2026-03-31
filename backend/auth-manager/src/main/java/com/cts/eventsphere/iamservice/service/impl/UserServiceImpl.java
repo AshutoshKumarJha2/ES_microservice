@@ -1,5 +1,6 @@
 package com.cts.eventsphere.iamservice.service.impl;
 
+import com.cts.eventsphere.iamservice.dto.audit.AuditAction;
 import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
 import com.cts.eventsphere.iamservice.dto.user.UserResponseDto;
 import com.cts.eventsphere.iamservice.exception.user.EmailAlreadyExistsException;
@@ -9,6 +10,7 @@ import com.cts.eventsphere.iamservice.model.User;
 import com.cts.eventsphere.iamservice.model.data.UserRoles;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepo;
     private final PasswordEncoder passwordEncoder;
+    private final AuditService auditService;
 
     /**
      * {@inheritDoc}
@@ -45,9 +48,12 @@ public class UserServiceImpl implements UserService {
      * and maps each to a {@link UserResponseDto}.</p>
      */
     @Override
-    public List<UserResponseDto> getAllUsers() {
+    public List<UserResponseDto> getAllUsers(String actorId) {
         List<User> userList = userRepo.findAll();
-        return userList.stream().map(user -> UserResponseDtoMapper.toDTO(user)).toList();
+        return userList
+                .stream()
+                .peek(event -> auditService.logAudit(actorId, AuditAction.READ,User.class,event.getUserId()))
+                .map(user -> UserResponseDtoMapper.toDTO(user)).toList();
     }
 
     /**
@@ -63,6 +69,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto getUser(String userId) {
         User user =userRepo.findById(userId).orElseThrow(()->new UserNotFoundException(userId));
+        auditService.logAudit(userId,AuditAction.READ,User.class,userId);
         return UserResponseDtoMapper.toDTO(user);
     }
 
@@ -97,6 +104,7 @@ public class UserServiceImpl implements UserService {
         }
 
         User saved = userRepo.save(user);
+        auditService.logAudit(user.getUserId(),AuditAction.UPDATE,User.class,saved.getUserId());
         return UserResponseDtoMapper.toDTO(saved);
     }
 
@@ -111,6 +119,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         String enumStatus = String.valueOf(UserStatus.valueOf(status));
         user.setStatus(UserStatus.valueOf(enumStatus));
+        auditService.logAudit(user.getUserId(),AuditAction.UPDATE,User.class,userId);
         return UserResponseDtoMapper.toDTO(userRepo.save(user));
     }
 
@@ -129,6 +138,7 @@ public class UserServiceImpl implements UserService {
         user.setRole(newRole);
         User updatedUser = userRepo.save(user);
         log.info("changing user role to {} for {}",  newRole.name(), userId);
+        auditService.logAudit(userId,AuditAction.UPDATE,User.class,updatedUser.getUserId());
         try{
             String message = "Your role has been changed to " + newRole;
 //            notificationService.sendNotification(userId, message, "INFO");

@@ -42,8 +42,10 @@ public class UserController {
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(
+            @AuthenticationPrincipal UserPrincipal principal
+    ){
+        return ResponseEntity.ok(userService.getAllUsers(principal.userId()));
     }
     /**
      * Retrieves a user by their unique identifier.

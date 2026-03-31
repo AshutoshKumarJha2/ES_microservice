@@ -2,6 +2,7 @@ package com.cts.eventsphere.iamservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * Entry point for the Auth Manager microservice.
@@ -15,6 +16,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @since 25-03-2026
  */
 @SpringBootApplication
+@EnableFeignClients
 public class AuthManagerApplication {
 
 	/**

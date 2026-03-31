@@ -1,5 +1,6 @@
 package com.cts.eventsphere.iamservice.service.impl;
 
+import com.cts.eventsphere.iamservice.dto.audit.AuditAction;
 import com.cts.eventsphere.iamservice.dto.auth.LoginRequestDto;
 import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.RegisterResponseDto;
@@ -12,6 +13,7 @@ import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.security.JwtUtil;
 import com.cts.eventsphere.iamservice.security.TokenType;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.AuthService;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AuditService auditService;
 
 
     /**
@@ -57,6 +60,7 @@ public class AuthServiceImpl implements AuthService {
 
         if (existingUser.isPresent()) {
 //            auditService.logAudit(existingUser.getUserId(), AuditAction.REGISTRATION_FAILURE, User.class, user.getUserId());
+//            auditService.logAudit(existingUser.get().getUserId(), AuditAction.REGISTRATON_FAILURE,User.class,existingUser.get().getUserId());
             throw new UserAlreadyExistsException(dto.email());
         }
 
@@ -67,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(dto.password())); // Hashing
         userRepository.save(user);
         log.info("User {} registered with id {}", user.getName(),user.getUserId());
-//        auditService.logAudit(user.getUserId(), AuditAction.REGISTRATION_SUCCESS, User.class, user.getUserId());
+        auditService.logAudit(user.getUserId(), AuditAction.REGISTRATION_SUCCESS,User.class,user.getUserId());
         String successRegistration = "User registered successfully with email: " + user.getEmail();
         return new RegisterResponseDto(user.getUserId(), user.getName(), user.getEmail(), user.getRole().name(), user.getPhone(), user.getStatus().name(), successRegistration);
     }
@@ -83,11 +87,18 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository.findByEmail(loginDto.email())
                 .orElseThrow(() ->{
                     log.warn("Login failed for email: {} - user not found", loginDto.email());
+//                    auditService.logAudit(user.getUserId(),AuditAction.LOGIN_FAILURE,User.class,user.getUserId());
                     return new UserNotFoundException(loginDto.email());
                 });
 
+        if(loginDto.email() == user.getEmail()){
+            log.error("Login failed for email: {} - user already exists", loginDto.email());
+            throw new EmailAlreadyExistsException(loginDto.email());
+        }
+
         if (!passwordEncoder.matches(loginDto.password(), user.getPassword())) {
             log.warn("Login failed: invalid password");
+//            auditService.logAudit(user.getUserId(),AuditAction.LOGIN_FAILURE,User.class,user.getUserId());
             throw new InvalidPasswordException("Invalid password provided");
         }
 
@@ -96,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = jwtUtil.generateAccessToken(user.getUserId(), roleName);
         String refreshToken = jwtUtil.generateRefreshToken(user.getUserId(), roleName);
 
-//        auditService.logAudit(user.getUserId(), AuditAction.LOGIN_SUCCESS, User.class, user.getUserId());
+        auditService.logAudit(user.getUserId(), AuditAction.LOGIN_SUCCESS, User.class, user.getUserId());
         return new LoginResponseDto(accessToken, refreshToken, "Bearer");
     }
 
@@ -115,17 +126,19 @@ public class AuthServiceImpl implements AuthService {
         var user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
 
         if(!user.getRole().name().equals(roleName)){
+//            auditService.logAudit(userId,AuditAction.PERMISSION_CHANGE,User.class,user.getUserId());
             throw new RefreshFailedException(userId);
         }
 
         roleName = user.getRole().name();
 
         if(user.getStatus().equals(UserStatus.INACTIVE)){
+//            auditService.logAudit(userId,AuditAction.STATUS_CHANGE,User.class,user.getUserId());
             throw new UserNotActiveException(userId);
         }
 
         if(user.getStatus().equals(UserStatus.SUSPENDED)){
-            throw  new UserSuspendedException(userId);
+            throw new UserSuspendedException(userId);
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(userId, roleName);
