@@ -32,3 +32,6 @@
 
 # Claude
 **/.claude/
+
+# Launch files
+**/**/~launch.ps1
