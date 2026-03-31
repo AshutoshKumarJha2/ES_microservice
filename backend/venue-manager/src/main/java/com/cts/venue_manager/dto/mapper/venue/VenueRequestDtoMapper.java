@@ -35,7 +35,7 @@ public class VenueRequestDtoMapper {
         if (dto.availabilityStatus() != null) {
             venue.setAvailabilityStatus(dto.availabilityStatus());
         } else {
-            venue.setAvailabilityStatus(AvailabilityStatus.available);
+            venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         }
 
         return venue;

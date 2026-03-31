@@ -1,0 +1,613 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventServiceImplTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: EventServiceImplTest (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventServiceImplTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (26/26)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EventServiceImplTest$AddActivity</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (45/45)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$Create</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$DeleteById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$FindAllEvents</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$FindAllSchedules</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (31/31)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$FindById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventServiceImplTest$UpdateById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (157/157)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.event.EventResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Schedule;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.EventStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.impl.EventServiceImpl;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import static org.assertj.core.api.Assertions.assertThat;
+&nbsp;import static org.assertj.core.api.Assertions.assertThatThrownBy;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.ArgumentMatchers.eq;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class EventServiceImplTest {</b>
+&nbsp;
+&nbsp;    @Mock private EventRepository eventRepository;
+&nbsp;    @Mock private EventResponseDtoMapper eventResponseDtoMapper;
+&nbsp;    @Mock private EventRequestDtoMapper eventRequestDtoMapper;
+&nbsp;    @Mock private ScheduleRepository scheduleRepository;
+&nbsp;    @Mock private ScheduleResponseDtoMapper scheduleResponseDtoMapper;
+&nbsp;    @Mock private ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+&nbsp;    @Mock private AuditService auditService;
+&nbsp;
+&nbsp;    @InjectMocks
+&nbsp;    private EventServiceImpl eventService;
+&nbsp;
+&nbsp;    private static final String USER_ID   = &quot;user-001&quot;;
+&nbsp;    private static final String EVENT_ID  = &quot;event-001&quot;;
+&nbsp;    private static final String SCHED_ID  = &quot;sched-001&quot;;
+&nbsp;
+&nbsp;    private Event sampleEvent;
+&nbsp;    private EventResponseDto sampleEventResponse;
+&nbsp;    private EventRequestDto sampleEventRequest;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        sampleEvent = Event.builder()</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .name(&quot;Test Event&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .startDate(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                .endDate(LocalDate.now().plusDays(5))</b>
+<b class="fc">&nbsp;                .status(EventStatus.draft)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleEventResponse = EventResponseDto.builder()</b>
+<b class="fc">&nbsp;                .id(EVENT_ID)</b>
+<b class="fc">&nbsp;                .eventName(&quot;Test Event&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .startAt(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                .endAt(LocalDate.now().plusDays(5).toString())</b>
+<b class="fc">&nbsp;                .status(EventStatus.draft)</b>
+<b class="fc">&nbsp;                .venueId(&quot;venue-001&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleEventRequest = EventRequestDto.builder()</b>
+<b class="fc">&nbsp;                .name(&quot;Test Event&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .startDate(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                .endDate(LocalDate.now().plusDays(5))</b>
+<b class="fc">&nbsp;                .venueId(&quot;venue-001&quot;)</b>
+<b class="fc">&nbsp;                .status(EventStatus.draft)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // create
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;create()&quot;)
+<b class="fc">&nbsp;    class Create {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – saves event, logs audit, returns response DTO&quot;)
+&nbsp;        void create_happyPath() {
+<b class="fc">&nbsp;            when(eventRequestDtoMapper.toEntity(sampleEventRequest)).thenReturn(sampleEvent);</b>
+<b class="fc">&nbsp;            when(eventRepository.save(sampleEvent)).thenReturn(sampleEvent);</b>
+<b class="fc">&nbsp;            when(eventResponseDtoMapper.toDTO(sampleEvent)).thenReturn(sampleEventResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            EventResponseDto result = eventService.create(USER_ID, sampleEventRequest);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEqualTo(sampleEventResponse);</b>
+<b class="fc">&nbsp;            verify(eventRepository).save(sampleEvent);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.CREATE, Event.class, EVENT_ID);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // findAllEvents
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;findAllEvents()&quot;)
+<b class="fc">&nbsp;    class FindAllEvents {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns mapped DTOs for every stored event&quot;)
+&nbsp;        void findAllEvents_happyPath() {
+<b class="fc">&nbsp;            when(eventRepository.findAll()).thenReturn(List.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(eventResponseDtoMapper.toDTO(sampleEvent)).thenReturn(sampleEventResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            List&lt;EventResponseDto&gt; result = eventService.findAllEvents(USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).hasSize(1).containsExactly(sampleEventResponse);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.READ, Event.class, EVENT_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns empty list when no events exist&quot;)
+&nbsp;        void findAllEvents_empty() {
+<b class="fc">&nbsp;            when(eventRepository.findAll()).thenReturn(List.of());</b>
+&nbsp;
+<b class="fc">&nbsp;            List&lt;EventResponseDto&gt; result = eventService.findAllEvents(USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEmpty();</b>
+<b class="fc">&nbsp;            verifyNoMoreInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // findById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;findById()&quot;)
+<b class="fc">&nbsp;    class FindById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – finds event and returns response DTO&quot;)
+&nbsp;        void findById_happyPath() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(eventResponseDtoMapper.toDTO(sampleEvent)).thenReturn(sampleEventResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            EventResponseDto result = eventService.findById(EVENT_ID, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEqualTo(sampleEventResponse);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.READ, Event.class, EVENT_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when event does not exist&quot;)
+&nbsp;        void findById_notFound() {
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; eventService.findById(EVENT_ID, USER_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verifyNoInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // updateById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;updateById()&quot;)
+<b class="fc">&nbsp;    class UpdateById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – updates event, logs audit, returns true&quot;)
+&nbsp;        void updateById_happyPath() {
+<b class="fc">&nbsp;            when(eventRepository.existsById(EVENT_ID)).thenReturn(true);</b>
+<b class="fc">&nbsp;            when(eventRequestDtoMapper.toEntity(sampleEventRequest)).thenReturn(sampleEvent);</b>
+<b class="fc">&nbsp;            when(eventRepository.save(any(Event.class))).thenReturn(sampleEvent);</b>
+&nbsp;
+<b class="fc">&nbsp;            boolean result = eventService.updateById(EVENT_ID, sampleEventRequest, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isTrue();</b>
+<b class="fc">&nbsp;            verify(eventRepository).save(any(Event.class));</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.UPDATE, Event.class, EVENT_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when event does not exist&quot;)
+&nbsp;        void updateById_notFound() {
+<b class="fc">&nbsp;            when(eventRepository.existsById(EVENT_ID)).thenReturn(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; eventService.updateById(EVENT_ID, sampleEventRequest, USER_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(eventRepository, never()).save(any());</b>
+<b class="fc">&nbsp;            verifyNoInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // deleteById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;deleteById()&quot;)
+<b class="fc">&nbsp;    class DeleteById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – deletes event, logs audit, returns true&quot;)
+&nbsp;        void deleteById_happyPath() {
+<b class="fc">&nbsp;            when(eventRepository.existsById(EVENT_ID)).thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            boolean result = eventService.deleteById(EVENT_ID, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isTrue();</b>
+<b class="fc">&nbsp;            verify(eventRepository).deleteById(EVENT_ID);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.DELETE, Event.class, EVENT_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when event does not exist&quot;)
+&nbsp;        void deleteById_notFound() {
+<b class="fc">&nbsp;            when(eventRepository.existsById(EVENT_ID)).thenReturn(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; eventService.deleteById(EVENT_ID, USER_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(eventRepository, never()).deleteById(any());</b>
+<b class="fc">&nbsp;            verifyNoInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // addActivity
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;addActivity()&quot;)
+<b class="fc">&nbsp;    class AddActivity {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – adds schedule to existing event and returns response DTO&quot;)
+&nbsp;        void addActivity_happyPath() {
+<b class="fc">&nbsp;            ScheduleRequestDto scheduleRequest = ScheduleRequestDto.builder()</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(2))</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Keynote Speech&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            Schedule schedule = Schedule.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .event(sampleEvent)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(2))</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Keynote Speech&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(2).toString())</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Keynote Speech&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(scheduleRequestDtoMapper.toEntity(scheduleRequest, sampleEvent)).thenReturn(schedule);</b>
+<b class="fc">&nbsp;            when(scheduleRepository.save(schedule)).thenReturn(schedule);</b>
+<b class="fc">&nbsp;            when(scheduleResponseDtoMapper.toDTO(schedule)).thenReturn(scheduleResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            ScheduleResponseDto result = eventService.addActivity(EVENT_ID, scheduleRequest, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEqualTo(scheduleResponse);</b>
+<b class="fc">&nbsp;            verify(scheduleRepository).save(schedule);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.CREATE, Schedule.class, SCHED_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when parent event does not exist&quot;)
+&nbsp;        void addActivity_eventNotFound() {
+<b class="fc">&nbsp;            ScheduleRequestDto scheduleRequest = ScheduleRequestDto.builder()</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Panel&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.draft)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; eventService.addActivity(EVENT_ID, scheduleRequest, USER_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(scheduleRepository, never()).save(any());</b>
+<b class="fc">&nbsp;            verifyNoInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // findAllSchedules
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;findAllSchedules()&quot;)
+<b class="fc">&nbsp;    class FindAllSchedules {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns only schedules belonging to the requested event&quot;)
+&nbsp;        void findAllSchedules_happyPath() {
+<b class="fc">&nbsp;            Schedule schedule = Schedule.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .event(sampleEvent)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;10:00-11:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Workshop&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;10:00-11:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Workshop&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(scheduleRepository.findAll()).thenReturn(List.of(schedule));</b>
+<b class="fc">&nbsp;            when(scheduleResponseDtoMapper.toDTO(schedule)).thenReturn(scheduleResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            List&lt;ScheduleResponseDto&gt; result = eventService.findAllSchedules(EVENT_ID, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).hasSize(1).containsExactly(scheduleResponse);</b>
+<b class="fc">&nbsp;            verify(auditService).logAudit(USER_ID, AuditAction.READ, Schedule.class, SCHED_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns empty list when no schedules match the event ID&quot;)
+&nbsp;        void findAllSchedules_noMatchingSchedules() {
+<b class="fc">&nbsp;            Event otherEvent = Event.builder().eventId(&quot;other-event&quot;).build();</b>
+<b class="fc">&nbsp;            Schedule otherSchedule = Schedule.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(&quot;other-sched&quot;)</b>
+<b class="fc">&nbsp;                    .event(otherEvent)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(scheduleRepository.findAll()).thenReturn(List.of(otherSchedule));</b>
+&nbsp;
+<b class="fc">&nbsp;            List&lt;ScheduleResponseDto&gt; result = eventService.findAllSchedules(EVENT_ID, USER_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEmpty();</b>
+<b class="fc">&nbsp;            verifyNoInteractions(auditService);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

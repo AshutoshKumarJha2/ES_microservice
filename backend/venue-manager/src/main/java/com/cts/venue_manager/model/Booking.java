@@ -38,8 +38,8 @@ public class Booking {
     private LocalDate date;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, columnDefinition = "ENUM('pending','confirmed','cancelled')")
-    private BookingStatus status = BookingStatus.pending;
+    @Column(name = "status", nullable = false, columnDefinition = "ENUM('PENDING','CONFIRMED','CANCELLED')")
+    private BookingStatus status = BookingStatus.PENDING;
 
     @CreationTimestamp
     @Column(name = "createdAt", updatable = false)

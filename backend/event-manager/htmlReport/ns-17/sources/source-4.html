@@ -1,0 +1,139 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > Registration</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.model</a>
+</div>
+
+<h1>Coverage Summary for Class: Registration (com.cts.eventsphere.eventmanager.model)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">Registration$HibernateInstantiator</td>
+  </tr>
+  <tr>
+    <td class="name">Registration$HibernateProxy</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.model;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
+&nbsp;import jakarta.persistence.*;
+&nbsp;import lombok.AllArgsConstructor;
+&nbsp;import lombok.Builder;
+&nbsp;import lombok.Data;
+&nbsp;import lombok.NoArgsConstructor;
+&nbsp;import org.hibernate.annotations.CreationTimestamp;
+&nbsp;import org.hibernate.annotations.DynamicInsert;
+&nbsp;import org.hibernate.annotations.UpdateTimestamp;
+&nbsp;import org.hibernate.annotations.UuidGenerator;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;
+&nbsp;/**
+&nbsp; * Entity representing an attendee&#39;s registration for an {@link Event}.
+&nbsp; *
+&nbsp; * &lt;p&gt;Links an attendee to an event through a selected {@link Ticket}.
+&nbsp; * An attendee can only register once per event (enforced by unique constraint on eventId + attendeeId).&lt;/p&gt;
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@Data
+&nbsp;@NoArgsConstructor
+&nbsp;@AllArgsConstructor
+&nbsp;@Builder
+&nbsp;@Entity
+&nbsp;@DynamicInsert
+&nbsp;@Table(name = &quot;registration&quot;, uniqueConstraints = @UniqueConstraint(columnNames = {&quot;eventId&quot;, &quot;attendeeId&quot;}))
+&nbsp;public class Registration {
+&nbsp;
+&nbsp;    @Id
+&nbsp;    @UuidGenerator
+&nbsp;    @Column(columnDefinition = &quot;CHAR(36)&quot;)
+&nbsp;    private String registrationId;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;eventId&quot;, nullable = false)
+&nbsp;    private Event event;
+&nbsp;
+&nbsp;    @Column(nullable = false)
+&nbsp;    private String attendeeId;
+&nbsp;
+&nbsp;    @ManyToOne
+&nbsp;    @JoinColumn(name = &quot;ticketId&quot;)
+&nbsp;    private Ticket ticket;
+&nbsp;
+&nbsp;    @Column
+&nbsp;    private LocalDate date;
+&nbsp;
+&nbsp;    @Column
+&nbsp;    @Enumerated(EnumType.STRING)
+&nbsp;    private RegistrationStatus status;
+&nbsp;
+&nbsp;    @CreationTimestamp
+&nbsp;    @Column(updatable = false)
+&nbsp;    private LocalDateTime createdAt;
+&nbsp;
+&nbsp;    @UpdateTimestamp
+&nbsp;    private LocalDateTime updatedAt;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

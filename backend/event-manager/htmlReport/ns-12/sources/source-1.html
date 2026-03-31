@@ -1,0 +1,305 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > GlobalExceptionHandler</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.exception</a>
+</div>
+
+<h1>Coverage Summary for Class: GlobalExceptionHandler (com.cts.eventsphere.eventmanager.exception)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">GlobalExceptionHandler</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    55%
+  </span>
+  <span class="absValue">
+    (11/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    87.5%
+  </span>
+  <span class="absValue">
+    (7/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    62.2%
+  </span>
+  <span class="absValue">
+    (28/45)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.exception;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericErrorResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.registration.DuplicateRegistrationException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.registration.InvalidRegistrationStatusException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.registration.RegistrationNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketUnavailableException;
+&nbsp;import com.cts.eventsphere.eventmanager.service.AuditService;
+&nbsp;import jakarta.servlet.http.HttpServletRequest;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import jakarta.validation.ConstraintViolationException;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.http.converter.HttpMessageNotReadableException;
+&nbsp;import org.springframework.security.access.AccessDeniedException;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.web.HttpRequestMethodNotSupportedException;
+&nbsp;import org.springframework.web.bind.MethodArgumentNotValidException;
+&nbsp;import org.springframework.web.bind.MissingServletRequestParameterException;
+&nbsp;import org.springframework.web.bind.annotation.ExceptionHandler;
+&nbsp;import org.springframework.web.bind.annotation.RestControllerAdvice;
+&nbsp;import org.springframework.web.servlet.resource.NoResourceFoundException;
+&nbsp;
+&nbsp;import java.util.UUID;
+&nbsp;import java.util.stream.Collectors;
+&nbsp;
+&nbsp;@RestControllerAdvice
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class GlobalExceptionHandler {
+&nbsp;
+&nbsp;    private final AuditService auditService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Extracts the authenticated user&#39;s ID from the Spring Security context.
+&nbsp;     * Returns {@code &quot;anonymous&quot;} if no authenticated user is present.
+&nbsp;     *
+&nbsp;     * @return The userId string of the current principal, or {@code &quot;anonymous&quot;}.
+&nbsp;     */
+&nbsp;    private String resolveUserId() {
+<b class="fc">&nbsp;        var auth = SecurityContextHolder.getContext().getAuthentication();</b>
+<b class="pc">&nbsp;        if (auth != null &amp;&amp; auth.getPrincipal() instanceof UserPrincipal principal) {</b>
+<b class="fc">&nbsp;            return principal.userId();</b>
+&nbsp;        }
+<b class="fc">&nbsp;        return &quot;anonymous&quot;;</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Derives an {@link AuditAction} from the HTTP method of the request.
+&nbsp;     * Used when auditing failed operations where the original intent is inferred
+&nbsp;     * from the HTTP verb.
+&nbsp;     *
+&nbsp;     * @param request The current {@link HttpServletRequest}.
+&nbsp;     * @return The corresponding {@link AuditAction}.
+&nbsp;     */
+&nbsp;    private AuditAction resolveActionByMethod(HttpServletRequest request) {
+<b class="fc">&nbsp;        return switch (request.getMethod().toUpperCase()) {</b>
+<b class="fc">&nbsp;            case &quot;POST&quot;         -&gt; AuditAction.CREATE;</b>
+<b class="fc">&nbsp;            case &quot;PUT&quot;, &quot;PATCH&quot; -&gt; AuditAction.UPDATE;</b>
+<b class="fc">&nbsp;            case &quot;DELETE&quot;       -&gt; AuditAction.DELETE;</b>
+<b class="fc">&nbsp;            default             -&gt; AuditAction.READ;</b>
+&nbsp;        };
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 400 Bad Request ──────────────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(MethodArgumentNotValidException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleValidationException(MethodArgumentNotValidException ex) {
+<b class="fc">&nbsp;        String message = ex.getBindingResult().getFieldErrors().stream()</b>
+<b class="fc">&nbsp;                .map(e -&gt; e.getField() + &quot;: &quot; + e.getDefaultMessage())</b>
+<b class="fc">&nbsp;                .collect(Collectors.joining(&quot;, &quot;));</b>
+<b class="fc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(message));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(HttpMessageNotReadableException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleMessageNotReadable(HttpMessageNotReadableException ex) {
+<b class="nc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(&quot;Malformed or unreadable request body&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(MissingServletRequestParameterException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleMissingParam(MissingServletRequestParameterException ex) {
+<b class="nc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(&quot;Missing required parameter: &quot; + ex.getParameterName()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(ConstraintViolationException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleConstraintViolation(ConstraintViolationException ex) {
+<b class="nc">&nbsp;        String message = ex.getConstraintViolations().stream()</b>
+<b class="nc">&nbsp;                .map(v -&gt; v.getPropertyPath() + &quot;: &quot; + v.getMessage())</b>
+<b class="nc">&nbsp;                .collect(Collectors.joining(&quot;, &quot;));</b>
+<b class="nc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(message));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(IllegalArgumentException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleIllegalArgument(IllegalArgumentException ex) {
+<b class="nc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(ex.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(InvalidRegistrationStatusException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleInvalidRegistrationStatus(InvalidRegistrationStatusException e,
+&nbsp;                                                                                HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, &quot;Registration&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.badRequest().body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 403 Forbidden ────────────────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(AccessDeniedException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
+<b class="nc">&nbsp;        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, &quot;Request&quot;, request.getRequestURI());</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new GenericErrorResponse(&quot;Access denied&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 404 Not Found ────────────────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(NoResourceFoundException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleNoResourceFound(NoResourceFoundException ex) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(ex.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(EventNotFoundException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleEventNotFound(EventNotFoundException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), &quot;Event&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(&quot;Event not found&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(ScheduleNotFoundException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleScheduleNotFound(ScheduleNotFoundException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), &quot;Schedule&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(&quot;Schedule not found&quot;));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(TicketNotFoundException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleTicketNotFound(TicketNotFoundException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), &quot;Ticket&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(RegistrationNotFoundException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleRegistrationNotFound(RegistrationNotFoundException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), &quot;Registration&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 405 Method Not Allowed ───────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(new GenericErrorResponse(&quot;HTTP method not supported: &quot; + ex.getMethod()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 409 Conflict ─────────────────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(TicketAlreadyExistsException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleTicketAlreadyExists(TicketAlreadyExistsException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), AuditAction.CREATE, &quot;Ticket&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @ExceptionHandler(DuplicateRegistrationException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleDuplicateRegistration(DuplicateRegistrationException e, HttpServletRequest request) {
+<b class="fc">&nbsp;        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, &quot;Registration&quot;, request.getRequestURI());</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 422 Unprocessable Entity ─────────────────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(TicketUnavailableException.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleTicketUnavailable(TicketUnavailableException e, HttpServletRequest request) {
+<b class="nc">&nbsp;        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, &quot;Ticket&quot;, request.getRequestURI());</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new GenericErrorResponse(e.getMessage()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // ── 500 Internal Server Error (catch-all) ────────────────────────────────
+&nbsp;
+&nbsp;    @ExceptionHandler(Exception.class)
+&nbsp;    public ResponseEntity&lt;GenericErrorResponse&gt; handleUnexpected(Exception ex) {
+<b class="nc">&nbsp;        String traceId = UUID.randomUUID().toString();</b>
+<b class="nc">&nbsp;        log.error(&quot;Unhandled exception. traceId={}&quot;, traceId, ex);</b>
+<b class="nc">&nbsp;        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)</b>
+<b class="nc">&nbsp;                .body(new GenericErrorResponse(&quot;An unexpected error occurred. Please contact support with traceId: &quot; + traceId));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

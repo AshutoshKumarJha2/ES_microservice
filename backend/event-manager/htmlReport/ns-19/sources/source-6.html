@@ -1,0 +1,119 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditService (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">AuditService$MockitoMock$JxDwj6QL</td>
+  </tr>
+  <tr>
+    <td class="name">AuditService$MockitoMock$JxDwj6QL$auxiliary$HA2U5mrc</td>
+  </tr>
+  <tr>
+    <td class="name">AuditService$MockitoMock$JxDwj6QL$auxiliary$UbWiZE4C</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+&nbsp;
+&nbsp;/**
+&nbsp; * AuditService is responsible for recording audit trail entries for significant
+&nbsp; * actions performed within the event-manager. It delegates persistence to the
+&nbsp; * log-manager microservice via a Feign client.
+&nbsp; * All implementations must ensure that failures to reach the log-manager never
+&nbsp; * propagate to the calling business operation.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-28
+&nbsp; */
+&nbsp;public interface AuditService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Records an audit log entry for the given actor, action, entity type, and entity ID.
+&nbsp;     * Failures are swallowed so the caller&#39;s operation is never interrupted.
+&nbsp;     *
+&nbsp;     * @param userId      The ID of the user performing the action.
+&nbsp;     * @param action      The {@link AuditAction} representing the type of operation performed.
+&nbsp;     * @param entityClass The class of the entity affected (e.g. {@code Event.class},
+&nbsp;     *                    {@code Schedule.class}). Its simple name is used as the entity name.
+&nbsp;     * @param entityId    The unique identifier of the affected entity.
+&nbsp;     */
+&nbsp;    void logAudit(String userId, AuditAction action, Class&lt;?&gt; entityClass, String entityId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Records an audit log entry using a plain string entity name.
+&nbsp;     * Intended for use in contexts where no {@link Class} object is available,
+&nbsp;     * such as a global exception handler.
+&nbsp;     * Failures are swallowed so the caller&#39;s operation is never interrupted.
+&nbsp;     *
+&nbsp;     * @param userId     The ID of the user performing the action.
+&nbsp;     * @param action     The {@link AuditAction} representing the type of operation performed.
+&nbsp;     * @param entityName The name of the entity type affected (e.g. {@code &quot;Event&quot;}, {@code &quot;Ticket&quot;}).
+&nbsp;     * @param entityId   The unique identifier or request URI of the affected resource.
+&nbsp;     */
+&nbsp;    void logAudit(String userId, AuditAction action, String entityName, String entityId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

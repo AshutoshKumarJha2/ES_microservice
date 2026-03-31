@@ -1,0 +1,160 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditLogMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.logmanager.dto.mapper.auditlog</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditLogMapper (com.cts.eventsphere.logmanager.dto.mapper.auditlog)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuditLogMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    66.7%
+  </span>
+  <span class="absValue">
+    (2/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    92.9%
+  </span>
+  <span class="absValue">
+    (13/14)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.logmanager.dto.mapper.auditlog;
+&nbsp;
+&nbsp;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditLogRequestDTO;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditResponseDTO;
+&nbsp;import com.cts.eventsphere.logmanager.model.AuditLog;
+&nbsp;
+&nbsp;import java.time.LocalDateTime;
+&nbsp;
+&nbsp;/**
+&nbsp; * AuditLogMapper is a utility class responsible for mapping AuditLog entities
+&nbsp; * to their respective Data Transfer Objects (DTOs).
+&nbsp; * * This class facilitates the decoupling of the internal database schema from
+&nbsp; * the external API responses.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-08
+&nbsp; */
+<b class="nc">&nbsp;public class AuditLogMapper {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Converts an {@link AuditLog} entity into an {@link AuditResponseDTO}.
+&nbsp;     * This method extracts user details and action metadata to provide a
+&nbsp;     * flattened view for API consumers.
+&nbsp;     *
+&nbsp;     * @param audit The source {@link AuditLog} entity to be converted.
+&nbsp;     * @return A constructed {@link AuditResponseDTO} containing the audit details.
+&nbsp;     */
+&nbsp;    public static AuditResponseDTO toDTO(AuditLog audit){
+<b class="fc">&nbsp;        return AuditResponseDTO.builder()</b>
+<b class="fc">&nbsp;                .auditId(audit.getAuditId())</b>
+<b class="fc">&nbsp;                .userId(audit.getUserId())</b>
+<b class="fc">&nbsp;                .action(audit.getAction())</b>
+<b class="fc">&nbsp;                .entityId(audit.getEntityId())</b>
+<b class="fc">&nbsp;                .entityName(audit.getEntityName())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Helper method to create audit log object from dto
+&nbsp;     *
+&nbsp;     * @param dto the service request dto
+&nbsp;     * @param actorId the user who is requesting
+&nbsp;     * @return {@link AuditLog}
+&nbsp;     */
+&nbsp;    public static AuditLog fromDTO(AuditLogRequestDTO dto, String actorId){
+<b class="fc">&nbsp;        return AuditLog.builder()</b>
+<b class="fc">&nbsp;                .userId(actorId)</b>
+<b class="fc">&nbsp;                .action(dto.action().name())</b>
+<b class="fc">&nbsp;                .entityId(dto.entityId())</b>
+<b class="fc">&nbsp;                .entityName(dto.entityName())</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 18:09</div>
+</div>
+</body>
+</html>

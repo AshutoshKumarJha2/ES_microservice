@@ -1,0 +1,129 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketDtoMapper</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.dto.mapper.ticket</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketDtoMapper (com.cts.eventsphere.eventmanager.dto.mapper.ticket)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TicketDtoMapper</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    85.7%
+  </span>
+  <span class="absValue">
+    (6/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.dto.mapper.ticket;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Ticket;
+&nbsp;
+&nbsp;/**
+&nbsp; * Utility class for mapping {@link Ticket} entities to DTOs.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;
+<b class="nc">&nbsp;public class TicketDtoMapper {</b>
+&nbsp;
+&nbsp;    public static TicketResponseDto toDto(Ticket ticket) {
+<b class="fc">&nbsp;        return new TicketResponseDto(</b>
+<b class="fc">&nbsp;                ticket.getTicketId(),</b>
+<b class="fc">&nbsp;                ticket.getEvent().getEventId(),</b>
+<b class="fc">&nbsp;                ticket.getType(),</b>
+<b class="fc">&nbsp;                ticket.getPrice().doubleValue(),</b>
+<b class="fc">&nbsp;                ticket.getStatus()</b>
+&nbsp;        );
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>
