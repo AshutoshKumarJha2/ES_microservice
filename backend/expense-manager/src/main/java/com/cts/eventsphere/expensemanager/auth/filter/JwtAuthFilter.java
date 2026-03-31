@@ -49,7 +49,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             UserPrincipal principal = authService.validate(authHeader);
-
+            log.info("Extracted user principal {}", principal);
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                             principal, null, principal.authorities());
@@ -60,6 +60,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         } catch (ResponseStatusException e) {
             // IAM rejected the token — SecurityContext stays empty, Spring Security blocks the request
             log.error("Token validation failed: {}", e.getReason());
+            log.error("Token validation failed: {}", e.getMessage());
         } catch (Exception e) {
             // IAM unreachable or unexpected error — fail safely
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);

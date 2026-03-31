@@ -144,7 +144,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional
     public ExpenseResponseDto updateExpenseStatus(String actorId, String expenseId, ExpenseStatus status) {
-        log.info("Updating expenseId: {} to status: {} by actorId: {}", expenseId, status, actorId);
+        log.info("Updating expenseId: {} to  status: {} by actorId: {}", expenseId, status, actorId);
 
         Expense expense = findExpenseOrThrow(expenseId);
 
