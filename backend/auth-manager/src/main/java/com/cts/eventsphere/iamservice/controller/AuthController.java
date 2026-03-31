@@ -94,8 +94,4 @@ public class AuthController {
         return ResponseEntity.ok(authService.validateToken(authHeader));
     }
 
-    @PostMapping("/users/userdetails")
-    public ResponseEntity<List<UserResponseDto>> getUserDetails(@RequestBody List<String> userIds) {
-        return ResponseEntity.ok(userService.getUsers(userIds));
-    }
 }
