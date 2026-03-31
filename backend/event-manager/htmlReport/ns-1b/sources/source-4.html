@@ -1,0 +1,102 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: EventRepository (com.cts.eventsphere.eventmanager.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$yD6LmqeG</td>
+  </tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$yD6LmqeG$auxiliary$3LgOQ7Xm</td>
+  </tr>
+  <tr>
+    <td class="name">EventRepository$MockitoMock$yD6LmqeG$auxiliary$Gjc2w181</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.repository;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;/**
+&nbsp; * JPA Repository for the Event Entity.
+&nbsp; * * @author 2479623
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; * @since 25-03-2026
+&nbsp; */
+&nbsp;@Repository
+&nbsp;public interface EventRepository extends JpaRepository&lt;Event, String&gt; {
+&nbsp;    /**
+&nbsp;     * Finds an event by its unique identifier.
+&nbsp;     * This method queries the underlying data source to retrieve the event
+&nbsp;     * associated with the given event ID.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to be retrieved
+&nbsp;     * @return the Event object corresponding to the provided ID, if found
+&nbsp;     */
+&nbsp;    Event findByEventId(String eventId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

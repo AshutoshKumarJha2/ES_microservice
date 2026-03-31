@@ -1,0 +1,204 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EmailServiceImplTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.logmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: EmailServiceImplTest (com.cts.eventsphere.logmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EmailServiceImplTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EmailServiceImplTest$SendNotificationEmail</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (2/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.logmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.logmanager.service.impl.EmailServiceImpl;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.mail.SimpleMailMessage;
+&nbsp;import org.springframework.mail.javamail.JavaMailSender;
+&nbsp;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class EmailServiceImplTest {</b>
+&nbsp;
+&nbsp;    @Mock private JavaMailSender mailSender;
+&nbsp;    @InjectMocks private EmailServiceImpl emailService;
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // sendNotificationEmail
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;sendNotificationEmail(to, subject, body)&quot;)
+<b class="fc">&nbsp;    class SendNotificationEmail {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – delegates to JavaMailSender with correct message fields&quot;)
+&nbsp;        void send_happyPath_callsMailSender() {
+<b class="fc">&nbsp;            emailService.sendNotificationEmail(&quot;user@example.com&quot;, &quot;Hello&quot;, &quot;Message body&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(mailSender).send(argThat((SimpleMailMessage msg) -&gt;</b>
+<b class="pc">&nbsp;                    &quot;user@example.com&quot;.equals(msg.getTo()[0]) &amp;&amp;</b>
+<b class="pc">&nbsp;                    &quot;Hello&quot;.equals(msg.getSubject()) &amp;&amp;</b>
+<b class="fc">&nbsp;                    &quot;Message body&quot;.equals(msg.getText())</b>
+&nbsp;            ));
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;swallows exception – does not propagate when mail send fails&quot;)
+&nbsp;        void send_mailSenderThrows_doesNotPropagate() {
+<b class="fc">&nbsp;            doThrow(new RuntimeException(&quot;SMTP connection refused&quot;))</b>
+<b class="fc">&nbsp;                    .when(mailSender).send(any(SimpleMailMessage.class));</b>
+&nbsp;
+&nbsp;            // must not throw
+<b class="fc">&nbsp;            emailService.sendNotificationEmail(&quot;user@example.com&quot;, &quot;Subject&quot;, &quot;Body&quot;);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(mailSender).send(any(SimpleMailMessage.class));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 18:02</div>
+</div>
+</body>
+</html>

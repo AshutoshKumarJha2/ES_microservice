@@ -1,0 +1,144 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegistrationRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: RegistrationRepository (com.cts.eventsphere.eventmanager.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">RegistrationRepository$MockitoMock$4pv7OGD3</td>
+  </tr>
+  <tr>
+    <td class="name">RegistrationRepository$MockitoMock$4pv7OGD3$auxiliary$2Kk0SgRi</td>
+  </tr>
+  <tr>
+    <td class="name">RegistrationRepository$MockitoMock$4pv7OGD3$auxiliary$Ecunbv8q</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.repository;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Registration;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.Pageable;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * JPA Repository for the {@link Registration} entity.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@Repository
+&nbsp;public interface RegistrationRepository extends JpaRepository&lt;Registration, String&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of all registrations for the given event.
+&nbsp;     *
+&nbsp;     * @param eventId  the ID of the event
+&nbsp;     * @param pageable pagination and sorting information
+&nbsp;     * @return page of registrations for the event
+&nbsp;     */
+&nbsp;    Page&lt;Registration&gt; findByEventEventId(String eventId, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of registrations for the given event filtered by status.
+&nbsp;     *
+&nbsp;     * @param eventId  the ID of the event
+&nbsp;     * @param status   the registration status to filter by
+&nbsp;     * @param pageable pagination and sorting information
+&nbsp;     * @return page of registrations matching the event and status
+&nbsp;     */
+&nbsp;    Page&lt;Registration&gt; findByEventEventIdAndStatus(String eventId, RegistrationStatus status, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of registrations made by the given attendee.
+&nbsp;     *
+&nbsp;     * @param attendeeId the ID of the attendee
+&nbsp;     * @param pageable   pagination and sorting information
+&nbsp;     * @return page of registrations for the attendee
+&nbsp;     */
+&nbsp;    Page&lt;Registration&gt; findByAttendeeId(String attendeeId, Pageable pageable);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks whether a registration already exists for the given event and attendee.
+&nbsp;     *
+&nbsp;     * @param eventId    the ID of the event
+&nbsp;     * @param attendeeId the ID of the attendee
+&nbsp;     * @return {@code true} if a registration exists, {@code false} otherwise
+&nbsp;     */
+&nbsp;    boolean existsByEventEventIdAndAttendeeId(String eventId, String attendeeId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds a registration by attendee ID and event ID.
+&nbsp;     *
+&nbsp;     * @param attendeeId the ID of the attendee
+&nbsp;     * @param eventId    the ID of the event
+&nbsp;     * @return an {@link Optional} containing the matching registration, or empty if not found
+&nbsp;     */
+&nbsp;    Optional&lt;Registration&gt; findByAttendeeIdAndEventEventId(String attendeeId, String eventId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

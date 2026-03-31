@@ -8,5 +8,5 @@ package com.cts.eventsphere.eventmanager.model.data;
  * @since 25-03-2026
  */
 public enum EventStatus {
-    draft, published, completed, cancelled
+    DRAFT, PUBLISHED, COMPLETED, CANCELLED
 }

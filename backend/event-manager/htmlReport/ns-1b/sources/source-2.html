@@ -1,0 +1,116 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketRepository</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.repository</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketRepository (com.cts.eventsphere.eventmanager.repository)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">TicketRepository$MockitoMock$mIz9pId8</td>
+  </tr>
+  <tr>
+    <td class="name">TicketRepository$MockitoMock$mIz9pId8$auxiliary$aIY9CPSB</td>
+  </tr>
+  <tr>
+    <td class="name">TicketRepository$MockitoMock$mIz9pId8$auxiliary$kqHWe4aV</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.repository;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Ticket;
+&nbsp;import org.springframework.data.domain.Page;
+&nbsp;import org.springframework.data.domain.PageRequest;
+&nbsp;import org.springframework.data.jpa.repository.JpaRepository;
+&nbsp;import org.springframework.stereotype.Repository;
+&nbsp;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;/**
+&nbsp; * JPA Repository for the {@link Ticket} entity.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@Repository
+&nbsp;public interface TicketRepository extends JpaRepository&lt;Ticket, String&gt; {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of tickets associated with the given event.
+&nbsp;     *
+&nbsp;     * @param eventId     the ID of the event
+&nbsp;     * @param pageRequest pagination information
+&nbsp;     * @return page of tickets for the event
+&nbsp;     */
+&nbsp;    Page&lt;Ticket&gt; findByEventEventId(String eventId, PageRequest pageRequest);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Finds a ticket by event ID and ticket type.
+&nbsp;     * Used to enforce uniqueness of ticket types per event.
+&nbsp;     *
+&nbsp;     * @param eventId the ID of the event
+&nbsp;     * @param type    the ticket type (e.g., &quot;vip&quot;, &quot;general&quot;)
+&nbsp;     * @return an {@link Optional} containing the matching ticket, or empty if not found
+&nbsp;     */
+&nbsp;    Optional&lt;Ticket&gt; findByEventEventIdAndType(String eventId, String type);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

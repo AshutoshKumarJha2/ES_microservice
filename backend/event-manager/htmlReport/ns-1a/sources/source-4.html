@@ -1,0 +1,225 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScheduleServiceImpl</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service.impl</a>
+</div>
+
+<h1>Coverage Summary for Class: ScheduleServiceImpl (com.cts.eventsphere.eventmanager.service.impl)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ScheduleServiceImpl</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service.impl;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Schedule;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.ScheduleService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.stereotype.Service;
+&nbsp;
+&nbsp;/**
+&nbsp; * Implementation for Service of Schedule Entity.
+&nbsp; * Provides business logic for updating and deleting schedules associated with events,
+&nbsp; * and triggers notifications with dynamic schedule details.
+&nbsp; *
+&nbsp; * @author 2479623
+&nbsp; * @version 1.1
+&nbsp; * @since 26-03-2026
+&nbsp; */
+&nbsp;@Service
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class ScheduleServiceImpl implements ScheduleService {
+&nbsp;    private final ScheduleRepository scheduleRepository;
+&nbsp;    private final EventRepository eventRepository;
+&nbsp;    private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
+&nbsp;    private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+&nbsp;//    private final NotificationService notificationService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates an existing schedule by its unique identifier within a specific event
+&nbsp;     * and triggers a notification with updated schedule details.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to which the schedule belongs
+&nbsp;     * @param id the unique identifier of the schedule to update
+&nbsp;     * @param scheduleRequest the DTO containing updated schedule details
+&nbsp;     * @return the response DTO representing the updated schedule
+&nbsp;     * @throws ScheduleNotFoundException if no schedule exists with the given ID
+&nbsp;     * @throws EventNotFoundException if the parent event does not exist
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public ScheduleResponseDto updateById(String eventId, String id, ScheduleRequestDto scheduleRequest) throws ScheduleNotFoundException {
+<b class="fc">&nbsp;        log.info(&quot;Attempting to update schedule ID: {} for event ID: {}&quot;, id, eventId);</b>
+&nbsp;
+<b class="fc">&nbsp;        if(!scheduleRepository.existsById(id)) {</b>
+<b class="fc">&nbsp;            log.error(&quot;Update failed: Schedule with ID {} does not exist&quot;, id);</b>
+<b class="fc">&nbsp;            throw new ScheduleNotFoundException(id);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        Event event = eventRepository.findById(eventId)</b>
+<b class="fc">&nbsp;                .orElseThrow(() -&gt; {</b>
+<b class="fc">&nbsp;                    log.error(&quot;Update failed: Event with ID {} not found&quot;, eventId);</b>
+<b class="fc">&nbsp;                    return new EventNotFoundException(eventId);</b>
+&nbsp;                });
+&nbsp;
+<b class="fc">&nbsp;        log.debug(&quot;Mapping ScheduleRequestDto to Schedule entity for ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        Schedule schedule = scheduleRequestDtoMapper.toEntity(scheduleRequest, event);</b>
+<b class="fc">&nbsp;        schedule.setScheduleId(id);</b>
+&nbsp;
+<b class="fc">&nbsp;        Schedule updatedSchedule = scheduleRepository.save(schedule);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully saved updated schedule ID: {}&quot;, updatedSchedule.getScheduleId());</b>
+&nbsp;
+&nbsp;//        notificationService.sendNotification(
+&nbsp;//                event.getOrganizerId(),
+&nbsp;//                &quot;Schedule Updated for Event: &quot; + event.getName() +
+&nbsp;//                        &quot; | Date: &quot; + scheduleRequest.date() +
+&nbsp;//                        &quot; | Time Slot: &quot; + scheduleRequest.timeSlot() +
+&nbsp;//                        &quot; | Activity: &quot; + scheduleRequest.activity(),
+&nbsp;//                scheduleRequest.status().name()
+&nbsp;//        );
+&nbsp;
+<b class="fc">&nbsp;        return scheduleResponseDtoMapper.toDTO(updatedSchedule);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes a schedule by its unique identifier and triggers a notification.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the schedule to delete
+&nbsp;     * @return true if the deletion was successful, false otherwise
+&nbsp;     * @throws ScheduleNotFoundException if no schedule exists with the given ID
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public boolean deleteById(String id) throws ScheduleNotFoundException {
+<b class="fc">&nbsp;        log.info(&quot;Attempting to delete schedule with ID: {}&quot;, id);</b>
+&nbsp;
+<b class="fc">&nbsp;        if(!scheduleRepository.existsById(id)) {</b>
+<b class="fc">&nbsp;            log.warn(&quot;Delete aborted: Schedule ID {} not found in repository&quot;, id);</b>
+<b class="fc">&nbsp;            throw new ScheduleNotFoundException(id);</b>
+&nbsp;        }
+&nbsp;
+<b class="fc">&nbsp;        scheduleRepository.deleteById(id);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully deleted schedule with ID: {}&quot;, id);</b>
+&nbsp;
+&nbsp;//        notificationService.sendNotification(
+&nbsp;//                id,
+&nbsp;//                &quot;Schedule Deleted with ID: &quot; + id,
+&nbsp;//                &quot;SCHEDULE&quot;
+&nbsp;//        );
+&nbsp;
+<b class="fc">&nbsp;        return true;</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

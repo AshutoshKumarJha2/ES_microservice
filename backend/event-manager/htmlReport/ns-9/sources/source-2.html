@@ -1,0 +1,142 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventResponseDto</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.dto.event</a>
+</div>
+
+<h1>Coverage Summary for Class: EventResponseDto (com.cts.eventsphere.eventmanager.dto.event)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventResponseDto</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.dto.event;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.EventStatus;
+&nbsp;import jakarta.validation.constraints.NotBlank;
+&nbsp;import jakarta.validation.constraints.NotNull;
+&nbsp;import lombok.Builder;
+&nbsp;
+&nbsp;/**
+&nbsp; * DTO for Event Entity.
+&nbsp; * * @author 2479623
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; * @since 26-03-2026
+&nbsp; */
+<b class="fc">&nbsp;@Builder</b>
+<b class="fc">&nbsp;public record EventResponseDto(</b>
+&nbsp;        @NotBlank(message = &quot;Event ID must not be blank&quot;)
+&nbsp;        String id,
+&nbsp;
+&nbsp;        @NotBlank(message = &quot;Event name must not be blank&quot;)
+&nbsp;        String eventName,
+&nbsp;
+&nbsp;        @NotBlank(message = &quot;Organizer ID must not be blank&quot;)
+&nbsp;        String organizerId,
+&nbsp;
+&nbsp;        @NotBlank(message = &quot;Start time must not be blank&quot;)
+&nbsp;        String startAt,
+&nbsp;
+&nbsp;        @NotBlank(message = &quot;End time must not be blank&quot;)
+&nbsp;        String endAt,
+&nbsp;
+&nbsp;        @NotNull(message = &quot;Event status must not be null&quot;)
+&nbsp;        EventStatus status,
+&nbsp;
+&nbsp;        @NotBlank(message = &quot;Venue ID must not be blank&quot;)
+&nbsp;        String venueId
+&nbsp;) {
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

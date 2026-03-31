@@ -48,8 +48,8 @@ public class Schedule {
     private String activity;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('draft','active','completed','terminated')")
-    private ScheduleStatus status = ScheduleStatus.draft;
+    @Column(columnDefinition = "ENUM('DRAFT','ACTIVE','COMPLETED','TERMINATED')")
+    private ScheduleStatus status = ScheduleStatus.DRAFT;
 
     @CreationTimestamp
     @Column(updatable = false)

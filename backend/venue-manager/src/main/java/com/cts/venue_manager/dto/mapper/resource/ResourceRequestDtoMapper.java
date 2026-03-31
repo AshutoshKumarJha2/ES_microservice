@@ -35,7 +35,7 @@ public class ResourceRequestDtoMapper {
         resource.setType(dto.type());
         resource.setCostRate(dto.costRate());
 
-        resource.setAvailability(Availability.available);
+        resource.setAvailability(Availability.AVAILABLE);
 
         return resource;
     }

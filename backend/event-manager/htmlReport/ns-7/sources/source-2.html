@@ -1,0 +1,618 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventControllerTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: EventControllerTest (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventControllerTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (24/24)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EventControllerTest$CreateActivity</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (27/27)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$CreateEvent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (18/18)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$DeleteEvent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$GetAllActivities</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$GetAllEvents</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$GetEventById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">EventControllerTest$UpdateEvent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/17)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (23/23)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (128/128)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fasterxml.jackson.databind.SerializationFeature;
+&nbsp;import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.GlobalExceptionHandler;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.EventStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.service.AuditService;
+&nbsp;import com.cts.eventsphere.eventmanager.service.EventService;
+&nbsp;import org.junit.jupiter.api.AfterEach;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+&nbsp;import org.springframework.test.web.servlet.MockMvc;
+&nbsp;import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import static org.hamcrest.Matchers.*;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.ArgumentMatchers.eq;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+&nbsp;import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class EventControllerTest {</b>
+&nbsp;
+&nbsp;    @Mock private EventService eventService;
+&nbsp;    @Mock private AuditService auditService;
+&nbsp;
+&nbsp;    @InjectMocks private EventController eventController;
+&nbsp;
+&nbsp;    private MockMvc mockMvc;
+&nbsp;    private ObjectMapper objectMapper;
+&nbsp;
+&nbsp;    private static final String USER_ID  = &quot;user-001&quot;;
+&nbsp;    private static final String EVENT_ID = &quot;event-001&quot;;
+&nbsp;    private static final String SCHED_ID = &quot;sched-001&quot;;
+&nbsp;
+&nbsp;    private EventResponseDto eventResponse;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        objectMapper = new ObjectMapper()</b>
+<b class="fc">&nbsp;                .registerModule(new JavaTimeModule())</b>
+<b class="fc">&nbsp;                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);</b>
+&nbsp;
+<b class="fc">&nbsp;        mockMvc = MockMvcBuilders</b>
+<b class="fc">&nbsp;                .standaloneSetup(eventController)</b>
+<b class="fc">&nbsp;                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())</b>
+<b class="fc">&nbsp;                .setControllerAdvice(new GlobalExceptionHandler(auditService))</b>
+<b class="fc">&nbsp;                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        var principal = new UserPrincipal(USER_ID, &quot;ORGANIZER&quot;,</b>
+<b class="fc">&nbsp;                List.of(new SimpleGrantedAuthority(&quot;ROLE_ORGANIZER&quot;)));</b>
+<b class="fc">&nbsp;        SecurityContextHolder.getContext().setAuthentication(</b>
+<b class="fc">&nbsp;                new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()));</b>
+&nbsp;
+<b class="fc">&nbsp;        eventResponse = EventResponseDto.builder()</b>
+<b class="fc">&nbsp;                .id(EVENT_ID)</b>
+<b class="fc">&nbsp;                .eventName(&quot;Tech Summit&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .startAt(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                .endAt(LocalDate.now().plusDays(5).toString())</b>
+<b class="fc">&nbsp;                .status(EventStatus.published)</b>
+<b class="fc">&nbsp;                .venueId(&quot;venue-001&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @AfterEach
+&nbsp;    void tearDown() {
+<b class="fc">&nbsp;        SecurityContextHolder.clearContext();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // POST /events
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;POST /events&quot;)
+<b class="fc">&nbsp;    class CreateEvent {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 201 with created event body&quot;)
+&nbsp;        void create_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(eventService.create(eq(USER_ID), any(EventRequestDto.class))).thenReturn(eventResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;name&quot;: &quot;Tech Summit&quot;,
+&nbsp;                      &quot;organizerId&quot;: &quot;org-001&quot;,
+&nbsp;                      &quot;startDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;endDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;venueId&quot;: &quot;venue-001&quot;,
+&nbsp;                      &quot;status&quot;: &quot;published&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(</b>
+<b class="fc">&nbsp;                    LocalDate.now().plusDays(1),</b>
+<b class="fc">&nbsp;                    LocalDate.now().plusDays(5));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events&quot;)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isCreated())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.id&quot;).value(EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.eventName&quot;).value(&quot;Tech Summit&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 400 when request body is missing required fields&quot;)
+&nbsp;        void create_missingName_returns400() throws Exception {
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;organizerId&quot;: &quot;org-001&quot;,
+&nbsp;                      &quot;startDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;endDate&quot;: &quot;%s&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events&quot;)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isBadRequest());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // GET /events
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;GET /events&quot;)
+<b class="fc">&nbsp;    class GetAllEvents {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with list of events&quot;)
+&nbsp;        void readAll_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(eventService.findAllEvents(USER_ID)).thenReturn(List.of(eventResponse));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$&quot;, hasSize(1)))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$[0].id&quot;).value(EVENT_ID));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with empty list when no events exist&quot;)
+&nbsp;        void readAll_empty() throws Exception {
+<b class="fc">&nbsp;            when(eventService.findAllEvents(USER_ID)).thenReturn(List.of());</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$&quot;, hasSize(0)));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // GET /events/{id}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;GET /events/{id}&quot;)
+<b class="fc">&nbsp;    class GetEventById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with event body&quot;)
+&nbsp;        void getById_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(eventService.findById(EVENT_ID, USER_ID)).thenReturn(eventResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events/{id}&quot;, EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.id&quot;).value(EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.eventName&quot;).value(&quot;Tech Summit&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when event does not exist&quot;)
+&nbsp;        void getById_notFound() throws Exception {
+<b class="fc">&nbsp;            when(eventService.findById(EVENT_ID, USER_ID))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events/{id}&quot;, EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // PUT /events/{id}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;PUT /events/{id}&quot;)
+<b class="fc">&nbsp;    class UpdateEvent {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 204 NO_CONTENT on successful update&quot;)
+&nbsp;        void update_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(eventService.updateById(eq(EVENT_ID), any(EventRequestDto.class), eq(USER_ID)))</b>
+<b class="fc">&nbsp;                    .thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;name&quot;: &quot;Tech Summit Updated&quot;,
+&nbsp;                      &quot;organizerId&quot;: &quot;org-001&quot;,
+&nbsp;                      &quot;startDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;endDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;status&quot;: &quot;published&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(put(&quot;/events/{id}&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNoContent());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when event does not exist&quot;)
+&nbsp;        void update_notFound() throws Exception {
+<b class="fc">&nbsp;            when(eventService.updateById(eq(EVENT_ID), any(EventRequestDto.class), eq(USER_ID)))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;name&quot;: &quot;Tech Summit Updated&quot;,
+&nbsp;                      &quot;organizerId&quot;: &quot;org-001&quot;,
+&nbsp;                      &quot;startDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;endDate&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;status&quot;: &quot;published&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(put(&quot;/events/{id}&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // DELETE /events/{id}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;DELETE /events/{id}&quot;)
+<b class="fc">&nbsp;    class DeleteEvent {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 204 NO_CONTENT on successful deletion&quot;)
+&nbsp;        void delete_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(eventService.deleteById(EVENT_ID, USER_ID)).thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/events/{id}&quot;, EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNoContent());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when event does not exist&quot;)
+&nbsp;        void delete_notFound() throws Exception {
+<b class="fc">&nbsp;            when(eventService.deleteById(EVENT_ID, USER_ID))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/events/{id}&quot;, EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // POST /events/{id}/schedules
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;POST /events/{id}/schedules&quot;)
+<b class="fc">&nbsp;    class CreateActivity {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 201 with created schedule body&quot;)
+&nbsp;        void createActivity_happyPath() throws Exception {
+<b class="fc">&nbsp;            ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Keynote&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(eventService.addActivity(eq(EVENT_ID), any(ScheduleRequestDto.class), eq(USER_ID)))</b>
+<b class="fc">&nbsp;                    .thenReturn(scheduleResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;eventId&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;date&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;timeSlot&quot;: &quot;09:00-10:00&quot;,
+&nbsp;                      &quot;activity&quot;: &quot;Keynote&quot;,
+&nbsp;                      &quot;status&quot;: &quot;active&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(EVENT_ID, LocalDate.now().plusDays(1));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{id}/schedules&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isCreated())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.scheduleId&quot;).value(SCHED_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.activity&quot;).value(&quot;Keynote&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when parent event does not exist&quot;)
+&nbsp;        void createActivity_eventNotFound() throws Exception {
+<b class="fc">&nbsp;            when(eventService.addActivity(eq(EVENT_ID), any(ScheduleRequestDto.class), eq(USER_ID)))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            String body = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;eventId&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;date&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;timeSlot&quot;: &quot;09:00-10:00&quot;,
+&nbsp;                      &quot;activity&quot;: &quot;Keynote&quot;,
+&nbsp;                      &quot;status&quot;: &quot;active&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(EVENT_ID, LocalDate.now().plusDays(1));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{id}/schedules&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(body))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // GET /events/{id}/schedules
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;GET /events/{id}/schedules&quot;)
+<b class="fc">&nbsp;    class GetAllActivities {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with list of schedules&quot;)
+&nbsp;        void getAllActivity_happyPath() throws Exception {
+<b class="fc">&nbsp;            ScheduleResponseDto scheduleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                    .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                    .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                    .date(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                    .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                    .activity(&quot;Keynote&quot;)</b>
+<b class="fc">&nbsp;                    .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                    .build();</b>
+&nbsp;
+<b class="fc">&nbsp;            when(eventService.findAllSchedules(EVENT_ID, USER_ID)).thenReturn(List.of(scheduleResponse));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events/{id}/schedules&quot;, EVENT_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$&quot;, hasSize(1)))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$[0].scheduleId&quot;).value(SCHED_ID));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

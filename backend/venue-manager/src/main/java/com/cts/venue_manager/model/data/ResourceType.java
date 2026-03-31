@@ -7,5 +7,5 @@ package com.cts.venue_manager.model.data;
  * @since 26-02-2026
  */
 public enum ResourceType {
-    equipment,staff
+    EQUIPMENT, STAFF
 }

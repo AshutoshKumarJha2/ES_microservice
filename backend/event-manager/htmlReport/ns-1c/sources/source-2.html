@@ -1,0 +1,108 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditClient</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.client</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditClient (com.cts.eventsphere.eventmanager.client)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+</tr>
+<tr>
+  <td class="name">AuditClient</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.client;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.audit.AuditLogRequestDTO;
+&nbsp;import org.springframework.cloud.openfeign.FeignClient;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.bind.annotation.PostMapping;
+&nbsp;import org.springframework.web.bind.annotation.RequestBody;
+&nbsp;
+&nbsp;/**
+&nbsp; * AuditClient is a Feign client that mirrors the audit endpoint exposed by
+&nbsp; * {@code AuditController} in the log-manager service.
+&nbsp; * It is used to persist audit log entries for every significant action performed
+&nbsp; * within the event-manager.
+&nbsp; *
+&nbsp; * &lt;p&gt;The incoming {@code Authorization} header is automatically forwarded to the
+&nbsp; * log-manager via {@link com.cts.eventsphere.eventmanager.config.FeignAuthInterceptor},
+&nbsp; * allowing the log-manager to authenticate the request and resolve the acting user.&lt;/p&gt;
+&nbsp; *
+&nbsp; * &lt;p&gt;Calls are fire-and-forget: a failure to reach the log-manager must never
+&nbsp; * interrupt the triggering business operation. Callers are responsible for catching
+&nbsp; * {@link feign.FeignException} and logging it appropriately.&lt;/p&gt;
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-28
+&nbsp; */
+&nbsp;@FeignClient(name = &quot;log-manager&quot;, contextId = &quot;auditClient&quot;, path = &quot;/audits&quot;)
+&nbsp;public interface AuditClient {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Submits an audit log entry to the log-manager.
+&nbsp;     * The acting user is resolved from the JWT forwarded in the {@code Authorization} header.
+&nbsp;     *
+&nbsp;     * @param dto The {@link AuditLogRequestDTO} containing the action performed, the entity ID,
+&nbsp;     *            and the entity name to be recorded in the audit trail.
+&nbsp;     * @return A {@link ResponseEntity} with HTTP 201 (Created) on success.
+&nbsp;     */
+&nbsp;    @PostMapping
+&nbsp;    ResponseEntity&lt;Void&gt; createAudit(@RequestBody AuditLogRequestDTO dto);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>
