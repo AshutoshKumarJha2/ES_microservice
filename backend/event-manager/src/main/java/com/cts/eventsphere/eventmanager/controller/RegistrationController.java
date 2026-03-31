@@ -100,7 +100,7 @@ public class RegistrationController {
     }
 
     @PatchMapping("/registrations/{registrationId}/check-in")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<GenericResponse> checkInRegistration(
             @PathVariable String registrationId,
             @AuthenticationPrincipal UserPrincipal userDetails) {

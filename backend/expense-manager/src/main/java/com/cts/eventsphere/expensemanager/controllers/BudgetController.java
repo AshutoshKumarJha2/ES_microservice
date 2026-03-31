@@ -53,7 +53,7 @@ public class BudgetController {
      * @return the created budget with HTTP 201
      */
     @PostMapping("/{eventId}/budget")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_OFFICER')")
     @Operation(summary = "Set budget for an event")
     public ResponseEntity<BudgetResponseDto> setBudget(
             @PathVariable String eventId,
@@ -73,7 +73,7 @@ public class BudgetController {
      * @return the budget details with HTTP 200
      */
     @GetMapping("/{eventId}/budget")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_OFFICER')")
     @Operation(summary = "Get budget for an event")
     public ResponseEntity<BudgetResponseDto> getBudget(
             @PathVariable String eventId,
