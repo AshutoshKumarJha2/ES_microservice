@@ -23,7 +23,7 @@ public interface UserService {
      *
      * @return a list of {@link UserResponseDto} for every user in the system; never {@code null}
      */
-    List<UserResponseDto> getAllUsers();
+    List<UserResponseDto> getAllUsers(String userId);
 
     List<UserResponseDto> getUsers(List<String> userIds);
 
