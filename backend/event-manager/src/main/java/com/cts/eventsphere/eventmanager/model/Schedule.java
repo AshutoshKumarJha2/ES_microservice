@@ -2,8 +2,10 @@ package com.cts.eventsphere.eventmanager.model;
 
 import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -22,6 +24,8 @@ import java.util.UUID;
 @Table(name = "schedule")
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Schedule {
     @Id
     @Column(columnDefinition = "CHAR(36)")
@@ -48,8 +52,8 @@ public class Schedule {
     private String activity;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('draft','active','completed','terminated')")
-    private ScheduleStatus status = ScheduleStatus.draft;
+    @Column(columnDefinition = "ENUM('DRAFT','ACTIVE','COMPLETED','TERMINATED')")
+    private ScheduleStatus status = ScheduleStatus.DRAFT;
 
     @CreationTimestamp
     @Column(updatable = false)

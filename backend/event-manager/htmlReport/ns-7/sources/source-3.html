@@ -1,0 +1,245 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegistrationController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: RegistrationController (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">RegistrationController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">RegistrationController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (28/28)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.registration.RegistrationRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.service.RegistrationService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import jakarta.validation.constraints.Max;
+&nbsp;import jakarta.validation.constraints.Min;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * REST controller for event registration management.
+&nbsp; * Handles attendee registration, status transitions (approve, reject, cancel, check-in),
+&nbsp; * and retrieval of registration records.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Validated
+&nbsp;public class RegistrationController {
+&nbsp;
+&nbsp;    private final RegistrationService registrationService;
+&nbsp;
+&nbsp;    @PostMapping(&quot;/events/{eventId}/registrations&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ATTENDEE&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; createRegistration(
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails,
+&nbsp;            @RequestBody @Valid RegistrationRequestDto request) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Creating registration for eventId: {}, userId: {}, ticketId: {}&quot;, eventId, userId, request.ticketId());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.registerForEvent(userId, eventId, request.ticketId()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/events/{eventId}/registrations&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;RegistrationListResponseDto&gt; getAllRegistrationsByEvent(
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails,
+&nbsp;            @RequestParam(required = false) String status,
+&nbsp;            @RequestParam(defaultValue = &quot;10&quot;) @Min(1) @Max(100) int size,
+&nbsp;            @RequestParam(defaultValue = &quot;0&quot;) @Min(0) int page) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Getting registrations for eventId: {}, actorId: {}&quot;, eventId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, size, page));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/events/{eventId}/my-registration&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ATTENDEE&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;RegistrationDto&gt; getMyRegistrationForEvent(
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;User {} checking registration for event {}&quot;, userId, eventId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.getRegistrationByEventIdAndUserId(userId, eventId, userId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/registrations/{registrationId}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ADMIN&#39;, &#39;ORGANIZER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;RegistrationDto&gt; getRegistrationById(
+&nbsp;            @PathVariable String registrationId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Getting registration for id: {} by actor: {}&quot;, registrationId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.getRegistrationById(actorId, registrationId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/events/{eventId}/registrations/attendee/{attendeeId}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ATTENDEE&#39;, &#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;RegistrationDto&gt; getRegistrationByAttendee(
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @PathVariable String attendeeId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Getting registration for attendee {} at event {} by actor {}&quot;, attendeeId, eventId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.getRegistrationByEventIdAndUserId(actorId, eventId, attendeeId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PatchMapping(&quot;/registrations/{registrationId}/cancel&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ATTENDEE&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; cancelRegistration(
+&nbsp;            @PathVariable String registrationId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Cancelling registration: {} by actor: {}&quot;, registrationId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.cancelRegistration(actorId, registrationId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PatchMapping(&quot;/registrations/{registrationId}/check-in&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ATTENDEE&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; checkInRegistration(
+&nbsp;            @PathVariable String registrationId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Checking in registration: {} by actor: {}&quot;, registrationId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.checkInRegistration(actorId, registrationId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PatchMapping(&quot;/registrations/{registrationId}/approve&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; approveRegistration(
+&nbsp;            @PathVariable String registrationId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Approving registration: {} by actor: {}&quot;, registrationId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.approveRegistration(actorId, registrationId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PatchMapping(&quot;/registrations/{registrationId}/reject&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; rejectRegistration(
+&nbsp;            @PathVariable String registrationId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Rejecting registration: {} by actor: {}&quot;, registrationId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(registrationService.rejectRegistration(actorId, registrationId));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

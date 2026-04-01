@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @version 1.0
  * @since 26-03-2026
  */
-@FeignClient(name = "event-service", url = "${services.event.url}")
+@FeignClient(name = "event-manager")
 public interface EventServiceClient {
 
-    @GetMapping("/api/v1/events/{eventId}/my-registration")
+    @GetMapping("/events/{eventId}/my-registration")
     RegistrationStatusDto getRegistrationStatus(@PathVariable String eventId);
 }

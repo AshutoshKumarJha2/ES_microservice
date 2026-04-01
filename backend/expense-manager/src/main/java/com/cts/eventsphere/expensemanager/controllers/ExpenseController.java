@@ -64,7 +64,7 @@ public class ExpenseController {
      * Retrieves all expenses in the system.
      */
     @GetMapping("/expenses")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_OFFICER')")
     @Operation(summary = "Get all expenses")
     public ResponseEntity<List<ExpenseResponseDto>> getAllExpenses(
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -81,7 +81,7 @@ public class ExpenseController {
      * <p>Supports pagination via query params: {@code ?page=0&size=10&sort=createdAt,desc}</p>
      */
     @GetMapping("/events/{eventId}/expenses")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_OFFICER')")
     @Operation(summary = "Get expenses for an event (paginated)")
     public ResponseEntity<Page<ExpenseResponseDto>> getEventExpenses(
             @PathVariable String eventId,
@@ -101,7 +101,7 @@ public class ExpenseController {
      * to record expenses when bookings or deliveries are confirmed.</p>
      */
     @PostMapping("/events/{eventId}/expenses")
-    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'FINANCE_OFFICER')")
     @Operation(summary = "Create an expense for an event")
     public ResponseEntity<ExpenseResponseDto> createExpense(
             @PathVariable String eventId,
@@ -121,7 +121,7 @@ public class ExpenseController {
      * @param status must be APPROVED or REJECTED
      */
     @PatchMapping("/expenses/{expenseId}/status")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_OFFICER')")
     @Operation(summary = "Approve or reject an expense")
     public ResponseEntity<ExpenseResponseDto> updateExpenseStatus(
             @PathVariable String expenseId,
@@ -141,7 +141,7 @@ public class ExpenseController {
      * <p>Transitions expense APPROVED → PAID and updates the event budget.</p>
      */
     @PostMapping("/expenses/{expenseId}/payment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'FINANCE_OFFICER')")
     @Operation(summary = "Make payment on an approved expense")
     public ResponseEntity<PaymentResponseDto> makePayment(
             @PathVariable String expenseId,

@@ -34,7 +34,7 @@ public class ScheduleController {
      * @param scheduleRequest the request DTO containing updated schedule details
      * @return ResponseEntity containing the updated schedule DTO and HTTP status 200 (OK)
      */
-    @PostMapping("/{id}")
+    @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'VENUE_MANAGER')")
     public ResponseEntity<ScheduleResponseDto> update(@PathVariable String eventId,
                                                       @PathVariable String id,
@@ -52,6 +52,7 @@ public class ScheduleController {
      * @return ResponseEntity with HTTP status 204 (NO_CONTENT) if deletion is successful
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'VENUE_MANAGER')")
     public ResponseEntity<Schedule> delete(@PathVariable String id) {
         log.info("Received request to delete schedule with ID: {}", id);
         scheduleService.deleteById(id);

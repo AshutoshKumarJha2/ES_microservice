@@ -9,5 +9,5 @@ package com.cts.venue_manager.model.data;
  */
 
 public enum BookingStatus {
-    PENDING,CONFIRMED,CANCELLED
+    PENDING, CONFIRMED, CANCELLED
 }

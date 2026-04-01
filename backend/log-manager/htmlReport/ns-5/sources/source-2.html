@@ -1,0 +1,330 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuthServiceTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.logmanager.auth.service</a>
+</div>
+
+<h1>Coverage Summary for Class: AuthServiceTest (com.cts.eventsphere.logmanager.auth.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuthServiceTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AuthServiceTest$FeignExceptions</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">AuthServiceTest$HappyPath</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">AuthServiceTest$InvalidHeader</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">AuthServiceTest$NonOkResponse</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (12/12)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (46/46)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.logmanager.auth.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.logmanager.auth.client.IAMClient;
+&nbsp;import com.cts.eventsphere.logmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.logmanager.auth.dto.ValidateResponse;
+&nbsp;import feign.FeignException;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.web.server.ResponseStatusException;
+&nbsp;
+&nbsp;import static org.assertj.core.api.Assertions.assertThat;
+&nbsp;import static org.assertj.core.api.Assertions.assertThatThrownBy;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class AuthServiceTest {</b>
+&nbsp;
+&nbsp;    @Mock private IAMClient iamClient;
+&nbsp;    @InjectMocks private AuthService authService;
+&nbsp;
+&nbsp;    private static final String BEARER_TOKEN = &quot;Bearer valid.jwt.token&quot;;
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // Missing / malformed header
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;validate – missing or non-Bearer header&quot;)
+<b class="fc">&nbsp;    class InvalidHeader {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when Authorization header is null&quot;)
+&nbsp;        void validate_nullHeader_throws401() {
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(null))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when header does not start with &#39;Bearer &#39;&quot;)
+&nbsp;        void validate_basicHeader_throws401() {
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(&quot;Basic dXNlcjpwYXNz&quot;))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // Happy path
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;validate – happy path&quot;)
+<b class="fc">&nbsp;    class HappyPath {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;returns UserPrincipal when IAM responds 200 OK with valid body&quot;)
+&nbsp;        void validate_happyPath_returnsUserPrincipal() {
+<b class="fc">&nbsp;            ValidateResponse body = new ValidateResponse();</b>
+<b class="fc">&nbsp;            body.setUserId(&quot;user-001&quot;);</b>
+<b class="fc">&nbsp;            body.setUserRole(&quot;ADMIN&quot;);</b>
+<b class="fc">&nbsp;            when(iamClient.validate(BEARER_TOKEN)).thenReturn(ResponseEntity.ok(body));</b>
+&nbsp;
+<b class="fc">&nbsp;            UserPrincipal principal = authService.validate(BEARER_TOKEN);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(principal.userId()).isEqualTo(&quot;user-001&quot;);</b>
+<b class="fc">&nbsp;            assertThat(principal.role()).isEqualTo(&quot;ADMIN&quot;);</b>
+<b class="fc">&nbsp;            assertThat(principal.authorities()).hasSize(1);</b>
+<b class="fc">&nbsp;            assertThat(principal.authorities().iterator().next().getAuthority())</b>
+<b class="fc">&nbsp;                    .isEqualTo(&quot;ROLE_ADMIN&quot;);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // Non-OK / null body
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;validate – non-OK or empty response&quot;)
+<b class="fc">&nbsp;    class NonOkResponse {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when IAM returns non-OK status&quot;)
+&nbsp;        void validate_nonOkStatus_throws401() {
+<b class="fc">&nbsp;            when(iamClient.validate(BEARER_TOKEN))</b>
+<b class="fc">&nbsp;                    .thenReturn(ResponseEntity.status(HttpStatus.FORBIDDEN).build());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(BEARER_TOKEN))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when IAM returns 200 with null body&quot;)
+&nbsp;        void validate_nullBody_throws401() {
+<b class="fc">&nbsp;            when(iamClient.validate(BEARER_TOKEN)).thenReturn(ResponseEntity.ok(null));</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(BEARER_TOKEN))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // Feign exceptions
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;validate – Feign exceptions from IAM&quot;)
+<b class="fc">&nbsp;    class FeignExceptions {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when IAM rejects with FeignException.Unauthorized&quot;)
+&nbsp;        void validate_feignUnauthorized_throws401() {
+<b class="fc">&nbsp;            FeignException.Unauthorized unauthorized = mock(FeignException.Unauthorized.class);</b>
+<b class="fc">&nbsp;            when(iamClient.validate(BEARER_TOKEN)).thenThrow(unauthorized);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(BEARER_TOKEN))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;throws 401 when IAM rejects with FeignException.Forbidden&quot;)
+&nbsp;        void validate_feignForbidden_throws401() {
+<b class="fc">&nbsp;            FeignException.Forbidden forbidden = mock(FeignException.Forbidden.class);</b>
+<b class="fc">&nbsp;            when(iamClient.validate(BEARER_TOKEN)).thenThrow(forbidden);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; authService.validate(BEARER_TOKEN))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ResponseStatusException.class)</b>
+<b class="fc">&nbsp;                    .extracting(e -&gt; ((ResponseStatusException) e).getStatusCode())</b>
+<b class="fc">&nbsp;                    .isEqualTo(HttpStatus.UNAUTHORIZED);</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 18:02</div>
+</div>
+</body>
+</html>

@@ -42,8 +42,10 @@ public class UserController {
      */
     @GetMapping("/users")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<UserResponseDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUsers());
+    public ResponseEntity<List<UserResponseDto>> getAllUsers(
+            @AuthenticationPrincipal UserPrincipal principal
+    ){
+        return ResponseEntity.ok(userService.getAllUsers(principal.userId()));
     }
     /**
      * Retrieves a user by their unique identifier.
@@ -54,7 +56,7 @@ public class UserController {
      * @return HTTP 200 OK with the {@link UserResponseDto} for the found user
      */
     @GetMapping("/users/{userId}")
-    public ResponseEntity<UserResponseDto> getUserById(@RequestBody String userId){
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable String userId){
         return ResponseEntity.ok(userService.getUser(userId));
     }
 
@@ -68,7 +70,8 @@ public class UserController {
      * @return HTTP 200 OK with the updated {@link UserResponseDto}
      */
     @PutMapping("/users/{userId}")
-    public ResponseEntity<UserResponseDto> updateUserDetails(@RequestBody String userId, @RequestBody UserRequestDto userRequestDto){
+    @PreAuthorize("hasRole('ADMIN') or principal.userId().equals(#userId)")
+    public ResponseEntity<UserResponseDto> updateUserDetails(@PathVariable String userId, @RequestBody UserRequestDto userRequestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         return ResponseEntity.ok(userService.updateUserDetails(userId,userRequestDto));
     }
 
@@ -120,9 +123,17 @@ public class UserController {
         return ResponseEntity.ok(updatedUserRole);
     }
 
-//    @GetMapping("/users/userdetails")
-//    public ResponseEntity<UserResponseDto> getUserDetails(@AuthenticationPrincipal UserPrincipal userPrincipal){
-//
-//    }
+    /**
+     * Get details of all users by ids. it supports max of 100 user ids.
+     *
+     * <p>{@code PATCH /api/v1/users/{userId}/role} — requires {@code ADMIN} role.</p>
+     *
+     * @param userIds the UUIDs of the users whose details are needed.
+     * @return HTTP 200 OK with the updated {@link UserResponseDto}
+     */
+    @PostMapping("/users/userdetails")
+    public ResponseEntity<List<UserResponseDto>> getUserDetails(@RequestBody List<String> userIds) {
+        return ResponseEntity.ok(userService.getUsers(userIds));
+    }
 
 }

@@ -1,0 +1,473 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketControllerTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketControllerTest (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TicketControllerTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (13/13)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TicketControllerTest$CreateTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (24/24)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketControllerTest$DeleteTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketControllerTest$GetTicketById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketControllerTest$GetTicketsByEvent</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">TicketControllerTest$UpdateTicket</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (14/14)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (20/20)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (88/88)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.GlobalExceptionHandler;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketAlreadyExistsException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.ticket.TicketNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.TicketStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.service.AuditService;
+&nbsp;import com.cts.eventsphere.eventmanager.service.TicketService;
+&nbsp;import org.junit.jupiter.api.AfterEach;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+&nbsp;import org.springframework.security.core.authority.SimpleGrantedAuthority;
+&nbsp;import org.springframework.security.core.context.SecurityContextHolder;
+&nbsp;import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
+&nbsp;import org.springframework.test.web.servlet.MockMvc;
+&nbsp;import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;import static org.mockito.ArgumentMatchers.*;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+&nbsp;import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class TicketControllerTest {</b>
+&nbsp;
+&nbsp;    @Mock private TicketService ticketService;
+&nbsp;    @Mock private AuditService auditService;
+&nbsp;
+&nbsp;    @InjectMocks private TicketController ticketController;
+&nbsp;
+&nbsp;    private MockMvc mockMvc;
+&nbsp;    private ObjectMapper objectMapper;
+&nbsp;
+&nbsp;    private static final String ACTOR_ID  = &quot;actor-001&quot;;
+&nbsp;    private static final String EVENT_ID  = &quot;event-001&quot;;
+&nbsp;    private static final String TICKET_ID = &quot;ticket-001&quot;;
+&nbsp;
+&nbsp;    private TicketResponseDto ticketResponse;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        objectMapper = new ObjectMapper();</b>
+&nbsp;
+<b class="fc">&nbsp;        mockMvc = MockMvcBuilders</b>
+<b class="fc">&nbsp;                .standaloneSetup(ticketController)</b>
+<b class="fc">&nbsp;                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())</b>
+<b class="fc">&nbsp;                .setControllerAdvice(new GlobalExceptionHandler(auditService))</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        var principal = new UserPrincipal(ACTOR_ID, &quot;ORGANIZER&quot;,</b>
+<b class="fc">&nbsp;                List.of(new SimpleGrantedAuthority(&quot;ROLE_ORGANIZER&quot;)));</b>
+<b class="fc">&nbsp;        SecurityContextHolder.getContext().setAuthentication(</b>
+<b class="fc">&nbsp;                new UsernamePasswordAuthenticationToken(principal, null, principal.authorities()));</b>
+&nbsp;
+<b class="fc">&nbsp;        ticketResponse = new TicketResponseDto(TICKET_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @AfterEach
+&nbsp;    void tearDown() {
+<b class="fc">&nbsp;        SecurityContextHolder.clearContext();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // POST /events/{eventId}/tickets
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;POST /events/{eventId}/tickets&quot;)
+<b class="fc">&nbsp;    class CreateTicket {</b>
+&nbsp;
+&nbsp;        private static final String VALID_BODY = &quot;&quot;&quot;
+&nbsp;                {&quot;type&quot;: &quot;general&quot;, &quot;price&quot;: 50.0, &quot;status&quot;: &quot;ACTIVE&quot;}
+&nbsp;                &quot;&quot;&quot;;
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with success message&quot;)
+&nbsp;        void createTicket_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .thenReturn(new GenericResponse(&quot;Ticket created successfully&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(VALID_BODY))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Ticket created successfully&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when event does not exist&quot;)
+&nbsp;        void createTicket_eventNotFound() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(VALID_BODY))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 409 when ticket type already exists for event&quot;)
+&nbsp;        void createTicket_typeAlreadyExists() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.createTicket(ACTOR_ID, EVENT_ID, &quot;general&quot;, 50.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .thenThrow(new TicketAlreadyExistsException(&quot;Ticket type general already exists for event &quot; + EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(VALID_BODY))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isConflict());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 400 when request body is invalid (blank type)&quot;)
+&nbsp;        void createTicket_blankType_returns400() throws Exception {
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(&quot;{\&quot;type\&quot;: \&quot;\&quot;, \&quot;price\&quot;: 50.0, \&quot;status\&quot;: \&quot;ACTIVE\&quot;}&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isBadRequest());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // GET /events/{eventId}/tickets
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;GET /events/{eventId}/tickets&quot;)
+<b class="fc">&nbsp;    class GetTicketsByEvent {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with paginated ticket list&quot;)
+&nbsp;        void getTicketsByEventId_happyPath() throws Exception {
+<b class="fc">&nbsp;            var listResponse = new TicketListResponseDto(List.of(ticketResponse), 0, 1, 1L, 1);</b>
+<b class="fc">&nbsp;            when(ticketService.getTicketsByEventId(ACTOR_ID, EVENT_ID, 0, 10)).thenReturn(listResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .param(&quot;page&quot;, &quot;0&quot;)</b>
+<b class="fc">&nbsp;                            .param(&quot;size&quot;, &quot;10&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.totalElements&quot;).value(1))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.tickets[0].ticketId&quot;).value(TICKET_ID));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with empty list when no tickets exist for event&quot;)
+&nbsp;        void getTicketsByEventId_empty() throws Exception {
+<b class="fc">&nbsp;            var emptyResponse = new TicketListResponseDto(List.of(), 0, 0, 0L, 0);</b>
+<b class="fc">&nbsp;            when(ticketService.getTicketsByEventId(ACTOR_ID, EVENT_ID, 0, 10)).thenReturn(emptyResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/events/{eventId}/tickets&quot;, EVENT_ID)</b>
+<b class="fc">&nbsp;                            .param(&quot;page&quot;, &quot;0&quot;)</b>
+<b class="fc">&nbsp;                            .param(&quot;size&quot;, &quot;10&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.totalElements&quot;).value(0));</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // GET /tickets/{ticketId}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;GET /tickets/{ticketId}&quot;)
+<b class="fc">&nbsp;    class GetTicketById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with ticket body&quot;)
+&nbsp;        void getTicketById_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.getTicketById(ACTOR_ID, TICKET_ID)).thenReturn(ticketResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/tickets/{ticketId}&quot;, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.ticketId&quot;).value(TICKET_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.type&quot;).value(&quot;general&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.price&quot;).value(50.0));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when ticket does not exist&quot;)
+&nbsp;        void getTicketById_notFound() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.getTicketById(ACTOR_ID, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .thenThrow(new TicketNotFoundException(TICKET_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(get(&quot;/tickets/{ticketId}&quot;, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // PUT /tickets/{ticketId}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;PUT /tickets/{ticketId}&quot;)
+<b class="fc">&nbsp;    class UpdateTicket {</b>
+&nbsp;
+&nbsp;        private static final String VALID_BODY = &quot;&quot;&quot;
+&nbsp;                {&quot;type&quot;: &quot;vip&quot;, &quot;price&quot;: 150.0, &quot;status&quot;: &quot;ACTIVE&quot;}
+&nbsp;                &quot;&quot;&quot;;
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with update message&quot;)
+&nbsp;        void updateTicket_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.updateTicket(ACTOR_ID, TICKET_ID, &quot;vip&quot;, 150.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .thenReturn(new GenericResponse(&quot;Ticket updated successfully&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(put(&quot;/tickets/{ticketId}&quot;, TICKET_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(VALID_BODY))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Ticket updated successfully&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when ticket does not exist&quot;)
+&nbsp;        void updateTicket_notFound() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.updateTicket(ACTOR_ID, TICKET_ID, &quot;vip&quot;, 150.0, TicketStatus.ACTIVE))</b>
+<b class="fc">&nbsp;                    .thenThrow(new TicketNotFoundException(TICKET_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(put(&quot;/tickets/{ticketId}&quot;, TICKET_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(VALID_BODY))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // DELETE /tickets/{ticketId}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;DELETE /tickets/{ticketId}&quot;)
+<b class="fc">&nbsp;    class DeleteTicket {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with deletion message&quot;)
+&nbsp;        void deleteTicket_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.deleteTicket(ACTOR_ID, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .thenReturn(new GenericResponse(&quot;Ticket deleted successfully&quot;));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/tickets/{ticketId}&quot;, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.message&quot;).value(&quot;Ticket deleted successfully&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when ticket does not exist&quot;)
+&nbsp;        void deleteTicket_notFound() throws Exception {
+<b class="fc">&nbsp;            when(ticketService.deleteTicket(ACTOR_ID, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .thenThrow(new TicketNotFoundException(TICKET_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/tickets/{ticketId}&quot;, TICKET_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

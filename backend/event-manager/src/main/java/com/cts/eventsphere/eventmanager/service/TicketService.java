@@ -25,7 +25,7 @@ public interface TicketService {
      * @param status  the initial availability status
      * @return a {@link GenericResponse} indicating the result
      */
-    GenericResponse createTicket(String actorId, String eventId, String type, double price, TicketStatus status);
+     TicketResponseDto createTicket(String actorId, String eventId, String type, double price, TicketStatus status);
 
     /**
      * Retrieves a paginated list of tickets for a specific event.
@@ -67,7 +67,7 @@ public interface TicketService {
      * @param status   the updated availability status
      * @return a {@link GenericResponse} indicating the result
      */
-    GenericResponse updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status);
+    TicketResponseDto updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status);
 
     /**
      * Deletes a ticket from the system.

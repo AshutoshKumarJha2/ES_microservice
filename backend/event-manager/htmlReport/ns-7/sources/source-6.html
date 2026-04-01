@@ -1,0 +1,328 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScheduleControllerTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ScheduleControllerTest (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ScheduleControllerTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (17/17)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ScheduleControllerTest$DeleteSchedule</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ScheduleControllerTest$UpdateSchedule</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (30/30)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (11/11)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (56/56)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.fasterxml.jackson.databind.ObjectMapper;
+&nbsp;import com.fasterxml.jackson.databind.SerializationFeature;
+&nbsp;import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.GlobalExceptionHandler;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.service.AuditService;
+&nbsp;import com.cts.eventsphere.eventmanager.service.ScheduleService;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;import org.springframework.http.MediaType;
+&nbsp;import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+&nbsp;import org.springframework.test.web.servlet.MockMvc;
+&nbsp;import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.ArgumentMatchers.eq;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+&nbsp;import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class ScheduleControllerTest {</b>
+&nbsp;
+&nbsp;    @Mock private ScheduleService scheduleService;
+&nbsp;    @Mock private AuditService auditService;
+&nbsp;
+&nbsp;    @InjectMocks private ScheduleController scheduleController;
+&nbsp;
+&nbsp;    private MockMvc mockMvc;
+&nbsp;    private ObjectMapper objectMapper;
+&nbsp;
+&nbsp;    private static final String EVENT_ID = &quot;event-001&quot;;
+&nbsp;    private static final String SCHED_ID = &quot;sched-001&quot;;
+&nbsp;
+&nbsp;    private ScheduleResponseDto scheduleResponse;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        objectMapper = new ObjectMapper()</b>
+<b class="fc">&nbsp;                .registerModule(new JavaTimeModule())</b>
+<b class="fc">&nbsp;                .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);</b>
+&nbsp;
+<b class="fc">&nbsp;        mockMvc = MockMvcBuilders</b>
+<b class="fc">&nbsp;                .standaloneSetup(scheduleController)</b>
+<b class="fc">&nbsp;                .setControllerAdvice(new GlobalExceptionHandler(auditService))</b>
+<b class="fc">&nbsp;                .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        scheduleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .date(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                .activity(&quot;Opening Keynote&quot;)</b>
+<b class="fc">&nbsp;                .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // POST /events/{eventId}/schedules/{id}   (update)
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;POST /events/{eventId}/schedules/{id}&quot;)
+<b class="fc">&nbsp;    class UpdateSchedule {</b>
+&nbsp;
+&nbsp;        private String validBody() {
+<b class="fc">&nbsp;            return &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;eventId&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;date&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;timeSlot&quot;: &quot;09:00-10:00&quot;,
+&nbsp;                      &quot;activity&quot;: &quot;Opening Keynote&quot;,
+&nbsp;                      &quot;status&quot;: &quot;active&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(EVENT_ID, LocalDate.now().plusDays(1));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 200 with updated schedule&quot;)
+&nbsp;        void update_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))</b>
+<b class="fc">&nbsp;                    .thenReturn(scheduleResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(validBody()))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isOk())</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.scheduleId&quot;).value(SCHED_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.activity&quot;).value(&quot;Opening Keynote&quot;))</b>
+<b class="fc">&nbsp;                    .andExpect(jsonPath(&quot;$.timeSlot&quot;).value(&quot;09:00-10:00&quot;));</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when schedule does not exist&quot;)
+&nbsp;        void update_scheduleNotFound() throws Exception {
+<b class="fc">&nbsp;            when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))</b>
+<b class="fc">&nbsp;                    .thenThrow(new ScheduleNotFoundException(SCHED_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(validBody()))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when parent event does not exist&quot;)
+&nbsp;        void update_eventNotFound() throws Exception {
+<b class="fc">&nbsp;            when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))</b>
+<b class="fc">&nbsp;                    .thenThrow(new EventNotFoundException(EVENT_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(validBody()))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 400 when request body has invalid timeSlot format&quot;)
+&nbsp;        void update_invalidTimeSlot_returns400() throws Exception {
+<b class="fc">&nbsp;            String invalidBody = &quot;&quot;&quot;</b>
+&nbsp;                    {
+&nbsp;                      &quot;eventId&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;date&quot;: &quot;%s&quot;,
+&nbsp;                      &quot;timeSlot&quot;: &quot;bad-format&quot;,
+&nbsp;                      &quot;activity&quot;: &quot;Keynote&quot;,
+&nbsp;                      &quot;status&quot;: &quot;active&quot;
+&nbsp;                    }
+<b class="fc">&nbsp;                    &quot;&quot;&quot;.formatted(EVENT_ID, LocalDate.now().plusDays(1));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(post(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID)</b>
+<b class="fc">&nbsp;                            .contentType(MediaType.APPLICATION_JSON)</b>
+<b class="fc">&nbsp;                            .content(invalidBody))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isBadRequest());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // DELETE /events/{eventId}/schedules/{id}
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;DELETE /events/{eventId}/schedules/{id}&quot;)
+<b class="fc">&nbsp;    class DeleteSchedule {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – returns 204 NO_CONTENT on successful deletion&quot;)
+&nbsp;        void delete_happyPath() throws Exception {
+<b class="fc">&nbsp;            when(scheduleService.deleteById(SCHED_ID)).thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNoContent());</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(scheduleService).deleteById(SCHED_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – returns 404 when schedule does not exist&quot;)
+&nbsp;        void delete_notFound() throws Exception {
+<b class="fc">&nbsp;            when(scheduleService.deleteById(SCHED_ID))</b>
+<b class="fc">&nbsp;                    .thenThrow(new ScheduleNotFoundException(SCHED_ID));</b>
+&nbsp;
+<b class="fc">&nbsp;            mockMvc.perform(delete(&quot;/events/{eventId}/schedules/{id}&quot;, EVENT_ID, SCHED_ID))</b>
+<b class="fc">&nbsp;                    .andExpect(status().isNotFound());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

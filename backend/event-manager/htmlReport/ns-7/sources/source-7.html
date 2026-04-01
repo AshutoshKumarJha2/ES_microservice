@@ -1,0 +1,203 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketController (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">TicketController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">TicketController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (6/6)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (16/16)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.CreateTicketRequest;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.service.TicketService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import jakarta.validation.constraints.Max;
+&nbsp;import jakarta.validation.constraints.Min;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.validation.annotation.Validated;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * REST controller for ticket management.
+&nbsp; * Handles creation, retrieval, update, and deletion of tickets for events.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@Validated
+&nbsp;public class TicketController {
+&nbsp;
+&nbsp;    private final TicketService ticketService;
+&nbsp;
+&nbsp;    @PostMapping(&quot;/events/{eventId}/tickets&quot;)
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ORGANIZER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; createTicket(
+&nbsp;            @RequestBody @Valid CreateTicketRequest request,
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Creating ticket for eventId: {}, actorId: {}&quot;, eventId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(ticketService.createTicket(actorId, eventId, request.type(), request.price(), request.status()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/events/{eventId}/tickets&quot;)
+&nbsp;    @PreAuthorize(&quot;isAuthenticated()&quot;)
+&nbsp;    public ResponseEntity&lt;TicketListResponseDto&gt; getTicketsByEventId(
+&nbsp;            @PathVariable String eventId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails,
+&nbsp;            @RequestParam(defaultValue = &quot;0&quot;) @Min(0) int page,
+&nbsp;            @RequestParam(defaultValue = &quot;10&quot;) @Min(1) @Max(100) int size) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Fetching tickets for eventId: {}, actorId: {}, page: {}, size: {}&quot;, eventId, actorId, page, size);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(ticketService.getTicketsByEventId(actorId, eventId, page, size));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/tickets/{ticketId}&quot;)
+&nbsp;    @PreAuthorize(&quot;isAuthenticated()&quot;)
+&nbsp;    public ResponseEntity&lt;TicketResponseDto&gt; getTicketById(
+&nbsp;            @PathVariable String ticketId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Fetching ticket with ticketId: {}, actorId: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(ticketService.getTicketById(actorId, ticketId));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PutMapping(&quot;/tickets/{ticketId}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; updateTicket(
+&nbsp;            @PathVariable String ticketId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails,
+&nbsp;            @RequestBody @Valid CreateTicketRequest request) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Updating ticket with ticketId: {}, actorId: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(ticketService.updateTicket(actorId, ticketId, request.type(), request.price(), request.status()));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @DeleteMapping(&quot;/tickets/{ticketId}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ORGANIZER&#39;, &#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; deleteTicket(
+&nbsp;            @PathVariable String ticketId,
+&nbsp;            @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var actorId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Deleting ticket with ticketId: {}, actorId: {}&quot;, ticketId, actorId);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(ticketService.deleteTicket(actorId, ticketId));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

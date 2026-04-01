@@ -36,7 +36,7 @@ public class TicketServiceImpl implements TicketService {
     private final EventRepository eventRepository;
 
     @Override
-    public GenericResponse createTicket(String actorId, String eventId, String type, double price, TicketStatus status) {
+    public TicketResponseDto createTicket(String actorId, String eventId, String type, double price, TicketStatus status) {
         var event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotFoundException(eventId));
 
@@ -56,7 +56,7 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.save(ticket);
         log.info("Ticket created with id: {}, for eventId: {} by actor: {}", ticket.getTicketId(), eventId, actorId);
 
-        return new GenericResponse("Ticket created successfully");
+        return TicketDtoMapper.toDto(ticket);
     }
 
     @Override
@@ -106,7 +106,7 @@ public class TicketServiceImpl implements TicketService {
     }
 
     @Override
-    public GenericResponse updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status) {
+    public TicketResponseDto updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status) {
         var ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new TicketNotFoundException(ticketId));
 
@@ -116,7 +116,7 @@ public class TicketServiceImpl implements TicketService {
         ticketRepository.save(ticket);
 
         log.info("Updated ticket with id: {} by actor: {}", ticketId, actorId);
-        return new GenericResponse("Ticket updated successfully");
+        return TicketDtoMapper.toDto(ticket);
     }
 
     @Override

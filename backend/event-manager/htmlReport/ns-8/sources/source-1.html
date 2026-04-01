@@ -1,0 +1,132 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditAction</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.dto.audit</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditAction (com.cts.eventsphere.eventmanager.dto.audit)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuditAction</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (7/7)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.dto.audit;
+&nbsp;
+&nbsp;/**
+&nbsp; * AuditAction defines the set of standardized actions that can be recorded in the
+&nbsp; * system audit logs. It mirrors {@code com.cts.eventsphere.logmanager.model.data.AuditAction}
+&nbsp; * from the log-manager service to avoid a compile-time dependency on that module.
+&nbsp; * It encompasses data lifecycle events, security-related activities, and administrative
+&nbsp; * state transitions to ensure full system traceability.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-28
+&nbsp; */
+<b class="fc">&nbsp;public enum AuditAction {</b>
+&nbsp;    // --- Standard CRUD Operations ---
+<b class="fc">&nbsp;    CREATE, READ, UPDATE, DELETE,</b>
+&nbsp;
+&nbsp;    // --- Registration &amp; Workflow States ---
+<b class="fc">&nbsp;    APPROVE, REJECT, CANCEL, RESTORE,</b>
+&nbsp;
+&nbsp;    // --- Security &amp; Access Control ---
+<b class="fc">&nbsp;    REGISTRATION_SUCCESS, REGISTRATON_FAILURE,</b>
+<b class="fc">&nbsp;    LOGIN_SUCCESS, LOGIN_FAILURE, LOGOUT,</b>
+<b class="fc">&nbsp;    PERMISSION_CHANGE, ACCESS_DENIED,</b>
+&nbsp;
+&nbsp;    // --- System &amp; Administrative ---
+<b class="fc">&nbsp;    CONFIG_CHANGE, EXPORT, SYSTEM_JOB_EXECUTION</b>
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

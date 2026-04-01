@@ -1,0 +1,175 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScheduleController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: ScheduleController (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ScheduleController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ScheduleController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Schedule;
+&nbsp;import com.cts.eventsphere.eventmanager.service.ScheduleService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * Rest Controller for Schedule Entity.
+&nbsp; * Provides endpoints for updating and deleting schedules associated with events.
+&nbsp; *
+&nbsp; * @author 2479623
+&nbsp; * @version 1.0
+&nbsp; * @since 26-03-2026
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RequestMapping(&quot;/events/{eventId}/schedules&quot;)
+&nbsp;public class ScheduleController {
+&nbsp;    private final ScheduleService scheduleService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates an existing schedule by its unique identifier within a specific event.
+&nbsp;     *
+&nbsp;     * @param eventId the unique identifier of the event to which the schedule belongs
+&nbsp;     * @param id the unique identifier of the schedule to update
+&nbsp;     * @param scheduleRequest the request DTO containing updated schedule details
+&nbsp;     * @return ResponseEntity containing the updated schedule DTO and HTTP status 200 (OK)
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/{id}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ADMIN&#39;, &#39;ORGANIZER&#39;, &#39;VENUE_MANAGER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;ScheduleResponseDto&gt; update(@PathVariable String eventId,
+&nbsp;                                                      @PathVariable String id,
+&nbsp;                                                      @Valid @RequestBody ScheduleRequestDto scheduleRequest) {
+<b class="fc">&nbsp;        log.info(&quot;Received request to update schedule with ID: {} for event ID: {}&quot;, id, eventId);</b>
+<b class="fc">&nbsp;        ScheduleResponseDto response = scheduleService.updateById(eventId, id, scheduleRequest);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully updated schedule with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(response);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes a schedule by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the schedule to delete
+&nbsp;     * @return ResponseEntity with HTTP status 204 (NO_CONTENT) if deletion is successful
+&nbsp;     */
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Schedule&gt; delete(@PathVariable String id) {
+<b class="fc">&nbsp;        log.info(&quot;Received request to delete schedule with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        scheduleService.deleteById(id);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully deleted schedule with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.noContent().build();</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

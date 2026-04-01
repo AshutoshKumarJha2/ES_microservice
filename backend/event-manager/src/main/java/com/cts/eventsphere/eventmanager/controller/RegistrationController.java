@@ -36,7 +36,7 @@ public class RegistrationController {
 
     @PostMapping("/events/{eventId}/registrations")
     @PreAuthorize("hasRole('ATTENDEE')")
-    public ResponseEntity<GenericResponse> createRegistration(
+    public ResponseEntity<RegistrationDto> createRegistration(
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestBody @Valid RegistrationRequestDto request) {
@@ -100,7 +100,7 @@ public class RegistrationController {
     }
 
     @PatchMapping("/registrations/{registrationId}/check-in")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<GenericResponse> checkInRegistration(
             @PathVariable String registrationId,
             @AuthenticationPrincipal UserPrincipal userDetails) {

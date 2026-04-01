@@ -9,5 +9,5 @@ package com.cts.venue_manager.model.data;
  */
 
 public enum AvailabilityStatus {
-    AVAILABLE,UNAVAILABLE,MAINTENANCE;
+    AVAILABLE, UNAVAILABLE, MAINTENENCE;
 }
