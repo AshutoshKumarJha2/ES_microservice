@@ -1,0 +1,137 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventManagerApplication</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager</a>
+</div>
+
+<h1>Coverage Summary for Class: EventManagerApplication (com.cts.eventsphere.eventmanager)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventManagerApplication</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager;
+&nbsp;
+&nbsp;import org.springframework.boot.SpringApplication;
+&nbsp;import org.springframework.boot.autoconfigure.SpringBootApplication;
+&nbsp;import org.springframework.cloud.openfeign.EnableFeignClients;
+&nbsp;
+&nbsp;/**
+&nbsp; * Event Manager Application class
+&nbsp; *
+&nbsp; * @author 2479623
+&nbsp; *
+&nbsp; * @version 1.0
+&nbsp; * @since 25-03-2026
+&nbsp; */
+&nbsp;@SpringBootApplication
+&nbsp;@EnableFeignClients
+<b class="fc">&nbsp;public class EventManagerApplication {</b>
+&nbsp;
+&nbsp;	/**
+&nbsp;	 * Entry point for the Event Manager microservice.
+&nbsp;	 * Bootstraps the Spring Boot application context.
+&nbsp;	 *
+&nbsp;	 * @param args command-line arguments passed at startup
+&nbsp;	 * @return void
+&nbsp;	 * @author 2479623
+&nbsp;	 * @version 1.0
+&nbsp;	 * @since 25-03-2026
+&nbsp;	 */
+&nbsp;	public static void main(String[] args) {
+<b class="nc">&nbsp;		SpringApplication.run(EventManagerApplication.class, args);</b>
+&nbsp;	}
+&nbsp;
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

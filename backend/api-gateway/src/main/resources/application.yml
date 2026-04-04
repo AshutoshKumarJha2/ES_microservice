@@ -1,11 +1,37 @@
 spring:
   application:
     name: api-gateway
+  config:
+    import: configserver:http://localhost:6971
+  cloud:
+    gateway:
+      mvc:
+        http-client:
+          connect-timeout: 3000
+          read-timeout: 10000
 
 server:
   port: 6970
 
 eureka:
-    client:
-      service-url:
-        defaultZone: http://localhost:6969/eureka
+  client:
+    service-url:
+      defaultZone: http://localhost:6969/eureka
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+
+springdoc:
+  api-docs:
+    path: /gateway/api-docs
+  swagger-ui:
+    enabled: false

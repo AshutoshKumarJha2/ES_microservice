@@ -1,0 +1,876 @@
+{
+	"info": {
+		"_postman_id": "es-expense-manager-2026",
+		"name": "EventSphere - Expense Manager",
+		"description": "Complete Postman collection for the Expense Manager microservice.\n\n## Setup Instructions\n1. Start services in order: service-registry → config-server → api-gateway → auth-manager → event-manager → expense-manager\n2. Run **Step 0: Login** first to get a JWT token (auto-saved to collection variable)\n3. All subsequent requests use the token automatically via `{{jwt_token}}`\n\n## Test Flow (Recommended Order)\n1. Login → get token\n2. Create Budget for an event\n3. Get Budget\n4. Create Expense\n5. Get Expenses by Event\n6. Get All Expenses\n7. Approve Expense\n8. Make Payment\n9. Delete Expense (create another one first)\n\n## Gateway URL\n- Via Gateway: `http://localhost:6970/api/v1/expense-manager/...`\n- Direct: `http://localhost:7099/...`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "gateway_url",
+			"value": "http://localhost:6970/api/v1"
+		},
+		{
+			"key": "expense_direct_url",
+			"value": "http://localhost:7099"
+		},
+		{
+			"key": "auth_direct_url",
+			"value": "http://localhost:8081"
+		},
+		{
+			"key": "jwt_token",
+			"value": ""
+		},
+		{
+			"key": "event_id",
+			"value": "REPLACE_WITH_REAL_EVENT_ID"
+		},
+		{
+			"key": "expense_id",
+			"value": "REPLACE_AFTER_CREATE"
+		},
+		{
+			"key": "expense_id_to_delete",
+			"value": "REPLACE_AFTER_CREATE"
+		},
+		{
+			"key": "payment_id",
+			"value": ""
+		},
+		{
+			"key": "budget_id",
+			"value": ""
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{jwt_token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "0. Auth - Login (Get JWT Token)",
+			"item": [
+				{
+					"name": "Login as ADMIN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    // Try common token field names",
+									"    var token = jsonData.accessToken || jsonData.token || jsonData.access_token || jsonData.jwt;",
+									"    if (token) {",
+									"        pm.collectionVariables.set('jwt_token', token);",
+									"        console.log('JWT Token saved successfully!');",
+									"    } else {",
+									"        console.log('Response body:', JSON.stringify(jsonData));",
+									"        console.log('Could not find token field. Check response and update script.');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@eventsphere.com\",\n    \"password\": \"Admin@123\",\n    \"role\": \"ADMIN\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/auth-manager/auth/login",
+							"host": ["{{gateway_url}}"],
+							"path": ["auth-manager", "auth", "login"]
+						},
+						"description": "Login to get JWT token. Token is auto-saved to `jwt_token` variable.\n\n**If using direct URL:** Change to `{{auth_direct_url}}/auth/login`\n\n**Update email/password** with a real user registered in your auth-manager DB."
+					}
+				},
+				{
+					"name": "Login as FINANCE_MANAGER",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.accessToken || jsonData.token || jsonData.access_token || jsonData.jwt;",
+									"    if (token) {",
+									"        pm.collectionVariables.set('jwt_token', token);",
+									"        console.log('JWT Token saved successfully!');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"finance@eventsphere.com\",\n    \"password\": \"Finance@123\",\n    \"role\": \"FINANCE_MANAGER\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/auth-manager/auth/login",
+							"host": ["{{gateway_url}}"],
+							"path": ["auth-manager", "auth", "login"]
+						},
+						"description": "Login as FINANCE_MANAGER role. Update email/password with a real user."
+					}
+				},
+				{
+					"name": "Login as ORGANIZER",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    var token = jsonData.accessToken || jsonData.token || jsonData.access_token || jsonData.jwt;",
+									"    if (token) {",
+									"        pm.collectionVariables.set('jwt_token', token);",
+									"        console.log('JWT Token saved successfully!');",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"organizer@eventsphere.com\",\n    \"password\": \"Organizer@123\",\n    \"role\": \"ORGANIZER\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/auth-manager/auth/login",
+							"host": ["{{gateway_url}}"],
+							"path": ["auth-manager", "auth", "login"]
+						}
+					}
+				}
+			],
+			"description": "Login endpoints to get JWT token. Run one of these FIRST."
+		},
+		{
+			"name": "1. Budget Endpoints",
+			"item": [
+				{
+					"name": "Create Budget for Event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.budgetId) {",
+									"        pm.collectionVariables.set('budget_id', jsonData.budgetId);",
+									"        console.log('Budget ID saved:', jsonData.budgetId);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plannedAmount\": 50000.00\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/budget",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "budget"]
+						},
+						"description": "Creates a budget for the given event.\n\n**Prerequisites:**\n- Valid `event_id` (must exist in event-manager DB)\n- Role: ADMIN, ORGANIZER, or FINANCE_MANAGER\n\n**Expected:** 201 Created"
+					}
+				},
+				{
+					"name": "Get Budget for Event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var jsonData = pm.response.json();",
+									"    console.log('Budget - Planned:', jsonData.plannedAmount, '| Actual:', jsonData.actualAmount, '| Variance:', jsonData.variance);",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/budget",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "budget"]
+						},
+						"description": "Fetches the budget for the given event.\n\n**Expected:** 200 OK with budget details including plannedAmount, actualAmount, variance"
+					}
+				},
+				{
+					"name": "[ERROR] Create Duplicate Budget",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plannedAmount\": 75000.00\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/budget",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "budget"]
+						},
+						"description": "Tries to create a second budget for the same event.\n\n**Expected:** 409 Conflict — BudgetAlreadyExistsException"
+					}
+				},
+				{
+					"name": "[ERROR] Budget for Non-existent Event",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/non-existent-event-id/budget",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "non-existent-event-id", "budget"]
+						},
+						"description": "Tries to get budget for a non-existent event.\n\n**Expected:** 404 Not Found — BudgetNotFoundException"
+					}
+				}
+			],
+			"description": "Budget CRUD endpoints. Create a budget before testing expenses."
+		},
+		{
+			"name": "2. Expense Endpoints",
+			"item": [
+				{
+					"name": "Create Expense for Event",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.expenseId) {",
+									"        pm.collectionVariables.set('expense_id', jsonData.expenseId);",
+									"        console.log('Expense ID saved:', jsonData.expenseId);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Catering charges for event hall\",\n    \"amount\": 15000.00,\n    \"date\": \"2026-03-29\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"]
+						},
+						"description": "Creates a new expense with status SUBMITTED.\n\n**Prerequisites:**\n- Valid `event_id`\n- Role: ADMIN, ORGANIZER, or FINANCE_MANAGER\n\n**Expected:** 201 Created with status=SUBMITTED"
+					}
+				},
+				{
+					"name": "Create Expense #2 (for deletion test)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.expenseId) {",
+									"        pm.collectionVariables.set('expense_id_to_delete', jsonData.expenseId);",
+									"        console.log('Expense ID (for delete) saved:', jsonData.expenseId);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Sound system rental for stage setup\",\n    \"amount\": 8500.00,\n    \"date\": \"2026-03-28\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"]
+						},
+						"description": "Creates a second expense (to be used for deletion test later).\n\n**Expected:** 201 Created"
+					}
+				},
+				{
+					"name": "Create Expense #3 (for rejection test)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.expenseId) {",
+									"        pm.collectionVariables.set('expense_id_to_reject', jsonData.expenseId);",
+									"        console.log('Expense ID (for reject) saved:', jsonData.expenseId);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Unauthorized luxury decor purchase\",\n    \"amount\": 99999.99,\n    \"date\": \"2026-03-27\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"]
+						},
+						"description": "Creates a third expense (to be rejected later)."
+					}
+				},
+				{
+					"name": "Get All Expenses",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses"]
+						},
+						"description": "Retrieves all expenses across all events.\n\n**Role:** ADMIN or FINANCE_MANAGER\n\n**Expected:** 200 OK with list of all expenses"
+					}
+				},
+				{
+					"name": "Get Expenses by Event (Paginated)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses?page=0&size=10&sort=createdAt,desc",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								},
+								{
+									"key": "sort",
+									"value": "createdAt,desc"
+								}
+							]
+						},
+						"description": "Retrieves paginated expenses for a specific event.\n\n**Query Params:**\n- `page` — page number (0-indexed)\n- `size` — items per page\n- `sort` — field,direction (e.g., `createdAt,desc`)\n\n**Expected:** 200 OK with paginated response"
+					}
+				},
+				{
+					"name": "Get Expenses by Event (Page 2)",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses?page=1&size=2&sort=amount,asc",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "2"
+								},
+								{
+									"key": "sort",
+									"value": "amount,asc"
+								}
+							]
+						},
+						"description": "Tests pagination - page 2 with size 2, sorted by amount ascending."
+					}
+				},
+				{
+					"name": "[ERROR] Create Expense - Invalid Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"\",\n    \"amount\": -100,\n    \"date\": null\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "expenses"]
+						},
+						"description": "Sends invalid data to test Bean Validation.\n\n**Expected:** 400 Bad Request with validation error messages"
+					}
+				},
+				{
+					"name": "[ERROR] Create Expense - Non-existent Event",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Test expense for fake event\",\n    \"amount\": 500.00,\n    \"date\": \"2026-03-29\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/fake-event-id-12345/expenses",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "fake-event-id-12345", "expenses"]
+						},
+						"description": "Creates expense for a non-existent event.\n\n**Expected:** 404 Not Found or 503 Service Unavailable (EventServiceException)"
+					}
+				}
+			],
+			"description": "Expense CRUD endpoints."
+		},
+		{
+			"name": "3. Expense Status (Approve / Reject)",
+			"item": [
+				{
+					"name": "Approve Expense",
+					"request": {
+						"method": "PATCH",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/status?status=APPROVED",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "status"],
+							"query": [
+								{
+									"key": "status",
+									"value": "APPROVED"
+								}
+							]
+						},
+						"description": "Approves an expense (SUBMITTED → APPROVED).\n\n**Role:** ADMIN or FINANCE_MANAGER\n\n**Expected:** 200 OK with status=APPROVED and approvedBy set"
+					}
+				},
+				{
+					"name": "Reject Expense",
+					"request": {
+						"method": "PATCH",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id_to_reject}}/status?status=REJECTED",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id_to_reject}}", "status"],
+							"query": [
+								{
+									"key": "status",
+									"value": "REJECTED"
+								}
+							]
+						},
+						"description": "Rejects an expense (SUBMITTED → REJECTED).\n\n**Expected:** 200 OK with status=REJECTED"
+					}
+				},
+				{
+					"name": "[ERROR] Approve Already Approved Expense",
+					"request": {
+						"method": "PATCH",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/status?status=APPROVED",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "status"],
+							"query": [
+								{
+									"key": "status",
+									"value": "APPROVED"
+								}
+							]
+						},
+						"description": "Tries to approve an already-approved expense.\n\n**Expected:** 400 Bad Request — InvalidExpenseStateException (only SUBMITTED can transition)"
+					}
+				},
+				{
+					"name": "[ERROR] Invalid Status Value",
+					"request": {
+						"method": "PATCH",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/status?status=INVALID_STATUS",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "status"],
+							"query": [
+								{
+									"key": "status",
+									"value": "INVALID_STATUS"
+								}
+							]
+						},
+						"description": "Sends an invalid enum value for status.\n\n**Expected:** 400 Bad Request — MethodArgumentTypeMismatchException"
+					}
+				},
+				{
+					"name": "[ERROR] Non-existent Expense",
+					"request": {
+						"method": "PATCH",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/non-existent-expense-id/status?status=APPROVED",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "non-existent-expense-id", "status"],
+							"query": [
+								{
+									"key": "status",
+									"value": "APPROVED"
+								}
+							]
+						},
+						"description": "Tries to approve a non-existent expense.\n\n**Expected:** 404 Not Found — ExpenseNotFoundException"
+					}
+				}
+			],
+			"description": "Expense approval/rejection workflow. Run AFTER creating expenses."
+		},
+		{
+			"name": "4. Payment Endpoints",
+			"item": [
+				{
+					"name": "Make Payment (BANK_TRANSFER)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"if (pm.response.code === 201) {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.paymentId) {",
+									"        pm.collectionVariables.set('payment_id', jsonData.paymentId);",
+									"        console.log('Payment ID saved:', jsonData.paymentId);",
+									"    }",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 15000.00,\n    \"method\": \"BANK_TRANSFER\",\n    \"paymentDate\": \"2026-03-29T14:30:00\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/payment",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "payment"]
+						},
+						"description": "Processes payment for an APPROVED expense.\n\n**Prerequisites:**\n- Expense must be in APPROVED status (run 'Approve Expense' first)\n- Budget must exist for the event\n\n**Effect:**\n- Expense status → PAID\n- Budget actualAmount += expense amount\n- Budget variance recalculated\n\n**Expected:** 201 Created with payment details"
+					}
+				},
+				{
+					"name": "Make Payment (UPI)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 8500.00,\n    \"method\": \"UPI\",\n    \"paymentDate\": \"2026-03-29T16:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/payment",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "payment"]
+						},
+						"description": "Tests payment with UPI method.\n\n**Note:** If expense_id is already PAID, this will fail with InvalidExpenseStateException (expected)."
+					}
+				},
+				{
+					"name": "Make Payment (CREDIT_CARD)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 5000.00,\n    \"method\": \"CREDIT_CARD\",\n    \"paymentDate\": \"2026-03-29T10:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/payment",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "payment"]
+						},
+						"description": "Tests payment with CREDIT_CARD method."
+					}
+				},
+				{
+					"name": "[ERROR] Pay Non-Approved Expense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 500.00,\n    \"method\": \"CASH\",\n    \"paymentDate\": \"2026-03-29T12:00:00\"\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id_to_delete}}/payment",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id_to_delete}}", "payment"]
+						},
+						"description": "Tries to pay an expense that is NOT in APPROVED status (still SUBMITTED).\n\n**Expected:** 400 Bad Request — InvalidExpenseStateException"
+					}
+				},
+				{
+					"name": "[ERROR] Pay with Invalid Data",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": -50.00,\n    \"method\": \"CASH\",\n    \"paymentDate\": null\n}"
+						},
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id}}/payment",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id}}", "payment"]
+						},
+						"description": "Sends invalid payment data.\n\n**Expected:** 400 Bad Request — Validation errors"
+					}
+				},
+				{
+					"name": "Verify Budget After Payment",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/events/{{event_id}}/budget",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "events", "{{event_id}}", "budget"]
+						},
+						"description": "Fetches the budget AFTER payment to verify:\n- `actualAmount` increased by the expense amount\n- `variance` = plannedAmount - actualAmount\n\n**Run this after 'Make Payment' to verify budget tracking works.**"
+					}
+				}
+			],
+			"description": "Payment processing endpoints. Run AFTER approving an expense."
+		},
+		{
+			"name": "5. Delete Expense",
+			"item": [
+				{
+					"name": "Delete Expense",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id_to_delete}}",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id_to_delete}}"]
+						},
+						"description": "Deletes an expense.\n\n**Role:** ADMIN or ORGANIZER\n\n**Expected:** 204 No Content"
+					}
+				},
+				{
+					"name": "[ERROR] Delete Non-existent Expense",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/non-existent-expense-id",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "non-existent-expense-id"]
+						},
+						"description": "Tries to delete a non-existent expense.\n\n**Expected:** 404 Not Found — ExpenseNotFoundException"
+					}
+				},
+				{
+					"name": "[ERROR] Delete Already Deleted Expense",
+					"request": {
+						"method": "DELETE",
+						"url": {
+							"raw": "{{gateway_url}}/expense-manager/expenses/{{expense_id_to_delete}}",
+							"host": ["{{gateway_url}}"],
+							"path": ["expense-manager", "expenses", "{{expense_id_to_delete}}"]
+						},
+						"description": "Tries to delete the same expense again.\n\n**Expected:** 404 Not Found — ExpenseNotFoundException"
+					}
+				}
+			],
+			"description": "Expense deletion endpoints."
+		},
+		{
+			"name": "6. Direct URL (No Gateway)",
+			"item": [
+				{
+					"name": "[Direct] Create Budget",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plannedAmount\": 100000.00\n}"
+						},
+						"url": {
+							"raw": "{{expense_direct_url}}/events/{{event_id}}/budget",
+							"host": ["{{expense_direct_url}}"],
+							"path": ["events", "{{event_id}}", "budget"]
+						},
+						"description": "Direct call to expense-manager (port 7099), bypassing API Gateway.\n\nUseful for debugging gateway routing issues."
+					}
+				},
+				{
+					"name": "[Direct] Get All Expenses",
+					"request": {
+						"method": "GET",
+						"url": {
+							"raw": "{{expense_direct_url}}/expenses",
+							"host": ["{{expense_direct_url}}"],
+							"path": ["expenses"]
+						},
+						"description": "Direct call to get all expenses, bypassing gateway."
+					}
+				},
+				{
+					"name": "[Direct] Create Expense",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"description\": \"Direct API test - venue booking\",\n    \"amount\": 25000.00,\n    \"date\": \"2026-03-29\"\n}"
+						},
+						"url": {
+							"raw": "{{expense_direct_url}}/events/{{event_id}}/expenses",
+							"host": ["{{expense_direct_url}}"],
+							"path": ["events", "{{event_id}}", "expenses"]
+						}
+					}
+				}
+			],
+			"description": "Same endpoints but hitting expense-manager directly (port 7099) instead of going through the API Gateway (port 6970). Useful for debugging."
+		}
+	]
+}

@@ -1,0 +1,172 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > AuditController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.logmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: AuditController (com.cts.eventsphere.logmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">AuditController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">AuditController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (5/5)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.logmanager.controller;
+&nbsp;
+&nbsp;import com.cts.eventsphere.logmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditListResponseDTO;
+&nbsp;import com.cts.eventsphere.logmanager.dto.audit.AuditLogRequestDTO;
+&nbsp;import com.cts.eventsphere.logmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.logmanager.service.AuditService;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;/**
+&nbsp; * AuditController class is responsible for handling HTTP requests related to system audit logs.
+&nbsp; * It provides endpoints for retrieving audit trails for administrative review.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-16
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/audits&quot;)
+&nbsp;@RequiredArgsConstructor
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;public class AuditController {
+&nbsp;    private final AuditService auditService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of all system audit logs.
+&nbsp;     * Accessible only by Admins.
+&nbsp;     *
+&nbsp;     * @param size The number of records per page (defaults to 10).
+&nbsp;     * @param page The page number to retrieve (defaults to 0).
+&nbsp;     * @return A {@link ResponseEntity} containing {@link AuditListResponseDTO} with the list of audits.
+&nbsp;     */
+&nbsp;    @GetMapping
+&nbsp;    @PreAuthorize(&quot;hasRole(&#39;ADMIN&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;AuditListResponseDTO&gt; getAllAudits(
+&nbsp;            @RequestParam(defaultValue = &quot;10&quot;) int size,
+&nbsp;            @RequestParam(defaultValue = &quot;0&quot;) int page
+&nbsp;    ){
+<b class="fc">&nbsp;        log.info(&quot;Getting all audits, page {}, size {}&quot;, page, size);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(auditService.getAudits(size, page));</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @PostMapping
+&nbsp;    @PreAuthorize(&quot;isAuthenticated()&quot;)
+&nbsp;    public ResponseEntity&lt;GenericResponse&gt; createAudit(
+&nbsp;            @AuthenticationPrincipal UserPrincipal userPrincipal,
+&nbsp;            @RequestBody AuditLogRequestDTO dto
+&nbsp;            ){
+<b class="fc">&nbsp;        auditService.logAudit(userPrincipal.userId(), dto);</b>
+<b class="fc">&nbsp;        return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse(&quot;Success&quot;));</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 18:09</div>
+</div>
+</body>
+</html>

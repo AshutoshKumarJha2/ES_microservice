@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: vendor-manager
+  profiles:
+    active: local
+  config:
+    import: "configserver:http://localhost:6971"
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6969/eureka
+
+server:
+  port: 7075

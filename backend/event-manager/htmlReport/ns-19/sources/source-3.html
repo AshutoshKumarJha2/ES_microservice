@@ -1,0 +1,315 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > ScheduleServiceImplTest</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: ScheduleServiceImplTest (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">ScheduleServiceImplTest</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (2/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (29/29)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">ScheduleServiceImplTest$DeleteById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (3/3)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (10/10)
+  </span>
+</td>
+  </tr>
+  <tr>
+    <td class="name">ScheduleServiceImplTest$UpdateById</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (4/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (22/22)
+  </span>
+</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (9/9)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (61/61)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.exception.schedule.ScheduleNotFoundException;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Event;
+&nbsp;import com.cts.eventsphere.eventmanager.model.Schedule;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.EventRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+&nbsp;import com.cts.eventsphere.eventmanager.service.impl.ScheduleServiceImpl;
+&nbsp;import org.junit.jupiter.api.BeforeEach;
+&nbsp;import org.junit.jupiter.api.DisplayName;
+&nbsp;import org.junit.jupiter.api.Nested;
+&nbsp;import org.junit.jupiter.api.Test;
+&nbsp;import org.junit.jupiter.api.extension.ExtendWith;
+&nbsp;import org.mockito.InjectMocks;
+&nbsp;import org.mockito.Mock;
+&nbsp;import org.mockito.junit.jupiter.MockitoExtension;
+&nbsp;
+&nbsp;import java.time.LocalDate;
+&nbsp;import java.util.Optional;
+&nbsp;
+&nbsp;import static org.assertj.core.api.Assertions.assertThat;
+&nbsp;import static org.assertj.core.api.Assertions.assertThatThrownBy;
+&nbsp;import static org.mockito.ArgumentMatchers.any;
+&nbsp;import static org.mockito.Mockito.*;
+&nbsp;
+&nbsp;@ExtendWith(MockitoExtension.class)
+<b class="fc">&nbsp;class ScheduleServiceImplTest {</b>
+&nbsp;
+&nbsp;    @Mock private ScheduleRepository scheduleRepository;
+&nbsp;    @Mock private EventRepository eventRepository;
+&nbsp;    @Mock private ScheduleResponseDtoMapper scheduleResponseDtoMapper;
+&nbsp;    @Mock private ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+&nbsp;
+&nbsp;    @InjectMocks
+&nbsp;    private ScheduleServiceImpl scheduleService;
+&nbsp;
+&nbsp;    private static final String EVENT_ID  = &quot;event-001&quot;;
+&nbsp;    private static final String SCHED_ID  = &quot;sched-001&quot;;
+&nbsp;
+&nbsp;    private Event sampleEvent;
+&nbsp;    private Schedule sampleSchedule;
+&nbsp;    private ScheduleRequestDto sampleRequest;
+&nbsp;    private ScheduleResponseDto sampleResponse;
+&nbsp;
+&nbsp;    @BeforeEach
+&nbsp;    void setUp() {
+<b class="fc">&nbsp;        sampleEvent = Event.builder()</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .name(&quot;Test Event&quot;)</b>
+<b class="fc">&nbsp;                .organizerId(&quot;org-001&quot;)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleSchedule = Schedule.builder()</b>
+<b class="fc">&nbsp;                .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                .event(sampleEvent)</b>
+<b class="fc">&nbsp;                .date(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                .activity(&quot;Opening Keynote&quot;)</b>
+<b class="fc">&nbsp;                .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleRequest = ScheduleRequestDto.builder()</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .date(LocalDate.now().plusDays(1))</b>
+<b class="fc">&nbsp;                .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                .activity(&quot;Opening Keynote&quot;)</b>
+<b class="fc">&nbsp;                .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;
+<b class="fc">&nbsp;        sampleResponse = ScheduleResponseDto.builder()</b>
+<b class="fc">&nbsp;                .scheduleId(SCHED_ID)</b>
+<b class="fc">&nbsp;                .eventId(EVENT_ID)</b>
+<b class="fc">&nbsp;                .date(LocalDate.now().plusDays(1).toString())</b>
+<b class="fc">&nbsp;                .timeSlot(&quot;09:00-10:00&quot;)</b>
+<b class="fc">&nbsp;                .activity(&quot;Opening Keynote&quot;)</b>
+<b class="fc">&nbsp;                .status(ScheduleStatus.active)</b>
+<b class="fc">&nbsp;                .build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // updateById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;updateById()&quot;)
+<b class="fc">&nbsp;    class UpdateById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – updates schedule and returns response DTO&quot;)
+&nbsp;        void updateById_happyPath() {
+<b class="fc">&nbsp;            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(true);</b>
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(sampleEvent));</b>
+<b class="fc">&nbsp;            when(scheduleRequestDtoMapper.toEntity(sampleRequest, sampleEvent)).thenReturn(sampleSchedule);</b>
+<b class="fc">&nbsp;            when(scheduleRepository.save(sampleSchedule)).thenReturn(sampleSchedule);</b>
+<b class="fc">&nbsp;            when(scheduleResponseDtoMapper.toDTO(sampleSchedule)).thenReturn(sampleResponse);</b>
+&nbsp;
+<b class="fc">&nbsp;            ScheduleResponseDto result = scheduleService.updateById(EVENT_ID, SCHED_ID, sampleRequest);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isEqualTo(sampleResponse);</b>
+<b class="fc">&nbsp;            assertThat(sampleSchedule.getScheduleId()).isEqualTo(SCHED_ID);</b>
+<b class="fc">&nbsp;            verify(scheduleRepository).save(sampleSchedule);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws ScheduleNotFoundException when schedule does not exist&quot;)
+&nbsp;        void updateById_scheduleNotFound() {
+<b class="fc">&nbsp;            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; scheduleService.updateById(EVENT_ID, SCHED_ID, sampleRequest))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ScheduleNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(SCHED_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(scheduleRepository, never()).save(any());</b>
+<b class="fc">&nbsp;            verifyNoInteractions(eventRepository);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws EventNotFoundException when parent event does not exist&quot;)
+&nbsp;        void updateById_eventNotFound() {
+<b class="fc">&nbsp;            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(true);</b>
+<b class="fc">&nbsp;            when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.empty());</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; scheduleService.updateById(EVENT_ID, SCHED_ID, sampleRequest))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(EventNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(EVENT_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(scheduleRepository, never()).save(any());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    // deleteById
+&nbsp;    // -------------------------------------------------------------------------
+&nbsp;    @Nested
+&nbsp;    @DisplayName(&quot;deleteById()&quot;)
+<b class="fc">&nbsp;    class DeleteById {</b>
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;happy path – deletes schedule and returns true&quot;)
+&nbsp;        void deleteById_happyPath() {
+<b class="fc">&nbsp;            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(true);</b>
+&nbsp;
+<b class="fc">&nbsp;            boolean result = scheduleService.deleteById(SCHED_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThat(result).isTrue();</b>
+<b class="fc">&nbsp;            verify(scheduleRepository).deleteById(SCHED_ID);</b>
+&nbsp;        }
+&nbsp;
+&nbsp;        @Test
+&nbsp;        @DisplayName(&quot;unhappy path – throws ScheduleNotFoundException when schedule does not exist&quot;)
+&nbsp;        void deleteById_notFound() {
+<b class="fc">&nbsp;            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(false);</b>
+&nbsp;
+<b class="fc">&nbsp;            assertThatThrownBy(() -&gt; scheduleService.deleteById(SCHED_ID))</b>
+<b class="fc">&nbsp;                    .isInstanceOf(ScheduleNotFoundException.class)</b>
+<b class="fc">&nbsp;                    .hasMessageContaining(SCHED_ID);</b>
+&nbsp;
+<b class="fc">&nbsp;            verify(scheduleRepository, never()).deleteById(any());</b>
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

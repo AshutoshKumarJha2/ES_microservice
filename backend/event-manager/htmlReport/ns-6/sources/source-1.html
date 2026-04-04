@@ -1,0 +1,158 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > FeignAuthInterceptor</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.config</a>
+</div>
+
+<h1>Coverage Summary for Class: FeignAuthInterceptor (com.cts.eventsphere.eventmanager.config)</h1>
+
+<table class="coverageStats">
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Class, %
+</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Branch, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">FeignAuthInterceptor</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (1/1)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    50%
+  </span>
+  <span class="absValue">
+    (1/2)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    0%
+  </span>
+  <span class="absValue">
+    (0/4)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    16.7%
+  </span>
+  <span class="absValue">
+    (1/6)
+  </span>
+</td>
+</tr>
+
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.config;
+&nbsp;
+&nbsp;import feign.RequestInterceptor;
+&nbsp;import feign.RequestTemplate;
+&nbsp;import org.springframework.stereotype.Component;
+&nbsp;import org.springframework.web.context.request.RequestContextHolder;
+&nbsp;import org.springframework.web.context.request.ServletRequestAttributes;
+&nbsp;
+&nbsp;/**
+&nbsp; * FeignAuthInterceptor is a Feign {@link RequestInterceptor} that automatically
+&nbsp; * propagates the {@code Authorization} header from the current inbound HTTP request
+&nbsp; * to all outgoing Feign requests made by this service.
+&nbsp; * This ensures that service-to-service calls (e.g. to the log-manager audit endpoint)
+&nbsp; * carry the original JWT, allowing downstream services to authenticate the request
+&nbsp; * and resolve the acting {@code UserPrincipal}.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-28
+&nbsp; */
+&nbsp;@Component
+<b class="fc">&nbsp;public class FeignAuthInterceptor implements RequestInterceptor {</b>
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Intercepts every outgoing Feign request and appends the {@code Authorization}
+&nbsp;     * header sourced from the current servlet request context, if present.
+&nbsp;     *
+&nbsp;     * @param template The {@link RequestTemplate} for the outgoing Feign request
+&nbsp;     *                 to which the header will be applied.
+&nbsp;     */
+&nbsp;    @Override
+&nbsp;    public void apply(RequestTemplate template) {
+&nbsp;        ServletRequestAttributes attributes =
+<b class="nc">&nbsp;                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();</b>
+<b class="nc">&nbsp;        if (attributes != null) {</b>
+<b class="nc">&nbsp;            String authHeader = attributes.getRequest().getHeader(&quot;Authorization&quot;);</b>
+<b class="nc">&nbsp;            if (authHeader != null) {</b>
+<b class="nc">&nbsp;                template.header(&quot;Authorization&quot;, authHeader);</b>
+&nbsp;            }
+&nbsp;        }
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

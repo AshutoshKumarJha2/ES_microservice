@@ -1,0 +1,157 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > TicketService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: TicketService (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">TicketService$MockitoMock$bGtZkKNe</td>
+  </tr>
+  <tr>
+    <td class="name">TicketService$MockitoMock$bGtZkKNe$auxiliary$fKP0ZwOr</td>
+  </tr>
+  <tr>
+    <td class="name">TicketService$MockitoMock$bGtZkKNe$auxiliary$KRuCi79q</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.ticket.TicketResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.model.data.TicketStatus;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service interface for managing ticket-related operations.
+&nbsp; * Handles ticket lifecycle and ensures all actions are attributed via actorId for auditing.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;public interface TicketService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new ticket for a specific event.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the user performing the action
+&nbsp;     * @param eventId the ID of the event
+&nbsp;     * @param type    the ticket category (e.g., &quot;vip&quot;, &quot;general&quot;)
+&nbsp;     * @param price   the cost of the ticket
+&nbsp;     * @param status  the initial availability status
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse createTicket(String actorId, String eventId, String type, double price, TicketStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of tickets for a specific event.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the user requesting the data
+&nbsp;     * @param eventId the ID of the event
+&nbsp;     * @param page    the page number (zero-based)
+&nbsp;     * @param size    the number of records per page
+&nbsp;     * @return a {@link TicketListResponseDto} with tickets and pagination metadata
+&nbsp;     */
+&nbsp;    TicketListResponseDto getTicketsByEventId(String actorId, String eventId, int page, int size);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of all tickets across all events.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the user requesting the data
+&nbsp;     * @param page    the page number (zero-based)
+&nbsp;     * @param size    the number of records per page
+&nbsp;     * @return a {@link TicketListResponseDto} with all tickets and pagination metadata
+&nbsp;     */
+&nbsp;    TicketListResponseDto getAllTickets(String actorId, int page, int size);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Fetches a single ticket by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param actorId  the ID of the user requesting the data
+&nbsp;     * @param ticketId the ID of the ticket
+&nbsp;     * @return a {@link TicketResponseDto} containing the ticket details
+&nbsp;     */
+&nbsp;    TicketResponseDto getTicketById(String actorId, String ticketId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates the details of an existing ticket.
+&nbsp;     *
+&nbsp;     * @param actorId  the ID of the user performing the update
+&nbsp;     * @param ticketId the ID of the ticket to update
+&nbsp;     * @param type     the updated ticket category
+&nbsp;     * @param price    the updated price
+&nbsp;     * @param status   the updated availability status
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse updateTicket(String actorId, String ticketId, String type, double price, TicketStatus status);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes a ticket from the system.
+&nbsp;     *
+&nbsp;     * @param actorId  the ID of the user performing the deletion
+&nbsp;     * @param ticketId the ID of the ticket to delete
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse deleteTicket(String actorId, String ticketId);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

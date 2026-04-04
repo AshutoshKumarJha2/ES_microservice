@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EventSphere — Wireframes</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f5f5f5; --surface: #ffffff; --border: #d0d0d0; --border-dark: #999;
+    --text: #1a1a1a; --muted: #666; --accent: #2c2c2c; --tag: #e8e8e8;
+    --highlight: #dce8ff; --red-tag: #fde8e8; --green-tag: #e8fde8; --yellow-tag: #fdf6e8;
+    --sidebar-w: 220px;
+  }
+  body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 13px; display: flex; min-height: 100vh; }
+
+  /* Sidebar */
+  #sidebar { width: var(--sidebar-w); background: var(--accent); color: #fff; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; z-index: 100; }
+  #sidebar .logo { padding: 18px 16px 12px; font-size: 16px; font-weight: 700; letter-spacing: .5px; border-bottom: 1px solid #444; }
+  #sidebar .logo span { font-size: 11px; font-weight: 400; opacity: .6; display: block; margin-top: 2px; }
+  .nav-group { padding: 10px 0 4px; }
+  .nav-group-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; opacity: .5; padding: 0 16px 4px; }
+  .nav-item { display: block; padding: 7px 16px; cursor: pointer; opacity: .75; transition: opacity .15s, background .15s; font-size: 12px; border-left: 3px solid transparent; }
+  .nav-item:hover { opacity: 1; background: rgba(255,255,255,.08); }
+  .nav-item.active { opacity: 1; background: rgba(255,255,255,.12); border-left-color: #fff; }
+
+  /* Main */
+  #main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  #topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+  #topbar .breadcrumb { font-size: 12px; color: var(--muted); }
+  #topbar .user-chip { background: var(--tag); padding: 4px 10px; border-radius: 20px; font-size: 11px; }
+  .page { display: none; padding: 24px; }
+  .page.active { display: block; }
+
+  /* Components */
+  h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  h2 { font-size: 15px; font-weight: 600; margin-bottom: 12px; }
+  h3 { font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 12px; margin-bottom: 20px; }
+  .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card + .card { margin-top: 12px; }
+  .card-grid { display: grid; gap: 16px; }
+  .card-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .card-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .card-grid.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+
+  .stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-align: center; }
+  .stat-card .num { font-size: 28px; font-weight: 700; margin-bottom: 4px; }
+  .stat-card .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+
+  .btn { display: inline-block; padding: 7px 14px; border-radius: 5px; border: 1.5px solid var(--border-dark); background: var(--surface); cursor: pointer; font-size: 12px; font-weight: 500; }
+  .btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn.danger { background: #c0392b; color: #fff; border-color: #c0392b; }
+  .btn.sm { padding: 4px 10px; font-size: 11px; }
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
+  .badge.green { background: var(--green-tag); color: #155724; }
+  .badge.red { background: var(--red-tag); color: #721c24; }
+  .badge.yellow { background: var(--yellow-tag); color: #856404; }
+  .badge.blue { background: var(--highlight); color: #004085; }
+  .badge.gray { background: var(--tag); color: #444; }
+
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 9px 12px; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); border-bottom: 2px solid var(--border); }
+  td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafafa; }
+
+  .form-group { margin-bottom: 14px; }
+  .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .4px; }
+  .form-field { width: 100%; border: 1.5px solid var(--border); border-radius: 5px; padding: 8px 10px; font-size: 12px; background: var(--bg); color: var(--muted); }
+  .form-field.select::after { content: '▾'; }
+
+  .tab-bar { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 16px; }
+  .tab { padding: 8px 16px; cursor: pointer; font-size: 12px; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -2px; }
+  .tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+
+  .timeline { list-style: none; padding-left: 0; }
+  .timeline li { display: flex; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .timeline li:last-child { border-bottom: none; }
+  .timeline .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-dark); margin-top: 4px; flex-shrink: 0; }
+  .timeline .dot.green { background: #27ae60; }
+  .timeline .dot.blue { background: #2980b9; }
+  .timeline .dot.red { background: #c0392b; }
+
+  .search-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+  .search-bar input { flex: 1; border: 1.5px solid var(--border); border-radius: 5px; padding: 7px 10px; font-size: 12px; }
+  .filter-row { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .filter-chip { padding: 4px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); font-size: 11px; cursor: pointer; }
+  .filter-chip.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  .modal-backdrop { background: rgba(0,0,0,.08); border: 2px dashed var(--border-dark); border-radius: 8px; padding: 20px; margin-top: 16px; }
+  .modal-backdrop h3 { margin-bottom: 12px; font-size: 14px; }
+
+  .progress-bar { height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; margin-top: 6px; }
+  .progress-bar .fill { height: 100%; background: var(--accent); border-radius: 4px; }
+
+  .avatar { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%; background: var(--tag); font-size: 11px; font-weight: 700; border: 1.5px solid var(--border); }
+
+  .sidebar-note { font-size: 10px; opacity: .5; padding: 12px 16px; border-top: 1px solid #444; margin-top: auto; }
+
+  /* Specific layout helpers */
+  .two-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .row { display: flex; gap: 12px; align-items: center; }
+  .row.between { justify-content: space-between; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .mb-4 { margin-bottom: 4px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 11px; }
+
+  /* Auth page special */
+  .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--bg); }
+  .auth-card { width: 380px; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 32px; }
+  .auth-card h1 { font-size: 22px; margin-bottom: 4px; }
+  .auth-card .subtitle { margin-bottom: 24px; }
+
+  /* Notification dot */
+  .notif { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #e74c3c; margin-left: 4px; vertical-align: middle; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================ SIDEBAR ============================================================ -->
+<div id="sidebar">
+  <div class="logo">EventSphere <span>Wireframe — All Roles</span></div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Auth</div>
+    <div class="nav-item" onclick="go('login')">Login</div>
+    <div class="nav-item" onclick="go('register')">Register</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Admin</div>
+    <div class="nav-item" onclick="go('admin-dashboard')">Dashboard</div>
+    <div class="nav-item" onclick="go('admin-users')">User Management</div>
+    <div class="nav-item" onclick="go('admin-events')">All Events</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Organizer</div>
+    <div class="nav-item" onclick="go('org-dashboard')">Dashboard</div>
+    <div class="nav-item" onclick="go('org-create-event')">Create Event</div>
+    <div class="nav-item" onclick="go('org-event-detail')">Event Detail</div>
+    <div class="nav-item" onclick="go('org-tickets')">Tickets</div>
+    <div class="nav-item" onclick="go('org-registrations')">Registrations</div>
+    <div class="nav-item" onclick="go('org-budget')">Budget & Expenses</div>
+    <div class="nav-item" onclick="go('org-venue-booking')">Venue Booking</div>
+    <div class="nav-item" onclick="go('org-vendor-contracts')">Vendor Contracts</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Attendee</div>
+    <div class="nav-item" onclick="go('att-browse')">Browse Events</div>
+    <div class="nav-item" onclick="go('att-event-detail')">Event Detail</div>
+    <div class="nav-item" onclick="go('att-my-registrations')">My Registrations</div>
+    <div class="nav-item" onclick="go('att-feedback')">Submit Feedback</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Finance Officer</div>
+    <div class="nav-item" onclick="go('fin-expenses')">Expense Approvals</div>
+    <div class="nav-item" onclick="go('fin-payments')">Payments</div>
+    <div class="nav-item" onclick="go('fin-budgets')">Budget Overview</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Vendor</div>
+    <div class="nav-item" onclick="go('ven-profile')">My Profile</div>
+    <div class="nav-item" onclick="go('ven-contracts')">Contracts</div>
+    <div class="nav-item" onclick="go('ven-invoices')">Invoices</div>
+    <div class="nav-item" onclick="go('ven-deliveries')">Deliveries</div>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">Venue Manager</div>
+    <div class="nav-item" onclick="go('venue-list')">My Venues</div>
+    <div class="nav-item" onclick="go('venue-bookings')">Bookings</div>
+    <div class="nav-item" onclick="go('venue-resources')">Resources</div>
+  </div>
+
+  <div class="sidebar-note">All screens are static wireframes</div>
+</div>
+
+<!-- ============================================================ TOP BAR ============================================================ -->
+<div id="main">
+  <div id="topbar">
+    <div class="breadcrumb" id="breadcrumb">Login</div>
+    <div class="user-chip" id="user-chip">Not logged in</div>
+  </div>
+
+<!-- ============================================================ PAGES ============================================================ -->
+
+<!-- LOGIN -->
+<div class="page active" id="page-login" style="display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 41px)">
+  <div class="auth-card">
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to EventSphere</p>
+    <div class="form-group"><label>Email Address</label><div class="form-field">user@example.com</div></div>
+    <div class="form-group"><label>Password</label><div class="form-field">••••••••</div></div>
+    <div style="margin-bottom:16px"><div class="btn primary" style="width:100%;text-align:center">Sign In</div></div>
+    <div style="text-align:center;font-size:12px;color:var(--muted)">Don't have an account? <span style="color:var(--accent);cursor:pointer" onclick="go('register')">Register</span></div>
+  </div>
+</div>
+
+<!-- REGISTER -->
+<div class="page" id="page-register" style="display:none;align-items:center;justify-content:center;min-height:calc(100vh - 41px)">
+  <div class="auth-card">
+    <h1>Create Account</h1>
+    <p class="subtitle">Join EventSphere</p>
+    <div class="card-grid cols-2"><div class="form-group"><label>First Name</label><div class="form-field">John</div></div><div class="form-group"><label>Last Name</label><div class="form-field">Doe</div></div></div>
+    <div class="form-group"><label>Email Address</label><div class="form-field">user@example.com</div></div>
+    <div class="form-group"><label>Phone</label><div class="form-field">+1 234 567 8900</div></div>
+    <div class="form-group"><label>Password</label><div class="form-field">••••••••</div></div>
+    <div class="form-group"><label>Role</label><div class="form-field select">Attendee ▾</div></div>
+    <div style="margin-bottom:16px"><div class="btn primary" style="width:100%;text-align:center">Create Account</div></div>
+    <div style="text-align:center;font-size:12px;color:var(--muted)">Already have an account? <span style="color:var(--accent);cursor:pointer" onclick="go('login')">Sign In</span></div>
+  </div>
+</div>
+
+<!-- ADMIN DASHBOARD -->
+<div class="page" id="page-admin-dashboard">
+  <div class="page-header"><div><h1>Admin Dashboard</h1><p class="subtitle">Platform overview & controls</p></div><div class="btn-group"><div class="btn">Export Report</div><div class="btn primary">+ Invite User</div></div></div>
+  <div class="card-grid cols-4" style="margin-bottom:20px">
+    <div class="stat-card"><div class="num">1,284</div><div class="label">Total Users</div></div>
+    <div class="stat-card"><div class="num">47</div><div class="label">Active Events</div></div>
+    <div class="stat-card"><div class="num">$128k</div><div class="label">Total Revenue</div></div>
+    <div class="stat-card"><div class="num">3<span class="notif"></span></div><div class="label">Pending Issues</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <h2>Recent Users</h2>
+      <table>
+        <tr><th>Name</th><th>Role</th><th>Status</th><th>Joined</th></tr>
+        <tr><td>Alice Johnson</td><td>ORGANIZER</td><td><span class="badge green">Active</span></td><td>2026-03-30</td></tr>
+        <tr><td>Bob Martinez</td><td>ATTENDEE</td><td><span class="badge green">Active</span></td><td>2026-03-29</td></tr>
+        <tr><td>Carol White</td><td>VENDOR</td><td><span class="badge yellow">Inactive</span></td><td>2026-03-28</td></tr>
+        <tr><td>David Kim</td><td>FINANCE_OFFICER</td><td><span class="badge green">Active</span></td><td>2026-03-27</td></tr>
+      </table>
+      <div class="mt-8"><div class="btn sm">View All Users →</div></div>
+    </div>
+    <div class="card">
+      <h2>System Activity</h2>
+      <ul class="timeline">
+        <li><div class="dot green"></div><div><div class="mb-4">New event published: <strong>Tech Summit 2026</strong></div><div class="small muted">10 mins ago</div></div></li>
+        <li><div class="dot blue"></div><div><div class="mb-4">User role changed: carol@email.com → VENDOR</div><div class="small muted">1 hr ago</div></div></li>
+        <li><div class="dot red"></div><div><div class="mb-4">Expense rejected: Event #A1 ($5,200)</div><div class="small muted">3 hrs ago</div></div></li>
+        <li><div class="dot blue"></div><div><div class="mb-4">Venue booked: Grand Hall for Music Fest</div><div class="small muted">5 hrs ago</div></div></li>
+        <li><div class="dot green"></div><div><div class="mb-4">Contract signed: FastCatering Co.</div><div class="small muted">Yesterday</div></div></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN USERS -->
+<div class="page" id="page-admin-users">
+  <div class="page-header"><div><h1>User Management</h1><p class="subtitle">View, update roles, suspend accounts</p></div><div class="btn-group"><div class="btn primary">+ Invite User</div></div></div>
+  <div class="search-bar"><input placeholder="Search by name or email…" /><div class="btn">Filter ▾</div></div>
+  <div class="filter-row">
+    <div class="filter-chip active">All</div>
+    <div class="filter-chip">ADMIN</div>
+    <div class="filter-chip">ORGANIZER</div>
+    <div class="filter-chip">ATTENDEE</div>
+    <div class="filter-chip">VENDOR</div>
+    <div class="filter-chip">VENUE_MANAGER</div>
+    <div class="filter-chip">FINANCE_OFFICER</div>
+  </div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+      <tr><td><div class="row"><div class="avatar">AJ</div> Alice Johnson</div></td><td>alice@org.com</td><td><span class="badge blue">ORGANIZER</span></td><td><span class="badge green">Active</span></td><td>Mar 1</td><td><div class="btn-group"><div class="btn sm">Edit Role</div><div class="btn sm danger">Suspend</div></div></td></tr>
+      <tr><td><div class="row"><div class="avatar">BM</div> Bob Martinez</div></td><td>bob@mail.com</td><td><span class="badge gray">ATTENDEE</span></td><td><span class="badge green">Active</span></td><td>Feb 15</td><td><div class="btn-group"><div class="btn sm">Edit Role</div><div class="btn sm danger">Suspend</div></div></td></tr>
+      <tr><td><div class="row"><div class="avatar">CW</div> Carol White</div></td><td>carol@vendor.io</td><td><span class="badge yellow">VENDOR</span></td><td><span class="badge yellow">Inactive</span></td><td>Jan 20</td><td><div class="btn-group"><div class="btn sm">Edit Role</div><div class="btn sm">Activate</div></div></td></tr>
+      <tr><td><div class="row"><div class="avatar">DK</div> David Kim</div></td><td>david@fin.com</td><td><span class="badge blue">FINANCE_OFFICER</span></td><td><span class="badge green">Active</span></td><td>Jan 10</td><td><div class="btn-group"><div class="btn sm">Edit Role</div><div class="btn sm danger">Suspend</div></div></td></tr>
+      <tr><td><div class="row"><div class="avatar">ER</div> Emma Rodriguez</div></td><td>emma@venue.com</td><td><span class="badge blue">VENUE_MANAGER</span></td><td><span class="badge green">Active</span></td><td>Dec 5</td><td><div class="btn-group"><div class="btn sm">Edit Role</div><div class="btn sm danger">Suspend</div></div></td></tr>
+    </table>
+  </div>
+  <div class="row mt-16 muted small">Showing 5 of 1,284 users &nbsp; <div class="btn sm">← Prev</div> &nbsp; Page 1 of 257 &nbsp; <div class="btn sm">Next →</div></div>
+</div>
+
+<!-- ADMIN EVENTS -->
+<div class="page" id="page-admin-events">
+  <div class="page-header"><div><h1>All Events</h1><p class="subtitle">Monitor every event on the platform</p></div></div>
+  <div class="search-bar"><input placeholder="Search events…"/><div class="btn">Status ▾</div><div class="btn">Date ▾</div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Organizer</th><th>Dates</th><th>Venue</th><th>Status</th><th>Actions</th></tr>
+      <tr><td><strong>Tech Summit 2026</strong></td><td>Alice Johnson</td><td>Apr 10–12</td><td>Grand Hall</td><td><span class="badge green">Published</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td><strong>Music Fest Spring</strong></td><td>Bob Chen</td><td>May 3</td><td>Open Arena</td><td><span class="badge blue">Draft</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td><strong>Startup Pitch Day</strong></td><td>Alice Johnson</td><td>Apr 20</td><td>Conference Ctr</td><td><span class="badge green">Published</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td><strong>Art Exhibition</strong></td><td>Sara Lee</td><td>Mar 15</td><td>City Gallery</td><td><span class="badge gray">Completed</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td><strong>Food & Culture Fair</strong></td><td>Mike Patel</td><td>Jun 1–2</td><td>TBD</td><td><span class="badge red">Cancelled</span></td><td><div class="btn sm">View</div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ORGANIZER DASHBOARD -->
+<div class="page" id="page-org-dashboard">
+  <div class="page-header"><div><h1>Organizer Dashboard</h1><p class="subtitle">Manage your events and operations</p></div><div class="btn primary" onclick="go('org-create-event')">+ Create Event</div></div>
+  <div class="card-grid cols-4" style="margin-bottom:20px">
+    <div class="stat-card"><div class="num">4</div><div class="label">Active Events</div></div>
+    <div class="stat-card"><div class="num">312</div><div class="label">Registrations</div></div>
+    <div class="stat-card"><div class="num">$42k</div><div class="label">Budget Used</div></div>
+    <div class="stat-card"><div class="num">7</div><div class="label">Pending Approvals</div></div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <h2>My Events</h2>
+      <table>
+        <tr><th>Event</th><th>Date</th><th>Status</th><th></th></tr>
+        <tr><td><strong>Tech Summit 2026</strong></td><td>Apr 10–12</td><td><span class="badge green">Published</span></td><td><div class="btn sm" onclick="go('org-event-detail')">Manage</div></td></tr>
+        <tr><td><strong>Startup Pitch Day</strong></td><td>Apr 20</td><td><span class="badge green">Published</span></td><td><div class="btn sm">Manage</div></td></tr>
+        <tr><td><strong>Workshop Series</strong></td><td>May 5</td><td><span class="badge blue">Draft</span></td><td><div class="btn sm">Manage</div></td></tr>
+        <tr><td><strong>Networking Dinner</strong></td><td>May 15</td><td><span class="badge blue">Draft</span></td><td><div class="btn sm">Manage</div></td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h2>Quick Actions</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="btn" onclick="go('org-venue-booking')">Book a Venue</div>
+        <div class="btn" onclick="go('org-vendor-contracts')">Manage Vendors</div>
+        <div class="btn" onclick="go('org-budget')">Review Budget</div>
+        <div class="btn" onclick="go('org-registrations')">Approve Registrations</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CREATE EVENT -->
+<div class="page" id="page-org-create-event">
+  <div class="page-header"><div><h1>Create New Event</h1><p class="subtitle">Fill in the event details below</p></div></div>
+  <div class="two-col">
+    <div class="card">
+      <h2>Basic Information</h2>
+      <div class="form-group"><label>Event Name</label><div class="form-field">e.g. Tech Summit 2026</div></div>
+      <div class="card-grid cols-2">
+        <div class="form-group"><label>Start Date</label><div class="form-field">2026-04-10</div></div>
+        <div class="form-group"><label>End Date</label><div class="form-field">2026-04-12</div></div>
+      </div>
+      <div class="form-group"><label>Venue</label><div class="form-field select">Select Venue ▾</div></div>
+      <div class="form-group"><label>Status</label><div class="form-field select">Draft ▾</div></div>
+      <div class="btn-group mt-16"><div class="btn primary">Create Event</div><div class="btn">Save as Draft</div><div class="btn">Cancel</div></div>
+    </div>
+    <div class="card">
+      <h2>Add Schedule (optional)</h2>
+      <div class="form-group"><label>Session Name</label><div class="form-field">Opening Keynote</div></div>
+      <div class="form-group"><label>Description</label><div class="form-field">Welcome address and agenda overview</div></div>
+      <div class="card-grid cols-2">
+        <div class="form-group"><label>Start Time</label><div class="form-field">09:00</div></div>
+        <div class="form-group"><label>End Time</label><div class="form-field">10:00</div></div>
+      </div>
+      <div class="btn sm">+ Add Another Session</div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT DETAIL -->
+<div class="page" id="page-org-event-detail">
+  <div class="page-header">
+    <div><h1>Tech Summit 2026</h1><p class="subtitle">Apr 10–12, 2026 · Grand Hall · <span class="badge green">Published</span></p></div>
+    <div class="btn-group"><div class="btn">Edit</div><div class="btn danger">Cancel Event</div></div>
+  </div>
+  <div class="tab-bar">
+    <div class="tab active">Overview</div>
+    <div class="tab" onclick="go('org-tickets')">Tickets</div>
+    <div class="tab" onclick="go('org-registrations')">Registrations</div>
+    <div class="tab" onclick="go('org-budget')">Budget</div>
+  </div>
+  <div class="two-col">
+    <div class="card">
+      <h2>Schedule</h2>
+      <table>
+        <tr><th>Session</th><th>Time</th><th>Status</th><th></th></tr>
+        <tr><td>Opening Keynote</td><td>Apr 10 09:00–10:00</td><td><span class="badge green">Active</span></td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Panel: AI Trends</td><td>Apr 10 10:30–12:00</td><td><span class="badge yellow">Pending</span></td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Workshop: Cloud</td><td>Apr 11 09:00–11:00</td><td><span class="badge yellow">Pending</span></td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Closing Ceremony</td><td>Apr 12 16:00–17:00</td><td><span class="badge yellow">Pending</span></td><td><div class="btn sm">Edit</div></td></tr>
+      </table>
+      <div class="mt-8"><div class="btn sm primary">+ Add Session</div></div>
+    </div>
+    <div class="card">
+      <h2>Quick Stats</h2>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div><div class="row between mb-4"><span>Registrations</span><strong>248 / 500</strong></div><div class="progress-bar"><div class="fill" style="width:49.6%"></div></div></div>
+        <div><div class="row between mb-4"><span>Budget Used</span><strong>$28k / $50k</strong></div><div class="progress-bar"><div class="fill" style="width:56%"></div></div></div>
+        <div><div class="row between mb-4"><span>Check-ins</span><strong>0 / 248</strong></div><div class="progress-bar"><div class="fill" style="width:0%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKETS -->
+<div class="page" id="page-org-tickets">
+  <div class="page-header"><div><h1>Tickets — Tech Summit 2026</h1><p class="subtitle">Manage ticket types and pricing</p></div><div class="btn primary">+ Add Ticket Type</div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Type</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+      <tr><td><strong>General Admission</strong></td><td>$99.00</td><td><span class="badge green">Available</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm danger">Delete</div></div></td></tr>
+      <tr><td><strong>VIP Pass</strong></td><td>$299.00</td><td><span class="badge green">Available</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm danger">Delete</div></div></td></tr>
+      <tr><td><strong>Student Discount</strong></td><td>$49.00</td><td><span class="badge red">Sold Out</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm danger">Delete</div></div></td></tr>
+      <tr><td><strong>Speaker Pass</strong></td><td>$0.00</td><td><span class="badge gray">Unavailable</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm danger">Delete</div></div></td></tr>
+    </table>
+  </div>
+  <div class="modal-backdrop">
+    <h3>Add / Edit Ticket Type</h3>
+    <div class="card-grid cols-3">
+      <div class="form-group"><label>Type Name</label><div class="form-field">VIP Pass</div></div>
+      <div class="form-group"><label>Price ($)</label><div class="form-field">299.00</div></div>
+      <div class="form-group"><label>Status</label><div class="form-field select">Available ▾</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Save</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- REGISTRATIONS -->
+<div class="page" id="page-org-registrations">
+  <div class="page-header"><div><h1>Registrations — Tech Summit 2026</h1><p class="subtitle">Approve or reject attendee registrations</p></div></div>
+  <div class="filter-row">
+    <div class="filter-chip active">All (248)</div>
+    <div class="filter-chip">Pending (14)</div>
+    <div class="filter-chip">Approved (230)</div>
+    <div class="filter-chip">Rejected (4)</div>
+    <div class="filter-chip">Checked In (0)</div>
+  </div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Attendee</th><th>Ticket</th><th>Registered</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>John Doe</td><td>General Admission</td><td>Mar 28</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Sarah Connor</td><td>VIP Pass</td><td>Mar 27</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Mike Brown</td><td>General Admission</td><td>Mar 25</td><td><span class="badge green">Approved</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Lisa Park</td><td>Student Discount</td><td>Mar 24</td><td><span class="badge red">Rejected</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Tom Wilson</td><td>General Admission</td><td>Mar 23</td><td><span class="badge green">Approved</span></td><td><div class="btn sm">View</div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- BUDGET & EXPENSES -->
+<div class="page" id="page-org-budget">
+  <div class="page-header"><div><h1>Budget & Expenses — Tech Summit 2026</h1><p class="subtitle">Track financial allocations and spending</p></div><div class="btn primary">+ Add Expense</div></div>
+  <div class="card-grid cols-3" style="margin-bottom:20px">
+    <div class="stat-card"><div class="num">$50,000</div><div class="label">Planned Budget</div></div>
+    <div class="stat-card"><div class="num">$28,400</div><div class="label">Total Expenses</div></div>
+    <div class="stat-card"><div class="num">$21,600</div><div class="label">Remaining</div></div>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="row between mb-4"><span>Budget utilization</span><strong>56.8%</strong></div>
+    <div class="progress-bar" style="height:12px"><div class="fill" style="width:56.8%"></div></div>
+  </div>
+  <div class="card" style="padding:0">
+    <h2 style="padding:16px 16px 0">Expenses</h2>
+    <table>
+      <tr><th>Description</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Venue Rental — Grand Hall</td><td>$15,000</td><td>Mar 1</td><td><span class="badge green">Paid</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Catering — Day 1 Lunch</td><td>$5,200</td><td>Mar 5</td><td><span class="badge green">Approved</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>A/V Equipment Rental</td><td>$3,800</td><td>Mar 10</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Speaker Travel Reimbursements</td><td>$4,400</td><td>Mar 15</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn sm">View</div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VENUE BOOKING -->
+<div class="page" id="page-org-venue-booking">
+  <div class="page-header"><div><h1>Venue Booking</h1><p class="subtitle">Find and book venues for your events</p></div></div>
+  <div class="search-bar"><input placeholder="Search by location…"/><input placeholder="Min capacity…" style="width:160px"/><div class="btn">Find Available ▾</div></div>
+  <div class="card-grid cols-3" style="margin-bottom:20px">
+    <div class="card"><h3>Grand Hall</h3><div class="small muted mb-4">Downtown, City Center</div><div class="small mb-4">Capacity: 1,200</div><span class="badge green">Available</span><div class="mt-8"><div class="btn sm primary">Book Now</div></div></div>
+    <div class="card"><h3>Open Arena</h3><div class="small muted mb-4">North District</div><div class="small mb-4">Capacity: 5,000</div><span class="badge green">Available</span><div class="mt-8"><div class="btn sm primary">Book Now</div></div></div>
+    <div class="card"><h3>Conference Ctr</h3><div class="small muted mb-4">Business Park</div><div class="small mb-4">Capacity: 800</div><span class="badge yellow">Unavailable</span><div class="mt-8"><div class="btn sm" style="opacity:.4;cursor:default">Unavailable</div></div></div>
+  </div>
+  <div class="modal-backdrop">
+    <h3>New Booking — Grand Hall</h3>
+    <div class="card-grid cols-3">
+      <div class="form-group"><label>Event</label><div class="form-field select">Tech Summit 2026 ▾</div></div>
+      <div class="form-group"><label>Check-in Date</label><div class="form-field">2026-04-09</div></div>
+      <div class="form-group"><label>Check-out Date</label><div class="form-field">2026-04-13</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Submit Booking</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- VENDOR CONTRACTS -->
+<div class="page" id="page-org-vendor-contracts">
+  <div class="page-header"><div><h1>Vendor Contracts</h1><p class="subtitle">Manage contracts for Tech Summit 2026</p></div><div class="btn primary">+ New Contract</div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Vendor</th><th>Event</th><th>Amount</th><th>Period</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>FastCatering Co.</td><td>Tech Summit 2026</td><td>$8,000</td><td>Apr 10–12</td><td><span class="badge green">Active</span></td><td><div class="btn-group"><div class="btn sm">View</div><div class="btn sm">Invoice</div></div></td></tr>
+      <tr><td>TechAV Solutions</td><td>Tech Summit 2026</td><td>$4,500</td><td>Apr 9–13</td><td><span class="badge blue">Draft</span></td><td><div class="btn-group"><div class="btn sm">View</div><div class="btn sm">Activate</div></div></td></tr>
+      <tr><td>Security Pro Ltd.</td><td>Startup Pitch Day</td><td>$1,200</td><td>Apr 20</td><td><span class="badge yellow">Draft</span></td><td><div class="btn-group"><div class="btn sm">View</div><div class="btn sm">Activate</div></div></td></tr>
+    </table>
+  </div>
+  <div class="modal-backdrop">
+    <h3>New Contract</h3>
+    <div class="card-grid cols-2">
+      <div class="form-group"><label>Vendor</label><div class="form-field select">Select Vendor ▾</div></div>
+      <div class="form-group"><label>Event</label><div class="form-field select">Tech Summit 2026 ▾</div></div>
+      <div class="form-group"><label>Start Date</label><div class="form-field">2026-04-09</div></div>
+      <div class="form-group"><label>End Date</label><div class="form-field">2026-04-13</div></div>
+      <div class="form-group"><label>Contract Amount ($)</label><div class="form-field">4500.00</div></div>
+      <div class="form-group"><label>Terms</label><div class="form-field">Net 30 payment, 50% upfront</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Create Contract</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- ATTENDEE: BROWSE EVENTS -->
+<div class="page" id="page-att-browse">
+  <div class="page-header"><div><h1>Browse Events</h1><p class="subtitle">Discover and register for upcoming events</p></div></div>
+  <div class="search-bar"><input placeholder="Search events…"/><div class="btn">Date ▾</div><div class="btn">Category ▾</div></div>
+  <div class="filter-row">
+    <div class="filter-chip active">All</div>
+    <div class="filter-chip">This Month</div>
+    <div class="filter-chip">Next Month</div>
+    <div class="filter-chip">Free</div>
+    <div class="filter-chip">Available</div>
+  </div>
+  <div class="card-grid cols-3">
+    <div class="card"><h3>Tech Summit 2026</h3><div class="small muted mb-4">Apr 10–12 · Grand Hall</div><div class="small mb-4">248 / 500 registered · <strong>$99 – $299</strong></div><span class="badge green">Published</span><div class="mt-8"><div class="btn sm primary" onclick="go('att-event-detail')">View & Register</div></div></div>
+    <div class="card"><h3>Startup Pitch Day</h3><div class="small muted mb-4">Apr 20 · Conference Ctr</div><div class="small mb-4">86 / 200 registered · <strong>$49</strong></div><span class="badge green">Published</span><div class="mt-8"><div class="btn sm primary">View & Register</div></div></div>
+    <div class="card"><h3>Music Fest Spring</h3><div class="small muted mb-4">May 3 · Open Arena</div><div class="small mb-4">0 / 5,000 registered · <strong>$149</strong></div><span class="badge green">Published</span><div class="mt-8"><div class="btn sm primary">View & Register</div></div></div>
+    <div class="card"><h3>AI Workshop</h3><div class="small muted mb-4">May 10 · Tech Hub</div><div class="small mb-4">120 / 120 registered · <strong>$79</strong></div><span class="badge red">Sold Out</span><div class="mt-8"><div class="btn sm" style="opacity:.4;cursor:default">Sold Out</div></div></div>
+    <div class="card"><h3>Networking Dinner</h3><div class="small muted mb-4">May 15 · Rooftop Lounge</div><div class="small mb-4">30 / 80 registered · <strong>$199</strong></div><span class="badge green">Published</span><div class="mt-8"><div class="btn sm primary">View & Register</div></div></div>
+    <div class="card"><h3>Design Summit</h3><div class="small muted mb-4">Jun 5 · Art District</div><div class="small mb-4">0 / 300 registered · <strong>Free</strong></div><span class="badge green">Published</span><div class="mt-8"><div class="btn sm primary">View & Register</div></div></div>
+  </div>
+</div>
+
+<!-- ATTENDEE: EVENT DETAIL -->
+<div class="page" id="page-att-event-detail">
+  <div class="page-header"><div><h1>Tech Summit 2026</h1><p class="subtitle">Apr 10–12, 2026 · Grand Hall, Downtown</p></div></div>
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:16px">
+        <h2>About This Event</h2>
+        <p class="small muted">Join 500+ tech leaders, innovators, and engineers for three days of keynotes, workshops, and networking. Topics: AI, Cloud, DevOps, and the Future of Work.</p>
+        <div class="mt-16">
+          <h3>Schedule Highlights</h3>
+          <table style="margin-top:8px">
+            <tr><th>Session</th><th>Time</th></tr>
+            <tr><td>Opening Keynote</td><td>Apr 10, 09:00–10:00</td></tr>
+            <tr><td>Panel: AI Trends</td><td>Apr 10, 10:30–12:00</td></tr>
+            <tr><td>Workshop: Cloud</td><td>Apr 11, 09:00–11:00</td></tr>
+            <tr><td>Closing Ceremony</td><td>Apr 12, 16:00–17:00</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="align-self:start">
+      <h2>Register</h2>
+      <div class="form-group"><label>Select Ticket</label><div class="form-field select">General Admission — $99 ▾</div></div>
+      <div style="margin:12px 0;font-size:12px;color:var(--muted)">252 spots remaining</div>
+      <div class="btn primary" style="width:100%;text-align:center">Register Now</div>
+      <div style="margin-top:12px;font-size:11px;color:var(--muted);text-align:center">Registration is subject to organizer approval</div>
+    </div>
+  </div>
+</div>
+
+<!-- ATTENDEE: MY REGISTRATIONS -->
+<div class="page" id="page-att-my-registrations">
+  <div class="page-header"><div><h1>My Registrations</h1><p class="subtitle">Track your event registrations</p></div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Ticket</th><th>Registered</th><th>Status</th><th>Actions</th></tr>
+      <tr><td><strong>Tech Summit 2026</strong><div class="small muted">Apr 10–12</div></td><td>General Admission</td><td>Mar 28</td><td><span class="badge green">Approved</span></td><td><div class="btn-group"><div class="btn sm">Check In</div><div class="btn sm danger">Cancel</div></div></td></tr>
+      <tr><td><strong>Startup Pitch Day</strong><div class="small muted">Apr 20</div></td><td>Standard</td><td>Mar 25</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm danger">Cancel</div></div></td></tr>
+      <tr><td><strong>Art Exhibition</strong><div class="small muted">Mar 15 (Past)</div></td><td>Free Entry</td><td>Mar 10</td><td><span class="badge gray">Completed</span></td><td><div class="btn sm" onclick="go('att-feedback')">Leave Feedback</div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ATTENDEE: FEEDBACK -->
+<div class="page" id="page-att-feedback">
+  <div class="page-header"><div><h1>Submit Feedback</h1><p class="subtitle">Art Exhibition — Mar 15, 2026</p></div></div>
+  <div class="card" style="max-width:520px">
+    <div class="form-group"><label>Overall Rating</label>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <div style="font-size:22px;cursor:pointer">★</div><div style="font-size:22px;cursor:pointer">★</div><div style="font-size:22px;cursor:pointer">★</div><div style="font-size:22px;cursor:pointer">★</div><div style="font-size:22px;cursor:pointer;opacity:.3">★</div>
+        <span class="muted small" style="align-self:center">4 / 5</span>
+      </div>
+    </div>
+    <div class="form-group"><label>Comment</label><div class="form-field" style="min-height:80px">Excellent event! Very well organized, loved the interactive exhibits. Would attend again.</div></div>
+    <div class="btn-group"><div class="btn primary">Submit Feedback</div><div class="btn">Cancel</div></div>
+  </div>
+  <div class="card mt-16" style="max-width:520px">
+    <h2>Event Feedback Summary</h2>
+    <div class="row between mb-4"><span>Average Rating</span><strong>4.2 / 5</strong></div>
+    <div class="progress-bar"><div class="fill" style="width:84%"></div></div>
+    <div class="small muted mt-8">Based on 38 reviews</div>
+  </div>
+</div>
+
+<!-- FINANCE: EXPENSE APPROVALS -->
+<div class="page" id="page-fin-expenses">
+  <div class="page-header"><div><h1>Expense Approvals</h1><p class="subtitle">Review and action submitted expenses</p></div></div>
+  <div class="filter-row">
+    <div class="filter-chip active">Submitted (8)</div>
+    <div class="filter-chip">Approved (24)</div>
+    <div class="filter-chip">Rejected (3)</div>
+    <div class="filter-chip">Paid (15)</div>
+  </div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Description</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Tech Summit 2026</td><td>A/V Equipment Rental</td><td>$3,800</td><td>Mar 10</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Tech Summit 2026</td><td>Speaker Travel</td><td>$4,400</td><td>Mar 15</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Startup Pitch Day</td><td>Printing & Materials</td><td>$850</td><td>Mar 20</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Music Fest</td><td>Stage Setup</td><td>$12,000</td><td>Mar 22</td><td><span class="badge yellow">Submitted</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- FINANCE: PAYMENTS -->
+<div class="page" id="page-fin-payments">
+  <div class="page-header"><div><h1>Payments</h1><p class="subtitle">Process payments for approved expenses</p></div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Expense</th><th>Amount</th><th>Method</th><th>Transaction ID</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Venue Rental — Grand Hall</td><td>$15,000</td><td>Bank Transfer</td><td>TXN-001234</td><td><span class="badge green">Completed</span></td><td><div class="btn sm">Receipt</div></td></tr>
+      <tr><td>Catering — Day 1</td><td>$5,200</td><td>Credit Card</td><td>TXN-001235</td><td><span class="badge green">Completed</span></td><td><div class="btn sm">Receipt</div></td></tr>
+      <tr><td>A/V Equipment</td><td>$3,800</td><td>—</td><td>—</td><td><span class="badge yellow">Pending</span></td><td><div class="btn sm primary">Pay Now</div></td></tr>
+    </table>
+  </div>
+  <div class="modal-backdrop">
+    <h3>Process Payment — A/V Equipment ($3,800)</h3>
+    <div class="card-grid cols-2">
+      <div class="form-group"><label>Payment Method</label><div class="form-field select">Bank Transfer ▾</div></div>
+      <div class="form-group"><label>Transaction Reference</label><div class="form-field">TXN-XXXXXX</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Submit Payment</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- FINANCE: BUDGETS -->
+<div class="page" id="page-fin-budgets">
+  <div class="page-header"><div><h1>Budget Overview</h1><p class="subtitle">Financial summary across all events</p></div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Planned</th><th>Expenses</th><th>Remaining</th><th>Utilization</th></tr>
+      <tr><td><strong>Tech Summit 2026</strong></td><td>$50,000</td><td>$28,400</td><td>$21,600</td><td><div class="progress-bar" style="width:120px;display:inline-block"><div class="fill" style="width:56.8%"></div></div> 57%</td></tr>
+      <tr><td><strong>Startup Pitch Day</strong></td><td>$15,000</td><td>$5,200</td><td>$9,800</td><td><div class="progress-bar" style="width:120px;display:inline-block"><div class="fill" style="width:34.7%"></div></div> 35%</td></tr>
+      <tr><td><strong>Music Fest Spring</strong></td><td>$80,000</td><td>$12,000</td><td>$68,000</td><td><div class="progress-bar" style="width:120px;display:inline-block"><div class="fill" style="width:15%"></div></div> 15%</td></tr>
+      <tr><td><strong>Art Exhibition</strong></td><td>$8,000</td><td>$7,900</td><td>$100</td><td><div class="progress-bar" style="width:120px;display:inline-block"><div class="fill" style="width:98.8%"></div></div> 99%</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VENDOR: PROFILE -->
+<div class="page" id="page-ven-profile">
+  <div class="page-header"><div><h1>Vendor Profile</h1><p class="subtitle">FastCatering Co.</p></div><div class="btn primary">Edit Profile</div></div>
+  <div class="two-col">
+    <div class="card">
+      <div class="form-group"><label>Business Name</label><div class="form-field">FastCatering Co.</div></div>
+      <div class="form-group"><label>Contact Info</label><div class="form-field">contact@fastcatering.com · +1 800 555 0100</div></div>
+      <div class="form-group"><label>Status</label><div style="margin-top:4px"><span class="badge green">Active</span></div></div>
+    </div>
+    <div class="card">
+      <h2>Summary</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="row between"><span class="muted small">Active Contracts</span><strong>2</strong></div>
+        <div class="row between"><span class="muted small">Open Invoices</span><strong>1</strong></div>
+        <div class="row between"><span class="muted small">Pending Deliveries</span><strong>3</strong></div>
+        <div class="row between"><span class="muted small">Total Earned</span><strong>$24,500</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VENDOR: CONTRACTS -->
+<div class="page" id="page-ven-contracts">
+  <div class="page-header"><div><h1>My Contracts</h1><p class="subtitle">Contracts assigned to FastCatering Co.</p></div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Organizer</th><th>Amount</th><th>Period</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Tech Summit 2026</td><td>Alice Johnson</td><td>$8,000</td><td>Apr 10–12</td><td><span class="badge green">Active</span></td><td><div class="btn-group"><div class="btn sm">View</div><div class="btn sm" onclick="go('ven-deliveries')">Log Delivery</div></div></td></tr>
+      <tr><td>Networking Dinner</td><td>Alice Johnson</td><td>$3,200</td><td>May 15</td><td><span class="badge blue">Draft</span></td><td><div class="btn-group"><div class="btn sm">View</div><div class="btn sm">Accept</div></div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VENDOR: INVOICES -->
+<div class="page" id="page-ven-invoices">
+  <div class="page-header"><div><h1>Invoices</h1><p class="subtitle">Billing history</p></div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Contract</th><th>Total Amount</th><th>Due Date</th><th>Transaction</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Tech Summit — Catering</td><td>$8,000</td><td>Apr 30</td><td>TXN-001240</td><td><span class="badge green">Paid</span></td><td><div class="btn sm">Download PDF</div></td></tr>
+      <tr><td>Networking Dinner</td><td>$3,200</td><td>May 25</td><td>—</td><td><span class="badge blue">Draft</span></td><td><div class="btn sm">View</div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VENDOR: DELIVERIES -->
+<div class="page" id="page-ven-deliveries">
+  <div class="page-header"><div><h1>Deliveries</h1><p class="subtitle">Track and update delivery statuses</p></div><div class="btn primary">+ Log Delivery</div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Invoice</th><th>Description</th><th>Qty</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Tech Summit Invoice #1</td><td>Day 1 Lunch Setup</td><td>500 covers</td><td><span class="badge green">Delivered</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Tech Summit Invoice #1</td><td>Day 2 Catering</td><td>500 covers</td><td><span class="badge blue">Shipped</span></td><td><div class="btn sm">Update Status</div></td></tr>
+      <tr><td>Tech Summit Invoice #1</td><td>Day 3 Catering</td><td>400 covers</td><td><span class="badge yellow">Pending</span></td><td><div class="btn sm">Update Status</div></td></tr>
+    </table>
+  </div>
+  <div class="modal-backdrop">
+    <h3>Log New Delivery</h3>
+    <div class="card-grid cols-2">
+      <div class="form-group"><label>Invoice</label><div class="form-field select">Tech Summit Invoice #1 ▾</div></div>
+      <div class="form-group"><label>Description</label><div class="form-field">Day 3 Catering</div></div>
+      <div class="form-group"><label>Quantity</label><div class="form-field">400</div></div>
+      <div class="form-group"><label>Status</label><div class="form-field select">Pending ▾</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Save</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- VENUE MANAGER: VENUES -->
+<div class="page" id="page-venue-list">
+  <div class="page-header"><div><h1>My Venues</h1><p class="subtitle">Manage venue listings and availability</p></div><div class="btn primary">+ Add Venue</div></div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Venue</th><th>Location</th><th>Capacity</th><th>Status</th><th>Actions</th></tr>
+      <tr><td><strong>Grand Hall</strong></td><td>Downtown, City Center</td><td>1,200</td><td><span class="badge green">Available</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm" onclick="go('venue-resources')">Resources</div><div class="btn sm" onclick="go('venue-bookings')">Bookings</div></div></td></tr>
+      <tr><td><strong>Rooftop Lounge</strong></td><td>West District</td><td>80</td><td><span class="badge green">Available</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm">Resources</div><div class="btn sm">Bookings</div></div></td></tr>
+      <tr><td><strong>Conference Suite B</strong></td><td>Business Park</td><td>200</td><td><span class="badge yellow">Maintenance</span></td><td><div class="btn-group"><div class="btn sm">Edit</div><div class="btn sm">Update Status</div></div></td></tr>
+    </table>
+  </div>
+  <div class="modal-backdrop">
+    <h3>Add / Edit Venue</h3>
+    <div class="card-grid cols-2">
+      <div class="form-group"><label>Venue Name</label><div class="form-field">Grand Hall</div></div>
+      <div class="form-group"><label>Location</label><div class="form-field">Downtown, City Center</div></div>
+      <div class="form-group"><label>Capacity</label><div class="form-field">1200</div></div>
+      <div class="form-group"><label>Availability Status</label><div class="form-field select">Available ▾</div></div>
+    </div>
+    <div class="btn-group"><div class="btn primary">Save Venue</div><div class="btn">Cancel</div></div>
+  </div>
+</div>
+
+<!-- VENUE MANAGER: BOOKINGS -->
+<div class="page" id="page-venue-bookings">
+  <div class="page-header"><div><h1>Bookings — Grand Hall</h1><p class="subtitle">Review and confirm venue booking requests</p></div></div>
+  <div class="filter-row">
+    <div class="filter-chip active">All</div>
+    <div class="filter-chip">Pending (3)</div>
+    <div class="filter-chip">Confirmed</div>
+    <div class="filter-chip">Cancelled</div>
+  </div>
+  <div class="card" style="padding:0">
+    <table>
+      <tr><th>Event</th><th>Organizer</th><th>Check-In</th><th>Check-Out</th><th>Status</th><th>Actions</th></tr>
+      <tr><td>Tech Summit 2026</td><td>Alice Johnson</td><td>Apr 9</td><td>Apr 13</td><td><span class="badge green">Confirmed</span></td><td><div class="btn sm">View</div></td></tr>
+      <tr><td>Corporate Gala</td><td>Bob Chen</td><td>May 20</td><td>May 21</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm primary">Confirm</div><div class="btn sm danger">Reject</div></div></td></tr>
+      <tr><td>Product Launch</td><td>Sara Lee</td><td>Jun 3</td><td>Jun 3</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm primary">Confirm</div><div class="btn sm danger">Reject</div></div></td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- VENUE MANAGER: RESOURCES -->
+<div class="page" id="page-venue-resources">
+  <div class="page-header"><div><h1>Resources — Grand Hall</h1><p class="subtitle">Manage venue equipment and resource allocations</p></div><div class="btn primary">+ Add Resource</div></div>
+  <div class="card-grid cols-2">
+    <div class="card" style="padding:0">
+      <h2 style="padding:16px 16px 0">Inventory</h2>
+      <table>
+        <tr><th>Resource</th><th>Type</th><th>Total</th><th>Available</th><th></th></tr>
+        <tr><td>Projectors</td><td>AV Equipment</td><td>10</td><td>7</td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Round Tables</td><td>Furniture</td><td>50</td><td>50</td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Chairs</td><td>Furniture</td><td>600</td><td>352</td><td><div class="btn sm">Edit</div></td></tr>
+        <tr><td>Microphones</td><td>AV Equipment</td><td>20</td><td>14</td><td><div class="btn sm">Edit</div></td></tr>
+      </table>
+    </div>
+    <div class="card" style="padding:0">
+      <h2 style="padding:16px 16px 0">Allocation Requests</h2>
+      <table>
+        <tr><th>Event</th><th>Resources</th><th>Status</th><th></th></tr>
+        <tr><td>Tech Summit 2026</td><td>3 Projectors, 200 Chairs</td><td><span class="badge green">Approved</span></td><td><div class="btn sm">View</div></td></tr>
+        <tr><td>Corporate Gala</td><td>20 Tables, 160 Chairs</td><td><span class="badge yellow">Pending</span></td><td><div class="btn-group"><div class="btn sm primary">Approve</div><div class="btn sm danger">Reject</div></div></td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#main -->
+
+<script>
+  const pages = document.querySelectorAll('.page');
+  const navItems = document.querySelectorAll('.nav-item');
+  const breadcrumb = document.getElementById('breadcrumb');
+  const userChip = document.getElementById('user-chip');
+
+  const roleMap = {
+    'login': ['Not logged in', 'Auth › Login'],
+    'register': ['Not logged in', 'Auth › Register'],
+    'admin-dashboard': ['Admin: System Admin', 'Admin › Dashboard'],
+    'admin-users': ['Admin: System Admin', 'Admin › User Management'],
+    'admin-events': ['Admin: System Admin', 'Admin › All Events'],
+    'org-dashboard': ['Organizer: Alice Johnson', 'Organizer › Dashboard'],
+    'org-create-event': ['Organizer: Alice Johnson', 'Organizer › Create Event'],
+    'org-event-detail': ['Organizer: Alice Johnson', 'Organizer › Event Detail'],
+    'org-tickets': ['Organizer: Alice Johnson', 'Organizer › Tickets'],
+    'org-registrations': ['Organizer: Alice Johnson', 'Organizer › Registrations'],
+    'org-budget': ['Organizer: Alice Johnson', 'Organizer › Budget & Expenses'],
+    'org-venue-booking': ['Organizer: Alice Johnson', 'Organizer › Venue Booking'],
+    'org-vendor-contracts': ['Organizer: Alice Johnson', 'Organizer › Vendor Contracts'],
+    'att-browse': ['Attendee: John Doe', 'Attendee › Browse Events'],
+    'att-event-detail': ['Attendee: John Doe', 'Attendee › Event Detail'],
+    'att-my-registrations': ['Attendee: John Doe', 'Attendee › My Registrations'],
+    'att-feedback': ['Attendee: John Doe', 'Attendee › Submit Feedback'],
+    'fin-expenses': ['Finance Officer: David Kim', 'Finance › Expense Approvals'],
+    'fin-payments': ['Finance Officer: David Kim', 'Finance › Payments'],
+    'fin-budgets': ['Finance Officer: David Kim', 'Finance › Budget Overview'],
+    'ven-profile': ['Vendor: FastCatering Co.', 'Vendor › My Profile'],
+    'ven-contracts': ['Vendor: FastCatering Co.', 'Vendor › Contracts'],
+    'ven-invoices': ['Vendor: FastCatering Co.', 'Vendor › Invoices'],
+    'ven-deliveries': ['Vendor: FastCatering Co.', 'Vendor › Deliveries'],
+    'venue-list': ['Venue Manager: Emma Rodriguez', 'Venue Manager › My Venues'],
+    'venue-bookings': ['Venue Manager: Emma Rodriguez', 'Venue Manager › Bookings'],
+    'venue-resources': ['Venue Manager: Emma Rodriguez', 'Venue Manager › Resources'],
+  };
+
+  function go(id) {
+    pages.forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+    const target = document.getElementById('page-' + id);
+    if (target) {
+      target.style.display = (id === 'login' || id === 'register') ? 'flex' : 'block';
+      target.classList.add('active');
+    }
+    navItems.forEach(n => n.classList.remove('active'));
+    navItems.forEach(n => { if (n.getAttribute('onclick') && n.getAttribute('onclick').includes("'"+id+"'")) n.classList.add('active'); });
+    if (roleMap[id]) {
+      userChip.textContent = roleMap[id][0];
+      breadcrumb.textContent = roleMap[id][1];
+    }
+    window.scrollTo(0, 0);
+  }
+
+  // init
+  go('login');
+</script>
+</body>
+</html>

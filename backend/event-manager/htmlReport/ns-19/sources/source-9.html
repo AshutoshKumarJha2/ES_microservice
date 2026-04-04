@@ -1,0 +1,199 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > RegistrationService</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.service</a>
+</div>
+
+<h1>Coverage Summary for Class: RegistrationService (com.cts.eventsphere.eventmanager.service)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+</tr>
+  <tr>
+    <td class="name">RegistrationService$MockitoMock$drCt617I</td>
+  </tr>
+  <tr>
+    <td class="name">RegistrationService$MockitoMock$drCt617I$auxiliary$8hEKmTSL</td>
+  </tr>
+  <tr>
+    <td class="name">RegistrationService$MockitoMock$drCt617I$auxiliary$MC3P7367</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.service;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
+&nbsp;
+&nbsp;/**
+&nbsp; * Service interface for managing event registrations.
+&nbsp; *
+&nbsp; * @author test-in-prod-10x
+&nbsp; * @version 1.0
+&nbsp; * @since 2026-03-26
+&nbsp; */
+&nbsp;public interface RegistrationService {
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Registers a user for a specific event with a chosen ticket.
+&nbsp;     *
+&nbsp;     * @param userId   the ID of the attendee
+&nbsp;     * @param eventId  the ID of the event
+&nbsp;     * @param ticketId the ID of the selected ticket
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse registerForEvent(String userId, String eventId, String ticketId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a registration by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor making the request
+&nbsp;     * @param registrationId the ID of the registration
+&nbsp;     * @return a {@link RegistrationDto} containing registration details
+&nbsp;     */
+&nbsp;    RegistrationDto getRegistrationById(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a registration for a specific attendee and event combination.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the actor making the request
+&nbsp;     * @param eventId the ID of the event
+&nbsp;     * @param userId  the ID of the attendee
+&nbsp;     * @return a {@link RegistrationDto} representing the registration
+&nbsp;     */
+&nbsp;    RegistrationDto getRegistrationByEventIdAndUserId(String actorId, String eventId, String userId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Permanently deletes a registration record.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor performing the deletion
+&nbsp;     * @param registrationId the ID of the registration to delete
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse deleteRegistration(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Cancels a registration, typically initiated by the attendee.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor performing the cancellation
+&nbsp;     * @param registrationId the ID of the registration to cancel
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse cancelRegistration(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Approves a pending registration, changing its status to CONFIRMED.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor performing the approval
+&nbsp;     * @param registrationId the ID of the registration to approve
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse approveRegistration(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Checks in a CONFIRMED registration, changing its status to CHECKED_IN.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor performing the check-in
+&nbsp;     * @param registrationId the ID of the registration to check in
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse checkInRegistration(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Rejects a registration, changing its status to CANCELLED.
+&nbsp;     *
+&nbsp;     * @param actorId        the ID of the actor performing the rejection
+&nbsp;     * @param registrationId the ID of the registration to reject
+&nbsp;     * @return a {@link GenericResponse} indicating the result
+&nbsp;     */
+&nbsp;    GenericResponse rejectRegistration(String actorId, String registrationId);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of registrations for a specific attendee.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the actor making the request
+&nbsp;     * @param userId  the ID of the attendee
+&nbsp;     * @param size    the number of records per page
+&nbsp;     * @param page    the page number (zero-based)
+&nbsp;     * @return a {@link RegistrationListResponseDto} containing the attendee&#39;s registrations
+&nbsp;     */
+&nbsp;    RegistrationListResponseDto getRegistrationsByUserId(String actorId, String userId, int size, int page);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of registrations for a specific event, optionally filtered by status.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the actor making the request
+&nbsp;     * @param eventId the ID of the event
+&nbsp;     * @param status  the registration status to filter by, or {@code null} for all
+&nbsp;     * @param size    the number of records per page
+&nbsp;     * @param page    the page number (zero-based)
+&nbsp;     * @return a {@link RegistrationListResponseDto} containing the event&#39;s registrations
+&nbsp;     */
+&nbsp;    RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, int size, int page);
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves a paginated list of all registrations in the system.
+&nbsp;     *
+&nbsp;     * @param actorId the ID of the actor making the request
+&nbsp;     * @param size    the number of records per page
+&nbsp;     * @param page    the page number (zero-based)
+&nbsp;     * @return a {@link RegistrationListResponseDto} containing all registrations
+&nbsp;     */
+&nbsp;    RegistrationListResponseDto getAllRegistrations(String actorId, int size, int page);
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>

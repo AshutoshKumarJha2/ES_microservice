@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: venue-manager
+  config:
+    import: "configserver:http://localhost:6971"
+  profiles:
+    active: local
+
+logging:
+  level:
+    org.springdoc: DEBUG
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:6969/eureka
+
+server:
+  port: 7076

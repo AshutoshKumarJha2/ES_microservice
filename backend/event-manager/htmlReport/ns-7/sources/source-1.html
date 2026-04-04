@@ -1,0 +1,251 @@
+
+
+
+<!DOCTYPE html>
+<html id="htmlId">
+<head>
+  <meta http-equiv="Content-Type" content="text/html;charset=UTF-8"> 
+  <title>Coverage Report > EventController</title>
+  <style type="text/css">
+    @import "../../css/coverage.css";
+    @import "../../css/idea.min.css";
+  </style>
+  <script type="text/javascript" src="../../js/highlight.min.js"></script>
+  <script type="text/javascript" src="../../js/highlightjs-line-numbers.min.js"></script>
+</head>
+
+<body>
+<div class="content">
+<div class="breadCrumbs">
+Current scope:     <a href="../../index.html">all classes</a>
+    <span class="separator">|</span>
+    <a href="../index.html">com.cts.eventsphere.eventmanager.controller</a>
+</div>
+
+<h1>Coverage Summary for Class: EventController (com.cts.eventsphere.eventmanager.controller)</h1>
+
+<table class="coverageStats">
+
+<tr>
+  <th class="name">Class</th>
+<th class="coverageStat 
+">
+  Method, %
+</th>
+<th class="coverageStat 
+">
+  Line, %
+</th>
+</tr>
+<tr>
+  <td class="name">EventController</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+  <tr>
+    <td class="name">EventController$$SpringCGLIB$$0</td>
+  </tr>
+<tr>
+  <td class="name"><strong>Total</strong></td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (8/8)
+  </span>
+</td>
+<td class="coverageStat">
+  <span class="percent">
+    100%
+  </span>
+  <span class="absValue">
+    (34/34)
+  </span>
+</td>
+</tr>
+</table>
+
+<br/>
+<br/>
+
+
+<pre>
+<code class="sourceCode" id="sourceCode">&nbsp;package com.cts.eventsphere.eventmanager.controller;
+&nbsp;
+&nbsp;import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
+&nbsp;import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+&nbsp;import com.cts.eventsphere.eventmanager.service.EventService;
+&nbsp;import jakarta.validation.Valid;
+&nbsp;import lombok.RequiredArgsConstructor;
+&nbsp;import lombok.extern.slf4j.Slf4j;
+&nbsp;import org.springframework.http.HttpStatus;
+&nbsp;import org.springframework.http.ResponseEntity;
+&nbsp;import org.springframework.security.access.prepost.PreAuthorize;
+&nbsp;import org.springframework.security.core.annotation.AuthenticationPrincipal;
+&nbsp;import org.springframework.web.bind.annotation.*;
+&nbsp;
+&nbsp;import java.util.List;
+&nbsp;
+&nbsp;/**
+&nbsp; * Rest Controller for Event Entity.
+&nbsp; * Provides endpoints for creating, retrieving, updating, and deleting events,
+&nbsp; * as well as managing schedules associated with events.
+&nbsp; *
+&nbsp; * @author 2479623
+&nbsp; * @version 1.0
+&nbsp; * @since 27-02-2026
+&nbsp; */
+&nbsp;@RestController
+&nbsp;@RequestMapping(&quot;/events&quot;)
+<b class="fc">&nbsp;@Slf4j</b>
+&nbsp;@RequiredArgsConstructor
+&nbsp;public class EventController {
+&nbsp;    private final EventService eventService;
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Creates a new event.
+&nbsp;     *
+&nbsp;     * @param event the request DTO containing event details
+&nbsp;     * @return ResponseEntity containing the created event DTO and HTTP status 201 (CREATED)
+&nbsp;     */
+&nbsp;    @PostMapping
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ADMIN&#39;, &#39;ORGANIZER&#39;, &#39;VENUE_MANAGER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;EventResponseDto&gt; create(@Valid @RequestBody EventRequestDto event, @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to create a new event: {}&quot;, event.name());</b>
+<b class="fc">&nbsp;        EventResponseDto createdEvent = eventService.create(userId,event);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully created event with ID: {}&quot;, createdEvent.id());</b>
+<b class="fc">&nbsp;        return new ResponseEntity&lt;&gt;(createdEvent, HttpStatus.CREATED);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all events.
+&nbsp;     * @return ResponseEntity containing a list of event DTOs and HTTP status 200 (OK)
+&nbsp;     */
+&nbsp;    @GetMapping
+&nbsp;    public ResponseEntity&lt;List&lt;EventResponseDto&gt;&gt; readAll(@AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to fetch all events&quot;);</b>
+<b class="fc">&nbsp;        List&lt;EventResponseDto&gt; events = eventService.findAllEvents(userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully retrieved {} events&quot;, events.size());</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(events);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Updates an existing event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the event to update
+&nbsp;     * @param eventRequest the request DTO containing updated event details
+&nbsp;     * @return ResponseEntity with HTTP status 204 (NO_CONTENT) if update is successful
+&nbsp;     */
+&nbsp;    @PutMapping(&quot;/{id}&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ADMIN&#39;, &#39;ORGANIZER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; update(@PathVariable String id, @Valid @RequestBody EventRequestDto eventRequest, @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to update event with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        eventService.updateById(id, eventRequest, userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully updated event with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.noContent().build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    @GetMapping(&quot;/{id}&quot;)
+&nbsp;    @PreAuthorize(&quot;isAuthenticated()&quot;)
+&nbsp;    public ResponseEntity&lt;EventResponseDto&gt; getById(@PathVariable String id, @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to get event with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(eventService.findById(id,userId));</b>
+&nbsp;
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Deletes an event by its unique identifier.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the event to delete
+&nbsp;     * @return ResponseEntity with HTTP status 204 (NO_CONTENT) if deletion is successful
+&nbsp;     */
+&nbsp;    @DeleteMapping(&quot;/{id}&quot;)
+&nbsp;    public ResponseEntity&lt;Void&gt; delete(@PathVariable String id, @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to delete event with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        eventService.deleteById(id, userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully deleted event with ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.noContent().build();</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Adds a new schedule (activity) to an existing event.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the event
+&nbsp;     * @param scheduleRequest the request DTO containing schedule details
+&nbsp;     * @return ResponseEntity containing the created schedule DTO and HTTP status 201 (CREATED)
+&nbsp;     */
+&nbsp;    @PostMapping(&quot;/{id}/schedules&quot;)
+&nbsp;    @PreAuthorize(&quot;hasAnyRole(&#39;ADMIN&#39;, &#39;ORGANIZER&#39;, &#39;VENUE_MANAGER&#39;)&quot;)
+&nbsp;    public ResponseEntity&lt;ScheduleResponseDto&gt; createActivity(@PathVariable String id, @Valid @RequestBody ScheduleRequestDto scheduleRequest , @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to add activity to event ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        ScheduleResponseDto response = eventService.addActivity(id, scheduleRequest, userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully added activity with ID: {} to event ID: {}&quot;, response.eventId(), id);</b>
+<b class="fc">&nbsp;        return new ResponseEntity&lt;&gt;(response, HttpStatus.CREATED);</b>
+&nbsp;    }
+&nbsp;
+&nbsp;    /**
+&nbsp;     * Retrieves all schedules (activities) associated with a specific event.
+&nbsp;     *
+&nbsp;     * @param id the unique identifier of the event
+&nbsp;     * @return ResponseEntity containing a list of schedule DTOs and HTTP status 200 (OK)
+&nbsp;     */
+&nbsp;    @GetMapping(&quot;/{id}/schedules&quot;)
+&nbsp;    public ResponseEntity&lt;List&lt;ScheduleResponseDto&gt;&gt; getAllActivity(@PathVariable String id, @AuthenticationPrincipal UserPrincipal userDetails) {
+<b class="fc">&nbsp;        var userId = userDetails.userId();</b>
+<b class="fc">&nbsp;        log.info(&quot;Received request to fetch all activities for event ID: {}&quot;, id);</b>
+<b class="fc">&nbsp;        List&lt;ScheduleResponseDto&gt; schedules = eventService.findAllSchedules(id, userId);</b>
+<b class="fc">&nbsp;        log.info(&quot;Successfully retrieved {} activities for event ID: {}&quot;, schedules.size(), id);</b>
+<b class="fc">&nbsp;        return ResponseEntity.ok(schedules);</b>
+&nbsp;    }
+&nbsp;}
+</code>
+</pre>
+</div>
+
+<script type="text/javascript">
+(function() {
+    var msie = false, msie9 = false;
+    /*@cc_on
+      msie = true;
+      @if (@_jscript_version >= 9)
+        msie9 = true;
+      @end
+    @*/
+
+    if (!msie || msie && msie9) {
+      hljs.highlightAll()
+      hljs.initLineNumbersOnLoad();
+    }
+})();
+</script>
+
+<div class="footer">
+    
+    <div style="float:right;">generated on 2026-03-30 15:18</div>
+</div>
+</body>
+</html>
