@@ -37,7 +37,7 @@ public class AuditController {
      * @return A {@link ResponseEntity} containing {@link AuditListResponseDTO} with the list of audits.
      */
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM')")
     public ResponseEntity<AuditListResponseDTO> getAllAudits(
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "0") int page
@@ -47,7 +47,7 @@ public class AuditController {
     }
 
     @PostMapping
-    @PreAuthorize("isAuthenticated()")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<GenericResponse> createAudit(
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AuditLogRequestDTO dto

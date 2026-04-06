@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -60,6 +61,7 @@ public class NotificationController {
      * @return ResponseEntity with HTTP status 201 (CREATED) if notification is successfully sent
      */
     @PostMapping("/send")
+    @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<Void> sendNotification(
             @Valid @RequestParam String userId,
             @Valid @RequestParam String message,

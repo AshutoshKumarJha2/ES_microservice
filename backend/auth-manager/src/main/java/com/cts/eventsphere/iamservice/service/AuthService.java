@@ -4,6 +4,8 @@ import com.cts.eventsphere.iamservice.dto.auth.LoginRequestDto;
 import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.RegisterResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.ValidateResponse;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenRequest;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenResponse;
 import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
 /**
@@ -72,4 +74,18 @@ public interface AuthService {
      *         with HTTP 401 if the header is missing, malformed, or the token is invalid/expired
      */
     ValidateResponse validateToken(String authHeader);
+
+    /**
+     * Issues a short-lived RSA-signed service token to a verified internal service.
+     *
+     * <p>The caller supplies its registered service name and pre-shared secret.
+     * The role embedded in the token is determined server-side from the service registry —
+     * the caller cannot influence it.</p>
+     *
+     * @param request contains {@code serviceName} and {@code serviceSecret}
+     * @return a {@link ServiceTokenResponse} with the signed JWT and expiry metadata
+     * @throws org.springframework.web.server.ResponseStatusException with HTTP 401
+     *         if the service name is not registered or the secret does not match
+     */
+    ServiceTokenResponse issueServiceToken(ServiceTokenRequest request);
 }

@@ -1,16 +1,20 @@
 package com.cts.eventsphere.iamservice.service.impl;
 
+import com.cts.eventsphere.iamservice.config.ServiceRegistryProperties;
 import com.cts.eventsphere.iamservice.dto.audit.AuditAction;
 import com.cts.eventsphere.iamservice.dto.auth.LoginRequestDto;
 import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.RegisterResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.ValidateResponse;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenRequest;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenResponse;
 import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
 import com.cts.eventsphere.iamservice.exception.user.*;
 import com.cts.eventsphere.iamservice.model.User;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.security.JwtUtil;
+import com.cts.eventsphere.iamservice.security.ServiceTokenUtil;
 import com.cts.eventsphere.iamservice.security.TokenType;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
 import com.cts.eventsphere.iamservice.service.AuditService;
@@ -45,6 +49,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final ServiceTokenUtil serviceTokenUtil;
+    private final ServiceRegistryProperties serviceRegistry;
     private final AuditService auditService;
 
 
@@ -174,5 +180,25 @@ public class AuthServiceImpl implements AuthService {
         } catch (JwtException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token");
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Looks up the service name in the pre-configured registry, validates the
+     * supplied secret against the stored BCrypt hash, then issues an RSA-signed
+     * service token with the registry-configured role. The caller cannot influence
+     * the role — it is always assigned server-side.</p>
+     */
+    @Override
+    public ServiceTokenResponse issueServiceToken(ServiceTokenRequest request) {
+        var entry = serviceRegistry.getServices().get(request.serviceName());
+        if (entry == null || !passwordEncoder.matches(request.serviceSecret(), entry.getSecretHash())) {
+            log.warn("Service token request rejected for service: {}", request.serviceName());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid service credentials");
+        }
+        String token = serviceTokenUtil.generateServiceToken(request.serviceName(), entry.getRole());
+        log.info("Service token issued to: {} with role: {}", request.serviceName(), entry.getRole());
+        return new ServiceTokenResponse(token, "Bearer", serviceTokenUtil.getExpirationSeconds());
     }
 }

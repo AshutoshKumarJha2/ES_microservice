@@ -13,3 +13,7 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:6969/eureka
+
+service:
+  name: log-manager
+  secret: es-svc-log-manager-2026

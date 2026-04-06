@@ -16,3 +16,32 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:6969/eureka
+
+service-token:
+  expiration-in-m: 5
+
+# BCrypt hashes of each service's pre-shared secret.
+# Generate: BCryptPasswordEncoder.encode("your-secret-here")
+# Store plaintext secrets in each service's config (never committed to git).
+service-registry:
+  auth-manager:
+    secret-hash: "$2a$10$mizNh2CAG2mu8hupUHXLTuRjOUjXiw93nVYW6ZZQGwty/BW7INj6O"
+    role: SYS_AUTH_MGR
+  event-manager:
+    secret-hash: "$2a$10$0Cx.tIgk/n/cshh05/tbiuRiA38rqkvxpengieulXky3lkdgFXBHq"
+    role: SYS_EVENT_MGR
+  engagement-manager:
+    secret-hash: "$2a$10$xstheCWLB7FqvPXn9e3ofObPM2HU9iuEHQ8/I1e.ek9gMFw3fAo3S"
+    role: SYS_ENGAGEMENT_MGR
+  expense-manager:
+    secret-hash: "$2a$10$Myr0WG.B0uhUk0b7/42Ip.5Pbe92Mzv2059BOgF1RGE24ztZ.dQlC"
+    role: SYS_EXPENSE_MGR
+  log-manager:
+    secret-hash: "$2a$10$RQTw8C2q8xwf5fdowJL/ee0wMGFKveNPl6H/33NXPouUbD9id35mW"
+    role: SYS_LOG_MGR
+  venue-manager:
+    secret-hash: "$2a$10$TzpTFwpX2QS7pmAfs6KAU.1RsBibC1w.0F3AEyLddEvDGz3g4YEKy"
+    role: SYS_VENUE_MGR
+  vendor-manager:
+    secret-hash: "$2a$10$xQgRv5oGbYySbMUxwkZhOuYkDeBH7WpMEidwm91b5Qq3OoXzbUrDi"
+    role: SYS_VENDOR_MGR
