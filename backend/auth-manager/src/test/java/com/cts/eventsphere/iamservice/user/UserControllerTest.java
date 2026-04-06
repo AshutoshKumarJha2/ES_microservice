@@ -66,7 +66,7 @@ class UserControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(userController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(any()))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();
     }
@@ -75,7 +75,7 @@ class UserControllerTest {
 
     @Test
     void getAllUsers_ShouldReturn200WithListOfUsers() throws Exception {
-        when(userService.getAllUsers()).thenReturn(List.of(ALICE_DTO, BOB_DTO));
+        when(userService.getAllUsers(any())).thenReturn(List.of(ALICE_DTO, BOB_DTO));
 
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk())
@@ -105,7 +105,7 @@ class UserControllerTest {
         when(userService.updateUserDetails("user-001", updateRequest)).thenReturn(ALICE_DTO);
 
         ResponseEntity<UserResponseDto> response =
-                userController.updateUserDetails("user-001", updateRequest);
+                userController.updateUserDetails("user-001", updateRequest, any());
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(ALICE_DTO);

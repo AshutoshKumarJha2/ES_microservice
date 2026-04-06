@@ -54,7 +54,7 @@ class BookingServiceImplTest {
         venue.setName("Grand Hall");
         venue.setLocation("New York");
         venue.setCapacity(500);
-        venue.setAvailabilityStatus(AvailabilityStatus.available);
+        venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return venue;
     }
 
@@ -71,7 +71,7 @@ class BookingServiceImplTest {
     }
 
     private BookingResponseDto buildResponseDto(String id) {
-        return new BookingResponseDto(id, EVENT_ID, VENUE_ID, LocalDate.now(), BookingStatus.pending,
+        return new BookingResponseDto(id, EVENT_ID, VENUE_ID, LocalDate.now(), BookingStatus.PENDING,
                 new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now());
     }
 
@@ -80,10 +80,10 @@ class BookingServiceImplTest {
     @Test
     void createBooking_success() {
         BookingRequestDto request = new BookingRequestDto(EVENT_ID, VENUE_ID);
-        Booking booking = buildBooking(null, BookingStatus.pending);
+        Booking booking = buildBooking(null, BookingStatus.PENDING);
         booking.setVenue(null);
         Venue venue = buildVenue(VENUE_ID);
-        Booking saved = buildBooking(BOOKING_ID, BookingStatus.pending);
+        Booking saved = buildBooking(BOOKING_ID, BookingStatus.PENDING);
         BookingResponseDto expected = buildResponseDto(BOOKING_ID);
 
         when(requestMapper.toEntity(request)).thenReturn(booking);
@@ -94,17 +94,17 @@ class BookingServiceImplTest {
         BookingResponseDto result = bookingService.createBooking(ACTOR_ID, request);
 
         assertThat(result.bookingId()).isEqualTo(BOOKING_ID);
-        assertThat(result.status()).isEqualTo(BookingStatus.pending);
+        assertThat(result.status()).isEqualTo(BookingStatus.PENDING);
     }
 
     @Test
     void createBooking_nullDate_defaultsToToday() {
         BookingRequestDto request = new BookingRequestDto(EVENT_ID, VENUE_ID);
-        Booking booking = buildBooking(null, BookingStatus.pending);
+        Booking booking = buildBooking(null, BookingStatus.PENDING);
         booking.setVenue(null);
         booking.setDate(null); // triggers the null-date fallback branch
         Venue venue = buildVenue(VENUE_ID);
-        Booking saved = buildBooking(BOOKING_ID, BookingStatus.pending);
+        Booking saved = buildBooking(BOOKING_ID, BookingStatus.PENDING);
         BookingResponseDto expected = buildResponseDto(BOOKING_ID);
 
         when(requestMapper.toEntity(request)).thenReturn(booking);
@@ -121,7 +121,7 @@ class BookingServiceImplTest {
     @Test
     void createBooking_venueNotFound_throwsRuntimeException() {
         BookingRequestDto request = new BookingRequestDto(EVENT_ID, VENUE_ID);
-        Booking booking = buildBooking(null, BookingStatus.pending);
+        Booking booking = buildBooking(null, BookingStatus.PENDING);
         booking.setVenue(null);
 
         when(requestMapper.toEntity(request)).thenReturn(booking);
@@ -136,25 +136,25 @@ class BookingServiceImplTest {
 
     @Test
     void updateBookingStatus_success() {
-        Booking booking = buildBooking(BOOKING_ID, BookingStatus.pending);
-        Booking saved = buildBooking(BOOKING_ID, BookingStatus.confirmed);
+        Booking booking = buildBooking(BOOKING_ID, BookingStatus.PENDING);
+        Booking saved = buildBooking(BOOKING_ID, BookingStatus.CONFIRMED);
         BookingResponseDto expected = new BookingResponseDto(BOOKING_ID, EVENT_ID, VENUE_ID,
-                LocalDate.now(), BookingStatus.confirmed, new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now());
+                LocalDate.now(), BookingStatus.CONFIRMED, new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now());
 
         when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.of(booking));
         when(bookingRepository.save(booking)).thenReturn(saved);
         when(responseMapper.toDto(saved, new ArrayList<>())).thenReturn(expected);
 
-        BookingResponseDto result = bookingService.updateBookingStatus(ACTOR_ID, BOOKING_ID, BookingStatus.confirmed);
+        BookingResponseDto result = bookingService.updateBookingStatus(ACTOR_ID, BOOKING_ID, BookingStatus.CONFIRMED);
 
-        assertThat(result.status()).isEqualTo(BookingStatus.confirmed);
+        assertThat(result.status()).isEqualTo(BookingStatus.CONFIRMED);
     }
 
     @Test
     void updateBookingStatus_notFound_throwsBookingNotFoundException() {
         when(bookingRepository.findById(BOOKING_ID)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> bookingService.updateBookingStatus(ACTOR_ID, BOOKING_ID, BookingStatus.confirmed))
+        assertThatThrownBy(() -> bookingService.updateBookingStatus(ACTOR_ID, BOOKING_ID, BookingStatus.CONFIRMED))
                 .isInstanceOf(BookingNotFoundException.class);
     }
 
@@ -183,8 +183,8 @@ class BookingServiceImplTest {
 
     @Test
     void getAllBookingsServ_returnsList() {
-        Booking b1 = buildBooking("b1", BookingStatus.pending);
-        Booking b2 = buildBooking("b2", BookingStatus.confirmed);
+        Booking b1 = buildBooking("b1", BookingStatus.PENDING);
+        Booking b2 = buildBooking("b2", BookingStatus.CONFIRMED);
         BookingResponseDto dto1 = buildResponseDto("b1");
         BookingResponseDto dto2 = buildResponseDto("b2");
 
@@ -208,7 +208,7 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByVenue_returnsList() {
-        Booking b1 = buildBooking("b1", BookingStatus.confirmed);
+        Booking b1 = buildBooking("b1", BookingStatus.CONFIRMED);
         BookingResponseVenueManagerDto dto1 = mock(BookingResponseVenueManagerDto.class);
 
         when(bookingRepository.findByVenue_VenueId(VENUE_ID)).thenReturn(List.of(b1));
@@ -230,7 +230,7 @@ class BookingServiceImplTest {
 
     @Test
     void getBookingsByEvent_returnsList() {
-        Booking b1 = buildBooking("b1", BookingStatus.pending);
+        Booking b1 = buildBooking("b1", BookingStatus.PENDING);
         BookingResponseDto dto1 = buildResponseDto("b1");
 
         when(bookingRepository.findByEventId(EVENT_ID)).thenReturn(List.of(b1));

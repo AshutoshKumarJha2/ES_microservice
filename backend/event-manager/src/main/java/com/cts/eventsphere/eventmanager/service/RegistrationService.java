@@ -21,7 +21,7 @@ public interface RegistrationService {
      * @param ticketId the ID of the selected ticket
      * @return a {@link GenericResponse} indicating the result
      */
-    GenericResponse registerForEvent(String userId, String eventId, String ticketId);
+    RegistrationDto registerForEvent(String userId, String eventId, String ticketId);
 
     /**
      * Retrieves a registration by its unique identifier.

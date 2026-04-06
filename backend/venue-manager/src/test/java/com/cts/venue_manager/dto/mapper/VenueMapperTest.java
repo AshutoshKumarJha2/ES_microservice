@@ -17,14 +17,14 @@ class VenueMapperTest {
 
     @Test
     void requestMapper_toEntity_mapsAllFields() {
-        VenueRequestDto dto = new VenueRequestDto("Expo Center", "Chicago", 800, AvailabilityStatus.available);
+        VenueRequestDto dto = new VenueRequestDto("Expo Center", "Chicago", 800, AvailabilityStatus.AVAILABLE);
 
         Venue result = requestMapper.toEntity(dto);
 
         assertThat(result.getName()).isEqualTo("Expo Center");
         assertThat(result.getLocation()).isEqualTo("Chicago");
         assertThat(result.getCapacity()).isEqualTo(800);
-        assertThat(result.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.available);
+        assertThat(result.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.AVAILABLE);
     }
 
     @Test
@@ -33,7 +33,7 @@ class VenueMapperTest {
 
         Venue result = requestMapper.toEntity(dto);
 
-        assertThat(result.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.available);
+        assertThat(result.getAvailabilityStatus()).isEqualTo(AvailabilityStatus.AVAILABLE);
     }
 
     @Test
@@ -48,7 +48,7 @@ class VenueMapperTest {
         venue.setName("Sunset Arena");
         venue.setLocation("Miami");
         venue.setCapacity(1500);
-        venue.setAvailabilityStatus(AvailabilityStatus.unavailable);
+        venue.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
 
         VenueResponseDto result = responseMapper.toDto(venue);
 
@@ -56,7 +56,7 @@ class VenueMapperTest {
         assertThat(result.name()).isEqualTo("Sunset Arena");
         assertThat(result.location()).isEqualTo("Miami");
         assertThat(result.capacity()).isEqualTo(1500);
-        assertThat(result.availabilityStatus()).isEqualTo(AvailabilityStatus.unavailable);
+        assertThat(result.availabilityStatus()).isEqualTo(AvailabilityStatus.UNAVAILABLE);
     }
 
     @Test

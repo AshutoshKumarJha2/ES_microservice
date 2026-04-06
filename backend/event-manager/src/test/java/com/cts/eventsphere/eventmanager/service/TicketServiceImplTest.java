@@ -85,9 +85,9 @@ class TicketServiceImplTest {
             when(ticketRepository.findByEventEventIdAndType(EVENT_ID, "general")).thenReturn(Optional.empty());
             when(ticketRepository.save(any(Ticket.class))).thenReturn(sampleTicket);
 
-            GenericResponse result = ticketService.createTicket(ACTOR_ID, EVENT_ID, "general", 50.0, TicketStatus.ACTIVE);
+            TicketResponseDto result = ticketService.createTicket(ACTOR_ID, EVENT_ID, "general", 50.0, TicketStatus.ACTIVE);
 
-            assertThat(result.message()).isEqualTo("Ticket created successfully");
+            assertThat(result.status()).isEqualTo("Ticket created successfully");
             verify(ticketRepository).save(any(Ticket.class));
         }
 
@@ -228,9 +228,9 @@ class TicketServiceImplTest {
             when(ticketRepository.findById(TICKET_ID)).thenReturn(Optional.of(sampleTicket));
             when(ticketRepository.save(sampleTicket)).thenReturn(sampleTicket);
 
-            GenericResponse result = ticketService.updateTicket(ACTOR_ID, TICKET_ID, "vip", 150.0, TicketStatus.INACTIVE);
+            TicketResponseDto result = ticketService.updateTicket(ACTOR_ID, TICKET_ID, "vip", 150.0, TicketStatus.INACTIVE);
 
-            assertThat(result.message()).isEqualTo("Ticket updated successfully");
+            assertThat(result.status()).isEqualTo("Ticket updated successfully");
             assertThat(sampleTicket.getType()).isEqualTo("vip");
             assertThat(sampleTicket.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(150.0));
             assertThat(sampleTicket.getStatus()).isEqualTo(TicketStatus.INACTIVE);

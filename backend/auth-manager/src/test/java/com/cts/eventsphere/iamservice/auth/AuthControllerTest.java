@@ -64,7 +64,7 @@ class AuthControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(authController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(any()))
                 .build();
     }
 
@@ -92,7 +92,7 @@ class AuthControllerTest {
 
     @Test
     void login_ShouldReturn200WithLoginResponseDto() throws Exception {
-        LoginRequestDto request = new LoginRequestDto("pass123", "alice@example.com", "ATTENDEE");
+        LoginRequestDto request = new LoginRequestDto("pass123", "alice@example.com");
         LoginResponseDto response = new LoginResponseDto("access.token", "refresh.token", "Bearer");
 
         when(authService.login(any(LoginRequestDto.class))).thenReturn(response);

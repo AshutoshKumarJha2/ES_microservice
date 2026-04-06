@@ -35,7 +35,7 @@ public class TicketController {
 
     @PostMapping("/events/{eventId}/tickets")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<GenericResponse> createTicket(
+    public ResponseEntity<TicketResponseDto> createTicket(
             @RequestBody @Valid CreateTicketRequest request,
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails) {
@@ -68,7 +68,7 @@ public class TicketController {
 
     @PutMapping("/tickets/{ticketId}")
     @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
-    public ResponseEntity<GenericResponse> updateTicket(
+    public ResponseEntity<TicketResponseDto> updateTicket(
             @PathVariable String ticketId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestBody @Valid CreateTicketRequest request) {

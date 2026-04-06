@@ -81,7 +81,6 @@ public class Expense {
     private String approvedBy;
 
     @Enumerated(EnumType.STRING)
-    @Column()
     private ExpenseStatus status = ExpenseStatus.SUBMITTED;
 
     @CreationTimestamp

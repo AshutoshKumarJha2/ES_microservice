@@ -1,6 +1,7 @@
 package com.cts.venue_manager.service;
 
 import com.cts.venue_manager.client.microservice.EventClient;
+import com.cts.venue_manager.client.model.data.EventStatus;
 import com.cts.venue_manager.dto.event.EventResponseDto;
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
 import com.cts.venue_manager.dto.resource.ResourceRequestDto;
@@ -59,7 +60,7 @@ class ResourceServiceImplTest {
         venue.setName("Test Venue");
         venue.setLocation("NYC");
         venue.setCapacity(200);
-        venue.setAvailabilityStatus(AvailabilityStatus.available);
+        venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return venue;
     }
 
@@ -67,8 +68,8 @@ class ResourceServiceImplTest {
         Resource r = new Resource();
         r.setResourceId(id);
         r.setName("Projector");
-        r.setType(ResourceType.equipment);
-        r.setAvailability(Availability.available);
+        r.setType(ResourceType.EQUIPMENT);
+        r.setAvailability(Availability.AVAILABLE);
         r.setCostRate(BigDecimal.valueOf(100));
         r.setUnit(units);
         r.setVenue(buildVenue(VENUE_ID));
@@ -76,15 +77,15 @@ class ResourceServiceImplTest {
     }
 
     private ResourceResponseDto buildResourceResponse(String id) {
-        return new ResourceResponseDto(id, VENUE_ID, ResourceType.equipment, "Projector",
-                Availability.available, 10, BigDecimal.valueOf(100));
+        return new ResourceResponseDto(id, VENUE_ID, ResourceType.EQUIPMENT, "Projector",
+                Availability.AVAILABLE, 10, BigDecimal.valueOf(100));
     }
 
     // ─── createResource ───────────────────────────────────────────────────────
 
     @Test
     void createResource_success() {
-        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.equipment,
+        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.EQUIPMENT,
                 BigDecimal.valueOf(100), 10);
 
         when(resourceRepository.existsByName("Projector")).thenReturn(false);
@@ -103,7 +104,7 @@ class ResourceServiceImplTest {
 
     @Test
     void createResource_nameAlreadyExists_throwsResourceAlreadyExistsException() {
-        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.equipment,
+        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.EQUIPMENT,
                 BigDecimal.valueOf(100), 10);
 
         when(resourceRepository.existsByName("Projector")).thenReturn(true);
@@ -115,7 +116,7 @@ class ResourceServiceImplTest {
 
     @Test
     void createResource_venueNotFound_throwsVenueNotFoundException() {
-        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.equipment,
+        ResourceRequestDto request = new ResourceRequestDto("Projector", ResourceType.EQUIPMENT,
                 BigDecimal.valueOf(100), 10);
 
         when(resourceRepository.existsByName("Projector")).thenReturn(false);
@@ -217,7 +218,7 @@ class ResourceServiceImplTest {
 
     @Test
     void updateResource_success() {
-        ResourceRequestDto dto = new ResourceRequestDto("Updated Projector", ResourceType.equipment,
+        ResourceRequestDto dto = new ResourceRequestDto("Updated Projector", ResourceType.EQUIPMENT,
                 BigDecimal.valueOf(150), 20);
         Resource existing = buildResource(RESOURCE_ID, 10);
         Resource saved = buildResource(RESOURCE_ID, 20);
@@ -236,7 +237,7 @@ class ResourceServiceImplTest {
 
     @Test
     void updateResource_notFound_throwsResourceNotFoundException() {
-        ResourceRequestDto dto = new ResourceRequestDto("X", ResourceType.equipment, BigDecimal.ONE, 1);
+        ResourceRequestDto dto = new ResourceRequestDto("X", ResourceType.EQUIPMENT, BigDecimal.ONE, 1);
         when(resourceRepository.findById(RESOURCE_ID)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> resourceService.updateResource(ACTOR_ID, RESOURCE_ID, dto))
@@ -272,7 +273,7 @@ class ResourceServiceImplTest {
         EventResponseDto eventDto = EventResponseDto.builder()
                 .id(EVENT_ID).eventName("Gala Night").organizerId("org-1")
                 .startAt("2026-06-01").endAt("2026-06-02").venueId(VENUE_ID)
-                .status(com.cts.venue_manager.client.model.data.EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         when(eventClient.getById(EVENT_ID)).thenReturn(ResponseEntity.ok(eventDto));
@@ -296,7 +297,7 @@ class ResourceServiceImplTest {
         EventResponseDto eventDto = EventResponseDto.builder()
                 .id(EVENT_ID).eventName("Gala Night").organizerId("org-1")
                 .startAt("2026-06-01").endAt("2026-06-02").venueId(VENUE_ID)
-                .status(com.cts.venue_manager.client.model.data.EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         when(eventClient.getById(EVENT_ID)).thenReturn(ResponseEntity.ok(eventDto));
@@ -319,7 +320,7 @@ class ResourceServiceImplTest {
         EventResponseDto eventDto = EventResponseDto.builder()
                 .id(EVENT_ID).eventName("Gala Night").organizerId("org-1")
                 .startAt("2026-06-01").endAt("2026-06-02").venueId(VENUE_ID)
-                .status(com.cts.venue_manager.client.model.data.EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         when(eventClient.getById(EVENT_ID)).thenReturn(ResponseEntity.ok(eventDto));
@@ -336,7 +337,7 @@ class ResourceServiceImplTest {
         EventResponseDto eventDto = EventResponseDto.builder()
                 .id(EVENT_ID).eventName("Gala Night").organizerId("org-1")
                 .startAt("2026-06-01").endAt("2026-06-02").venueId(VENUE_ID)
-                .status(com.cts.venue_manager.client.model.data.EventStatus.published)
+                .status(EventStatus.PUBLISHED)
                 .build();
 
         when(eventClient.getById(EVENT_ID)).thenReturn(ResponseEntity.ok(eventDto));

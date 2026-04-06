@@ -52,7 +52,7 @@ public class AuditController {
             @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AuditLogRequestDTO dto
             ){
-        auditService.logAudit(userPrincipal.userId(), dto);
+    auditService.logAudit(userPrincipal.userId(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse("Success"));
     }
 }

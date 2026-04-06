@@ -23,21 +23,21 @@ class ResourceMapperTest {
         venue.setName("Arena");
         venue.setLocation("NYC");
         venue.setCapacity(500);
-        venue.setAvailabilityStatus(AvailabilityStatus.available);
+        venue.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return venue;
     }
 
     @Test
     void requestMapper_toEntity_mapsAllFields() {
-        ResourceRequestDto dto = new ResourceRequestDto("Projector", ResourceType.equipment, BigDecimal.valueOf(200), 5);
+        ResourceRequestDto dto = new ResourceRequestDto("Projector", ResourceType.EQUIPMENT, BigDecimal.valueOf(200), 5);
 
         Resource result = ResourceRequestDtoMapper.toEntity(dto);
 
         assertThat(result.getName()).isEqualTo("Projector");
-        assertThat(result.getType()).isEqualTo(ResourceType.equipment);
+        assertThat(result.getType()).isEqualTo(ResourceType.EQUIPMENT);
         assertThat(result.getCostRate()).isEqualByComparingTo(BigDecimal.valueOf(200));
         assertThat(result.getUnit()).isEqualTo(5);
-        assertThat(result.getAvailability()).isEqualTo(Availability.available);
+        assertThat(result.getAvailability()).isEqualTo(Availability.AVAILABLE);
     }
 
     @Test
@@ -50,15 +50,15 @@ class ResourceMapperTest {
         Resource resource = new Resource();
         resource.setResourceId("r-1");
         resource.setName("Microphone");
-        resource.setType(ResourceType.equipment);
+        resource.setType(ResourceType.EQUIPMENT);
         resource.setCostRate(BigDecimal.valueOf(50));
         resource.setUnit(10);
-        resource.setAvailability(Availability.in_use);
+        resource.setAvailability(Availability.IN_USE);
 
         ResourceRequestDto result = ResourceResponseDtoMapper.toDto(resource);
 
         assertThat(result).isNotNull();
-        assertThat(result.type()).isEqualTo(ResourceType.equipment);
+        assertThat(result.type()).isEqualTo(ResourceType.EQUIPMENT);
         assertThat(result.costRate()).isEqualByComparingTo(BigDecimal.valueOf(50));
     }
 
@@ -72,9 +72,9 @@ class ResourceMapperTest {
         Resource resource = new Resource();
         resource.setResourceId("r-2");
         resource.setVenue(buildVenue("v-10"));
-        resource.setType(ResourceType.staff);
+        resource.setType(ResourceType.STAFF);
         resource.setName("Security Guard");
-        resource.setAvailability(Availability.available);
+        resource.setAvailability(Availability.AVAILABLE);
         resource.setUnit(3);
         resource.setCostRate(BigDecimal.valueOf(150));
 
@@ -82,9 +82,9 @@ class ResourceMapperTest {
 
         assertThat(result.resourceId()).isEqualTo("r-2");
         assertThat(result.venueId()).isEqualTo("v-10");
-        assertThat(result.type()).isEqualTo(ResourceType.staff);
+        assertThat(result.type()).isEqualTo(ResourceType.STAFF);
         assertThat(result.name()).isEqualTo("Security Guard");
-        assertThat(result.availability()).isEqualTo(Availability.available);
+        assertThat(result.availability()).isEqualTo(Availability.AVAILABLE);
         assertThat(result.unit()).isEqualTo(3);
         assertThat(result.costRate()).isEqualByComparingTo(BigDecimal.valueOf(150));
     }
