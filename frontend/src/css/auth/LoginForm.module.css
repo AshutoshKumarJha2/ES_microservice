@@ -1,0 +1,170 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
+
+.page-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: #e8eaf0;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.75rem 2.5rem;
+  width: 100%;
+  max-width: 680px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.07);
+}
+
+/* Logo */
+.logo {
+  font-family: 'Playwrite IE', cursive;
+  font-size: 1.6rem;
+  margin-bottom: 0.9rem;
+  line-height: 1;
+}
+
+.event {
+  color: #1a1a2e;
+}
+
+.sphere {
+  color: #f97316;
+}
+
+/* Heading */
+.heading {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.25rem;
+}
+
+.subheading {
+  font-size: 0.95rem;
+  color: #94a3b8;
+  margin-bottom: 1.1rem;
+  font-weight: 400;
+}
+
+/* Form */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1d4ed8;
+  text-transform: uppercase;
+}
+
+.field input {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.975rem;
+  font-weight: 400;
+  color: #1e293b;
+  background: #f8f9ff;
+  border: 1.5px solid #e2e8f0;
+  border-left: 3px solid #f97316;
+  border-radius: 8px;
+  padding: 0.55rem 0.9rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.field input::placeholder {
+  color: #cbd5e1;
+  font-weight: 400;
+}
+
+.field input:focus {
+  border-color: #1d4ed8;
+  border-left-color: #f97316;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.08);
+}
+
+/* Forgot password link */
+.forgot-link {
+  text-align: right;
+  font-size: 0.82rem;
+  margin-top: -0.3rem;
+}
+
+.forgot-link-anchor {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.forgot-link-anchor:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+/* Submit button */
+.btn-submit {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  background: #1d4ed8;
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  margin-top: 0.2rem;
+  letter-spacing: 0.01em;
+}
+
+.btn-submit:hover {
+  background: #1e40af;
+  box-shadow: 0 4px 14px rgba(29, 78, 216, 0.35);
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+}
+
+/* Footer */
+.footer-text {
+  text-align: center;
+  font-size: 0.88rem;
+  color: #94a3b8;
+  margin-top: 0.6rem;
+}
+
+.footer-link {
+  color: #1d4ed8;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-link:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}

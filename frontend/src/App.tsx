@@ -4,6 +4,8 @@ import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
 import { About } from './components/pages/About'
 import { AppLayout } from './components/layout/AppLayout'
+import { Register } from './components/pages/auth/Register'
+import { Login } from './components/pages/auth/Login'
 
 export const App = () => {
 
@@ -22,6 +24,14 @@ export const App = () => {
       {
         path:'/about',
         element:<About />
+      },
+      {
+        path:'/register',
+        element:<Register />
+      },
+      {
+        path:'/login',
+        element:<Login />
       }
     ]
   }])
