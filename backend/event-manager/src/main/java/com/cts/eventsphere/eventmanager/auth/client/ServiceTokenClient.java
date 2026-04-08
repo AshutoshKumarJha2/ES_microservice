@@ -22,9 +22,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "auth-manager", contextId = "serviceTokenClient", path = "/auth")
 public interface ServiceTokenClient {
 
+    /**
+     * Requests a signed service token from auth-manager.
+     *
+     * @param request the service credentials (name and pre-shared secret)
+     * @return the issued service token along with its type and TTL
+     */
     @PostMapping("/service-token")
     ServiceTokenResponse issueServiceToken(@RequestBody ServiceTokenRequest request);
 
+    /**
+     * Retrieves the RSA public key used to verify service tokens.
+     *
+     * @return the PEM-encoded RSA public key string
+     */
     @GetMapping("/service-token/public-key")
     String getPublicKey();
 }

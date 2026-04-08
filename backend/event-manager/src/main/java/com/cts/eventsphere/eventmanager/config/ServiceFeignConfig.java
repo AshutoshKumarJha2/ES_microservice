@@ -1,6 +1,8 @@
 package com.cts.eventsphere.eventmanager.config;
 
 import com.cts.eventsphere.eventmanager.auth.service.ServiceTokenProvider;
+import feign.Retryer;
+import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
 
 /**
@@ -22,5 +24,28 @@ public class ServiceFeignConfig {
     @Bean
     public ServiceTokenInterceptor serviceTokenInterceptor(ServiceTokenProvider provider) {
         return new ServiceTokenInterceptor(provider);
+    }
+
+    /**
+     * Registers the error decoder that invalidates the service token cache on 401
+     * and signals Feign to retry the request.
+     *
+     * @param provider the service token cache to invalidate on 401
+     * @return the configured {@link ServiceTokenErrorDecoder}
+     */
+    @Bean
+    public ErrorDecoder serviceTokenErrorDecoder(ServiceTokenProvider provider) {
+        return new ServiceTokenErrorDecoder(provider);
+    }
+
+    /**
+     * Limits retries to one attempt (initial + 1 retry) with a 100 ms interval,
+     * sufficient to recover from a token invalidation without hammering downstream.
+     *
+     * @return a {@link Retryer} allowing exactly one retry
+     */
+    @Bean
+    public Retryer serviceTokenRetryer() {
+        return new Retryer.Default(100, 100, 2);
     }
 }

@@ -38,6 +38,12 @@ public class ServiceTokenProvider {
     private volatile String cachedToken;
     private volatile Instant tokenExpiry = Instant.EPOCH;
 
+    /**
+     * Returns a valid service token, refreshing it from auth-manager if it is
+     * absent or within 30 seconds of expiry.
+     *
+     * @return the current compact JWT service token
+     */
     public String getToken() {
         if (needsRefresh()) {
             refresh();
@@ -47,6 +53,18 @@ public class ServiceTokenProvider {
 
     private boolean needsRefresh() {
         return cachedToken == null || Instant.now().isAfter(tokenExpiry.minusSeconds(BUFFER_SECONDS));
+    }
+
+    /**
+     * Invalidates the cached service token, forcing a fresh token to be
+     * fetched from auth-manager on the next call to {@link #getToken()}.
+     * Called by {@code ServiceTokenErrorDecoder} when a downstream service
+     * rejects the token with HTTP 401.
+     */
+    public synchronized void invalidate() {
+        cachedToken = null;
+        tokenExpiry = Instant.EPOCH;
+        log.info("Service token cache invalidated for {}, will re-fetch on next use", serviceName);
     }
 
     private synchronized void refresh() {
