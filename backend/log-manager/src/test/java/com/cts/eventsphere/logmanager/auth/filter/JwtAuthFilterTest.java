@@ -1,7 +1,8 @@
 package com.cts.eventsphere.logmanager.auth.filter;
 
 import com.cts.eventsphere.logmanager.auth.dto.UserPrincipal;
-import com.cts.eventsphere.logmanager.auth.service.AuthService;
+import com.cts.eventsphere.logmanager.auth.service.ServiceTokenValidator;
+import com.cts.eventsphere.logmanager.auth.service.UserTokenValidator;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JwtAuthFilterTest {
 
-    @Mock private AuthService authService;
+    @Mock private UserTokenValidator userTokenValidator;
+    @Mock private ServiceTokenValidator serviceTokenValidator;
     @InjectMocks private JwtAuthFilter jwtAuthFilter;
 
     @AfterEach
@@ -52,7 +54,7 @@ class JwtAuthFilterTest {
             jwtAuthFilter.doFilter(request, response, chain);
 
             verify(chain).doFilter(request, response);
-            verifyNoInteractions(authService);
+            verifyNoInteractions(userTokenValidator, serviceTokenValidator);
             assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
         }
 
@@ -67,7 +69,7 @@ class JwtAuthFilterTest {
             jwtAuthFilter.doFilter(request, response, chain);
 
             verify(chain).doFilter(request, response);
-            verifyNoInteractions(authService);
+            verifyNoInteractions(userTokenValidator, serviceTokenValidator);
         }
     }
 
@@ -81,15 +83,14 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("sets authentication in SecurityContext and continues filter chain")
         void validToken_setsAuthentication() throws Exception {
-            String bearerToken = "Bearer valid.jwt.token";
             MockHttpServletRequest  request  = new MockHttpServletRequest();
             MockHttpServletResponse response = new MockHttpServletResponse();
             FilterChain             chain    = mock(FilterChain.class);
-            request.addHeader("Authorization", bearerToken);
+            request.addHeader("Authorization", "Bearer valid.jwt.token");
 
             var principal = new UserPrincipal("user-001", "ADMIN",
                     List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
-            when(authService.validate(bearerToken)).thenReturn(principal);
+            when(userTokenValidator.validate("valid.jwt.token")).thenReturn(principal);
 
             jwtAuthFilter.doFilter(request, response, chain);
 
@@ -110,13 +111,12 @@ class JwtAuthFilterTest {
         @Test
         @DisplayName("continues filter chain when token validation fails with ResponseStatusException")
         void responseStatusException_continuesChain() throws Exception {
-            String bearerToken = "Bearer invalid.token";
             MockHttpServletRequest  request  = new MockHttpServletRequest();
             MockHttpServletResponse response = new MockHttpServletResponse();
             FilterChain             chain    = mock(FilterChain.class);
-            request.addHeader("Authorization", bearerToken);
+            request.addHeader("Authorization", "Bearer invalid.token");
 
-            when(authService.validate(bearerToken))
+            when(userTokenValidator.validate(any()))
                     .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token rejected"));
 
             jwtAuthFilter.doFilter(request, response, chain);
@@ -134,16 +134,15 @@ class JwtAuthFilterTest {
     class ServiceUnavailable {
 
         @Test
-        @DisplayName("returns 503 and does not call filterChain when AuthService throws unexpectedly")
+        @DisplayName("returns 503 and does not call filterChain when validator throws unexpectedly")
         void unexpectedException_returns503() throws Exception {
-            String bearerToken = "Bearer some.token";
             MockHttpServletRequest  request  = new MockHttpServletRequest();
             MockHttpServletResponse response = new MockHttpServletResponse();
             FilterChain             chain    = mock(FilterChain.class);
-            request.addHeader("Authorization", bearerToken);
+            request.addHeader("Authorization", "Bearer some.token");
 
-            when(authService.validate(bearerToken))
-                    .thenThrow(new RuntimeException("IAM service unreachable"));
+            when(userTokenValidator.validate(any()))
+                    .thenThrow(new RuntimeException("Key provider unreachable"));
 
             jwtAuthFilter.doFilter(request, response, chain);
 

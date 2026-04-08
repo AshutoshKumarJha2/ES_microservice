@@ -84,7 +84,7 @@ class ScheduleControllerTest {
                       "date": "%s",
                       "timeSlot": "09:00-10:00",
                       "activity": "Opening Keynote",
-                      "status": "active"
+                      "status": "ACTIVE"
                     }
                     """.formatted(EVENT_ID, LocalDate.now().plusDays(1));
         }
@@ -95,7 +95,7 @@ class ScheduleControllerTest {
             when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))
                     .thenReturn(scheduleResponse);
 
-            mockMvc.perform(post("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
+            mockMvc.perform(put("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(validBody()))
                     .andExpect(status().isOk())
@@ -110,7 +110,7 @@ class ScheduleControllerTest {
             when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))
                     .thenThrow(new ScheduleNotFoundException(SCHED_ID));
 
-            mockMvc.perform(post("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
+            mockMvc.perform(put("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(validBody()))
                     .andExpect(status().isNotFound());
@@ -122,7 +122,7 @@ class ScheduleControllerTest {
             when(scheduleService.updateById(eq(EVENT_ID), eq(SCHED_ID), any(ScheduleRequestDto.class)))
                     .thenThrow(new EventNotFoundException(EVENT_ID));
 
-            mockMvc.perform(post("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
+            mockMvc.perform(put("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(validBody()))
                     .andExpect(status().isNotFound());
@@ -137,11 +137,11 @@ class ScheduleControllerTest {
                       "date": "%s",
                       "timeSlot": "bad-format",
                       "activity": "Keynote",
-                      "status": "active"
+                      "status": "ACTIVE"
                     }
                     """.formatted(EVENT_ID, LocalDate.now().plusDays(1));
 
-            mockMvc.perform(post("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
+            mockMvc.perform(put("/events/{eventId}/schedules/{id}", EVENT_ID, SCHED_ID)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(invalidBody))
                     .andExpect(status().isBadRequest());

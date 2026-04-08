@@ -35,7 +35,7 @@ import java.util.Map;
  * @see RateLimiterRegistry
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE + 1)
 public class RateLimitingFilter extends OncePerRequestFilter {
 
     private final RateLimiterRegistry rateLimiterRegistry;

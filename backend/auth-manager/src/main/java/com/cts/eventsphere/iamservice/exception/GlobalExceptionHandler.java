@@ -15,6 +15,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.UUID;
+import org.slf4j.MDC;
+
 /**
  * Centralised exception handler for all REST controllers in the Auth Manager service.
  *
@@ -143,5 +146,26 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GenericErrorResponse> handleUserSuspendedException(UserSuspendedException e, HttpServletRequest request){
         auditService.logAudit(resolveUserId(),AuditAction.ACCESS_DENIED,User.class,request.getRequestURI());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericErrorResponse(e.getMessage()));
+    }
+
+    private AuditAction resolveActionByMethod(HttpServletRequest request) {
+        return switch (request.getMethod().toUpperCase()) {
+            case "POST"         -> AuditAction.CREATE;
+            case "PUT", "PATCH" -> AuditAction.UPDATE;
+            case "DELETE"       -> AuditAction.DELETE;
+            default             -> AuditAction.READ;
+        };
+    }
+
+    // ─── FALLBACK ────────────────────────────────────────────────────────────────
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+        String traceId = MDC.get("traceId");
+        if (traceId == null) traceId = UUID.randomUUID().toString();
+        log.error("Unhandled exception. traceId={}", traceId, ex);
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new GenericErrorResponse("An unexpected error occurred. Contact support with traceId: " + traceId));
     }
 }

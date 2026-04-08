@@ -16,6 +16,7 @@ import com.cts.eventsphere.eventmanager.model.data.EventStatus;
 import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+import com.cts.eventsphere.eventmanager.service.NotificationService;
 import com.cts.eventsphere.eventmanager.service.impl.EventServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -46,6 +47,7 @@ class EventServiceImplTest {
     @Mock private ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     @Mock private ScheduleRequestDtoMapper scheduleRequestDtoMapper;
     @Mock private AuditService auditService;
+    @Mock private NotificationService notificationService;
 
     @InjectMocks
     private EventServiceImpl eventService;

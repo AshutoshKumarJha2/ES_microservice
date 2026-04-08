@@ -8,13 +8,19 @@ package com.eventsphere.engagement_manager.Exception;
  * @since 26-03-2026
  */
 
+import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
+import com.eventsphere.engagement_manager.dto.audit.AuditAction;
 import com.eventsphere.engagement_manager.dto.shared.GenericErrorResponse;
+import com.eventsphere.engagement_manager.service.AuditService;
 import jakarta.persistence.EntityExistsException;
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.MDC;
 
 /**
  * Global Exception Handler for engagement-manager microservice.
@@ -32,8 +39,28 @@ import java.util.UUID;
  * @since 26-03-2026
  */
 @RestControllerAdvice
+@RequiredArgsConstructor
 @Slf4j
 public class GlobalExceptionHandler {
+
+    private final AuditService auditService;
+
+    private String resolveUserId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.userId();
+        }
+        return "anonymous";
+    }
+
+    private AuditAction resolveActionByMethod(HttpServletRequest request) {
+        return switch (request.getMethod().toUpperCase()) {
+            case "POST"         -> AuditAction.CREATE;
+            case "PUT", "PATCH" -> AuditAction.UPDATE;
+            case "DELETE"       -> AuditAction.DELETE;
+            default             -> AuditAction.READ;
+        };
+    }
 
     // ─── VALIDATION ─────────────────────────────────────────────────────────────
 
@@ -104,7 +131,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<GenericErrorResponse> handleAuthorizationDenied(
-            AuthorizationDeniedException e) {
+            AuthorizationDeniedException e, HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new GenericErrorResponse(e.getMessage()));
     }
@@ -112,9 +140,11 @@ public class GlobalExceptionHandler {
     // ─── FALLBACK ────────────────────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex) {
-        String traceId = UUID.randomUUID().toString();
+    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+        String traceId = MDC.get("traceId");
+        if (traceId == null) traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new GenericErrorResponse(
                         "An unexpected error occurred. Contact support with traceId: " + traceId

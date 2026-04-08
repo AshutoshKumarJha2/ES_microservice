@@ -112,7 +112,7 @@ class EventControllerTest {
                       "startDate": "%s",
                       "endDate": "%s",
                       "venueId": "venue-001",
-                      "status": "published"
+                      "status": "PUBLISHED"
                     }
                     """.formatted(
                     LocalDate.now().plusDays(1),
@@ -221,7 +221,7 @@ class EventControllerTest {
                       "organizerId": "org-001",
                       "startDate": "%s",
                       "endDate": "%s",
-                      "status": "published"
+                      "status": "PUBLISHED"
                     }
                     """.formatted(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
 
@@ -243,7 +243,7 @@ class EventControllerTest {
                       "organizerId": "org-001",
                       "startDate": "%s",
                       "endDate": "%s",
-                      "status": "published"
+                      "status": "PUBLISHED"
                     }
                     """.formatted(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5));
 
@@ -309,7 +309,7 @@ class EventControllerTest {
                       "date": "%s",
                       "timeSlot": "09:00-10:00",
                       "activity": "Keynote",
-                      "status": "active"
+                      "status": "ACTIVE"
                     }
                     """.formatted(EVENT_ID, LocalDate.now().plusDays(1));
 
@@ -333,7 +333,7 @@ class EventControllerTest {
                       "date": "%s",
                       "timeSlot": "09:00-10:00",
                       "activity": "Keynote",
-                      "status": "active"
+                      "status": "ACTIVE"
                     }
                     """.formatted(EVENT_ID, LocalDate.now().plusDays(1));
 

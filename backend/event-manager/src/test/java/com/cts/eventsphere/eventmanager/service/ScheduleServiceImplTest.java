@@ -11,6 +11,7 @@ import com.cts.eventsphere.eventmanager.model.Schedule;
 import com.cts.eventsphere.eventmanager.model.data.ScheduleStatus;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
+import com.cts.eventsphere.eventmanager.service.NotificationService;
 import com.cts.eventsphere.eventmanager.service.impl.ScheduleServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ class ScheduleServiceImplTest {
     @Mock private EventRepository eventRepository;
     @Mock private ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     @Mock private ScheduleRequestDtoMapper scheduleRequestDtoMapper;
+    @Mock private NotificationService notificationService;
 
     @InjectMocks
     private ScheduleServiceImpl scheduleService;
@@ -143,7 +145,7 @@ class ScheduleServiceImplTest {
         @Test
         @DisplayName("happy path – deletes schedule and returns true")
         void deleteById_happyPath() {
-            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(true);
+            when(scheduleRepository.findById(SCHED_ID)).thenReturn(Optional.of(sampleSchedule));
 
             boolean result = scheduleService.deleteById(SCHED_ID);
 
@@ -154,7 +156,7 @@ class ScheduleServiceImplTest {
         @Test
         @DisplayName("unhappy path – throws ScheduleNotFoundException when schedule does not exist")
         void deleteById_notFound() {
-            when(scheduleRepository.existsById(SCHED_ID)).thenReturn(false);
+            when(scheduleRepository.findById(SCHED_ID)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> scheduleService.deleteById(SCHED_ID))
                     .isInstanceOf(ScheduleNotFoundException.class)

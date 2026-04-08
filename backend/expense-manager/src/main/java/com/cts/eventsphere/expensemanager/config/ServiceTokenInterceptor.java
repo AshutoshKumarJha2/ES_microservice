@@ -4,6 +4,7 @@ import com.cts.eventsphere.expensemanager.auth.service.ServiceTokenProvider;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.MDC;
 
 /**
  * Feign {@link RequestInterceptor} that attaches a service token to outgoing requests.
@@ -24,5 +25,9 @@ public class ServiceTokenInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate template) {
         template.header("Authorization", "Bearer " + serviceTokenProvider.getToken());
+        String traceId = MDC.get("traceId");
+        if (traceId != null) {
+            template.header("X-Trace-ID", traceId);
+        }
     }
 }
