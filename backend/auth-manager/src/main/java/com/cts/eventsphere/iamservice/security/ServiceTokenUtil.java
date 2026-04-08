@@ -34,7 +34,7 @@ public class ServiceTokenUtil {
 
     private final RsaKeyProvider rsaKeyProvider;
 
-    @Value("${service-token.expiration-in-m:5}")
+    @Value("${service-token.expiration-in-m:1}")
     private long expirationMinutes;
 
     /**

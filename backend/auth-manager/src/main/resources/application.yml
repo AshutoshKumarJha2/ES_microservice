@@ -18,7 +18,7 @@ eureka:
       defaultZone: http://localhost:6969/eureka
 
 service-token:
-  expiration-in-m: 5
+  expiration-in-m: 1
 
 # BCrypt hashes of each service's pre-shared secret.
 # Generate: BCryptPasswordEncoder.encode("your-secret-here")
