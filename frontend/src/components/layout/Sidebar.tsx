@@ -102,10 +102,10 @@ const NAV_CONFIG: Record<UserResponseDto['role'], NavItem[]> = {
     { label: 'Analytics',    path: '/organizer/analytics',       icon: <IconChart /> },
   ],
   ADMIN: [
-    { label: 'Dashboard', path: '/admin/dashboard', icon: <IconDashboard /> },
-    { label: 'Users',     path: '/admin/users',     icon: <IconUsers /> },
-    { label: 'Events',    path: '/admin/events',    icon: <IconCalendar /> },
-    { label: 'Reports',   path: '/admin/reports',   icon: <IconChart /> },
+    { label: 'Dashboard',  path: '/admin/dashboard',  icon: <IconDashboard /> },
+    { label: 'Users',      path: '/admin/users',      icon: <IconUsers /> },
+    { label: 'Events',     path: '/admin/events',     icon: <IconCalendar /> },
+    { label: 'Audit Logs', path: '/admin/audit-logs', icon: <IconChart /> },
   ],
   FINANCE_OFFICER: [
     { label: 'Dashboard',         path: '/finance/dashboard', icon: <IconDashboard /> },
