@@ -6,6 +6,10 @@ import { About } from './components/pages/About'
 import { AppLayout } from './components/layout/AppLayout'
 import { Register } from './components/pages/auth/Register'
 import { Login } from './components/pages/auth/Login'
+import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
+import { CreateEvent } from './components/pages/events/CreateEvent'
+import { EventDetail } from './components/pages/events/EventDetail'
+import { Analytics } from './components/pages/events/Analytics'
 
 export const App = () => {
 
@@ -32,13 +36,32 @@ export const App = () => {
       {
         path:'/login',
         element:<Login />
+      },
+      {
+        path:'/organizer/dashboard',
+        element:<OrganizerDashboard />
+      },
+      {
+        path:'/organizer/events/create',
+        element:<CreateEvent />
+      },
+      {
+        path:'/organizer/events/:id/edit',
+        element:<CreateEvent />
+      },
+      {
+        path:'/organizer/events/:id',
+        element:<EventDetail />
+      },
+      {
+        path:'/organizer/analytics/:eventId',
+        element:<Analytics />
       }
     ]
   }])
 
   return (
     <>
-      {/* <h1>Hello World</h1> */}
       <RouterProvider router={router} />
     </>
   )

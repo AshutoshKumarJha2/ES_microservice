@@ -1,0 +1,344 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
+
+.page {
+  font-family: 'Urbanist', sans-serif;
+  background: #f1f5f9;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: #1d4ed8;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.back-btn:hover { color: #1e40af; }
+
+.event-header {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.event-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.4rem;
+}
+
+.event-meta {
+  font-size: 0.88rem;
+  color: #64748b;
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 99px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-draft     { background: #f1f5f9; color: #64748b; }
+.badge-published { background: #eff6ff; color: #1d4ed8; }
+.badge-completed { background: #f0fdf4; color: #16a34a; }
+.badge-cancelled { background: #fff1f2; color: #be123c; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.35rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  width: fit-content;
+}
+
+.tab {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #64748b;
+  background: none;
+  border: none;
+  border-radius: 8px;
+  padding: 0.55rem 1.25rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.tab.active {
+  background: #1d4ed8;
+  color: #fff;
+}
+
+.tab:hover:not(.active) {
+  background: #f1f5f9;
+  color: #1d4ed8;
+}
+
+/* Panel */
+.panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.panel-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* Quick stats row */
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.qs-card {
+  background: #f8faff;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid #1d4ed8;
+}
+
+.qs-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.3rem;
+}
+
+.qs-value {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+/* Table */
+.table-wrapper { overflow-x: auto; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead th {
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1d4ed8;
+  padding: 0.6rem 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+tbody td {
+  padding: 0.85rem 1rem;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #f8faff; }
+
+/* Filter chips (registrations) */
+.filter-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 0.3rem 0.9rem;
+  border-radius: 99px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8faff;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.chip.active {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: #fff;
+}
+
+.chip:hover:not(.active) {
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+}
+
+/* Buttons */
+.btn-primary {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  background: #1d4ed8;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover { background: #1e40af; }
+
+.btn-approve {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #f0fdf4;
+  color: #16a34a;
+  transition: opacity 0.2s;
+}
+
+.btn-approve:hover { opacity: 0.8; }
+
+.btn-reject {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #fff1f2;
+  color: #be123c;
+  transition: opacity 0.2s;
+}
+
+.btn-reject:hover { opacity: 0.8; }
+
+.btn-delete {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #fff1f2;
+  color: #be123c;
+  transition: opacity 0.2s;
+}
+
+.btn-edit {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background: #fff7ed;
+  color: #c2410c;
+  transition: opacity 0.2s;
+}
+
+.btn-edit:hover, .btn-delete:hover { opacity: 0.8; }
+
+.actions { display: flex; gap: 0.4rem; }
+
+/* Budget stat cards */
+.budget-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.budget-card {
+  background: #f8faff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border-top: 3px solid #1d4ed8;
+}
+
+.budget-card.orange { border-top-color: #f97316; }
+.budget-card.green  { border-top-color: #16a34a; }
+.budget-card.red    { border-top-color: #dc2626; }
+
+.budget-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 0.4rem;
+}
+
+.budget-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem 0;
+  color: #94a3b8;
+  font-size: 0.95rem;
+}
+
+.loading {
+  text-align: center;
+  padding: 2rem 0;
+  color: #94a3b8;
+}
+
+@media (max-width: 700px) {
+  .page { padding: 1rem; }
+  .quick-stats, .budget-stats { grid-template-columns: 1fr; }
+  .tabs { width: 100%; flex-wrap: wrap; }
+}
