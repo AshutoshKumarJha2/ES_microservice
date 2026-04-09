@@ -4,8 +4,10 @@ package com.cts.eventsphere.vendormanager.exception;
 import com.cts.eventsphere.vendormanager.dto.shared.GenericErrorResponse;
 import com.cts.eventsphere.vendormanager.exception.contract.ContractNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.delivery.DeliveryNotFoundException;
+import com.cts.eventsphere.vendormanager.exception.event.EventNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoiceNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoicePdfGenerationException;
+import com.cts.eventsphere.vendormanager.exception.invoice.PaymentNotApprovedException;
 import com.cts.eventsphere.vendormanager.exception.vendor.VendorNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -47,6 +49,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DeliveryNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleDeliveryNotFound(DeliveryNotFoundException e) {
         return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<GenericErrorResponse> handleEventNotFound(EventNotFoundException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PaymentNotApprovedException.class)
+    public ResponseEntity<GenericErrorResponse> handlePaymentNotApproved(PaymentNotApprovedException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

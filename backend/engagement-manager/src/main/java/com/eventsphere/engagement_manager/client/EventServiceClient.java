@@ -16,6 +16,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "event-manager", configuration = ServiceFeignConfig.class)
 public interface EventServiceClient {
 
-    @GetMapping("/events/{eventId}/my-registration")
-    RegistrationStatusDto getRegistrationStatus(@PathVariable String eventId);
+    @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
+    RegistrationStatusDto getRegistrationStatus(@PathVariable String eventId, @PathVariable String attendeeId);
 }

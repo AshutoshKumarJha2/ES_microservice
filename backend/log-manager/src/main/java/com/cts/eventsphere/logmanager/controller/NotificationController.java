@@ -40,6 +40,7 @@ public class NotificationController {
      * @return ResponseEntity containing a list of notifications and HTTP status 200 (OK)
      */
     @GetMapping("/{userId}/scroll")
+    @PreAuthorize("hasRole('ADMIN') or principal.userId().equals(#userId)")
     public ResponseEntity<List<Notification>> getNotificationsScroll(
             @PathVariable String userId,
             @Valid @RequestParam(required = false)

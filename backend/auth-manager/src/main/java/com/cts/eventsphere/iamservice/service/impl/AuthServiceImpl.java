@@ -193,8 +193,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ServiceTokenResponse issueServiceToken(ServiceTokenRequest request) {
         var entry = serviceRegistry.getServices().get(request.serviceName());
-        if (entry == null || !passwordEncoder.matches(request.serviceSecret(), entry.getSecretHash())) {
-            log.warn("Service token request rejected for service: {}", request.serviceName());
+        if (entry == null) {
+            log.warn("Service token request rejected — unknown service: [{}]. Registered: {}", request.serviceName(), serviceRegistry.getServices().keySet());
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid service credentials");
+        }
+        if (!passwordEncoder.matches(request.serviceSecret(), entry.getSecretHash())) {
+            log.warn("Service token request rejected — secret mismatch for service: [{}]", request.serviceName());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid service credentials");
         }
         String token = serviceTokenUtil.generateServiceToken(request.serviceName(), entry.getRole());

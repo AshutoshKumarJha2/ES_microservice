@@ -82,7 +82,7 @@ class FeedbackServiceImplTest {
         @DisplayName("happy path – confirmed attendee, no duplicate → saves and returns DTO")
         void create_happyPath_confirmedAttendee() {
             var registrationStatus = new RegistrationStatusDto(ATTENDEE_ID, EVENT_ID, "CONFIRMED");
-            when(registrationServiceClient.getRegistrationStatus(EVENT_ID))
+            when(registrationServiceClient.getRegistrationStatus(EVENT_ID, ATTENDEE_ID))
                     .thenReturn(registrationStatus);
             when(feedbackRepository.findByEventIdAndAttendeeId(eq(EVENT_ID), eq(ATTENDEE_ID), any(PageRequest.class)))
                     .thenReturn(Page.empty());
@@ -99,7 +99,7 @@ class FeedbackServiceImplTest {
         @DisplayName("happy path – checked-in attendee → saves successfully")
         void create_checkedInAttendee_saves() {
             var registrationStatus = new RegistrationStatusDto(ATTENDEE_ID, EVENT_ID, "CHECKED_IN");
-            when(registrationServiceClient.getRegistrationStatus(EVENT_ID))
+            when(registrationServiceClient.getRegistrationStatus(EVENT_ID, ATTENDEE_ID))
                     .thenReturn(registrationStatus);
             when(feedbackRepository.findByEventIdAndAttendeeId(eq(EVENT_ID), eq(ATTENDEE_ID), any(PageRequest.class)))
                     .thenReturn(Page.empty());
@@ -138,7 +138,7 @@ class FeedbackServiceImplTest {
         @DisplayName("unhappy path – attendee not registered (FeignException.NotFound) → throws IllegalStateException")
         void create_attendeeNotRegistered_throwsIllegalState() {
             FeignException.NotFound notFound = mock(FeignException.NotFound.class);
-            when(registrationServiceClient.getRegistrationStatus(EVENT_ID))
+            when(registrationServiceClient.getRegistrationStatus(EVENT_ID, ATTENDEE_ID))
                     .thenThrow(notFound);
 
             assertThatThrownBy(() -> feedbackService.create(validRequest, null))
@@ -150,7 +150,7 @@ class FeedbackServiceImplTest {
         @DisplayName("unhappy path – attendee status not confirmed/checked_in → throws IllegalStateException")
         void create_pendingAttendee_throwsIllegalState() {
             var registrationStatus = new RegistrationStatusDto(ATTENDEE_ID, EVENT_ID, "PENDING");
-            when(registrationServiceClient.getRegistrationStatus(EVENT_ID))
+            when(registrationServiceClient.getRegistrationStatus(EVENT_ID, ATTENDEE_ID))
                     .thenReturn(registrationStatus);
 
             assertThatThrownBy(() -> feedbackService.create(validRequest, null))
@@ -162,7 +162,7 @@ class FeedbackServiceImplTest {
         @DisplayName("unhappy path – duplicate feedback → throws EntityExistsException")
         void create_duplicateFeedback_throwsEntityExists() {
             var registrationStatus = new RegistrationStatusDto(ATTENDEE_ID, EVENT_ID, "CONFIRMED");
-            when(registrationServiceClient.getRegistrationStatus(EVENT_ID))
+            when(registrationServiceClient.getRegistrationStatus(EVENT_ID, ATTENDEE_ID))
                     .thenReturn(registrationStatus);
 
             Page<Feedback> nonEmpty = new PageImpl<>(List.of(sampleFeedback));

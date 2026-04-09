@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 import org.slf4j.MDC;
@@ -155,6 +156,16 @@ public class GlobalExceptionHandler {
             case "DELETE"       -> AuditAction.DELETE;
             default             -> AuditAction.READ;
         };
+    }
+
+    // ─── RESPONSE STATUS ─────────────────────────────────────────────────────────
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<GenericErrorResponse> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
+        log.warn("Request failed: {} {}", ex.getStatusCode(), ex.getReason());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(new GenericErrorResponse(ex.getReason()));
     }
 
     // ─── FALLBACK ────────────────────────────────────────────────────────────────
