@@ -1,5 +1,5 @@
 import axiosInstance from '../../api/axiosInstance'
-import type { EngagementResponseDto, PageFeedbackResponseDto } from '../../types/events'
+import type { EngagementResponseDto, FeedbackRequestDto, FeedbackResponseDto, PageFeedbackResponseDto } from '../../types/events'
 
 export const analyticsService = {
   async getEngagementsByEvent(eventId: string): Promise<EngagementResponseDto[]> {
@@ -11,6 +11,11 @@ export const analyticsService = {
     const { data } = await axiosInstance.get(`/api/v1/engagement-manager/feedback/event/${eventId}`, {
       params: { page, size },
     })
+    return data
+  },
+
+  async submitFeedback(payload: FeedbackRequestDto): Promise<FeedbackResponseDto> {
+    const { data } = await axiosInstance.post('/api/v1/engagement-manager/feedback', payload)
     return data
   },
 }

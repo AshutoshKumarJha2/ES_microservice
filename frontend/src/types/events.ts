@@ -173,3 +173,10 @@ export interface PageFeedbackResponseDto {
   number: number
   size: number
 }
+
+export interface FeedbackRequestDto {
+  eventId: string
+  userId: string
+  rating: number
+  comment: string
+}

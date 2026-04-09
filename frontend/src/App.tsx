@@ -10,6 +10,7 @@ import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard
 import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
 import { Analytics } from './components/pages/events/Analytics'
+import { SubmitFeedback } from './components/pages/events/SubmitFeedback'
 
 export const App = () => {
 
@@ -56,6 +57,10 @@ export const App = () => {
       {
         path:'/organizer/analytics/:eventId',
         element:<Analytics />
+      },
+      {
+        path:'/attendee/feedback/:eventId',
+        element:<SubmitFeedback />
       }
     ]
   }])

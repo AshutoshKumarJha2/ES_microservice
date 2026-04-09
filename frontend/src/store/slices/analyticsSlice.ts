@@ -1,12 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { analyticsService } from '../../services/events/analyticsService'
-import type { EngagementResponseDto, FeedbackResponseDto } from '../../types/events'
+import type { EngagementResponseDto, FeedbackRequestDto, FeedbackResponseDto } from '../../types/events'
 
 interface AnalyticsState {
   engagements: EngagementResponseDto[]
   feedback: FeedbackResponseDto[]
   loading: boolean
   error: string | null
+  submitLoading: boolean
+  submitSuccess: boolean
+  submitError: string | null
 }
 
 const initialState: AnalyticsState = {
@@ -14,6 +17,9 @@ const initialState: AnalyticsState = {
   feedback: [],
   loading: false,
   error: null,
+  submitLoading: false,
+  submitSuccess: false,
+  submitError: null,
 }
 
 export const fetchEngagements = createAsyncThunk(
@@ -38,6 +44,17 @@ export const fetchFeedback = createAsyncThunk(
   }
 )
 
+export const submitFeedback = createAsyncThunk(
+  'analytics/submitFeedback',
+  async (payload: FeedbackRequestDto, { rejectWithValue }) => {
+    try {
+      return await analyticsService.submitFeedback(payload)
+    } catch (err: unknown) {
+      return rejectWithValue((err as Error).message)
+    }
+  }
+)
+
 const analyticsSlice = createSlice({
   name: 'analytics',
   initialState,
@@ -45,6 +62,11 @@ const analyticsSlice = createSlice({
     clearAnalytics(state) {
       state.engagements = []
       state.feedback = []
+    },
+    clearSubmitState(state) {
+      state.submitLoading = false
+      state.submitSuccess = false
+      state.submitError = null
     },
   },
   extraReducers: (builder) => {
@@ -59,8 +81,12 @@ const analyticsSlice = createSlice({
         state.feedback = action.payload.content ?? []
       })
       .addCase(fetchFeedback.rejected, (state, action) => { state.loading = false; state.error = action.payload as string })
+
+      .addCase(submitFeedback.pending, (state) => { state.submitLoading = true; state.submitSuccess = false; state.submitError = null })
+      .addCase(submitFeedback.fulfilled, (state) => { state.submitLoading = false; state.submitSuccess = true })
+      .addCase(submitFeedback.rejected, (state, action) => { state.submitLoading = false; state.submitError = action.payload as string })
   },
 })
 
-export const { clearAnalytics } = analyticsSlice.actions
+export const { clearAnalytics, clearSubmitState } = analyticsSlice.actions
 export default analyticsSlice.reducer
