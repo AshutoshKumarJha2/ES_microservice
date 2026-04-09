@@ -1,0 +1,61 @@
+/* ── CSS Custom Properties (Theme) ───────────────────────────────────────────── */
+
+:root {
+  /* Backgrounds */
+  --bg-page:        #f1f5f9;
+  --bg-surface:     #ffffff;
+  --bg-hover:       #f1f5f9;
+
+  /* Header */
+  --header-bg:      #ffffff;
+  --header-border:  #e2e8f0;
+
+  /* Text */
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+
+  /* Borders */
+  --border-color:   #e2e8f0;
+
+  /* Brand */
+  --saffron-start:  #f97316;
+  --saffron-end:    #fbbf24;
+  --saffron-gradient: linear-gradient(135deg, #f97316 0%, #fbbf24 100%);
+}
+
+[data-theme="dark"] {
+  --bg-page:        #0f172a;
+  --bg-surface:     #1e293b;
+  --bg-hover:       #334155;
+
+  --header-bg:      #1e293b;
+  --header-border:  #334155;
+
+  --text-primary:   #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+
+  --border-color:   #334155;
+}
+
+/* ── Global resets ───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Urbanist', system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}

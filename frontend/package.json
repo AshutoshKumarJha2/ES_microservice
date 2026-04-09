@@ -15,9 +15,11 @@
     "bootstrap": "^5.3.8",
     "react": "^19.2.4",
     "react-bootstrap": "^2.10.10",
+    "react-bootstrap-icons": "^1.11.6",
     "react-dom": "^19.2.4",
     "react-redux": "^9.2.0",
-    "react-router-dom": "^7.14.0"
+    "react-router-dom": "^7.14.0",
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
