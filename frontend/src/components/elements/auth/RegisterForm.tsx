@@ -1,22 +1,42 @@
 import { useState } from "react";
 import styles from '../../../css/auth/RegisterForm.module.css'
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import axiosInstance from '../../../api/axiosInstance';
+import { Eye, EyeSlash } from 'react-bootstrap-icons';
 
 interface FormState {
   fullName: string;
   email: string;
   phone: string;
   password: string;
-  // role: Role;
 }
 
-export const RegisterForm:React.FC = () => {
+interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+}
+
+interface RegisterResponse {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  role: string;
+  phone: string;
+  status: string;
+  message: string;
+}
+
+export const RegisterForm: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     fullName: '',
     email: '',
     phone: '',
     password: '',
-    // role: 'ATTENDEE',
   });
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -25,10 +45,53 @@ export const RegisterForm:React.FC = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log('Form submitted:', form);
-    // Add your submission logic here
+    setLoading(true);
+
+    const payload: RegisterRequest = {
+      name: form.fullName,
+      email: form.email,
+      password: form.password,
+      phone: form.phone,
+    };
+
+    try {
+      const { data } = await axiosInstance.post<RegisterResponse>(
+        '/api/v1/auth-manager/auth/register',
+        payload
+      );
+      toast.success(data.message,{
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      })
+    } catch (err: unknown) {
+      const axiosErr = err as { response?: { data?: { message?: string; error?: string } } };
+      const message =
+        axiosErr.response?.data?.message ||
+        axiosErr.response?.data?.error ||
+        (err instanceof Error ? err.message : 'Registration failed. Please try again.');
+      toast.error(message, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        transition: Bounce,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return(
@@ -89,22 +152,54 @@ export const RegisterForm:React.FC = () => {
               </div>
               <div className={styles.field}>
                 <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  autoComplete="new-password"
-                />
+                <div className={styles['input-wrapper']}>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    className={styles['toggle-password']}
+                    onClick={() => setShowPassword(prev => !prev)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* Feedback */}
+            {/* {error && <p className={styles.error}>{error}erty</p>} */}
+            {/* Toastify.success('Title', 'This is the body of the notification'); */}
+            {/* {success && <p className={styles.success}>{success}</p>} */}
+
             {/* Submit */}
-            <button className={styles['btn-submit']} onClick={handleSubmit}>
-              Create Account
+            <button
+              className={styles['btn-submit']}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
             </button>
+            <ToastContainer
+              position="top-right"
+              autoClose={5000}
+              hideProgressBar
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable
+              pauseOnHover
+              theme="light"
+              transition={Bounce}
+            />
           </div>
 
           <p className={styles['footer-text']}>
