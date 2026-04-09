@@ -4,9 +4,13 @@ import ticketsReducer from './slices/ticketsSlice'
 import registrationsReducer from './slices/registrationsSlice'
 import budgetReducer from './slices/budgetSlice'
 import analyticsReducer from './slices/analyticsSlice'
+import authReducer from './slices/authSlice'
+import uiReducer from './slices/uiSlice'
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
+    ui: uiReducer,
     events: eventsReducer,
     tickets: ticketsReducer,
     registrations: registrationsReducer,

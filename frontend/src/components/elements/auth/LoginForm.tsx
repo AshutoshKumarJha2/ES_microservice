@@ -1,27 +1,47 @@
-import { useState } from "react";
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { loginUser, clearAuthError } from '../../../store/slices/authSlice'
+import type { UserResponseDto } from '../../../types/events'
 import styles from '../../../css/auth/LoginForm.module.css'
+import { Eye, EyeSlash } from 'react-bootstrap-icons'
+
+const ROLE_DASHBOARD_MAP: Record<UserResponseDto['role'], string> = {
+  ORGANIZER: '/organizer/dashboard',
+  ADMIN: '/admin/dashboard',
+  ATTENDEE: '/attendee/dashboard',
+  FINANCE_OFFICER: '/finance/dashboard',
+  VENUE_MANAGER: '/venue/dashboard',
+  VENDOR: '/vendor/dashboard',
+}
 
 interface FormState {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 export const LoginForm: React.FC = () => {
-  const [form, setForm] = useState<FormState>({
-    email: '',
-    password: '',
-  });
+  const dispatch = useAppDispatch()
+  const navigate = useNavigate()
+  const { loading, error } = useAppSelector((state) => state.auth)
+
+  const [form, setForm] = useState<FormState>({ email: '', password: '' })
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+    if (error) dispatch(clearAuthError())
+  }
 
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
-    e.preventDefault();
-    console.log('Login submitted:', form);
-    // Add your login logic here
-  };
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault()
+    const result = await dispatch(loginUser({ email: form.email, password: form.password }))
+    if (loginUser.fulfilled.match(result)) {
+      const user = result.payload.user as UserResponseDto
+      navigate(ROLE_DASHBOARD_MAP[user.role] ?? '/', { replace: true })
+    }
+  }
 
   return (
     <>
@@ -53,34 +73,56 @@ export const LoginForm: React.FC = () => {
               </div>
               <div className={styles.field}>
                 <label htmlFor="password">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={handleChange}
-                  autoComplete="current-password"
-                />
+                <div className={styles['input-wrapper']}>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    autoComplete="current-password"
+                  />
+                  <button
+                    type="button"
+                    className={styles['toggle-password']}
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
+                  </button>
+                </div>
               </div>
             </div>
 
             {/* Forgot password */}
             <div className={styles['forgot-link']}>
-              <a href="/forgot-password" className={styles['forgot-link-anchor']}>Forgot password?</a>
+              <a href="/forgot-password" className={styles['forgot-link-anchor']}>
+                Forgot password?
+              </a>
             </div>
 
+            {/* Feedback */}
+            {error && <p className={styles.error}>{error}</p>}
+
             {/* Submit */}
-            <button className={styles['btn-submit']} onClick={handleSubmit}>
-              Sign In
+            <button
+              className={styles['btn-submit']}
+              onClick={handleSubmit}
+              disabled={loading}
+            >
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </div>
 
           <p className={styles['footer-text']}>
-            Don't have an account? <a href="/register" className={styles['footer-link']}>Create one</a>
+            Don't have an account?{' '}
+            <a href="/register" className={styles['footer-link']}>
+              Create one
+            </a>
           </p>
         </div>
       </div>
     </>
-  );
-};
+  )
+}
