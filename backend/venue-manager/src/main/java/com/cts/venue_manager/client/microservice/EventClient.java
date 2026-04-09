@@ -1,5 +1,6 @@
 package com.cts.venue_manager.client.microservice;
 
+import com.cts.venue_manager.config.ServiceFeignConfig;
 import com.cts.venue_manager.dto.event.EventResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @version 1.0
  * @since 2026-03-27
  */
-@FeignClient(name = "event-manager")
+@FeignClient(name = "event-manager", configuration = ServiceFeignConfig.class)
 public interface EventClient {
 
     /**

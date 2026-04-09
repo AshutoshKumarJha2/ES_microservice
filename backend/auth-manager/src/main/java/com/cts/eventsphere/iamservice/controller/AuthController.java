@@ -4,8 +4,11 @@ import com.cts.eventsphere.iamservice.dto.auth.LoginRequestDto;
 import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.RegisterResponseDto;
 import com.cts.eventsphere.iamservice.dto.auth.ValidateResponse;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenRequest;
+import com.cts.eventsphere.iamservice.dto.servicetoken.ServiceTokenResponse;
 import com.cts.eventsphere.iamservice.dto.user.UserRequestDto;
 import com.cts.eventsphere.iamservice.dto.user.UserResponseDto;
+import com.cts.eventsphere.iamservice.security.RsaKeyProvider;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
 import com.cts.eventsphere.iamservice.service.AuthService;
 import com.cts.eventsphere.iamservice.service.UserService;
@@ -35,6 +38,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final UserService userService;
+    private final RsaKeyProvider rsaKeyProvider;
 
     /**
      * Registers a new user account.
@@ -92,6 +96,33 @@ public class AuthController {
     @GetMapping("/validate")
     public ResponseEntity<ValidateResponse> validate(@RequestHeader("Authorization") String authHeader) {
         return ResponseEntity.ok(authService.validateToken(authHeader));
+    }
+
+    /**
+     * Issues a short-lived RSA-signed service token to a verified internal service.
+     *
+     * <p>{@code POST /api/v1/auth/service-token} — no user authentication required.
+     * The service authenticates via its pre-shared secret; the role is assigned server-side.</p>
+     *
+     * @param request contains {@code serviceName} and {@code serviceSecret}
+     * @return HTTP 200 with a {@link ServiceTokenResponse}, or 401 if credentials are invalid
+     */
+    @PostMapping("/service-token")
+    public ResponseEntity<ServiceTokenResponse> issueServiceToken(@RequestBody ServiceTokenRequest request) {
+        return ResponseEntity.ok(authService.issueServiceToken(request));
+    }
+
+    /**
+     * Returns the RSA public key used to sign service tokens, in PEM format.
+     *
+     * <p>{@code GET /api/v1/auth/service-token/public-key} — public endpoint.
+     * Downstream services fetch this at startup to enable local token validation.</p>
+     *
+     * @return the PEM-encoded X.509 public key string
+     */
+    @GetMapping("/service-token/public-key")
+    public ResponseEntity<String> getServiceTokenPublicKey() {
+        return ResponseEntity.ok(rsaKeyProvider.getPublicKeyPem());
     }
 
 }

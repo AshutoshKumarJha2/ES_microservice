@@ -4,6 +4,7 @@ import com.cts.eventsphere.vendormanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractRequestDto;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractResponseDto;
 import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryRequestDto;
+import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryResponseDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceRequestDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceResponseDto;
 import com.cts.eventsphere.vendormanager.model.Invoice;
@@ -85,11 +86,10 @@ public class ContractController {
      */
     @PostMapping("/{contractId}/deliveries")
     @PreAuthorize("hasRole('VENDOR')")
-    public ResponseEntity<String> addDelivery(@AuthenticationPrincipal UserPrincipal user, @PathVariable String contractId, @Valid @RequestBody DeliveryRequestDto dto) {
+    public ResponseEntity<DeliveryResponseDto> addDelivery(@AuthenticationPrincipal UserPrincipal user, @PathVariable String contractId, @Valid @RequestBody DeliveryRequestDto dto) {
         var actorId = user.userId();
         log.info("REST request to add delivery for contract with ID: {} by actorId={}",contractId, actorId);
-        contractService.addDeliverable(user.userId(),contractId, dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Delivery Added");
+        return ResponseEntity.status(HttpStatus.CREATED).body(contractService.addDeliverable(user.userId(), contractId, dto));
     }
 
     @PostMapping("/{contractId}/payment-callback")

@@ -1,7 +1,8 @@
 package com.eventsphere.engagement_manager.auth.filter;
 
 import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
-import com.eventsphere.engagement_manager.auth.service.AuthService;
+import com.eventsphere.engagement_manager.auth.service.ServiceTokenValidator;
+import com.eventsphere.engagement_manager.auth.service.UserTokenValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,6 +17,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * [Detailed description of the class's responsibility]
@@ -29,7 +31,8 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final AuthService authService;
+    private final UserTokenValidator userTokenValidator;
+    private final ServiceTokenValidator serviceTokenValidator;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -46,7 +49,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         try {
-            UserPrincipal principal = authService.validate(authHeader);
+            String token = authHeader.substring(7);
+            UserPrincipal principal = isServiceToken(token)
+                    ? serviceTokenValidator.validate(token)
+                    : userTokenValidator.validate(token);
 
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
@@ -67,5 +73,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isServiceToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return false;
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            return payload.contains("\"type\":\"SERVICE\"");
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

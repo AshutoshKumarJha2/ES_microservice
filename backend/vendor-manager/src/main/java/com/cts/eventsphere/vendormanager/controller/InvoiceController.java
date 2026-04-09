@@ -81,7 +81,7 @@ public class InvoiceController {
      * @return ResponseEntity containing the PDF byte array with APPLICATION_PDF media type
      * @throws InvoiceNotFoundException if the invoice record is not found for the given ID
      */
-    @GetMapping("/{invoiceId}/download")
+    @GetMapping({"/{invoiceId}/download", "/{invoiceId}/pdf"})
     public ResponseEntity<byte[]> downloadPdf(@AuthenticationPrincipal UserPrincipal user, @PathVariable String invoiceId) {
         var actorId = user.userId();
         log.info("REST request to download invoice as PDF for invoice ID: {} by actorId={}", invoiceId, actorId);

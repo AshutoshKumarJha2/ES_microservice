@@ -3,6 +3,7 @@ package com.cts.eventsphere.apigateway.config;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.ratelimiter.RateLimiterRegistry;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.client.circuitbreaker.Customizer;
 import org.springframework.context.annotation.Bean;
@@ -49,8 +50,14 @@ public class ResilienceConfig {
                 .slowCallRateThreshold(80)
                 .build();
 
+        TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
+                .timeoutDuration(Duration.ofSeconds(10))
+                .build();
+
         return f -> f.configure(
-                builder -> builder.circuitBreakerConfig(config),
+                builder -> builder
+                        .circuitBreakerConfig(config)
+                        .timeLimiterConfig(timeLimiterConfig),
                 "auth-manager-cb", "event-manager-cb", "log-manager-cb",
                 "engagement-manager-cb", "expense-manager-cb",
                 "venue-manager-cb", "vendor-manager-cb"
