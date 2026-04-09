@@ -91,6 +91,13 @@ public class GlobalExceptionHandler {
 
     
 
+    @ExceptionHandler(InvalidExpenseStateException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidExpenseState(InvalidExpenseStateException ex, HttpServletRequest request) {
+        log.warn("Invalid expense state transition: {}", ex.getMessage());
+        auditService.logAudit(resolveUserId(), AuditAction.UPDATE, "Expense", request.getRequestURI());
+        return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
+    }
+
     @ExceptionHandler(BudgetAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleBudgetAlreadyExists(BudgetAlreadyExistsException ex, HttpServletRequest request) {
         log.warn("Duplicate budget: {}", ex.getMessage());
@@ -156,9 +163,12 @@ public class GlobalExceptionHandler {
     // ─── Catch-All ─────────────────────────────────────────────────────
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex) {
-        log.error("Unhandled exception: {}", ex.getMessage(), ex);
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred");
+    public ResponseEntity<Map<String, Object>> handleGenericException(Exception ex, HttpServletRequest request) {
+        String traceId = org.slf4j.MDC.get("traceId");
+        if (traceId == null) traceId = java.util.UUID.randomUUID().toString();
+        log.error("Unhandled exception. traceId={}", traceId, ex);
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Contact support with traceId: " + traceId);
     }
 
     // ─── Helper ────────────────────────────────────────────────────────

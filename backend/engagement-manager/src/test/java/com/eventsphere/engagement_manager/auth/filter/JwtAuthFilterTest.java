@@ -1,7 +1,8 @@
 package com.eventsphere.engagement_manager.auth.filter;
 
 import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
-import com.eventsphere.engagement_manager.auth.service.AuthService;
+import com.eventsphere.engagement_manager.auth.service.ServiceTokenValidator;
+import com.eventsphere.engagement_manager.auth.service.UserTokenValidator;
 import jakarta.servlet.FilterChain;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +28,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class JwtAuthFilterTest {
 
-    @Mock private AuthService authService;
+    @Mock private UserTokenValidator userTokenValidator;
+    @Mock private ServiceTokenValidator serviceTokenValidator;
     @InjectMocks private JwtAuthFilter jwtAuthFilter;
 
     private MockHttpServletRequest request;
@@ -53,7 +55,7 @@ class JwtAuthFilterTest {
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(authService);
+        verifyNoInteractions(userTokenValidator, serviceTokenValidator);
         assertThat(SecurityContextHolder.getContext().getAuthentication()).isNull();
     }
 
@@ -65,7 +67,7 @@ class JwtAuthFilterTest {
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(authService);
+        verifyNoInteractions(userTokenValidator, serviceTokenValidator);
     }
 
     @Test
@@ -75,7 +77,7 @@ class JwtAuthFilterTest {
         UserPrincipal principal = new UserPrincipal(
                 "user-001", "ATTENDEE",
                 List.of(new SimpleGrantedAuthority("ROLE_ATTENDEE")));
-        when(authService.validate("Bearer valid-token")).thenReturn(principal);
+        when(userTokenValidator.validate("valid-token")).thenReturn(principal);
 
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 
@@ -86,10 +88,10 @@ class JwtAuthFilterTest {
     }
 
     @Test
-    @DisplayName("ResponseStatusException from authService – continues chain with empty SecurityContext")
+    @DisplayName("ResponseStatusException from validator – continues chain with empty SecurityContext")
     void doFilter_responseStatusException_continuesChainWithEmptyContext() throws Exception {
         request.addHeader("Authorization", "Bearer bad-token");
-        when(authService.validate(any()))
+        when(userTokenValidator.validate(any()))
                 .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid token"));
 
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
@@ -99,10 +101,10 @@ class JwtAuthFilterTest {
     }
 
     @Test
-    @DisplayName("unexpected RuntimeException from authService – returns 503 and stops chain")
+    @DisplayName("unexpected RuntimeException from validator – returns 503 and stops chain")
     void doFilter_unexpectedException_returns503AndStopsChain() throws Exception {
         request.addHeader("Authorization", "Bearer token");
-        when(authService.validate(any())).thenThrow(new RuntimeException("IAM service unreachable"));
+        when(userTokenValidator.validate(any())).thenThrow(new RuntimeException("Key provider unreachable"));
 
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
 

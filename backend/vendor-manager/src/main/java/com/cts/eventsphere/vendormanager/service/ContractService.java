@@ -3,6 +3,7 @@ package com.cts.eventsphere.vendormanager.service;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractRequestDto;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractResponseDto;
 import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryRequestDto;
+import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryResponseDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceRequestDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceResponseDto;
 import com.cts.eventsphere.vendormanager.model.data.ContractStatus;
@@ -32,7 +33,7 @@ public interface ContractService {
      * * @param contractId the unique identifier of the contract
      * @param deliveryDto the delivery details to be added
      */
-    void addDeliverable(String actorId, String contractId, DeliveryRequestDto deliveryDto);
+    DeliveryResponseDto addDeliverable(String actorId, String contractId, DeliveryRequestDto deliveryDto);
 
     /**
      * Initiates the invoice creation process for a specific contract.

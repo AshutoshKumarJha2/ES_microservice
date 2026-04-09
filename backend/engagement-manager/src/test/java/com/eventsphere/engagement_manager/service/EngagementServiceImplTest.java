@@ -2,12 +2,15 @@ package com.eventsphere.engagement_manager.service;
 
 import com.eventsphere.engagement_manager.Exception.EngagementNotFoundException;
 import com.eventsphere.engagement_manager.Exception.InvalidEngagementException;
+import com.eventsphere.engagement_manager.client.LogServiceClient;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
 import com.eventsphere.engagement_manager.model.Engagement;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
 import com.eventsphere.engagement_manager.repository.EngagementRepository;
+import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.impl.EngagementServiceImpl;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,6 +19,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +34,8 @@ import static org.mockito.Mockito.*;
 class EngagementServiceImplTest {
 
     @Mock private EngagementRepository engagementRepository;
+    @Mock private AuditService auditService;
+    @Mock private LogServiceClient logServiceClient;
     @InjectMocks private EngagementServiceImpl engagementService;
 
     private static final String EVENT_ID    = "event-001";
@@ -39,6 +46,9 @@ class EngagementServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("test-user", null));
+
         sampleEngagement = Engagement.builder()
                 .engagementId(ENG_ID)
                 .eventId(EVENT_ID)
@@ -46,6 +56,11 @@ class EngagementServiceImplTest {
                 .activity(EngagementType.SESSION_JOIN)
                 .createdAt(LocalDateTime.now().minusMinutes(5))
                 .build();
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     // -------------------------------------------------------------------------
