@@ -4,6 +4,8 @@ import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
 import { About } from './components/pages/About'
 import { AppLayout } from './components/layout/AppLayout'
+import { AuthenticatedLayout } from './components/layout/AuthenticatedLayout'
+import { ProtectedRoute } from './components/elements/auth/ProtectedRoute'
 import { Register } from './components/pages/auth/Register'
 import { Login } from './components/pages/auth/Login'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
@@ -12,57 +14,51 @@ import { EventDetail } from './components/pages/events/EventDetail'
 import { Analytics } from './components/pages/events/Analytics'
 
 export const App = () => {
+  const router = createBrowserRouter([
+    // ── Standalone auth pages (no layout wrapper) ──────────────────────────────
+    {
+      path: '/login',
+      element: <Login />,
+    },
+    {
+      path: '/register',
+      element: <Register />,
+    },
 
-  const router = createBrowserRouter([{
-    path:'/',
-    element:<AppLayout />,
-    children:[
-      {
-        path:'/',
-        element:<Home />
-      },
-      {
-        path:'/contact',
-        element:<Contact />
-      },
-      {
-        path:'/about',
-        element:<About />
-      },
-      {
-        path:'/register',
-        element:<Register />
-      },
-      {
-        path:'/login',
-        element:<Login />
-      },
-      {
-        path:'/organizer/dashboard',
-        element:<OrganizerDashboard />
-      },
-      {
-        path:'/organizer/events/create',
-        element:<CreateEvent />
-      },
-      {
-        path:'/organizer/events/:id/edit',
-        element:<CreateEvent />
-      },
-      {
-        path:'/organizer/events/:id',
-        element:<EventDetail />
-      },
-      {
-        path:'/organizer/analytics/:eventId',
-        element:<Analytics />
-      }
-    ]
-  }])
+    // ── Public pages (require login, basic header + footer) ───────────────────
+    {
+      element: <ProtectedRoute />,
+      children: [
+        {
+          path: '/',
+          element: <AppLayout />,
+          children: [
+            { index: true, element: <Home /> },
+            { path: 'contact', element: <Contact /> },
+            { path: 'about', element: <About /> },
+          ],
+        },
+      ],
+    },
 
-  return (
-    <>
-      <RouterProvider router={router} />
-    </>
-  )
+    // ── Protected pages (sidebar + top header) ─────────────────────────────────
+    {
+      element: <ProtectedRoute />,
+      children: [
+        {
+          element: <AuthenticatedLayout />,
+          children: [
+            // Organizer
+            { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
+            { path: '/organizer/events/create',      element: <CreateEvent /> },
+            { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
+            { path: '/organizer/events/:id',         element: <EventDetail /> },
+            { path: '/organizer/analytics/:eventId', element: <Analytics /> },
+          ],
+        },
+      ],
+    },
+  ])
+
+  return <RouterProvider router={router} />
 }
