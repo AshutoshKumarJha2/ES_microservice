@@ -4,11 +4,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 import org.springframework.web.servlet.function.RouterFunction;
 import org.springframework.web.servlet.function.RouterFunctions;
 import org.springframework.web.servlet.function.ServerResponse;
 
 import java.net.URI;
+import java.util.List;
 
 /**
  * Web MVC routing configuration for the Swagger UI at the API Gateway.
@@ -51,6 +55,31 @@ public class WebConfig {
               });
             };
             """;
+
+    /**
+     * Registers a global CORS filter for all gateway routes.
+     *
+     * <p>The {@code spring.cloud.gateway.globalcors} property only applies to
+     * the WebFlux-based gateway. This MVC gateway requires an explicit
+     * {@link CorsFilter} bean so that preflight OPTIONS requests and actual
+     * cross-origin requests receive the correct {@code Access-Control-*} headers
+     * before any downstream forwarding or Spring Security processing occurs.</p>
+     *
+     * @return a {@link CorsFilter} configured to allow the Vite dev-server origin
+     */
+    @Bean
+    public CorsFilter corsFilter() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+        config.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 
     /**
      * Redirects {@code GET /docs} to the Swagger UI index page.
