@@ -16,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.cts.venue_manager.dto.shared.MessageResponseDto;
 import java.util.List;
 
 /**
@@ -113,7 +114,7 @@ public class ResourceController {
      */
     @PostMapping("/resources/allocation")
     @PreAuthorize("hasRole('ORGANIZER')")
-    public ResponseEntity<String> requestAllocation(
+    public ResponseEntity<MessageResponseDto> requestAllocation(
             @RequestBody @Valid ResourceAllocationRequestDto requestDto,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String actorId = userPrincipal.userId();
@@ -125,7 +126,7 @@ public class ResourceController {
                 requestDto.venueId(),
                 requestDto.resourceListElement()
         );
-        return new ResponseEntity<>("Resource Requested", HttpStatus.CREATED);
+        return new ResponseEntity<>(new MessageResponseDto("Resource Requested"), HttpStatus.CREATED);
     }
 
     /**
@@ -138,13 +139,13 @@ public class ResourceController {
      */
     @PatchMapping("/resources/allocation/{allocationId}/approve")
     @PreAuthorize("hasRole('VENUE_MANAGER')")
-    public ResponseEntity<String> approveAllocation(
+    public ResponseEntity<MessageResponseDto> approveAllocation(
             @PathVariable @NotBlank(message = "Allocation ID is required") String allocationId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String actorId = userPrincipal.userId();
         log.info("REST request to approve allocation: {} by actor: {}", allocationId, actorId);
         resourceService.approveAllocation(actorId, allocationId);
-        return ResponseEntity.ok("Resource allocation approved and inventory updated.");
+        return ResponseEntity.ok(new MessageResponseDto("Resource allocation approved and inventory updated."));
     }
 
     /**
