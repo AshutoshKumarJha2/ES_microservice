@@ -14,6 +14,10 @@ import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard
 import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
 import { Analytics } from './components/pages/events/Analytics'
+import { FinanceLayout } from './components/layout/FinanceLayout'
+import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
+import { Payments } from './components/pages/finance/Payments'
+import { BudgetOverview } from './components/pages/finance/BudgetOverview'
 import { NotificationCenter } from './components/pages/notifications/NotificationCenter'
 import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
@@ -74,6 +78,16 @@ export const App = () => {
       ],
     },
 
+    // ── Finance Officer Portal (separate layout) ──────────────────────────────
+    {
+      path: '/finance',
+      element: <FinanceLayout />,
+      children: [
+        { path: 'expenses', element: <ExpenseApprovals /> },
+        { path: 'payments', element: <Payments /> },
+        { path: 'budget', element: <BudgetOverview /> },
+      ],
+    },
     // ── Admin pages (AppLayout + ADMIN role guard) ─────────────────────────────
     {
       element: <AdminRoute />,
