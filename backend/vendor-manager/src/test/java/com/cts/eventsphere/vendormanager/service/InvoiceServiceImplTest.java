@@ -7,6 +7,7 @@ import com.cts.eventsphere.vendormanager.dto.mapper.invoice.InvoiceRequestDtoMap
 import com.cts.eventsphere.vendormanager.dto.mapper.invoice.InvoiceResponseDtoMapper;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoiceNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoicePdfGenerationException;
+import com.cts.eventsphere.vendormanager.exception.invoice.PaymentNotApprovedException;
 import com.cts.eventsphere.vendormanager.model.Invoice;
 import com.cts.eventsphere.vendormanager.model.data.InvoiceStatus;
 import com.cts.eventsphere.vendormanager.repository.InvoiceRepository;
@@ -179,8 +180,7 @@ class InvoiceServiceImplTest {
         when(paymentClient.getPaymentStatus(txId)).thenReturn("PENDING");
 
         assertThatThrownBy(() -> invoiceService.processInvoiceAfterPayment(ACTOR_ID, txId, dto))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("PENDING");
+                .isInstanceOf(PaymentNotApprovedException.class);
     }
 
     // ─── generateInvoicePdf ──────────────────────────────────────────────────

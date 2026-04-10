@@ -97,11 +97,6 @@ public class AuthServiceImpl implements AuthService {
                     return new UserNotFoundException(loginDto.email());
                 });
 
-        if(loginDto.email() == user.getEmail()){
-            log.error("Login failed for email: {} - user already exists", loginDto.email());
-            throw new EmailAlreadyExistsException(loginDto.email());
-        }
-
         if (!passwordEncoder.matches(loginDto.password(), user.getPassword())) {
             log.warn("Login failed: invalid password");
 //            auditService.logAudit(user.getUserId(),AuditAction.LOGIN_FAILURE,User.class,user.getUserId());
