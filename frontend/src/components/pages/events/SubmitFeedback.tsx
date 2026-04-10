@@ -59,117 +59,124 @@ export const SubmitFeedback = () => {
 
   return (
     <div className={styles.page}>
+      <div className={styles.container}>
 
-      {/* Page header — mirrors wireframe .page-header */}
-      <div className={styles['page-header']}>
-        <div>
-          <h1 className={styles.heading}>Submit Feedback</h1>
-          <p className={styles.subtitle}>
-            {selectedEvent ? selectedEvent.eventName : 'Loading event…'}
-          </p>
-        </div>
-      </div>
+        {/* Back navigation */}
+        <button className={styles['back-link']} onClick={() => navigate(-1)}>
+          ← My Registrations
+        </button>
 
-      {/* ── Feedback form card ── */}
-      <div className={styles.card}>
-        {submitSuccess ? (
-          <div className={styles.success}>
-            <div className={styles['success-icon']}>✓</div>
-            <h3>Feedback Submitted!</h3>
-            <p>Thank you for your feedback. Your response has been recorded.</p>
-            <div className={styles['btn-group']}>
-              <button className={styles['btn-primary']} onClick={handleSubmitAnother}>
-                Submit Another
-              </button>
-              <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>
-                Go Back
-              </button>
-            </div>
+        {/* Page header */}
+        <div className={styles['page-header']}>
+          <div>
+            <h1 className={styles.heading}>Submit Feedback</h1>
+            <p className={styles.subtitle}>
+              {selectedEvent ? selectedEvent.eventName : 'Loading event…'}
+            </p>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit}>
+        </div>
 
-            {/* Overall Rating */}
-            <div className={styles['form-group']}>
-              <label className={styles.label}>Overall Rating</label>
-              <div className={styles['stars-row']}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span
-                    key={star}
-                    className={`${styles.star} ${
-                      star <= displayStar ? styles['star-filled'] : styles['star-empty']
-                    }`}
-                    onClick={() => setRating(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                  >
-                    ★
-                  </span>
-                ))}
-                {displayStar > 0 && (
-                  <span className={styles['rating-text']}>{displayStar} / 5</span>
-                )}
+        {/* ── Feedback form card ── */}
+        <div className={styles.card}>
+          {submitSuccess ? (
+            <div className={styles.success}>
+              <div className={styles['success-icon']}>✓</div>
+              <h3>Feedback Submitted!</h3>
+              <p>Thank you for your feedback. Your response has been recorded.</p>
+              <div className={styles['btn-group']}>
+                <button className={styles['btn-primary']} onClick={handleSubmitAnother}>
+                  Submit Another
+                </button>
+                <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>
+                  Go Back
+                </button>
               </div>
             </div>
+          ) : (
+            <form onSubmit={handleSubmit}>
 
-            {/* Comment */}
-            <div className={styles['form-group']}>
-              <label className={styles.label}>Comment</label>
-              <textarea
-                className={styles.textarea}
-                placeholder="Share your experience about this event..."
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                rows={4}
-              />
-            </div>
+              {/* Overall Rating */}
+              <div className={styles['form-group']}>
+                <label className={styles.label}>Overall Rating</label>
+                <div className={styles['stars-row']}>
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <span
+                      key={star}
+                      className={`${styles.star} ${
+                        star <= displayStar ? styles['star-filled'] : styles['star-empty']
+                      }`}
+                      onClick={() => setRating(star)}
+                      onMouseEnter={() => setHoverRating(star)}
+                      onMouseLeave={() => setHoverRating(0)}
+                    >
+                      ★
+                    </span>
+                  ))}
+                  {displayStar > 0 && (
+                    <span className={styles['rating-text']}>{displayStar} / 5</span>
+                  )}
+                </div>
+              </div>
 
-            {submitError && <p className={styles['error-msg']}>{submitError}</p>}
+              {/* Comment */}
+              <div className={styles['form-group']}>
+                <label className={styles.label}>Comment</label>
+                <textarea
+                  className={styles.textarea}
+                  placeholder="Share your experience about this event..."
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  rows={4}
+                />
+              </div>
 
-            <div className={styles['btn-group']}>
-              <button
-                type="submit"
-                className={styles['btn-primary']}
-                disabled={submitLoading || rating === 0}
-              >
-                {submitLoading ? 'Submitting…' : 'Submit Feedback'}
-              </button>
-              <button
-                type="button"
-                className={styles['btn-cancel']}
-                onClick={() => navigate(-1)}
-              >
-                Cancel
-              </button>
-            </div>
+              {submitError && <p className={styles['error-msg']}>{submitError}</p>}
 
-          </form>
-        )}
+              <div className={styles['btn-group']}>
+                <button
+                  type="submit"
+                  className={styles['btn-primary']}
+                  disabled={submitLoading || rating === 0}
+                >
+                  {submitLoading ? 'Submitting…' : 'Submit Feedback'}
+                </button>
+                <button
+                  type="button"
+                  className={styles['btn-cancel']}
+                  onClick={() => navigate(-1)}
+                >
+                  Cancel
+                </button>
+              </div>
+
+            </form>
+          )}
+        </div>
+
+        {/* ── Event Feedback Summary card ── */}
+        <div className={styles.card}>
+          <h2 className={styles['card-title']}>Event Feedback Summary</h2>
+
+          <div className={styles['summary-row']}>
+            <span>Average Rating</span>
+            <strong>{avgRating ? `${avgRating} / 5` : '— / 5'}</strong>
+          </div>
+
+          <div className={styles['progress-bar']}>
+            <div
+              className={styles['progress-fill']}
+              style={{ width: avgRating ? `${(parseFloat(avgRating) / 5) * 100}%` : '0%' }}
+            />
+          </div>
+
+          <div className={styles['review-count']}>
+            {feedback.length > 0
+              ? `Based on ${feedback.length} review${feedback.length !== 1 ? 's' : ''}`
+              : 'No reviews yet'}
+          </div>
+        </div>
+
       </div>
-
-      {/* ── Event Feedback Summary card ── */}
-      <div className={styles.card}>
-        <h2 className={styles['card-title']}>Event Feedback Summary</h2>
-
-        <div className={styles['summary-row']}>
-          <span>Average Rating</span>
-          <strong>{avgRating ? `${avgRating} / 5` : '— / 5'}</strong>
-        </div>
-
-        <div className={styles['progress-bar']}>
-          <div
-            className={styles['progress-fill']}
-            style={{ width: avgRating ? `${(parseFloat(avgRating) / 5) * 100}%` : '0%' }}
-          />
-        </div>
-
-        <div className={styles['review-count']}>
-          {feedback.length > 0
-            ? `Based on ${feedback.length} review${feedback.length !== 1 ? 's' : ''}`
-            : 'No reviews yet'}
-        </div>
-      </div>
-
     </div>
   )
 }
