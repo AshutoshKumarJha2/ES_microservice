@@ -1,4 +1,30 @@
+// ── Notifications ─────────────────────────────────────────────────────────────
+
+export interface AppNotification {
+  notificationId: string
+  userId: string
+  eventId?: string
+  message: string
+  category: string
+  status: string   // 'READ' | 'UNREAD'
+  createdAt: string
+  updatedAt?: string
+}
+
+export interface SendNotificationDto {
+  userId: string
+  message: string
+  category: string
+}
+
 // ── Auth ──────────────────────────────────────────────────────────────────────
+
+export interface UserRequestDto {
+  name: string
+  email: string
+  phone: string
+  password?: string
+}
 
 export interface UserResponseDto {
   userId: string

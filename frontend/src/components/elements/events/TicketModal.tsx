@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import type { CreateTicketRequest, TicketResponseDto } from '../../../types/events'
-import styles from '../../../css/events/EventDetail.module.css'
+import styles from '../../../css/events/EventsPanel.module.css'
 
 interface Props {
   onClose: () => void
@@ -36,60 +36,53 @@ export const TicketModal = ({ onClose, onSave, existing }: Props) => {
   }
 
   return (
-    <div
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000,
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          background: '#fff', borderRadius: 16, padding: '2rem', width: '100%', maxWidth: 460,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 style={{ fontFamily: 'Urbanist, sans-serif', fontWeight: 700, color: '#0f172a', margin: '0 0 1.25rem' }}>
+    <div className={styles['modal-backdrop']} onClick={onClose}>
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+        <h3 className={styles['modal-title']}>
           {existing ? 'Edit Ticket' : 'Add Ticket'}
         </h3>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          <div className={styles.field}>
-            <label>Ticket Type</label>
-            <input name="type" value={form.type} onChange={handleChange} placeholder="e.g. General, VIP" required />
+        <form onSubmit={handleSubmit}>
+          <div className={styles['modal-field']}>
+            <label className={styles['modal-label']}>Ticket Type</label>
+            <input
+              className={styles['modal-input']}
+              name="type"
+              value={form.type}
+              onChange={handleChange}
+              placeholder="e.g. General, VIP"
+              required
+            />
           </div>
-          <div className={styles.field}>
-            <label>Price (₹)</label>
-            <input name="price" type="number" min={0} step={0.01} value={form.price} onChange={handleChange} required />
+          <div className={styles['modal-field']}>
+            <label className={styles['modal-label']}>Price (₹)</label>
+            <input
+              className={styles['modal-input']}
+              name="price"
+              type="number"
+              min={0}
+              step={0.01}
+              value={form.price}
+              onChange={handleChange}
+              required
+            />
           </div>
-          <div className={styles.field}>
-            <label>Status</label>
-            <select name="status" value={form.status} onChange={handleChange}>
+          <div className={styles['modal-field']}>
+            <label className={styles['modal-label']}>Status</label>
+            <select
+              className={styles['modal-select']}
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+            >
               <option value="ACTIVE">Active</option>
               <option value="INACTIVE">Inactive</option>
             </select>
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
-            <button
-              type="submit"
-              disabled={saving}
-              style={{
-                flex: 1, fontFamily: 'Urbanist, sans-serif', fontWeight: 600, fontSize: '0.95rem',
-                color: '#fff', background: '#1d4ed8', border: 'none', borderRadius: 10,
-                padding: '0.65rem', cursor: 'pointer',
-              }}
-            >
+          <div className={styles['modal-footer']}>
+            <button type="submit" className={styles['modal-btn-primary']} disabled={saving}>
               {saving ? 'Saving…' : 'Save'}
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              style={{
-                flex: 1, fontFamily: 'Urbanist, sans-serif', fontWeight: 600, fontSize: '0.95rem',
-                color: '#64748b', background: '#f1f5f9', border: 'none', borderRadius: 10,
-                padding: '0.65rem', cursor: 'pointer',
-              }}
-            >
+            <button type="button" className={styles['modal-btn-cancel']} onClick={onClose}>
               Cancel
             </button>
           </div>

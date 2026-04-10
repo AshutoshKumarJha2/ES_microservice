@@ -1,0 +1,206 @@
+@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
+
+.page {
+  min-height: calc(100vh - 64px);
+  background: var(--bg-page);
+  font-family: 'Urbanist', sans-serif;
+  transition: background 0.3s;
+}
+
+/* ── Banner (always dark blue — intentional brand colour) ───────────────────── */
+.banner {
+  background: linear-gradient(135deg, #001A5C 0%, #002888 60%, #003fbc 100%);
+  padding: 2.5rem 0;
+}
+
+.banner-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.banner-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #F47920;
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(244, 121, 32, 0.45);
+}
+
+.banner-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 0.2rem;
+}
+
+.banner-sub {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.status-active    { background: #4ade80; }
+.status-inactive  { background: #94a3b8; }
+.status-suspended { background: #f87171; }
+
+/* ── Main content ───────────────────────────────────────────────────────────── */
+.content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────────── */
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.3s, border-color 0.3s;
+}
+
+.card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 1.1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border-color);
+  transition: color 0.3s, border-color 0.3s;
+}
+
+/* ── Info rows ──────────────────────────────────────────────────────────────── */
+.info-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: border-color 0.3s;
+}
+
+.info-row:last-child { border-bottom: none; }
+
+.info-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.info-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.role-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  color: var(--blue);
+  background: var(--blue-subtle);
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+  transition: color 0.3s, background 0.3s;
+}
+
+.status-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  border-radius: 6px;
+  padding: 0.2rem 0.55rem;
+}
+
+.status-badge-active    { color: var(--green);  background: var(--green-subtle); }
+.status-badge-inactive  { color: var(--text-secondary); background: var(--bg-subtle); }
+.status-badge-suspended { color: var(--red);    background: var(--red-subtle); }
+
+/* ── Quick actions ──────────────────────────────────────────────────────────── */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.action-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 1.2rem;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: box-shadow 0.15s, transform 0.15s, background 0.3s, border-color 0.3s;
+}
+
+.action-card:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
+.action-label {
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.action-desc {
+  font-size: 0.78rem;
+  opacity: 0.75;
+}
+
+.action-blue {
+  background: var(--blue-subtle);
+  border-color: var(--blue-border);
+  color: var(--blue);
+}
+
+.action-orange {
+  background: var(--saffron-subtle);
+  border-color: var(--saffron-border);
+  color: var(--saffron);
+}
+
+.action-red {
+  background: var(--red-subtle);
+  border-color: var(--red-border);
+  color: var(--red);
+}
+
+/* ── Responsive ─────────────────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .banner-title  { font-size: 1.3rem; }
+  .banner-avatar { width: 48px; height: 48px; font-size: 1rem; }
+  .content       { padding: 1.25rem; }
+  .action-grid   { grid-template-columns: 1fr; }
+}
