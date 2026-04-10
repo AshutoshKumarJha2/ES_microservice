@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { analyticsService } from '../../services/events/analyticsService'
+import { analyticsService } from '../../services/engagement/analyticsService'
 import type { EngagementResponseDto, FeedbackRequestDto, FeedbackResponseDto } from '../../types/events'
 
 interface AnalyticsState {

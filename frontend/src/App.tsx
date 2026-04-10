@@ -14,7 +14,7 @@ import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard
 import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
 import { Analytics } from './components/pages/events/Analytics'
-import { SubmitFeedback } from './components/pages/events/SubmitFeedback'
+import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'

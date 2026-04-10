@@ -7,7 +7,7 @@ import {
   clearSubmitState,
 } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
-import styles from '../../../css/events/SubmitFeedback.module.css'
+import styles from '../../../css/engagement/SubmitFeedback.module.css'
 
 export const SubmitFeedback = () => {
   const { eventId } = useParams<{ eventId: string }>()
