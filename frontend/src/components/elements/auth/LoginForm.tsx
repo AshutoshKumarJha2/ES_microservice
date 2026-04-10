@@ -2,18 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { loginUser, clearAuthError } from '../../../store/slices/authSlice'
-import type { UserResponseDto } from '../../../types/events'
 import styles from '../../../css/auth/LoginForm.module.css'
 import { Eye, EyeSlash } from 'react-bootstrap-icons'
-
-const ROLE_DASHBOARD_MAP: Record<UserResponseDto['role'], string> = {
-  ORGANIZER: '/organizer/dashboard',
-  ADMIN: '/admin/dashboard',
-  ATTENDEE: '/attendee/dashboard',
-  FINANCE_OFFICER: '/finance/dashboard',
-  VENUE_MANAGER: '/venue/dashboard',
-  VENDOR: '/vendor/dashboard',
-}
 
 interface FormState {
   email: string
@@ -38,8 +28,7 @@ export const LoginForm: React.FC = () => {
     e.preventDefault()
     const result = await dispatch(loginUser({ email: form.email, password: form.password }))
     if (loginUser.fulfilled.match(result)) {
-      const user = result.payload.user as UserResponseDto
-      navigate(ROLE_DASHBOARD_MAP[user.role] ?? '/', { replace: true })
+      navigate('/', { replace: true })
     }
   }
 

@@ -82,9 +82,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public UserResponseDto updateUserDetails(String userId, UserRequestDto userRequestDto) {
-        if(!userRepo.existsById(userId)){
-            throw new IllegalArgumentException("User with user id "+userId+" does not exist");
-        }
         User user = userRepo.findById(userId).orElseThrow(()->new UserNotFoundException(userId));
 
 

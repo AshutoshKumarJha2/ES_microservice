@@ -1,0 +1,316 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
+
+/* ── Shell ─────────────────────────────────────────────────────────────────── */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  background: linear-gradient(175deg, #001A5C 0%, #002888 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 16px rgba(0, 26, 92, 0.4);
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* ── Logo ──────────────────────────────────────────────────────────────────── */
+.logo {
+  font-family: 'Playwrite IE', cursive;
+  font-size: 1.35rem;
+  line-height: 1;
+  text-decoration: none;
+  flex-shrink: 0;
+  color: #fff;
+}
+
+.logo-event  { color: #ffffff; }
+.logo-sphere { color: #F47920; }
+
+/* ── Nav links ─────────────────────────────────────────────────────────────── */
+.links {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.link {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.link.active {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-weight: 600;
+  border-bottom: 2px solid #F47920;
+}
+
+/* ── Right-side actions ────────────────────────────────────────────────────── */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Auth CTA buttons ──────────────────────────────────────────────────────── */
+.btn-login {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  text-decoration: none;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-login:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-register {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: #F47920;
+  border: 1.5px solid #F47920;
+  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  text-decoration: none;
+  transition: background 0.15s, box-shadow 0.15s;
+}
+
+.btn-register:hover {
+  background: #D96000;
+  border-color: #D96000;
+  box-shadow: 0 3px 10px rgba(244, 121, 32, 0.45);
+}
+
+/* ── Mobile hamburger ──────────────────────────────────────────────────────── */
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.25rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* ── Mobile drawer ─────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    align-items: center;
+  }
+
+  .links {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.15rem;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    background: #001A5C;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.75rem 1.25rem;
+    box-shadow: 0 8px 24px rgba(0, 26, 92, 0.5);
+  }
+
+  .links.open { display: flex; }
+
+  .link {
+    padding: 0.65rem 0.75rem;
+    font-size: 0.97rem;
+  }
+
+  .inner {
+    flex-wrap: wrap;
+    position: relative;
+  }
+
+  .actions { gap: 0.5rem; }
+  .user-name { display: none; }
+}
+
+/* ── User menu (chip + dropdown wrapper) ───────────────────────────────────── */
+.user-menu { position: relative; }
+
+button.user-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem 0.3rem 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-family: 'Urbanist', sans-serif;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+button.user-chip:hover {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #F47920;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.user-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ffffff;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  color: rgba(255, 255, 255, 0.7);
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.chevron-open { transform: rotate(180deg); }
+
+/* ── Dropdown panel ─────────────────────────────────────────────────────────── */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  min-width: 220px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  z-index: 200;
+  animation: dropdownIn 0.15s ease;
+  transition: background 0.3s, border-color 0.3s;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+  padding: 0.85rem 1rem 0.7rem;
+  background: var(--bg-subtle);
+  transition: background 0.3s;
+}
+
+.dropdown-name {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-email {
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-role {
+  display: inline-block;
+  margin-top: 0.45rem;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--blue);
+  background: var(--blue-subtle);
+  border-radius: 4px;
+  padding: 0.15rem 0.45rem;
+  transition: color 0.3s, background 0.3s;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color);
+  margin: 0;
+  transition: background 0.3s;
+}
+
+.dropdown-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 1rem;
+  font-family: 'Urbanist', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-body);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+
+.dropdown-item:hover {
+  background: var(--bg-hover);
+  color: var(--blue);
+}
+
+.dropdown-item-danger { color: var(--red); }
+
+.dropdown-item-danger:hover {
+  background: var(--red-subtle);
+  color: var(--red);
+}

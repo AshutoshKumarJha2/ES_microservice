@@ -271,3 +271,25 @@
     width: 260px;
   }
 }
+
+/* ── Dark mode ───────────────────────────────────────────────────────────────── */
+:global([data-theme="dark"]) .sidebar {
+  background: #070a14;
+  border-right: 1px solid rgba(100, 120, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .logo-wrap {
+  border-bottom-color: rgba(100, 120, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .nav-item:hover {
+  background: rgba(77, 136, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .divider {
+  background: rgba(100, 120, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .user-section {
+  border-top-color: rgba(100, 120, 255, 0.1);
+}

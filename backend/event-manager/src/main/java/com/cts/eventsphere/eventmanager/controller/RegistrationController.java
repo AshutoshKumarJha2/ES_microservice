@@ -79,7 +79,7 @@ public class RegistrationController {
     }
 
     @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
-    @PreAuthorize("hasAnyRole('ATTENDEE', 'ORGANIZER', 'ADMIN')")
+    @PreAuthorize("hasAnyRole('ATTENDEE', 'ORGANIZER', 'ADMIN', 'SYS_ENGAGEMENT_MGR')")
     public ResponseEntity<RegistrationDto> getRegistrationByAttendee(
             @PathVariable String eventId,
             @PathVariable String attendeeId,

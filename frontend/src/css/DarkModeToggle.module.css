@@ -1,0 +1,51 @@
+/* Matches wireframe .theme-toggle design exactly */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-label {
+  font-size: 11px;
+  font-family: 'Urbanist', sans-serif;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  min-width: 30px;
+}
+
+/* ── Track (pill) ───────────────────────────────────────────────────────────── */
+.toggle-track {
+  width: 42px;
+  height: 22px;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.3);
+  position: relative;
+  transition: background 0.3s, box-shadow 0.3s;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+:global([data-theme="dark"]) .toggle-track {
+  background: linear-gradient(135deg, #FF8C2A, #F47920);
+  box-shadow: 0 0 10px rgba(255, 140, 42, 0.5), inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Knob (circle) ──────────────────────────────────────────────────────────── */
+.toggle-knob {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+:global([data-theme="dark"]) .toggle-knob {
+  transform: translateX(20px);
+}

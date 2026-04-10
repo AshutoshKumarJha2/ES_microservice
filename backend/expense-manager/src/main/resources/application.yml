@@ -24,3 +24,7 @@ services:
   auth:
    url: http://localhost:7070
 
+service:
+  name: expense-manager
+  secret: es-svc-expense-manager-2026
+

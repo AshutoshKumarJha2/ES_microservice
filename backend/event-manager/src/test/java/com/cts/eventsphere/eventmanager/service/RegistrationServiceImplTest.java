@@ -104,7 +104,7 @@ class RegistrationServiceImplTest {
 
             RegistrationDto result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
 
-            assertThat(result.status()).isEqualTo("Registration successful");
+            assertThat(result.status()).isEqualTo(RegistrationStatus.PENDING.name());
             verify(registrationRepo).save(any(Registration.class));
         }
 
@@ -512,7 +512,7 @@ class RegistrationServiceImplTest {
 
             RegistrationDto result = registrationService.registerForEvent(USER_ID, EVENT_ID, TICKET_ID);
 
-            assertThat(result.status()).isEqualTo("Registration successful");
+            assertThat(result.status()).isEqualTo(RegistrationStatus.PENDING.name());
         }
     }
 }

@@ -34,6 +34,7 @@ public class AuditLogMapper {
                 .action(audit.getAction())
                 .entityId(audit.getEntityId())
                 .entityName(audit.getEntityName())
+                .timeStamp(audit.getTimeStamp())
                 .build();
     }
 

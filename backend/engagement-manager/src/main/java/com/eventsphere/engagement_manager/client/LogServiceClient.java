@@ -1,11 +1,12 @@
 package com.eventsphere.engagement_manager.client;
 
+import com.eventsphere.engagement_manager.config.ServiceFeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "log-manager", contextId = "logServiceClient", path = "/notifications")
+@FeignClient(name = "log-manager", contextId = "logServiceClient", path = "/notifications", configuration = ServiceFeignConfig.class)
 public interface LogServiceClient {
 
     @PostMapping("/send")

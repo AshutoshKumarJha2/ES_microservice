@@ -1,7 +1,8 @@
 package com.cts.eventsphere.expensemanager.auth.filter;
 
 import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
-import com.cts.eventsphere.expensemanager.auth.service.AuthService;
+import com.cts.eventsphere.expensemanager.auth.service.ServiceTokenValidator;
+import com.cts.eventsphere.expensemanager.auth.service.UserTokenValidator;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,13 +21,17 @@ import java.io.StringWriter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JwtAuthFilterTest {
 
     @Mock
-    private AuthService authService;
+    private UserTokenValidator userTokenValidator;
+
+    @Mock
+    private ServiceTokenValidator serviceTokenValidator;
 
     @InjectMocks
     private JwtAuthFilter jwtAuthFilter;
@@ -52,7 +57,7 @@ class JwtAuthFilterTest {
         jwtAuthFilter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(authService);
+        verifyNoInteractions(userTokenValidator, serviceTokenValidator);
     }
 
     @Test
@@ -62,14 +67,14 @@ class JwtAuthFilterTest {
         jwtAuthFilter.doFilter(request, response, filterChain);
 
         verify(filterChain).doFilter(request, response);
-        verifyNoInteractions(authService);
+        verifyNoInteractions(userTokenValidator, serviceTokenValidator);
     }
 
     @Test
     void doFilter_validToken_setsSecurityContextAndContinues() throws Exception {
         UserPrincipal principal = new UserPrincipal("u-1", "ORGANIZER", List.of());
         when(request.getHeader("Authorization")).thenReturn("Bearer valid-token");
-        when(authService.validate("Bearer valid-token")).thenReturn(principal);
+        when(userTokenValidator.validate("valid-token")).thenReturn(principal);
 
         jwtAuthFilter.doFilter(request, response, filterChain);
 
@@ -82,7 +87,7 @@ class JwtAuthFilterTest {
     @Test
     void doFilter_responseStatusException_continuesWithoutAuthentication() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer expired-token");
-        when(authService.validate("Bearer expired-token"))
+        when(userTokenValidator.validate(any()))
                 .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Token invalid"));
 
         jwtAuthFilter.doFilter(request, response, filterChain);
@@ -94,7 +99,7 @@ class JwtAuthFilterTest {
     @Test
     void doFilter_genericException_returns503AndStopsChain() throws Exception {
         when(request.getHeader("Authorization")).thenReturn("Bearer unreachable-token");
-        when(authService.validate("Bearer unreachable-token"))
+        when(userTokenValidator.validate(any()))
                 .thenThrow(new RuntimeException("IAM unreachable"));
         PrintWriter writer = new PrintWriter(new StringWriter());
         when(response.getWriter()).thenReturn(writer);

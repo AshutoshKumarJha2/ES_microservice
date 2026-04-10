@@ -11,6 +11,7 @@ import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -58,7 +59,7 @@ public class AuditServiceImpl implements AuditService {
      */
     @Override
     public AuditListResponseDTO getAudits(int size, int page) {
-        var pageable = PageRequest.of(page, size);
+        var pageable = PageRequest.of(page, size, Sort.by("timeStamp").descending());
         var pages = auditRepo.findAll(pageable);
         var audits = pages.stream().map(AuditLogMapper::toDTO).toList();
 
