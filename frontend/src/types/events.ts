@@ -1,5 +1,12 @@
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
+export interface UserRequestDto {
+  name: string
+  email: string
+  phone: string
+  password?: string
+}
+
 export interface UserResponseDto {
   userId: string
   name: string
