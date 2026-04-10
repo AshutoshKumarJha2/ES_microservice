@@ -55,62 +55,12 @@ export const App = () => {
             { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <Analytics /> },
+            {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
           ],
         },
       ],
     },
   ])
-
-  const router = createBrowserRouter([{
-    path:'/',
-    element:<AppLayout />,
-    children:[
-      {
-        path:'/',
-        element:<Home />
-      },
-      {
-        path:'/contact',
-        element:<Contact />
-      },
-      {
-        path:'/about',
-        element:<About />
-      },
-      {
-        path:'/register',
-        element:<Register />
-      },
-      {
-        path:'/login',
-        element:<Login />
-      },
-      {
-        path:'/organizer/dashboard',
-        element:<OrganizerDashboard />
-      },
-      {
-        path:'/organizer/events/create',
-        element:<CreateEvent />
-      },
-      {
-        path:'/organizer/events/:id/edit',
-        element:<CreateEvent />
-      },
-      {
-        path:'/organizer/events/:id',
-        element:<EventDetail />
-      },
-      {
-        path:'/organizer/analytics/:eventId',
-        element:<Analytics />
-      },
-      {
-        path:'/attendee/feedback/:eventId',
-        element:<SubmitFeedback />
-      }
-    ]
-  }])
 
   return <RouterProvider router={router} />
 }

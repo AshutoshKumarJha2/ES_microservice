@@ -23,6 +23,7 @@ const ROUTE_LABELS: Record<string, string> = {
   venues:       'Venues',
   attendee:     'Attendee',
   registrations:'Registrations',
+  feedback:     'Submit Feedback',
   vendor:       'Vendor',
   services:     'Services',
 }

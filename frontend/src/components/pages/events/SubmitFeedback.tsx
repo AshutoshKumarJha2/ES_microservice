@@ -18,6 +18,7 @@ export const SubmitFeedback = () => {
     (s) => s.analytics
   )
   const { selectedEvent } = useAppSelector((s) => s.events)
+  const { user } = useAppSelector((s) => s.auth)
 
   const [rating, setRating] = useState(0)
   const [hoverRating, setHoverRating] = useState(0)
@@ -42,7 +43,7 @@ export const SubmitFeedback = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!eventId || rating === 0) return
-    const userId = localStorage.getItem('userId') ?? ''
+    const userId = user?.userId ?? ''
     await dispatch(submitFeedback({ eventId, userId, rating, comment }))
     dispatch(fetchFeedback({ eventId, size: 100 }))
   }
@@ -58,15 +59,18 @@ export const SubmitFeedback = () => {
 
   return (
     <div className={styles.page}>
-      <button className={styles['back-btn']} onClick={() => navigate(-1)}>
-        ← Back
-      </button>
 
-      <h1 className={styles.heading}>Submit Feedback</h1>
-      <p className={styles.sub}>
-        {selectedEvent ? selectedEvent.eventName : eventId}
-      </p>
+      {/* Page header — mirrors wireframe .page-header */}
+      <div className={styles['page-header']}>
+        <div>
+          <h1 className={styles.heading}>Submit Feedback</h1>
+          <p className={styles.subtitle}>
+            {selectedEvent ? selectedEvent.eventName : 'Loading event…'}
+          </p>
+        </div>
+      </div>
 
+      {/* ── Feedback form card ── */}
       <div className={styles.card}>
         {submitSuccess ? (
           <div className={styles.success}>
@@ -84,6 +88,8 @@ export const SubmitFeedback = () => {
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
+
+            {/* Overall Rating */}
             <div className={styles['form-group']}>
               <label className={styles.label}>Overall Rating</label>
               <div className={styles['stars-row']}>
@@ -106,6 +112,7 @@ export const SubmitFeedback = () => {
               </div>
             </div>
 
+            {/* Comment */}
             <div className={styles['form-group']}>
               <label className={styles.label}>Comment</label>
               <textarea
@@ -135,28 +142,34 @@ export const SubmitFeedback = () => {
                 Cancel
               </button>
             </div>
+
           </form>
         )}
       </div>
 
-      <div className={`${styles.card} ${styles['card-mt']}`}>
+      {/* ── Event Feedback Summary card ── */}
+      <div className={styles.card}>
         <h2 className={styles['card-title']}>Event Feedback Summary</h2>
+
         <div className={styles['summary-row']}>
           <span>Average Rating</span>
           <strong>{avgRating ? `${avgRating} / 5` : '— / 5'}</strong>
         </div>
+
         <div className={styles['progress-bar']}>
           <div
             className={styles['progress-fill']}
             style={{ width: avgRating ? `${(parseFloat(avgRating) / 5) * 100}%` : '0%' }}
           />
         </div>
+
         <div className={styles['review-count']}>
           {feedback.length > 0
             ? `Based on ${feedback.length} review${feedback.length !== 1 ? 's' : ''}`
             : 'No reviews yet'}
         </div>
       </div>
+
     </div>
   )
 }
