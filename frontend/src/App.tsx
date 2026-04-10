@@ -4,11 +4,11 @@ import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
 import { About } from './components/pages/About'
 import { AppLayout } from './components/layout/AppLayout'
-import { AuthenticatedLayout } from './components/layout/AuthenticatedLayout'
 import { ProtectedRoute } from './components/elements/auth/ProtectedRoute'
 import { AdminRoute } from './components/elements/auth/AdminRoute'
 import { Register } from './components/pages/auth/Register'
 import { Login } from './components/pages/auth/Login'
+import { Profile } from './components/pages/auth/Profile'
 import { Dashboard } from './components/pages/Dashboard'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
 import { CreateEvent } from './components/pages/events/CreateEvent'
@@ -47,19 +47,19 @@ export const App = () => {
             { path: 'contact', element: <Contact /> },
             { path: 'about', element: <About /> },
             { path: 'dashboard', element: <Dashboard /> },
+            { path: 'profile', element: <Profile /> },
           ],
         },
       ],
     },
 
-    // ── Protected pages (sidebar + top header) ─────────────────────────────────
+    // ── Organizer pages (AppLayout — global header, no sidebar) ──────────────
     {
       element: <ProtectedRoute />,
       children: [
         {
-          element: <AuthenticatedLayout />,
+          element: <AppLayout />,
           children: [
-            // Organizer
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
             { path: '/organizer/events/create',      element: <CreateEvent /> },
             { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
