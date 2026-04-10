@@ -7,6 +7,7 @@ import analyticsReducer from './slices/analyticsSlice'
 import authReducer from './slices/authSlice'
 import uiReducer from './slices/uiSlice'
 import adminReducer from './slices/adminSlice'
+import notificationsReducer from './slices/notificationsSlice'
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     registrations: registrationsReducer,
     budget: budgetReducer,
     analytics: analyticsReducer,
+    notifications: notificationsReducer,
   },
 })
 
