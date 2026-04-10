@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { logout } from '../../store/slices/authSlice'
-import { BoxArrowRight, ChevronDown, List, Person, Speedometer2, X } from 'react-bootstrap-icons'
+import { Bell, BoxArrowRight, ChevronDown, List, Person, Speedometer2, X } from 'react-bootstrap-icons'
 import styles from '../../css/layout/Header.module.css'
 import { DarkModeToggle } from '../elements/DarkModeToggle'
 
@@ -10,6 +10,9 @@ export const Header = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const unreadCount = useAppSelector((state) =>
+    state.notifications.notifications.filter((n) => n.status === 'UNREAD').length
+  )
   const [menuOpen, setMenuOpen] = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -85,6 +88,17 @@ export const Header = () => {
         {/* Right actions */}
         <div className={styles.actions}>
           <DarkModeToggle />
+
+          {isAuthenticated && (
+            <Link to="/notifications" className={styles['bell-btn']} aria-label="Notifications">
+              <Bell size={16} />
+              {unreadCount > 0 && (
+                <span className={styles['bell-badge']}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
+            </Link>
+          )}
 
           {isAuthenticated ? (
             <div className={styles['user-menu']} ref={dropdownRef}>
