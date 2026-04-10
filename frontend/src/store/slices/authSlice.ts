@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
-import type { UserResponseDto } from '../../types/events'
+import type { UserResponseDto, UserRequestDto } from '../../types/events'
 import axiosInstance from '../../api/axiosInstance'
 
 interface AuthState {
@@ -56,6 +56,27 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 )
 
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (payload: UserRequestDto, { getState, rejectWithValue }) => {
+    try {
+      const state = getState() as { auth: AuthState }
+      const userId = state.auth.user?.userId
+      if (!userId) throw new Error('Not authenticated')
+      const { data } = await axiosInstance.put(
+        `/api/v1/auth-manager/users/${userId}`,
+        payload
+      )
+      return data as UserResponseDto
+    } catch (err: unknown) {
+      const error = err as { response?: { data?: { message?: string } }; message?: string }
+      return rejectWithValue(
+        error.response?.data?.message || error.message || 'Failed to update profile'
+      )
+    }
+  }
+)
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -92,6 +113,19 @@ const authSlice = createSlice({
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
         state.user = action.payload
         state.isAuthenticated = true
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.user = action.payload
+        state.loading = false
+        state.error = null
+      })
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload as string
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
         state.isAuthenticated = false
