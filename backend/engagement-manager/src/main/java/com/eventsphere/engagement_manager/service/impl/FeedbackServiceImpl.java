@@ -52,7 +52,7 @@ public class FeedbackServiceImpl implements FeedbackService {
         log.info("Processing feedback creation for event: {}", request.eventId());
 
         validateRating(request.rating());
-        ensureEligibleToSubmit(request.eventId());
+        ensureEligibleToSubmit(request.eventId(), request.attendeeId());
         ensureNotDuplicate(request.eventId(), request.attendeeId());
 
         Feedback entity = FeedbackRequestDtoMapper.toEntity(request);
@@ -109,10 +109,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         }
     }
 
-    private void ensureEligibleToSubmit(String eventId) {
+    private void ensureEligibleToSubmit(String eventId, String attendeeId) {
         RegistrationStatusDto registration;
         try {
-            registration = registrationServiceClient.getRegistrationStatus(eventId);
+            registration = registrationServiceClient.getRegistrationStatus(eventId, attendeeId);
         } catch (FeignException.NotFound e) {
             log.error(e.getMessage());
             throw new IllegalStateException("Attendee is not registered for this event.");

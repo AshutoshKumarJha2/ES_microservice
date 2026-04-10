@@ -15,9 +15,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.cts.eventsphere.expensemanager.auth.dto.UserPrincipal;
-import com.cts.eventsphere.expensemanager.auth.service.AuthService;
+import com.cts.eventsphere.expensemanager.auth.service.ServiceTokenValidator;
+import com.cts.eventsphere.expensemanager.auth.service.UserTokenValidator;
 
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * [Detailed description of the class's responsibility]
@@ -31,7 +33,8 @@ import java.io.IOException;
 @Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final AuthService authService;
+    private final UserTokenValidator userTokenValidator;
+    private final ServiceTokenValidator serviceTokenValidator;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -48,8 +51,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         try {
-            UserPrincipal principal = authService.validate(authHeader);
-            log.info("Extracted user principal {}", principal);
+            String token = authHeader.substring(7);
+            UserPrincipal principal = isServiceToken(token)
+                    ? serviceTokenValidator.validate(token)
+                    : userTokenValidator.validate(token);
+
             UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(
                             principal, null, principal.authorities());
@@ -70,5 +76,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isServiceToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return false;
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            return payload.contains("\"type\":\"SERVICE\"");
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

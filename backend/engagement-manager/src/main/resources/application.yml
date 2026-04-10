@@ -19,3 +19,7 @@ eureka:
   instance:
     prefer-ip-address: true
 
+service:
+  name: engagement-manager
+  secret: es-svc-engagement-manager-2026
+

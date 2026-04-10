@@ -58,7 +58,9 @@ public class AuditServiceImpl implements AuditService {
         var dto = new AuditLogRequestDTO(action, entityId, entityName);
         log.debug("Sending audit request: userId={}, payload={}", userId, dto);
         try {
-            auditClient.createAudit(dto);
+            var res = auditClient.createAudit(dto);
+            var statusCode = res.getStatusCode();
+            log.debug("Received audit response: userId={}, status={}", userId, statusCode);
             log.debug("Audit logged successfully: userId={}, action={}, entity={}, entityId={}",
                     userId, action, entityName, entityId);
         } catch (FeignException e) {

@@ -1,5 +1,6 @@
 package com.eventsphere.engagement_manager.client;
 
+import com.eventsphere.engagement_manager.config.ServiceFeignConfig;
 import com.eventsphere.engagement_manager.dto.client.RegistrationStatusDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @version 1.0
  * @since 26-03-2026
  */
-@FeignClient(name = "event-manager")
+@FeignClient(name = "event-manager", configuration = ServiceFeignConfig.class)
 public interface EventServiceClient {
 
-    @GetMapping("/events/{eventId}/my-registration")
-    RegistrationStatusDto getRegistrationStatus(@PathVariable String eventId);
+    @GetMapping("/events/{eventId}/registrations/attendee/{attendeeId}")
+    RegistrationStatusDto getRegistrationStatus(@PathVariable String eventId, @PathVariable String attendeeId);
 }

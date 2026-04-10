@@ -7,11 +7,13 @@ import analyticsReducer from './slices/analyticsSlice'
 import authReducer from './slices/authSlice'
 import uiReducer from './slices/uiSlice'
 import financeReducer from './slices/Finance/financeSlice'
+import adminReducer from './slices/adminSlice'
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     ui: uiReducer,
+    admin: adminReducer,
     events: eventsReducer,
     tickets: ticketsReducer,
     registrations: registrationsReducer,

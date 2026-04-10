@@ -3,12 +3,11 @@ package com.cts.eventsphere.iamservice.security;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
 
@@ -24,39 +23,30 @@ import java.util.List;
  * </ul>
  * </p>
  *
- * <p>Uses HMAC-SHA256 signing via the {@code jwt.secret} application property.
+ * <p>Uses RS256 signing via the RSA key pair provided by {@link RsaKeyProvider}.
  * Expiration times are controlled by {@code jwt.access.expiration-in-m} (minutes, default 15)
  * and {@code jwt.refresh.expiration-in-d} (days, default 7).</p>
  *
- * @author 2480010
- * @version 1.0
- * @since 25-03-2026
+ * @author test-in-prod-10x
+ * @version 2.0
+ * @since 2026-04-06
  */
 @Component
+@RequiredArgsConstructor
 public class JwtUtil {
-    @Value("${jwt.secret:nvjfenvjnjv53352434rnnc19dnwqdneciu439jn}")
-    private String SECRET_KEY;
+
+    private final RsaKeyProvider rsaKeyProvider;
 
     @Value("${jwt.access.expiration-in-m:15}")
-    private  long ACCESS_EXPIRATION_TIME_IN_M; // Default to 15 minutes
+    private long ACCESS_EXPIRATION_TIME_IN_M;
 
     @Value("${jwt.refresh.expiration-in-d:7}")
-    private long REFRESH_EXPIRATION_TIME_IN_D; // Default to 7 days
-
-    /**
-     * Derives the HMAC-SHA256 signing key from the configured secret string.
-     *
-     * @return the {@link SecretKey} used to sign and verify all JWTs
-     */
-    private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
-    }
+    private long REFRESH_EXPIRATION_TIME_IN_D;
 
     /**
      * Builds a signed JWT for the given user, role, and token type.
      *
-     * <p>Embeds the {@code userId}, {@code role}, and {@code type} as custom claims.
-     * Access tokens expire after {@code jwt.access.expiration-in-m} minutes;
+     * <p>Access tokens expire after {@code jwt.access.expiration-in-m} minutes;
      * refresh tokens expire after {@code jwt.refresh.expiration-in-d} days.</p>
      *
      * @param userId the UUID of the user to embed in the token subject and {@code userId} claim
@@ -65,23 +55,22 @@ public class JwtUtil {
      * @return the compact, URL-safe JWT string
      */
     private String buildToken(String userId, String role, TokenType type) {
-        var typeString = switch (type){
+        var typeString = switch (type) {
             case ACCESS -> "ACCESS";
             case REFRESH -> "REFRESH";
         };
-        var expirationMillis = switch (type){
+        var expirationMillis = switch (type) {
             case ACCESS -> ACCESS_EXPIRATION_TIME_IN_M * 60 * 1000;
             case REFRESH -> REFRESH_EXPIRATION_TIME_IN_D * 24 * 60 * 60 * 1000;
         };
         return Jwts.builder()
                 .setSubject(userId)
                 .claim("userId", userId)
-//                .claim("email", email)
                 .claim("role", role)
                 .claim("type", typeString)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .signWith(rsaKeyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
@@ -93,8 +82,12 @@ public class JwtUtil {
      * @throws io.jsonwebtoken.JwtException if the token is invalid or expired
      */
     public String extractUserId(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(rsaKeyProvider.getPublicKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     /**
@@ -105,8 +98,12 @@ public class JwtUtil {
      * @throws io.jsonwebtoken.JwtException if the token is invalid or expired
      */
     public String extractRole(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSigningKey()).build()
-                .parseClaimsJws(token).getBody().get("role", String.class);
+        return Jwts.parserBuilder()
+                .setSigningKey(rsaKeyProvider.getPublicKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 
     /**
@@ -115,11 +112,14 @@ public class JwtUtil {
      * @param token        the compact JWT string to validate
      * @param expectedType the {@link TokenType} the token must carry in its {@code type} claim
      * @return {@code true} if the token is valid and matches {@code expectedType};
-     *         {@code false} if the signature is wrong, the token is expired, or the type mismatches
+     *         {@code false} otherwise
      */
     public boolean validateToken(String token, TokenType expectedType) {
         try {
-            var claims = Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+            var claims = Jwts.parserBuilder()
+                    .setSigningKey(rsaKeyProvider.getPublicKey())
+                    .build()
+                    .parseClaimsJws(token);
             var tokenType = claims.getBody().get("type", String.class);
             return expectedType.name().equals(tokenType);
         } catch (JwtException | IllegalArgumentException e) {
@@ -130,22 +130,20 @@ public class JwtUtil {
     /**
      * Parses a token and constructs a {@link UserPrincipal} for use in the Spring Security context.
      *
-     * <p>Throws {@link io.jsonwebtoken.JwtException} if the token type does not match
-     * {@code expectedType}, preventing access tokens from being used on the refresh endpoint
-     * and vice versa.</p>
-     *
      * @param token        the compact JWT string to parse
      * @param expectedType the {@link TokenType} the token is required to carry
      * @return a {@link UserPrincipal} containing the user ID, role, and derived authorities
      * @throws io.jsonwebtoken.JwtException if the token is invalid, expired, or the type mismatches
      */
     UserPrincipal extractUserPrincipal(String token, TokenType expectedType) {
-        var claims = Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
+        var claims = Jwts.parserBuilder()
+                .setSigningKey(rsaKeyProvider.getPublicKey())
+                .build()
+                .parseClaimsJws(token);
         var tokenType = claims.getBody().get("type", String.class);
         if (!expectedType.name().equals(tokenType)) {
             throw new JwtException("Invalid token type. Expected: " + expectedType.name() + ", Found: " + tokenType);
         }
-//        String email = claims.getBody().get("email", String.class);
         String role = claims.getBody().get("role", String.class);
         String userId = claims.getBody().get("userId", String.class);
         String roleAuthority = "ROLE_" + role.toUpperCase();

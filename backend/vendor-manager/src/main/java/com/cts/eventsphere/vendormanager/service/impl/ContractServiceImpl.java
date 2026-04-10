@@ -4,6 +4,7 @@ import com.cts.eventsphere.vendormanager.client.EventClient;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractRequestDto;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractResponseDto;
 import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryRequestDto;
+import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryResponseDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceRequestDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceResponseDto;
 import com.cts.eventsphere.vendormanager.dto.mapper.contract.ContractRequestDtoMapper;
@@ -92,11 +93,12 @@ public class ContractServiceImpl implements ContractService {
      */
     @Override
     @Transactional
-    public void addDeliverable(String actorId, String contractId, DeliveryRequestDto dto) {
+    public DeliveryResponseDto addDeliverable(String actorId, String contractId, DeliveryRequestDto dto) {
         log.info("Attempting to add a new deliverable for contract with ID: {} by actorId={}", contractId, actorId);
         validateContract(contractId);
-        deliveryService.createDelivery(actorId,dto);
+        DeliveryResponseDto result = deliveryService.createDelivery(actorId, dto);
         log.info("Successfully added a deliverable for contract with ID: {} by actorId={}", contractId, actorId);
+        return result;
 //        auditService.logAudit(
 //                actorId,
 //                AuditAction.CREATE,

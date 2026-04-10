@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<GenericErrorResponse> handleUnexpectedExceptions(Exception ex) {
-        String traceId = java.util.UUID.randomUUID().toString();
+        String traceId = org.slf4j.MDC.get("traceId");
+        if (traceId == null) traceId = java.util.UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
         GenericErrorResponse body = new GenericErrorResponse(
                 "An unexpected error occurred. Please contact support with traceId: " + traceId

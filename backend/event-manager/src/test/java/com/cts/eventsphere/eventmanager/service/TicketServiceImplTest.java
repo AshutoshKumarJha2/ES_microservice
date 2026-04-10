@@ -87,7 +87,7 @@ class TicketServiceImplTest {
 
             TicketResponseDto result = ticketService.createTicket(ACTOR_ID, EVENT_ID, "general", 50.0, TicketStatus.ACTIVE);
 
-            assertThat(result.status()).isEqualTo("Ticket created successfully");
+            assertThat(result.status()).isEqualTo(TicketStatus.ACTIVE);
             verify(ticketRepository).save(any(Ticket.class));
         }
 
@@ -230,7 +230,7 @@ class TicketServiceImplTest {
 
             TicketResponseDto result = ticketService.updateTicket(ACTOR_ID, TICKET_ID, "vip", 150.0, TicketStatus.INACTIVE);
 
-            assertThat(result.status()).isEqualTo("Ticket updated successfully");
+            assertThat(result.status()).isEqualTo(TicketStatus.INACTIVE);
             assertThat(sampleTicket.getType()).isEqualTo("vip");
             assertThat(sampleTicket.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(150.0));
             assertThat(sampleTicket.getStatus()).isEqualTo(TicketStatus.INACTIVE);

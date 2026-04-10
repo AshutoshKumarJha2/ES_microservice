@@ -8,6 +8,7 @@
     import com.cts.eventsphere.vendormanager.dto.mapper.invoice.InvoiceResponseDtoMapper;
     import com.cts.eventsphere.vendormanager.exception.invoice.InvoiceNotFoundException;
     import com.cts.eventsphere.vendormanager.exception.invoice.InvoicePdfGenerationException;
+    import com.cts.eventsphere.vendormanager.exception.invoice.PaymentNotApprovedException;
     import com.cts.eventsphere.vendormanager.model.Invoice;
     import com.cts.eventsphere.vendormanager.model.data.InvoiceStatus;
     import com.cts.eventsphere.vendormanager.repository.InvoiceRepository;
@@ -142,7 +143,7 @@
             String paymentStatus = paymentClient.getPaymentStatus(transactionId);
 
             if (!"COMPLETED".equalsIgnoreCase(paymentStatus)) {
-                throw new IllegalStateException("Payment not approved. Current status: " + paymentStatus);
+                throw new PaymentNotApprovedException(paymentStatus);
             }
 
             Invoice invoice = requestDtoMapper.toEntity(dto);

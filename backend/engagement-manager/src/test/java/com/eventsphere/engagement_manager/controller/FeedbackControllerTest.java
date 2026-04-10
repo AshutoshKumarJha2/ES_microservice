@@ -240,7 +240,7 @@ class FeedbackControllerTest {
         @Test
         @DisplayName("happy path – returns 200 with empty page when no feedback exists for event")
         void listByEvent_empty_returns200WithEmptyPage() throws Exception {
-            when(feedbackService.listByEvent(eq(EVENT_ID), any())).thenReturn(Page.empty());
+            when(feedbackService.listByEvent(eq(EVENT_ID), any())).thenReturn(Page.empty(PageRequest.of(0, 10)));
 
             mockMvc.perform(get("/feedback/event/{eventId}", EVENT_ID))
                     .andExpect(status().isOk())

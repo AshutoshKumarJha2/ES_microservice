@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.slf4j.MDC;
 
 @RestControllerAdvice
 @RequiredArgsConstructor
@@ -127,7 +129,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EventNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleEventNotFound(EventNotFoundException e, HttpServletRequest request) {
         auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", request.getRequestURI());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse("Event not found"));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(ScheduleNotFoundException.class)
@@ -169,6 +171,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<GenericErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex,
+                                                                              HttpServletRequest request) {
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Entity", request.getRequestURI());
+        String message = switch (request.getMethod().toUpperCase()) {
+            case "DELETE"       -> "Cannot delete: this record is still referenced by other data";
+            case "POST", "PUT", "PATCH" -> "A record with conflicting data already exists";
+            default             -> "Data integrity constraint violated";
+        };
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(message));
+    }
+
     // ── 422 Unprocessable Entity ─────────────────────────────────────────────
 
     @ExceptionHandler(TicketUnavailableException.class)
@@ -180,9 +194,11 @@ public class GlobalExceptionHandler {
     // ── 500 Internal Server Error (catch-all) ────────────────────────────────
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex) {
-        String traceId = UUID.randomUUID().toString();
+    public ResponseEntity<GenericErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
+        String traceId = MDC.get("traceId");
+        if (traceId == null) traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new GenericErrorResponse("An unexpected error occurred. Please contact support with traceId: " + traceId));
     }
