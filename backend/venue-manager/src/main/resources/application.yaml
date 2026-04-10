@@ -17,3 +17,7 @@ eureka:
 
 server:
   port: 7076
+
+service:
+  name: venue-manager
+  secret: es-svc-venue-manager-2026

@@ -1,6 +1,7 @@
 package com.cts.eventsphere.expensemanager.client;
 
 import com.cts.eventsphere.expensemanager.client.dto.EventResponseDto;
+import com.cts.eventsphere.expensemanager.config.ServiceFeignConfig;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  * @since 25-03-2026
  * @see EventResponseDto
  */
-@FeignClient(name = "event-manager")
+@FeignClient(name = "event-manager", configuration = ServiceFeignConfig.class)
 public interface EventServiceClient {
 
     /**

@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.client;
 
+import com.cts.eventsphere.eventmanager.config.ServiceFeignConfig;
 import com.cts.eventsphere.eventmanager.dto.audit.AuditLogRequestDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +25,8 @@ import org.springframework.web.bind.annotation.RequestBody;
  * @version 1.0
  * @since 2026-03-28
  */
-@FeignClient(name = "log-manager", contextId = "auditClient", path = "/audits")
+@FeignClient(name = "log-manager", contextId = "auditClient", path = "/audits",
+        configuration = ServiceFeignConfig.class)
 public interface AuditClient {
 
     /**

@@ -1,12 +1,13 @@
 package com.eventsphere.engagement_manager.client;
 
+import com.eventsphere.engagement_manager.config.ServiceFeignConfig;
 import com.eventsphere.engagement_manager.dto.audit.AuditLogRequestDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "log-manager", contextId = "auditClient", path = "/audits")
+@FeignClient(name = "log-manager", contextId = "auditClient", path = "/audits", configuration = ServiceFeignConfig.class)
 public interface AuditClient {
 
     @PostMapping

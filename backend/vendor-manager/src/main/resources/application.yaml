@@ -13,3 +13,7 @@ eureka:
 
 server:
   port: 7075
+
+service:
+  name: vendor-manager
+  secret: es-svc-vendor-manager-2026

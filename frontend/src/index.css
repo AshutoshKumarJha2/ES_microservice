@@ -1,0 +1,118 @@
+/* ── CSS Custom Properties (Theme) ───────────────────────────────────────────── */
+
+:root {
+  /* Backgrounds */
+  --bg-page:    #f1f5f9;
+  --bg-surface: #ffffff;
+  --bg-subtle:  #f8faff;
+  --bg-hover:   #f1f5f9;
+  --bg-input:   #f8f9ff;
+
+  /* Text */
+  --text-primary:   #0f172a;
+  --text-body:      #334155;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+
+  /* Borders */
+  --border-color:  #e2e8f0;
+  --border-subtle: #f1f5f9;
+
+  /* Brand Blue */
+  --blue:        #1d4ed8;
+  --blue-hover:  #1e40af;
+  --blue-subtle: #eff6ff;
+  --blue-border: #bfdbfe;
+
+  /* Brand Saffron / Orange */
+  --saffron:        #f97316;
+  --saffron-hover:  #ea6c0a;
+  --saffron-subtle: #fff7ed;
+  --saffron-border: #fed7aa;
+
+  /* Status */
+  --green:        #16a34a;
+  --green-subtle: #f0fdf4;
+  --green-border: #bbf7d0;
+  --red:          #dc2626;
+  --red-subtle:   #fef2f2;
+  --red-border:   #fecaca;
+  --amber:        #d97706;
+  --amber-subtle: #fffbeb;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.07);
+
+  /* Header (AppHeader) */
+  --header-bg:     #ffffff;
+  --header-border: #e2e8f0;
+}
+
+[data-theme="dark"] {
+  --bg-page:    #070a14;
+  --bg-surface: #0f1220;
+  --bg-subtle:  #0d1117;
+  --bg-hover:   #1a1e35;
+  --bg-input:   rgba(255, 255, 255, 0.04);
+
+  --text-primary:   #e8eaff;
+  --text-body:      #b0b8d8;
+  --text-secondary: #7a85b0;
+  --text-muted:     #4a5270;
+
+  --border-color:  rgba(100, 120, 255, 0.18);
+  --border-subtle: rgba(100, 120, 255, 0.08);
+
+  --blue:        #4d88ff;
+  --blue-hover:  #6a9fff;
+  --blue-subtle: rgba(77, 136, 255, 0.12);
+  --blue-border: rgba(77, 136, 255, 0.35);
+
+  --saffron:        #ff8c2a;
+  --saffron-hover:  #ffa040;
+  --saffron-subtle: rgba(255, 140, 42, 0.1);
+  --saffron-border: rgba(255, 140, 42, 0.3);
+
+  --green:        #22dd7a;
+  --green-subtle: rgba(34, 221, 122, 0.1);
+  --green-border: rgba(34, 221, 122, 0.3);
+  --red:          #ff5252;
+  --red-subtle:   rgba(255, 82, 82, 0.1);
+  --red-border:   rgba(255, 82, 82, 0.3);
+  --amber:        #ff8c2a;
+  --amber-subtle: rgba(255, 140, 42, 0.1);
+
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.4),  0 0 0 1px rgba(77, 136, 255, 0.06);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(77, 136, 255, 0.1);
+
+  --header-bg:     #0f1220;
+  --header-border: rgba(100, 120, 255, 0.18);
+}
+
+/* ── Global resets ───────────────────────────────────────────────────────────── */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Urbanist', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--bg-page);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  text-decoration: none;
+}

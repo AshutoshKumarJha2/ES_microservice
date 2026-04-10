@@ -160,6 +160,7 @@ public class ExpenseController {
      * Called by vendor-manager to verify payment before generating invoices.
      */
     @GetMapping("/payments/{paymentId}/status")
+    @PreAuthorize("hasRole('SYS_VENDOR_MGR')")
     @Operation(summary = "Get payment status by payment ID")
     public ResponseEntity<String> getPaymentStatus(@PathVariable String paymentId) {
         return ResponseEntity.ok(expenseService.getPaymentStatus(paymentId));

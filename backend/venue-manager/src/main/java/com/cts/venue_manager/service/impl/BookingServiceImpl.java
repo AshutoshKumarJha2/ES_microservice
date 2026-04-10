@@ -7,6 +7,7 @@ import com.cts.venue_manager.dto.mapper.booking.BookingRepsonseVenueManagerDtoMa
 import com.cts.venue_manager.dto.mapper.booking.BookingRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.booking.BookingResponseDtoMapper;
 import com.cts.venue_manager.exception.booking.BookingNotFoundException;
+import com.cts.venue_manager.exception.venue.VenueNotFoundException;
 import com.cts.venue_manager.model.Booking;
 import com.cts.venue_manager.model.Venue;
 //import com.cts.venue_manager.model.data.AuditAction;
@@ -58,7 +59,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponseDto createBooking(String actorId, BookingRequestDto dto) {
         Booking booking = requestMapper.toEntity(dto);
         Venue venue = venueRepository.findById(dto.venueId())
-                .orElseThrow(() -> new RuntimeException("Venue not found"));
+                .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + dto.venueId()));
 
         booking.setVenue(venue);
         booking.setDate(booking.getDate() == null ? LocalDate.now() : booking.getDate());
