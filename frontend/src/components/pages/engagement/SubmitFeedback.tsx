@@ -5,18 +5,24 @@ import {
   fetchFeedback,
   submitFeedback,
   clearSubmitState,
+  fetchMyRegistration,
 } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import styles from '../../../css/engagement/SubmitFeedback.module.css'
+
+// Statuses that allow feedback submission
+const ALLOWED_STATUSES = ['CHECK_IN', 'CHECKED_IN', 'APPROVED', 'CONFIRMED']
+
+const isAllowedStatus = (status?: string) =>
+  status ? ALLOWED_STATUSES.includes(status.toUpperCase()) : false
 
 export const SubmitFeedback = () => {
   const { eventId } = useParams<{ eventId: string }>()
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
-  const { feedback, submitLoading, submitSuccess, submitError } = useAppSelector(
-    (s) => s.analytics
-  )
+  const { feedback, submitLoading, submitSuccess, submitError, myRegistration, myRegistrationLoading } =
+    useAppSelector((s) => s.analytics)
   const { selectedEvent } = useAppSelector((s) => s.events)
   const { user } = useAppSelector((s) => s.auth)
 
@@ -28,10 +34,14 @@ export const SubmitFeedback = () => {
     if (!eventId) return
     dispatch(fetchEventById(eventId))
     dispatch(fetchFeedback({ eventId, size: 100 }))
+    // Only fetch registration if user is an attendee
+    if (user?.role === 'ATTENDEE') {
+      dispatch(fetchMyRegistration(eventId))
+    }
     return () => {
       dispatch(clearSubmitState())
     }
-  }, [eventId, dispatch])
+  }, [eventId, dispatch, user?.role])
 
   const avgRating = useMemo(() => {
     const rated = feedback.filter((f) => f.rating != null && f.rating > 0)
@@ -57,6 +67,62 @@ export const SubmitFeedback = () => {
 
   const displayStar = hoverRating || rating
 
+  // ── Access checks ──────────────────────────────────────────────────────────
+
+  // Not an attendee at all
+  if (user && user.role !== 'ATTENDEE') {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <button className={styles['back-link']} onClick={() => navigate(-1)}>← Go Back</button>
+          <div className={`${styles.card} ${styles['access-denied']}`}>
+            <div className={styles['denied-icon']}>⚠</div>
+            <h3 className={styles['denied-title']}>Access Denied</h3>
+            <p className={styles['denied-msg']}>
+              Only registered attendees can submit feedback for this event.
+              Your current role ({user.role.replace('_', ' ')}) does not have permission to give feedback.
+            </p>
+            <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>Go Back</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Still loading registration
+  if (user?.role === 'ATTENDEE' && myRegistrationLoading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <p className={styles.loading}>Checking your registration…</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Attendee but not registered or wrong status
+  if (user?.role === 'ATTENDEE' && !myRegistrationLoading && !isAllowedStatus(myRegistration?.status)) {
+    const reason = !myRegistration
+      ? 'You are not registered for this event.'
+      : `Your registration status is "${myRegistration.status}". Only attendees with an Approved or Checked-In registration can submit feedback.`
+
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <button className={styles['back-link']} onClick={() => navigate(-1)}>← My Registrations</button>
+          <div className={`${styles.card} ${styles['access-denied']}`}>
+            <div className={styles['denied-icon']}>⚠</div>
+            <h3 className={styles['denied-title']}>Not Eligible to Submit Feedback</h3>
+            <p className={styles['denied-msg']}>{reason}</p>
+            <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>Go Back</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Main page ──────────────────────────────────────────────────────────────
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -71,7 +137,7 @@ export const SubmitFeedback = () => {
           <div>
             <h1 className={styles.heading}>Submit Feedback</h1>
             <p className={styles.subtitle}>
-              {selectedEvent ? selectedEvent.eventName : 'Loading event…'}
+              {selectedEvent ? selectedEvent.eventName : eventId ?? 'Loading event…'}
             </p>
           </div>
         </div>

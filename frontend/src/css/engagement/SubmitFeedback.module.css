@@ -351,6 +351,48 @@
 }
 
 /* ══════════════════════════════════════════════════════════
+   ACCESS DENIED CARD
+   ══════════════════════════════════════════════════════════ */
+
+.access-denied {
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-color: var(--amber-subtle, #fffbeb);
+  background: var(--amber-subtle, #fffbeb);
+}
+
+.denied-icon {
+  font-size: 2.5rem;
+  color: var(--amber, #d97706);
+  margin-bottom: 0.75rem;
+  line-height: 1;
+}
+
+.denied-title {
+  font-family: 'Urbanist', 'Poppins', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem;
+}
+
+.denied-msg {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
+.loading {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 3rem 0;
+  font-size: 13px;
+  font-family: 'Noto Sans', sans-serif;
+}
+
+/* ══════════════════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════════════════ */
 

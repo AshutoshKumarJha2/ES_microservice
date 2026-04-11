@@ -13,8 +13,8 @@ import { Dashboard } from './components/pages/Dashboard'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
 import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
-import { Analytics } from './components/pages/events/Analytics'
 import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
+import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'
@@ -73,7 +73,7 @@ export const App = () => {
             { path: '/organizer/events/create',      element: <CreateEvent /> },
             { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
-            { path: '/organizer/analytics/:eventId', element: <Analytics /> },
+            { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
           ],
         },
