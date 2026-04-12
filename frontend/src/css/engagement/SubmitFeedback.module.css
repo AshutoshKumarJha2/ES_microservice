@@ -392,6 +392,42 @@
   font-family: 'Noto Sans', sans-serif;
 }
 
+/* ── Already submitted ── */
+.already-submitted {
+  text-align: center;
+  padding: 1.5rem 1rem;
+}
+
+.already-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--blue-subtle);
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.already-title {
+  font-family: 'Urbanist', 'Poppins', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 6px;
+}
+
+.already-msg {
+  font-family: 'Noto Sans', sans-serif;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin: 0 0 1.25rem;
+  line-height: 1.6;
+}
+
 /* ══════════════════════════════════════════════════════════
    RESPONSIVE
    ══════════════════════════════════════════════════════════ */

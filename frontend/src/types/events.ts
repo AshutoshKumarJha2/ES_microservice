@@ -175,20 +175,35 @@ export interface PageExpenseResponseDto {
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 
+export type EngagementActivity =
+  | 'REGISTRATION' | 'REGISTRATION_CONFIRMATION' | 'CHECK_IN' | 'SESSION_BOOKMARK'
+  | 'SESSION_JOIN' | 'SESSION_LEAVE' | 'SESSION_QA_SUBMIT' | 'SESSION_FEEDBACK_SUBMIT'
+  | 'POLL_VIEW' | 'POLL_VOTE' | 'SURVEY_SUBMIT'
+  | 'CHAT_MESSAGE' | 'DIRECT_MESSAGE'
+  | 'BOOTH_VISIT' | 'RESOURCE_DOWNLOAD' | 'CTA_BUTTON_CLICK'
+  | 'EVENT_FEEDBACK_SUBMIT' | 'CERTIFICATE_DOWNLOAD' | 'RECORDING_PLAY'
+
+export interface EngagementRequestDto {
+  eventId: string
+  attendeeId: string
+  activity: EngagementActivity
+  activityTimestamp: string   // LocalDateTime — "YYYY-MM-DDTHH:mm:ss"
+}
+
 export interface EngagementResponseDto {
   engagementId?: string
   eventId: string
-  userId?: string
+  attendeeId?: string
   activity: string
-  createdAt?: string
+  activityTimestamp?: string
 }
 
 export interface FeedbackResponseDto {
   feedbackId?: string
   eventId: string
-  userId?: string
+  attendeeId?: string
   rating?: number
-  comment?: string
+  comments?: string
   createdAt?: string
 }
 
@@ -202,7 +217,8 @@ export interface PageFeedbackResponseDto {
 
 export interface FeedbackRequestDto {
   eventId: string
-  userId: string
+  attendeeId: string
   rating: number
-  comment: string
+  comments: string
+  createdAt: string
 }

@@ -3,7 +3,10 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEngagements, fetchFeedback } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
+import { fetchRegistrationsByEvent } from '../../../store/slices/registrationsSlice'
 import styles from '../../../css/engagement/EngagementAnalytics.module.css'
+
+const ORGANIZER_ROLES = ['ORGANIZER', 'ADMIN']
 
 const FILTER_CHIPS = ['All', 'View', 'Register', 'Check In', 'Rate', 'Comment']
 
@@ -25,8 +28,10 @@ const getDotClass = (activity: string): string => {
   return styles['dot-default']
 }
 
-const formatTime = (iso?: string) => {
-  if (!iso) return ''
+const formatTime = (ts?: string) => {
+  if (!ts) return ''
+  // Backend returns LocalDateTime — append 'Z' if no timezone info so the browser parses it correctly
+  const iso = ts.includes('Z') || ts.includes('+') ? ts : ts + 'Z'
   return new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
@@ -37,6 +42,10 @@ export const EngagementAnalytics = () => {
 
   const { engagements, feedback, loading } = useAppSelector((s) => s.analytics)
   const { selectedEvent } = useAppSelector((s) => s.events)
+  const { registrations } = useAppSelector((s) => s.registrations)
+  const { user } = useAppSelector((s) => s.auth)
+
+  const isOrganizerOrAdmin = ORGANIZER_ROLES.includes(user?.role ?? '')
 
   const [activeFilter, setActiveFilter] = useState('All')
 
@@ -46,11 +55,11 @@ export const EngagementAnalytics = () => {
 
     // Engagements sheet
     const engRows = [
-      ['Activity', 'User ID', 'Timestamp'],
+      ['Activity', 'Attendee ID', 'Timestamp'],
       ...engagements.map((e) => [
         e.activity,
-        e.userId ?? '',
-        e.createdAt ?? '',
+        e.attendeeId ?? '',
+        e.activityTimestamp ?? '',
       ]),
     ]
 
@@ -61,8 +70,8 @@ export const EngagementAnalytics = () => {
       ['Rating', 'Comment', 'User ID', 'Timestamp'],
       ...feedback.map((f) => [
         String(f.rating ?? ''),
-        `"${(f.comment ?? '').replace(/"/g, '""')}"`,
-        f.userId ?? '',
+        `"${(f.comments ?? '').replace(/"/g, '""')}"`,
+        f.attendeeId ?? '',
         f.createdAt ?? '',
       ]),
     ]
@@ -80,19 +89,27 @@ export const EngagementAnalytics = () => {
   }
 
   useEffect(() => {
-    if (!eventId) return
+    if (!eventId || !isOrganizerOrAdmin) return
     dispatch(fetchEventById(eventId))
     dispatch(fetchEngagements(eventId))
     dispatch(fetchFeedback({ eventId, size: 100 }))
-  }, [eventId, dispatch])
+    // Registrations & check-ins: event-manager is source of truth for registration status.
+    // Page is organizer/admin only so this endpoint is always authorised here.
+    dispatch(fetchRegistrationsByEvent({ eventId, size: 100 }))
+  }, [eventId, dispatch, isOrganizerOrAdmin])
 
   // ── Stat counts ──────────────────────────────────────────────────────────────
+  // Registrations & check-ins come from event-manager (source of truth for status).
+  // Total engagements & activity feed come from engagement-manager.
   const stats = useMemo(() => {
-    const views      = engagements.filter((e) => matchesFilter(e.activity, 'View')).length
-    const registers  = engagements.filter((e) => matchesFilter(e.activity, 'Register')).length
-    const checkins   = engagements.filter((e) => matchesFilter(e.activity, 'Check In')).length
-    return { views, registers, checkins }
-  }, [engagements])
+    const registers = registrations.filter((r) =>
+      ['APPROVED', 'CONFIRMED', 'CHECK_IN', 'CHECKED_IN'].includes(r.status?.toUpperCase() ?? '')
+    ).length
+    const checkins = registrations.filter((r) =>
+      ['CHECK_IN', 'CHECKED_IN'].includes(r.status?.toUpperCase() ?? '')
+    ).length
+    return { registers, checkins }
+  }, [registrations])
 
   const avgRating = useMemo(() => {
     const rated = feedback.filter((f) => f.rating != null && f.rating > 0)
@@ -128,10 +145,33 @@ export const EngagementAnalytics = () => {
   // ── Recent activity feed (filtered) ─────────────────────────────────────────
   const recentActivity = useMemo(() => {
     return [...engagements]
-      .sort((a, b) => (b.createdAt ?? '').localeCompare(a.createdAt ?? ''))
+      .sort((a, b) => (b.activityTimestamp ?? '').localeCompare(a.activityTimestamp ?? ''))
       .filter((e) => matchesFilter(e.activity, activeFilter))
       .slice(0, 10)
   }, [engagements, activeFilter])
+
+  // ── Access guard (after all hooks) ───────────────────────────────────────────
+  if (!isOrganizerOrAdmin) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles['access-denied']}>
+            <div className={styles['denied-icon']}>🚫</div>
+            <h2 className={styles['denied-title']}>Access Denied</h2>
+            <p className={styles['denied-msg']}>
+              This page is only accessible to event organisers and administrators.
+            </p>
+            <button
+              className={styles['btn-export']}
+              onClick={() => navigate('/dashboard')}
+            >
+              Go to Dashboard
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className={styles.page}>
@@ -164,7 +204,7 @@ export const EngagementAnalytics = () => {
         {/* ── Stat cards ── */}
         <div className={styles['stats-grid']}>
           <div className={`${styles['stat-card']} ${styles['stat-blue']}`}>
-            <div className={styles['stat-num']}>{stats.views || engagements.length}</div>
+            <div className={styles['stat-num']}>{engagements.length}</div>
             <div className={styles['stat-label']}>Total Engagements</div>
           </div>
           <div className={`${styles['stat-card']} ${styles['stat-orange']}`}>
@@ -286,18 +326,18 @@ export const EngagementAnalytics = () => {
               ) : (
                 <ul className={styles.timeline}>
                   {recentActivity.map((eng) => (
-                    <li key={eng.engagementId ?? `${eng.userId}-${eng.createdAt}`} className={styles['timeline-item']}>
+                    <li key={eng.engagementId ?? `${eng.attendeeId}-${eng.activityTimestamp}`} className={styles['timeline-item']}>
                       <div className={`${styles.dot} ${getDotClass(eng.activity)}`} />
                       <div className={styles['timeline-body']}>
                         <div className={styles['timeline-text']}>
                           <strong>{eng.activity.replace(/_/g, ' ')}</strong>
-                          {eng.userId && (
+                          {eng.attendeeId && (
                             <span className={styles['timeline-user']}>
-                              {' '}by {eng.userId.slice(0, 8)}…
+                              {' '}by {eng.attendeeId.slice(0, 8)}…
                             </span>
                           )}
                         </div>
-                        <div className={styles['timeline-time']}>{formatTime(eng.createdAt)}</div>
+                        <div className={styles['timeline-time']}>{formatTime(eng.activityTimestamp)}</div>
                       </div>
                     </li>
                   ))}

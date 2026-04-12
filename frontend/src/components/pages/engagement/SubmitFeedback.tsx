@@ -34,7 +34,6 @@ export const SubmitFeedback = () => {
     if (!eventId) return
     dispatch(fetchEventById(eventId))
     dispatch(fetchFeedback({ eventId, size: 100 }))
-    // Only fetch registration if user is an attendee
     if (user?.role === 'ATTENDEE') {
       dispatch(fetchMyRegistration(eventId))
     }
@@ -42,6 +41,12 @@ export const SubmitFeedback = () => {
       dispatch(clearSubmitState())
     }
   }, [eventId, dispatch, user?.role])
+
+  // ── Check if user already submitted feedback ──────────────────────────────
+  const alreadySubmitted = useMemo(() => {
+    if (!user?.userId) return false
+    return feedback.some((f) => f.attendeeId === user.userId)
+  }, [feedback, user?.userId])
 
   const avgRating = useMemo(() => {
     const rated = feedback.filter((f) => f.rating != null && f.rating > 0)
@@ -53,23 +58,17 @@ export const SubmitFeedback = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!eventId || rating === 0) return
-    const userId = user?.userId ?? ''
-    await dispatch(submitFeedback({ eventId, userId, rating, comment }))
+    const attendeeId = user?.userId ?? ''
+    const createdAt = new Date().toISOString().slice(0, 19)
+    await dispatch(submitFeedback({ eventId, attendeeId, rating, comments: comment, createdAt }))
     dispatch(fetchFeedback({ eventId, size: 100 }))
-  }
-
-  const handleSubmitAnother = () => {
-    dispatch(clearSubmitState())
-    setRating(0)
-    setHoverRating(0)
-    setComment('')
   }
 
   const displayStar = hoverRating || rating
 
   // ── Access checks ──────────────────────────────────────────────────────────
 
-  // Not an attendee at all
+  // Not an attendee
   if (user && user.role !== 'ATTENDEE') {
     return (
       <div className={styles.page}>
@@ -89,7 +88,7 @@ export const SubmitFeedback = () => {
     )
   }
 
-  // Still loading registration
+  // Still checking registration
   if (user?.role === 'ATTENDEE' && myRegistrationLoading) {
     return (
       <div className={styles.page}>
@@ -100,7 +99,7 @@ export const SubmitFeedback = () => {
     )
   }
 
-  // Attendee but not registered or wrong status
+  // Not registered or wrong status
   if (user?.role === 'ATTENDEE' && !myRegistrationLoading && !isAllowedStatus(myRegistration?.status)) {
     const reason = !myRegistration
       ? 'You are not registered for this event.'
@@ -144,20 +143,32 @@ export const SubmitFeedback = () => {
 
         {/* ── Feedback form card ── */}
         <div className={styles.card}>
-          {submitSuccess ? (
+
+          {/* Already submitted */}
+          {alreadySubmitted && !submitSuccess ? (
+            <div className={styles['already-submitted']}>
+              <div className={styles['already-icon']}>✓</div>
+              <h3 className={styles['already-title']}>Feedback Already Submitted</h3>
+              <p className={styles['already-msg']}>
+                You have already submitted feedback for this event. Only one feedback per attendee is allowed.
+              </p>
+              <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>
+                Go Back
+              </button>
+            </div>
+
+          ) : submitSuccess ? (
             <div className={styles.success}>
               <div className={styles['success-icon']}>✓</div>
               <h3>Feedback Submitted!</h3>
               <p>Thank you for your feedback. Your response has been recorded.</p>
               <div className={styles['btn-group']}>
-                <button className={styles['btn-primary']} onClick={handleSubmitAnother}>
-                  Submit Another
-                </button>
                 <button className={styles['btn-cancel']} onClick={() => navigate(-1)}>
                   Go Back
                 </button>
               </div>
             </div>
+
           ) : (
             <form onSubmit={handleSubmit}>
 

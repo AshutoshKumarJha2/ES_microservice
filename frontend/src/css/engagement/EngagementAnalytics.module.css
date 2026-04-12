@@ -501,3 +501,41 @@
     font-size: 24px;
   }
 }
+
+/* ══════════════════════════════════════════════════════════
+   ACCESS DENIED
+   ══════════════════════════════════════════════════════════ */
+
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 3rem 2rem;
+  margin-top: 4rem;
+  text-align: center;
+}
+
+.denied-icon {
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.denied-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.denied-msg {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  max-width: 340px;
+  margin: 0;
+  line-height: 1.5;
+}
