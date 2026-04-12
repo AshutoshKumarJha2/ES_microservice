@@ -2,24 +2,12 @@ import axiosInstance from '../../api/axiosInstance'
 import type {
     VenueRequestDto,
     VenueResponseDto,
-    AvailabilityStatus,
-    BookingRequestDto,
-    BookingResponseDto,
-    BookingResponseVenueManagerDto,
-    BookingStatus,
-    ResourceRequestDto,
-    ResourceResponseDto,
-    ResourceAllocationRequestDto,
-    MessageResponseDto,
+    AvailabilityStatus
 } from '../../types/venue'
 
 const BASE = '/api/v1/venue-manager/api/v1'
 
 export const venueService = {
-
-    // ─── Venue ────────────────────────────────────────────────────────────────
-
-
 
     async addVenue(payload: VenueRequestDto): Promise<VenueResponseDto> {
         const { data } = await axiosInstance.post(`${BASE}/venues`, payload)

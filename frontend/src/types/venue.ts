@@ -16,6 +16,7 @@ export interface VenueRequestDto {
   name: string;
   location: string;
   capacity: number;
+  availabilityStatus?: AvailabilityStatus;
 }
 
 export interface VenueResponseDto {

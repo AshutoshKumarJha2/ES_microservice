@@ -30,6 +30,13 @@ const getQuickActions = (role: string): QuickAction[] => {
         { label: 'Admin Panel', desc: 'System-wide administration', path: '/admin/dashboard', color: 'red' },
         { label: 'Browse Events', desc: 'View all events', path: '/', color: 'blue' },
       ]
+    case 'VENUE_MANAGER':
+      return [
+          {label:'Venue Manager Portal',desc: 'Manage your venue & resource', path: '/venue-manager/dashboard', color: 'blue'},
+        { label: 'Manage Venues',    desc: 'Add, edit and update venue listings',       path: '/venue-manager/venues',    color: 'orange' },
+        { label: 'View Bookings',    desc: 'Confirm or cancel venue booking requests',  path: '/venue-manager/venue/bookings',  color: 'green' },
+        { label: 'Manage Resources', desc: 'Equipment and staff resources per venue',   path: '/venue-manager/venue/resources', color: 'red' },
+      ]
     default:
       return [
         { label: 'Browse Events', desc: 'Discover upcoming events', path: '/', color: 'blue' },

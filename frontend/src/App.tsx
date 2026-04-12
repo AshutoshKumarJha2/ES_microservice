@@ -23,6 +23,11 @@ import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
 import { AdminEvents } from './components/pages/admin/AdminEvents'
 import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
+import { VenueLayout } from './components/layout/VenueLayout'
+import { VenueManagerDashboard } from './components/pages/venue/VenueManagerDashboard'
+import { Venues } from './components/pages/venue/Venues'
+import { VenueBookings } from './components/pages/venue/VenueBookings'
+import { VenueResources } from './components/pages/venue/VenueResources'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -101,6 +106,18 @@ export const App = () => {
             { path: '/admin/audit-logs', element: <AdminAuditLogs /> },
           ],
         },
+      ],
+    },
+
+    // ── Venue Manager Portal (separate layout) ─────────────────────────────────
+    {
+     
+      element: <VenueLayout />,
+      children: [
+        { path:'/venue-manager/dashboard', element: <VenueManagerDashboard /> },
+        { path: '/venue-manager/venues',    element: <Venues /> },
+        { path: '/venue-manager/venue/bookings',  element: <VenueBookings /> },
+        { path: '/venue-manager/venue/resources', element: <VenueResources /> },
       ],
     },
   ])
