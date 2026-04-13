@@ -1,16 +1,11 @@
 import axiosInstance from '../../api/axiosInstance'
 import type {
-    VenueRequestDto,
-    VenueResponseDto,
-    AvailabilityStatus,
+
     BookingRequestDto,
     BookingResponseDto,
     BookingResponseVenueManagerDto,
     BookingStatus,
-    ResourceRequestDto,
-    ResourceResponseDto,
-    ResourceAllocationRequestDto,
-    MessageResponseDto,
+    
 } from '../../types/venue'
 
 const BASE = '/api/v1/venue-manager/api/v1'

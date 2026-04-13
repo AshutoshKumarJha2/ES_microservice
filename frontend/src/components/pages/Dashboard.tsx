@@ -22,8 +22,9 @@ const getQuickActions = (role: string): QuickAction[] => {
   switch (role) {
     case 'ORGANIZER':
       return [
-        { label: 'Organizer Portal', desc: 'Manage your events & tickets', path: '/organizer/dashboard', color: 'blue' },
-        { label: 'Create Event', desc: 'Start planning a new event', path: '/organizer/events/create', color: 'orange' },
+        { label: 'Organizer Portal', desc: 'Access your organizer dashboard', path: '/organizer/dashboard', color: 'blue' },
+        { label: 'Create Event', desc: 'Start planning and publishing a new event', path: '/organizer/events/create', color: 'orange' },
+        { label: 'Book Venue & Resources', desc: 'Reserve venues and required resources for your event', path: '/organizer/booking', color: 'green' },
       ]
     case 'ADMIN':
       return [

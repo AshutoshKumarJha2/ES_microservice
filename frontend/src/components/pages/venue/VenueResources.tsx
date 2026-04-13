@@ -28,7 +28,6 @@ const typeBadgeClass = (t: ResourceType) =>
 
 const emptyForm = { name: '', type: 'EQUIPMENT' as ResourceType, costRate: '', unit: '' }
 
-/* ── Component ──────────────────────────────────────────────────────────────── */
 
 export const VenueResources = () => {
   const dispatch = useAppDispatch()
