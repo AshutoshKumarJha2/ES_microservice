@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.controller;
 
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -118,6 +119,21 @@ public class EventController {
         ScheduleResponseDto response = eventService.addActivity(id, scheduleRequest, userId);
         log.info("Successfully added activity with ID: {} to event ID: {}", response.eventId(), id);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Retrieves registration analytics for a specific event.
+     *
+     * @param id the unique identifier of the event
+     * @return ResponseEntity containing analytics DTO and HTTP status 200 (OK)
+     */
+    @GetMapping("/{id}/analytics")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'SYS_ENGAGEMENT_MGR')")
+    public ResponseEntity<EventAnalyticsResponseDto> getAnalytics(@PathVariable String id) {
+        log.info("Received request for analytics for event ID: {}", id);
+        EventAnalyticsResponseDto analytics = eventService.getAnalytics(id);
+        log.info("Successfully retrieved analytics for event ID: {}", id);
+        return ResponseEntity.ok(analytics);
     }
 
     /**
