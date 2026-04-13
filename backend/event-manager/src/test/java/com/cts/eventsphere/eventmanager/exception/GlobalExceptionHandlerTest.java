@@ -183,7 +183,7 @@ class GlobalExceptionHandlerTest {
     void handleUnexpected_returns500() {
         Exception ex = new RuntimeException("something went wrong");
 
-        ResponseEntity<GenericErrorResponse> response = handler.handleUnexpected(ex);
+        ResponseEntity<GenericErrorResponse> response = handler.handleUnexpected(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error()).contains("traceId");

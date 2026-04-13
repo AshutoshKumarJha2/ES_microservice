@@ -11,13 +11,16 @@ import com.cts.eventsphere.iamservice.exception.user.UserAlreadyExistsException;
 import com.cts.eventsphere.iamservice.exception.user.UserNotActiveException;
 import com.cts.eventsphere.iamservice.exception.user.UserNotFoundException;
 import com.cts.eventsphere.iamservice.exception.user.UserSuspendedException;
+import com.cts.eventsphere.iamservice.config.ServiceRegistryProperties;
 import com.cts.eventsphere.iamservice.model.User;
 import com.cts.eventsphere.iamservice.model.data.UserRoles;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.security.JwtUtil;
+import com.cts.eventsphere.iamservice.security.ServiceTokenUtil;
 import com.cts.eventsphere.iamservice.security.TokenType;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.impl.AuthServiceImpl;
 import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.Test;
@@ -57,6 +60,15 @@ class AuthServiceImplTest {
 
     @Mock
     private JwtUtil jwtUtil;
+
+    @Mock
+    private ServiceTokenUtil serviceTokenUtil;
+
+    @Mock
+    private ServiceRegistryProperties serviceRegistry;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private AuthServiceImpl authService;

@@ -4,6 +4,7 @@ import com.cts.eventsphere.vendormanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractRequestDto;
 import com.cts.eventsphere.vendormanager.dto.contract.ContractResponseDto;
 import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryRequestDto;
+import com.cts.eventsphere.vendormanager.dto.delivery.DeliveryResponseDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceRequestDto;
 import com.cts.eventsphere.vendormanager.dto.invoice.InvoiceResponseDto;
 import com.cts.eventsphere.vendormanager.model.data.ContractStatus;
@@ -81,15 +82,18 @@ class ContractControllerTest {
     }
 
     @Test
-    void addDelivery_returns201WithMessage() {
+    void addDelivery_returns201WithDeliveryResponse() {
         DeliveryRequestDto dto = new DeliveryRequestDto("inv-1", "Tables", 5,
                 LocalDateTime.now().plusDays(3), DeliveryStatus.SCHEDULED, "TRK-001");
-        doNothing().when(contractService).addDeliverable("user-1", "c-1", dto);
+        LocalDateTime now = LocalDateTime.now();
+        DeliveryResponseDto expected = new DeliveryResponseDto(
+                "d-1", "inv-1", "Tables", 5, now.plusDays(3), DeliveryStatus.SCHEDULED, "TRK-001", now, now);
+        when(contractService.addDeliverable("user-1", "c-1", dto)).thenReturn(expected);
 
-        ResponseEntity<String> response = contractController.addDelivery(user, "c-1", dto);
+        ResponseEntity<DeliveryResponseDto> response = contractController.addDelivery(user, "c-1", dto);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo("Delivery Added");
+        assertThat(response.getBody()).isEqualTo(expected);
     }
 
     @Test
