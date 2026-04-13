@@ -41,6 +41,21 @@ public class EngagementController {
         return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
+    /**
+     * Internal endpoint for service-to-service engagement logging.
+     * Called by event-manager (SYS_EVENT_MGR) when registrations, approvals,
+     * and check-ins happen — so those activities appear in the analytics dashboard.
+     */
+    @PostMapping("/internal/log")
+    @PreAuthorize("hasAnyRole('SYS_EVENT_MGR', 'ADMIN')")
+    public ResponseEntity<EngagementResponseDto> logEngagementInternal(@Valid @RequestBody EngagementRequestDto engagementRequestDto) {
+        log.info("Internal: Logging engagement activity={} for attendee={} at event={}",
+                engagementRequestDto.activity(), engagementRequestDto.attendeeId(), engagementRequestDto.eventId());
+
+        EngagementResponseDto saved = engagementService.recordEngagement(engagementRequestDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+
     @GetMapping("/event/{eventId}/log")
     @PreAuthorize("hasAnyRole('ATTENDEE','ORGANIZER','ADMIN')")
     public ResponseEntity<List<EngagementResponseDto>> getByEvent(@PathVariable String eventId) {
