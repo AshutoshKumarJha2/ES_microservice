@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
-import { loginUser, clearAuthError } from '../../../store/slices/authSlice'
+import { loginUser, clearAuthError, logout } from '../../../store/slices/authSlice'
 import styles from '../../../css/auth/LoginForm.module.css'
 import { Eye, EyeSlash } from 'react-bootstrap-icons'
-import { ToastContainer, toast, Bounce } from 'react-toastify'
+import { toast, Bounce } from 'react-toastify'
 
 interface FormState {
   email: string
@@ -49,7 +49,24 @@ export const LoginForm: React.FC = () => {
     e.preventDefault()
     const result = await dispatch(loginUser({ email: form.email, password: form.password }))
     if (loginUser.fulfilled.match(result)) {
-      navigate('/', { replace: true })
+      // Type assertion to access user status safely
+      const payload = result.payload as { user: { status: string } }
+      if(payload.user.status === 'SUSPENDED'){
+        dispatch(logout())
+        toast.error('Your account has been suspended.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        })
+        return
+      }
+      navigate('/dashboard', { replace: true })
     }
   }
 
@@ -120,19 +137,6 @@ export const LoginForm: React.FC = () => {
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              transition={Bounce}
-            />
           </div>
 
           <p className={styles['footer-text']}>

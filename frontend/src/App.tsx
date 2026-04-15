@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ToastContainer, Bounce } from 'react-toastify'
 import './App.css'
 import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
@@ -107,5 +108,22 @@ export const App = () => {
     },
   ])
 
-  return <RouterProvider router={router} />
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+      <RouterProvider router={router} />
+    </>
+  )
 }

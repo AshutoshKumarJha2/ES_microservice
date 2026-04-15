@@ -1,6 +1,6 @@
 import { useState } from "react";
 import styles from '../../../css/auth/RegisterForm.module.css'
-import { ToastContainer, toast, Bounce } from 'react-toastify';
+import { toast, Bounce } from 'react-toastify';
 import axiosInstance from '../../../api/axiosInstance';
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
 
@@ -187,19 +187,6 @@ export const RegisterForm: React.FC = () => {
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
-            <ToastContainer
-              position="top-right"
-              autoClose={5000}
-              hideProgressBar
-              newestOnTop={false}
-              closeOnClick
-              rtl={false}
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="light"
-              transition={Bounce}
-            />
           </div>
 
           <p className={styles['footer-text']}>
