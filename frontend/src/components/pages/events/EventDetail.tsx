@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, NavLink } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import { fetchTicketsByEvent, createTicket, updateTicket, deleteTicket } from '../../../store/slices/ticketsSlice'
@@ -7,7 +7,7 @@ import { fetchRegistrationsByEvent, approveRegistration, rejectRegistration } fr
 import { fetchBudget, fetchExpenses, setBudget, createExpense } from '../../../store/slices/budgetSlice'
 import { eventService } from '../../../services/events/eventService'
 import { TicketModal } from '../../elements/events/TicketModal'
-import type { ScheduleResponseDto, CreateTicketRequest, TicketResponseDto, BudgetRequestDto, ExpenseRequestDto } from '../../../types/events'
+import type { ScheduleResponseDto, ScheduleRequestDto, CreateTicketRequest, TicketResponseDto, BudgetRequestDto, ExpenseRequestDto } from '../../../types/events'
 import styles from '../../../css/events/EventsPanel.module.css'
 
 type Tab = 'overview' | 'tickets' | 'registrations' | 'budget'
@@ -33,8 +33,8 @@ const EXP_BADGE: Record<string, string> = {
   SUBMITTED: styles['badge-submitted'],
 }
 
-const navLink = ({ isActive }: { isActive: boolean }) =>
-  `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`
+const parseTimeSlot = (slot: string) => { const [start = '', end = ''] = slot.split('-'); return { start, end } }
+const buildTimeSlot = (start: string, end: string) => `${start}-${end}`
 
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -49,6 +49,11 @@ export const EventDetail = () => {
   const [activeTab, setActiveTab] = useState<Tab>('overview')
   const [schedules, setSchedules] = useState<ScheduleResponseDto[]>([])
   const [schedulesLoading, setSchedulesLoading] = useState(false)
+  const [showAddSession, setShowAddSession] = useState(false)
+  const [newSession, setNewSession] = useState<Omit<ScheduleRequestDto, 'eventId'>>({ date: '', timeSlot: '', activity: '', status: 'DRAFT' })
+  const [sessionSaving, setSessionSaving] = useState(false)
+  const [editingSession, setEditingSession] = useState<ScheduleResponseDto | null>(null)
+  const [sessionUpdating, setSessionUpdating] = useState(false)
   const [regFilter, setRegFilter] = useState<RegFilter>('ALL')
 
   const [ticketModalOpen, setTicketModalOpen] = useState(false)
@@ -76,6 +81,46 @@ export const EventDetail = () => {
         .finally(() => setSchedulesLoading(false))
     }
   }, [activeTab, id])
+
+  const loadSchedules = () => {
+    if (!id) return
+    setSchedulesLoading(true)
+    eventService.getSchedules(id).then(setSchedules).catch(console.error).finally(() => setSchedulesLoading(false))
+  }
+
+  const handleAddSession = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!id) return
+    setSessionSaving(true)
+    try {
+      await eventService.createSchedule(id, { ...newSession, eventId: id })
+      setNewSession({ date: '', timeSlot: '', activity: '', status: 'DRAFT' })
+      setShowAddSession(false)
+      loadSchedules()
+    } catch { /* ignore */ } finally {
+      setSessionSaving(false)
+    }
+  }
+
+  const handleUpdateSession = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (!editingSession || !id) return
+    setSessionUpdating(true)
+    try {
+      const { scheduleId, eventId: _eid, ...rest } = editingSession as ScheduleResponseDto & { eventId?: string }
+      await eventService.updateSchedule(id, scheduleId, { ...rest, eventId: id })
+      setEditingSession(null)
+      loadSchedules()
+    } catch { /* ignore */ } finally {
+      setSessionUpdating(false)
+    }
+  }
+
+  const handleDeleteSession = async (scheduleId: string) => {
+    if (!window.confirm('Delete this session?')) return
+    await eventService.deleteSchedule(scheduleId)
+    loadSchedules()
+  }
 
   const filteredRegistrations =
     regFilter === 'ALL' ? registrations : registrations.filter((r) => r.status === regFilter)
@@ -125,6 +170,12 @@ export const EventDetail = () => {
       <div className={styles.banner}>
         <div className={styles['banner-inner']}>
           <div className={styles['banner-text']}>
+            <button
+              onClick={() => navigate('/organizer/dashboard')}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', cursor: 'pointer', padding: 0, marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+            >
+              ← Dashboard
+            </button>
             <h1>{selectedEvent.eventName}</h1>
             <p>
               {selectedEvent.startAt} → {selectedEvent.endAt}
@@ -133,21 +184,10 @@ export const EventDetail = () => {
             </p>
           </div>
           <div className={styles['banner-actions']}>
-            <button className={styles['btn-secondary']} onClick={() => navigate(`/organizer/events/${id}/edit`)}>
-              Edit Event
-            </button>
             <button className={styles['btn-primary']} onClick={() => navigate(`/organizer/analytics/${id}`)}>
               Analytics
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Portal sub-nav */}
-      <div className={styles.subnav}>
-        <div className={styles['subnav-inner']}>
-          <NavLink to="/organizer/dashboard"    end className={navLink}>Dashboard</NavLink>
-          <NavLink to="/organizer/events/create"    className={navLink}>Create Event</NavLink>
         </div>
       </div>
 
@@ -186,7 +226,64 @@ export const EventDetail = () => {
             <div className={styles.card}>
               <div className={styles['panel-header']}>
                 <h3 className={styles['panel-title']}>Schedule</h3>
+                <button className={styles['btn-primary']} onClick={() => {
+                  if (!showAddSession) setNewSession((p) => ({ ...p, date: selectedEvent?.startAt ?? '' }))
+                  setShowAddSession((v) => !v)
+                }}>
+                  {showAddSession ? 'Cancel' : '+ Add Session'}
+                </button>
               </div>
+
+              {showAddSession && (
+                <form onSubmit={handleAddSession} className={styles['session-row']} style={{ marginBottom: '1rem' }}>
+                  <div className={styles['session-row-fields']}>
+                    <div className={styles.field}>
+                      <label>Date</label>
+                      <input type="date" value={newSession.date} onChange={(e) => setNewSession((p) => ({ ...p, date: e.target.value }))} required />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Time Slot</label>
+                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                        <input
+                          type="time"
+                          value={parseTimeSlot(newSession.timeSlot).start}
+                          onChange={(e) => setNewSession((p) => ({ ...p, timeSlot: buildTimeSlot(e.target.value, parseTimeSlot(p.timeSlot).end) }))}
+                          style={{ flex: 1, minWidth: 0 }}
+                          required
+                        />
+                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>to</span>
+                        <input
+                          type="time"
+                          value={parseTimeSlot(newSession.timeSlot).end}
+                          min={parseTimeSlot(newSession.timeSlot).start || undefined}
+                          onChange={(e) => setNewSession((p) => ({ ...p, timeSlot: buildTimeSlot(parseTimeSlot(p.timeSlot).start, e.target.value) }))}
+                          style={{ flex: 1, minWidth: 0 }}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className={styles.field}>
+                      <label>Activity</label>
+                      <input type="text" placeholder="Session title" value={newSession.activity} onChange={(e) => setNewSession((p) => ({ ...p, activity: e.target.value }))} required />
+                    </div>
+                    <div className={styles.field}>
+                      <label>Status</label>
+                      <select value={newSession.status} onChange={(e) => setNewSession((p) => ({ ...p, status: e.target.value as ScheduleRequestDto['status'] }))}>
+                        <option value="DRAFT">Draft</option>
+                        <option value="ACTIVE">Active</option>
+                        <option value="COMPLETED">Completed</option>
+                        <option value="TERMINATED">Terminated</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div className={styles['session-row-actions']}>
+                    <button type="submit" className={styles['btn-add-session']} disabled={sessionSaving}>
+                      {sessionSaving ? '…' : '↑ Save'}
+                    </button>
+                  </div>
+                </form>
+              )}
+
               {schedulesLoading ? (
                 <p className={styles.loading}>Loading schedule…</p>
               ) : schedules.length === 0 ? (
@@ -195,21 +292,83 @@ export const EventDetail = () => {
                 <div className={styles['table-wrapper']}>
                   <table>
                     <thead>
-                      <tr><th>Date</th><th>Time Slot</th><th>Activity</th><th>Status</th></tr>
+                      <tr><th>Date</th><th>Time Slot</th><th>Activity</th><th>Status</th><th>Actions</th></tr>
                     </thead>
                     <tbody>
-                      {schedules.map((s) => (
-                        <tr key={s.scheduleId}>
-                          <td>{s.date}</td>
-                          <td>{s.timeSlot}</td>
-                          <td>{s.activity}</td>
-                          <td>
-                            <span className={`${styles.badge} ${STATUS_BADGE[s.status] ?? styles['badge-draft']}`}>
-                              {s.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
+                      {schedules.map((s) => {
+                        const isEditing = editingSession?.scheduleId === s.scheduleId
+                        if (isEditing) {
+                          return (
+                            <tr key={s.scheduleId}>
+                              <td colSpan={5} style={{ padding: '0.5rem 0' }}>
+                                <form onSubmit={handleUpdateSession} className={styles['session-row']} style={{ margin: 0 }}>
+                                  <div className={styles['session-row-fields']}>
+                                    <div className={styles.field}>
+                                      <label>Date</label>
+                                      <input type="date" value={editingSession.date}
+                                        onChange={(e) => setEditingSession((p) => p && ({ ...p, date: e.target.value }))} required />
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Time Slot</label>
+                                      <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                                        <input type="time" style={{ flex: 1, minWidth: 0 }}
+                                          value={parseTimeSlot(editingSession.timeSlot).start}
+                                          onChange={(e) => setEditingSession((p) => p && ({ ...p, timeSlot: buildTimeSlot(e.target.value, parseTimeSlot(p.timeSlot).end) }))} required />
+                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>to</span>
+                                        <input type="time" style={{ flex: 1, minWidth: 0 }}
+                                          value={parseTimeSlot(editingSession.timeSlot).end}
+                                          min={parseTimeSlot(editingSession.timeSlot).start || undefined}
+                                          onChange={(e) => setEditingSession((p) => p && ({ ...p, timeSlot: buildTimeSlot(parseTimeSlot(p.timeSlot).start, e.target.value) }))} required />
+                                      </div>
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Activity</label>
+                                      <input type="text" value={editingSession.activity}
+                                        onChange={(e) => setEditingSession((p) => p && ({ ...p, activity: e.target.value }))} required />
+                                    </div>
+                                    <div className={styles.field}>
+                                      <label>Status</label>
+                                      <select value={editingSession.status}
+                                        onChange={(e) => setEditingSession((p) => p && ({ ...p, status: e.target.value as ScheduleResponseDto['status'] }))}>
+                                        <option value="DRAFT">Draft</option>
+                                        <option value="ACTIVE">Active</option>
+                                        <option value="COMPLETED">Completed</option>
+                                        <option value="TERMINATED">Terminated</option>
+                                      </select>
+                                    </div>
+                                  </div>
+                                  <div className={styles['session-row-actions']}>
+                                    <button type="submit" className={styles['btn-add-session']} disabled={sessionUpdating}>
+                                      {sessionUpdating ? '…' : '↑ Save'}
+                                    </button>
+                                    <button type="button" className={styles['btn-remove']} onClick={() => setEditingSession(null)}>
+                                      Cancel
+                                    </button>
+                                  </div>
+                                </form>
+                              </td>
+                            </tr>
+                          )
+                        }
+                        return (
+                          <tr key={s.scheduleId}>
+                            <td>{s.date}</td>
+                            <td>{s.timeSlot}</td>
+                            <td>{s.activity}</td>
+                            <td>
+                              <span className={`${styles.badge} ${STATUS_BADGE[s.status?.toLowerCase()] ?? styles['badge-draft']}`}>
+                                {s.status}
+                              </span>
+                            </td>
+                            <td>
+                              <div className={styles.actions}>
+                                <button className={styles['btn-sm']} onClick={() => setEditingSession(s)}>Edit</button>
+                                <button className={styles['btn-danger']} onClick={() => handleDeleteSession(s.scheduleId)}>Delete</button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>

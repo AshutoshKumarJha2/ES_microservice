@@ -160,7 +160,7 @@ export const OrganizerDashboard = () => {
                 </thead>
                 <tbody>
                   {events.map((event: EventResponseDto) => (
-                    <tr key={event.id}>
+                    <tr key={event.id} style={{ cursor: 'pointer' }} onClick={() => navigate(`/organizer/events/${event.id}`)}>
                       <td style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{event.eventName}</td>
                       <td>{event.startAt}</td>
                       <td>{event.endAt}</td>
@@ -169,12 +169,10 @@ export const OrganizerDashboard = () => {
                           {event.status}
                         </span>
                       </td>
-                      <td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <div className={styles.actions}>
-                          <button className={styles['btn-sm']}     onClick={() => navigate(`/organizer/events/${event.id}`)}>View</button>
-                          <button className={styles['btn-outline']} onClick={() => openEdit(event)}>Edit</button>
-                          <button className={styles['btn-success']} onClick={() => navigate(`/organizer/analytics/${event.id}`)}>Analytics</button>
-                          <button className={styles['btn-danger']}  onClick={() => handleDelete(event.id)}>Delete</button>
+                          <button className={styles['btn-sm']} onClick={() => openEdit(event)}>Edit</button>
+                          <button className={styles['btn-danger']} onClick={() => handleDelete(event.id)}>Delete</button>
                         </div>
                       </td>
                     </tr>
