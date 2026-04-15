@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAuditLogs } from '../../../store/slices/adminSlice'
 import styles from '../../../css/admin/AdminPanel.module.css'
 
-const MODULES = ['ALL', 'AUTH', 'EVENT', 'TICKET', 'REGISTRATION', 'BUDGET', 'VENUE', 'VENDOR']
 const PAGE_SIZE = 15
 
 export const AdminAuditLogs: React.FC = () => {
@@ -12,7 +11,6 @@ export const AdminAuditLogs: React.FC = () => {
   const { auditLogs, loadingLogs } = useAppSelector((state) => state.admin)
 
   const [search, setSearch] = useState('')
-  const [module, setModule] = useState('ALL')
   const [from, setFrom]     = useState('')
   const [to, setTo]         = useState('')
   const [page, setPage]     = useState(0)
@@ -23,21 +21,20 @@ export const AdminAuditLogs: React.FC = () => {
   }, [dispatch])
 
   const filtered = useMemo(() => {
-    const logs = auditLogs?.content ?? []
+    const logs = auditLogs?.audits ?? []
     const q = search.toLowerCase()
     const fromTs = from ? new Date(from).getTime() : null
     const toTs   = to   ? new Date(to + 'T23:59:59').getTime() : null
     return logs.filter((log) => {
-      const matchModule = module === 'ALL' || log.module === module
-      const matchSearch = !q || log.actorName?.toLowerCase().includes(q) || log.action?.toLowerCase().includes(q) || log.details?.toLowerCase().includes(q)
-      const ts = new Date(log.timestamp).getTime()
+      const matchSearch = !q || log.userId?.toLowerCase().includes(q) || log.action?.toLowerCase().includes(q) || log.entityName?.toLowerCase().includes(q) || log.entityId?.toLowerCase().includes(q)
+      const ts = new Date(log.timeStamp).getTime()
       const matchFrom = !fromTs || ts >= fromTs
       const matchTo   = !toTs   || ts <= toTs
-      return matchModule && matchSearch && matchFrom && matchTo
+      return matchSearch && matchFrom && matchTo
     })
-  }, [auditLogs, search, module, from, to])
+  }, [auditLogs, search, from, to])
 
-  useEffect(() => { setPage(0) }, [search, module, from, to])
+  useEffect(() => { setPage(0) }, [search, from, to])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pageLogs   = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
@@ -50,9 +47,9 @@ export const AdminAuditLogs: React.FC = () => {
 
   const handleExportCSV = () => {
     if (!filtered.length) return
-    const header = 'ID,Timestamp,Actor,Role,Action,Module,EntityId,Details\n'
+    const header = 'ID,Timestamp,UserId,Action,EntityId,EntityName\n'
     const rows = filtered.map((log) =>
-      [log.id, log.timestamp, log.actorName, log.actorRole, log.action, log.module, log.entityId, `"${log.details?.replace(/"/g, '""') ?? ''}"`].join(',')
+      [log.auditId, log.timeStamp, log.userId, log.action, log.entityId, `"${log.entityName?.replace(/"/g, '""') ?? ''}"`].join(',')
     ).join('\n')
     const blob = new Blob([header + rows], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)
@@ -110,15 +107,12 @@ export const AdminAuditLogs: React.FC = () => {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <select className={styles['filter-select']} value={module} onChange={(e) => setModule(e.target.value)}>
-              {MODULES.map((m) => <option key={m} value={m}>{m === 'ALL' ? 'All Modules' : m}</option>)}
-            </select>
             <input type="date" className={styles['filter-select']} value={from} onChange={(e) => setFrom(e.target.value)} title="From" />
             <input type="date" className={styles['filter-select']} value={to}   onChange={(e) => setTo(e.target.value)}   title="To" />
-            {(search || module !== 'ALL' || from || to) && (
+            {(search || from || to) && (
               <button
                 className={styles['btn-outline']}
-                onClick={() => { setSearch(''); setModule('ALL'); setFrom(''); setTo('') }}
+                onClick={() => { setSearch(''); setFrom(''); setTo('') }}
               >
                 Clear
               </button>
@@ -134,35 +128,34 @@ export const AdminAuditLogs: React.FC = () => {
                 <thead>
                   <tr>
                     <th>Timestamp</th>
-                    <th>Actor</th>
+                    <th>User ID</th>
                     <th>Action</th>
-                    <th>Module</th>
-                    <th>Details</th>
+                    <th>Entity</th>
+                    <th>Entity Name</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pageLogs.length === 0 ? (
                     <tr><td colSpan={5} className={styles.empty}>No audit logs found</td></tr>
                   ) : pageLogs.map((log) => (
-                    <tr key={log.id}>
-                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{formatDate(log.timestamp)}</td>
+                    <tr key={log.auditId}>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.82rem' }}>{formatDate(log.timeStamp)}</td>
                       <td>
                         <div className={styles['user-cell']}>
-                          <div className={styles.avatar}>{(log.actorName || '?').slice(0, 2).toUpperCase()}</div>
+                          <div className={styles.avatar}>{(log.userId || '?').slice(0, 2).toUpperCase()}</div>
                           <div>
-                            <div className={styles['user-name-cell']}>{log.actorName}</div>
-                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{log.actorRole}</div>
+                            <div className={styles['user-name-cell']}>{log.userId}</div>
                           </div>
                         </div>
                       </td>
                       <td><code style={{ fontSize: '0.8rem', color: 'var(--saffron)' }}>{log.action}</code></td>
                       <td>
                         <span className={`${styles.badge} ${styles['badge-draft']}`} style={{ fontSize: '0.65rem' }}>
-                          {log.module}
+                          {log.entityId}
                         </span>
                       </td>
-                      <td style={{ maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.83rem' }} title={log.details}>
-                        {log.details || '—'}
+                      <td style={{ maxWidth: '260px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.83rem' }} title={log.entityName}>
+                        {log.entityName || '—'}
                       </td>
                     </tr>
                   ))}
@@ -179,6 +172,7 @@ export const AdminAuditLogs: React.FC = () => {
               <button disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next →</button>
             </div>
           )}
+
         </div>
       </div>
     </div>

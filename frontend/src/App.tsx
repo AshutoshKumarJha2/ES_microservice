@@ -12,7 +12,6 @@ import { Login } from './components/pages/auth/Login'
 import { Profile } from './components/pages/auth/Profile'
 import { Dashboard } from './components/pages/Dashboard'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
-import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
 import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
 import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
@@ -71,8 +70,6 @@ export const App = () => {
           element: <AppLayout />,
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
-            { path: '/organizer/events/create',      element: <CreateEvent /> },
-            { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},

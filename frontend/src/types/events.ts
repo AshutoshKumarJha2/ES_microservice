@@ -42,12 +42,12 @@ export interface VenueResponseDto {
   name: string
   location: string
   capacity: number
-  availabilityStatus: 'available' | 'unavailable' | 'maintenence'
+  availabilityStatus: 'AVAILABLE' | 'UNAVAILABLE' | 'MAINTENENCE'
 }
 
 // ── Events ────────────────────────────────────────────────────────────────────
 
-export type EventStatus = 'draft' | 'published' | 'completed' | 'cancelled'
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'COMPLETED' | 'CANCELLED'
 
 export interface EventRequestDto {
   name: string
@@ -70,7 +70,7 @@ export interface EventResponseDto {
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
-export type ScheduleStatus = 'draft' | 'active' | 'completed' | 'terminated'
+export type ScheduleStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED'
 
 export interface ScheduleRequestDto {
   eventId: string
