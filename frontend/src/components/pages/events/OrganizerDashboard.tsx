@@ -4,14 +4,8 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllEvents, deleteEvent, createEvent, updateEvent } from '../../../store/slices/eventsSlice'
 import { venueService } from '../../../services/events/venueService'
 import type { EventResponseDto, EventRequestDto, VenueResponseDto } from '../../../types/events'
+import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import styles from '../../../css/events/EventsPanel.module.css'
-
-const STATUS_BADGE: Record<string, string> = {
-  draft:     styles['badge-draft'],
-  published: styles['badge-published'],
-  completed: styles['badge-completed'],
-  cancelled: styles['badge-cancelled'],
-}
 
 const EMPTY_FORM: EventRequestDto = {
   name:        '',
@@ -165,9 +159,7 @@ export const OrganizerDashboard = () => {
                       <td>{event.startAt}</td>
                       <td>{event.endAt}</td>
                       <td>
-                        <span className={`${styles.badge} ${STATUS_BADGE[event.status?.toLowerCase()] ?? styles['badge-draft']}`}>
-                          {event.status}
-                        </span>
+                        <EventStatusBadge status={event.status?.toLowerCase()} variant="event" />
                       </td>
                       <td onClick={(e) => e.stopPropagation()}>
                         <div className={styles.actions}>
