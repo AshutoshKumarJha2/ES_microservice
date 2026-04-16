@@ -132,6 +132,7 @@ public class UserController {
      * @return HTTP 200 OK with the updated {@link UserResponseDto}
      */
     @PostMapping("/users/userdetails")
+    @PreAuthorize("hasRole('SYS_EVENT_MGR')")
     public ResponseEntity<List<UserResponseDto>> getUserDetails(@RequestBody List<String> userIds) {
         return ResponseEntity.ok(userService.getUsers(userIds));
     }

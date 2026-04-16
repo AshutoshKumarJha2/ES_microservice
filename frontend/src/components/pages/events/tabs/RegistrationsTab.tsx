@@ -39,13 +39,22 @@ export const RegistrationsTab = () => {
         <div className={styles['table-wrapper']}>
           <table>
             <thead>
-              <tr><th>Registration ID</th><th>Attendee ID</th><th>Ticket ID</th><th>Status</th><th>Actions</th></tr>
+              <tr><th>Registration ID</th><th>Attendee</th><th>Ticket ID</th><th>Status</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {filtered.map((r) => (
                 <tr key={r.registrationId}>
                   <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.registrationId}</td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.attendeeId}</td>
+                  <td>
+                    {r.attendeeDetails ? (
+                      <div>
+                        <div>{r.attendeeDetails.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{r.attendeeDetails.email}</div>
+                      </div>
+                    ) : (
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.attendeeId}</span>
+                    )}
+                  </td>
                   <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.ticketId}</td>
                   <td><EventStatusBadge status={r.status} variant="registration" /></td>
                   <td>
