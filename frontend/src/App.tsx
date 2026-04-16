@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ToastContainer, Bounce } from 'react-toastify'
 import './App.css'
 import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
@@ -11,9 +12,9 @@ import { Login } from './components/pages/auth/Login'
 import { Profile } from './components/pages/auth/Profile'
 import { Dashboard } from './components/pages/Dashboard'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
-import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
-import { Analytics } from './components/pages/events/Analytics'
+import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
+import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'
@@ -74,10 +75,9 @@ export const App = () => {
           element: <AppLayout />,
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
-            { path: '/organizer/events/create',      element: <CreateEvent /> },
-            { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
-            { path: '/organizer/analytics/:eventId', element: <Analytics /> },
+            { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
+            {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
           ],
         },
       ],
@@ -122,5 +122,22 @@ export const App = () => {
     },
   ])
 
-  return <RouterProvider router={router} />
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+      <RouterProvider router={router} />
+    </>
+  )
 }

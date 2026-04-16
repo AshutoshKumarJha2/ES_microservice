@@ -1,13 +1,19 @@
 package com.eventsphere.engagement_manager.Exception;
 
 import com.eventsphere.engagement_manager.dto.shared.GenericErrorResponse;
+import com.eventsphere.engagement_manager.service.AuditService;
 import jakarta.persistence.EntityExistsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -19,13 +25,22 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
+    @Mock
+    private AuditService auditService;
+
+    @InjectMocks
     private GlobalExceptionHandler handler;
+
+    private MockHttpServletRequest request;
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler();
+        request = new MockHttpServletRequest();
+        request.setRequestURI("/test");
+        request.setMethod("GET");
     }
 
     // ─── VALIDATION ──────────────────────────────────────────────────────────────
@@ -155,7 +170,7 @@ class GlobalExceptionHandlerTest {
         AuthorizationDeniedException ex = mock(AuthorizationDeniedException.class);
         when(ex.getMessage()).thenReturn("Access is denied");
 
-        ResponseEntity<GenericErrorResponse> response = handler.handleAuthorizationDenied(ex);
+        ResponseEntity<GenericErrorResponse> response = handler.handleAuthorizationDenied(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         assertThat(response.getBody().error()).isEqualTo("Access is denied");
@@ -168,7 +183,7 @@ class GlobalExceptionHandlerTest {
     void handleUnexpected_returns500WithTraceId() {
         Exception ex = new RuntimeException("Unexpected database error");
 
-        ResponseEntity<GenericErrorResponse> response = handler.handleUnexpected(ex);
+        ResponseEntity<GenericErrorResponse> response = handler.handleUnexpected(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
         assertThat(response.getBody().error()).contains("traceId");
@@ -179,8 +194,8 @@ class GlobalExceptionHandlerTest {
     void handleUnexpected_generatesUniqueTraceId() {
         Exception ex = new RuntimeException("error");
 
-        ResponseEntity<GenericErrorResponse> first  = handler.handleUnexpected(ex);
-        ResponseEntity<GenericErrorResponse> second = handler.handleUnexpected(ex);
+        ResponseEntity<GenericErrorResponse> first  = handler.handleUnexpected(ex, request);
+        ResponseEntity<GenericErrorResponse> second = handler.handleUnexpected(ex, request);
 
         assertThat(first.getBody().error()).isNotEqualTo(second.getBody().error());
     }

@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.service;
 
+import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -76,4 +77,13 @@ public interface EventService {
      * @return a list of response DTOs representing all schedules for the event
      */
     List<ScheduleResponseDto> findAllSchedules(String eventId, String userId);
+
+    /**
+     * Retrieves registration analytics for a specific event.
+     *
+     * @param eventId the unique identifier of the event
+     * @return DTO containing registration counts broken down by status
+     * @throws EventNotFoundException if no event exists with the given ID
+     */
+    EventAnalyticsResponseDto getAnalytics(String eventId) throws EventNotFoundException;
 }

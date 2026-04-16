@@ -15,8 +15,8 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
 
 @Configuration
-public class GatewayConfig {
 
+public class GatewayConfig {
     @Bean
     RouterFunction<ServerResponse> customRoutes() {
         return route("auth-manager")

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
-import { loginUser, clearAuthError } from '../../../store/slices/authSlice'
+import { loginUser, clearAuthError, logout } from '../../../store/slices/authSlice'
 import styles from '../../../css/auth/LoginForm.module.css'
 import { Eye, EyeSlash } from 'react-bootstrap-icons'
+import { toast, Bounce } from 'react-toastify'
 
 interface FormState {
   email: string
@@ -17,18 +18,55 @@ export const LoginForm: React.FC = () => {
 
   const [form, setForm] = useState<FormState>({ email: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
+  const [fieldError, setFieldError] = useState<'email' | 'password' | null>(null)
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error, {
+        position: 'top-right',
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: 'light',
+        transition: Bounce,
+      })
+      if (error === 'User not found') setFieldError('email')
+      else if (error === 'Invalid password') setFieldError('password')
+      dispatch(clearAuthError())
+    }
+  }, [error, dispatch])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
-    if (error) dispatch(clearAuthError())
+    if (fieldError === name) setFieldError(null)
   }
 
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
     const result = await dispatch(loginUser({ email: form.email, password: form.password }))
     if (loginUser.fulfilled.match(result)) {
-      navigate('/', { replace: true })
+      // Type assertion to access user status safely
+      const payload = result.payload as { user: { status: string } }
+      if(payload.user.status === 'SUSPENDED'){
+        dispatch(logout())
+        toast.error('Your account has been suspended.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: 'light',
+          transition: Bounce,
+        })
+        return
+      }
+      navigate('/dashboard', { replace: true })
     }
   }
 
@@ -48,7 +86,7 @@ export const LoginForm: React.FC = () => {
           <div className={styles.form}>
             {/* Row: Email + Password */}
             <div className={styles['form-row']}>
-              <div className={styles.field}>
+              <div className={`${styles.field} ${fieldError === 'email' ? styles['field--error'] : ''}`}>
                 <label htmlFor="email">Email Address</label>
                 <input
                   id="email"
@@ -60,7 +98,7 @@ export const LoginForm: React.FC = () => {
                   autoComplete="email"
                 />
               </div>
-              <div className={styles.field}>
+              <div className={`${styles.field} ${fieldError === 'password' ? styles['field--error'] : ''}`}>
                 <label htmlFor="password">Password</label>
                 <div className={styles['input-wrapper']}>
                   <input
@@ -90,9 +128,6 @@ export const LoginForm: React.FC = () => {
                 Forgot password?
               </a>
             </div>
-
-            {/* Feedback */}
-            {error && <p className={styles.error}>{error}</p>}
 
             {/* Submit */}
             <button

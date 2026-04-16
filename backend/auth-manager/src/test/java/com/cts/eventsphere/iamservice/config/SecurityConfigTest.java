@@ -3,6 +3,8 @@ package com.cts.eventsphere.iamservice.config;
 import com.cts.eventsphere.iamservice.controller.AuthController;
 import com.cts.eventsphere.iamservice.dto.auth.LoginResponseDto;
 import com.cts.eventsphere.iamservice.security.JwtUtil;
+import com.cts.eventsphere.iamservice.security.RsaKeyProvider;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.AuthService;
 import com.cts.eventsphere.iamservice.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -56,6 +58,12 @@ class SecurityConfigTest {
 
     @MockitoBean
     private UserService userService;
+
+    @MockitoBean
+    private RsaKeyProvider rsaKeyProvider;
+
+    @MockitoBean
+    private AuditService auditService;
 
     // ─── passwordEncoder bean ─────────────────────────────────────────────────
 

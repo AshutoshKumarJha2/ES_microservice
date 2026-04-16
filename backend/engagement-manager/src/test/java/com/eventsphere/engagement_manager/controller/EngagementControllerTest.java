@@ -8,6 +8,7 @@ import com.eventsphere.engagement_manager.Exception.GlobalExceptionHandler;
 import com.eventsphere.engagement_manager.Exception.InvalidEngagementException;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
+import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.EngagementService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class EngagementControllerTest {
 
     @Mock private EngagementService engagementService;
+    @Mock private AuditService auditService;
     @InjectMocks private EngagementController engagementController;
 
     private MockMvc mockMvc;
@@ -59,7 +61,7 @@ class EngagementControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(engagementController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(auditService))
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .build();
 

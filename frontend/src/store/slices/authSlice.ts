@@ -31,11 +31,12 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('accessToken', tokens.accessToken)
       localStorage.setItem('refreshToken', tokens.refreshToken)
       const { data: user } = await axiosInstance.get('/api/v1/auth-manager/me')
+      // console.log({ tokens, user })
       return { tokens, user }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string }
+      const error = err as { response?: { data?: { message?: string; error?: string } }; message?: string }
       return rejectWithValue(
-        error.response?.data?.message || error.message || 'Login failed'
+        error.response?.data?.message || error.response?.data?.error || error.message || 'Login failed'
       )
     }
   }
