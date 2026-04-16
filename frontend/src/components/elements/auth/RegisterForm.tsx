@@ -45,7 +45,7 @@ export const RegisterForm: React.FC = () => {
     setForm(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
@@ -107,7 +107,7 @@ export const RegisterForm: React.FC = () => {
           <h1 className={styles.heading}>Create Account</h1>
           <p className={styles.subheading}>Join EventSphere</p>
 
-          <div className={styles.form}>
+          <form className={styles.form} onSubmit={handleSubmit}>
             {/* Row 1: Full Name + Phone */}
             <div className={styles['form-row']}>
               <div className={styles.field}>
@@ -181,13 +181,13 @@ export const RegisterForm: React.FC = () => {
 
             {/* Submit */}
             <button
+              type="submit"
               className={styles['btn-submit']}
-              onClick={handleSubmit}
               disabled={loading}
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
-          </div>
+          </form>
 
           <p className={styles['footer-text']}>
             Already have an account? <a href="/login" className={styles['footer-link']}>Sign In</a>

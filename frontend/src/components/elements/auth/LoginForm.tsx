@@ -45,7 +45,7 @@ export const LoginForm: React.FC = () => {
     if (fieldError === name) setFieldError(null)
   }
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const result = await dispatch(loginUser({ email: form.email, password: form.password }))
     if (loginUser.fulfilled.match(result)) {
@@ -83,7 +83,7 @@ export const LoginForm: React.FC = () => {
           <h1 className={styles.heading}>Welcome Back</h1>
           <p className={styles.subheading}>Sign in to your EventSphere account</p>
 
-          <div className={styles.form}>
+          <form className={styles.form} onSubmit={handleSubmit}>
             {/* Row: Email + Password */}
             <div className={styles['form-row']}>
               <div className={`${styles.field} ${fieldError === 'email' ? styles['field--error'] : ''}`}>
@@ -131,13 +131,13 @@ export const LoginForm: React.FC = () => {
 
             {/* Submit */}
             <button
+              type="submit"
               className={styles['btn-submit']}
-              onClick={handleSubmit}
               disabled={loading}
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
-          </div>
+          </form>
 
           <p className={styles['footer-text']}>
             Don't have an account?{' '}
