@@ -1,10 +1,13 @@
 package com.cts.eventsphere.iamservice.security;
 
 import com.cts.eventsphere.iamservice.model.data.ServiceRoles;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.Jwts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -56,6 +59,40 @@ public class ServiceTokenUtil {
                 .setExpiration(exp)
                 .signWith(rsaKeyProvider.getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
+    }
+
+    /**
+     * Validates an inbound RSA-signed service token and returns a {@link UserPrincipal}
+     * whose authorities contain all roles from the token's {@code roles} claim,
+     * prefixed with {@code ROLE_} (e.g. {@code ROLE_SYS_EVENT_MGR}).
+     *
+     * @param token the compact JWT string (without "Bearer " prefix)
+     * @return a {@link UserPrincipal} representing the calling service
+     * @throws io.jsonwebtoken.JwtException if the token is invalid, expired, or not a SERVICE token
+     */
+    public UserPrincipal validate(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(rsaKeyProvider.getPublicKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            if (!"SERVICE".equals(claims.get("type", String.class))) {
+                throw new JwtException("Not a service token");
+            }
+
+            String subject = claims.getSubject();
+            @SuppressWarnings("unchecked")
+            List<String> roles = claims.get("roles", List.class);
+            var authorities = roles.stream()
+                    .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                    .toList();
+            return new UserPrincipal(subject, roles.getFirst(), authorities);
+
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new JwtException("Invalid service token: " + e.getMessage());
+        }
     }
 
     public long getExpirationSeconds() {

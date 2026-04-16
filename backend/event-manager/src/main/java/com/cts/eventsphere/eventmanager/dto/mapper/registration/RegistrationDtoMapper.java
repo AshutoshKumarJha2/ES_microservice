@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.dto.mapper.registration;
 
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
+import com.cts.eventsphere.eventmanager.dto.user.UserDetailsDto;
 import com.cts.eventsphere.eventmanager.model.Registration;
 
 /**
@@ -20,6 +21,17 @@ public class RegistrationDtoMapper {
                 .ticketId(registration.getTicket().getTicketId())
                 .attendeeId(registration.getAttendeeId())
                 .status(registration.getStatus().name())
+                .build();
+    }
+
+    public static RegistrationDto toDto(Registration registration, UserDetailsDto userDetails) {
+        return RegistrationDto.builder()
+                .registrationId(registration.getRegistrationId())
+                .eventId(registration.getEvent().getEventId())
+                .ticketId(registration.getTicket().getTicketId())
+                .attendeeId(registration.getAttendeeId())
+                .status(registration.getStatus().name())
+                .attendeeDetails(userDetails)
                 .build();
     }
 }

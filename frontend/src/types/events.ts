@@ -119,12 +119,22 @@ export interface RegistrationRequestDto {
   ticketId: string
 }
 
+export interface UserDetailsDto {
+  userId: string
+  name: string
+  email: string
+  phone: string
+  role: string
+  status: string
+}
+
 export interface RegistrationDto {
   registrationId: string
   eventId: string
   ticketId: string
   attendeeId: string
   status: string
+  attendeeDetails: UserDetailsDto | null
 }
 
 export interface RegistrationListResponseDto {
