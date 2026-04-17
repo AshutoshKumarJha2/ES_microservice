@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import type { UserResponseDto, UserRequestDto } from '../../types/events'
 import axiosInstance from '../../api/axiosInstance'
@@ -9,15 +8,26 @@ interface AuthState {
   refreshToken: string | null
   isAuthenticated: boolean
   loading: boolean
+  userLoading: boolean
   error: string | null
 }
 
+function loadUser(): UserResponseDto | null {
+  try {
+    const raw = localStorage.getItem('user')
+    return raw ? (JSON.parse(raw) as UserResponseDto) : null
+  } catch {
+    return null
+  }
+}
+
 const initialState: AuthState = {
-  user: null,
+  user: loadUser(),
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
-  isAuthenticated: !!localStorage.getItem('accessToken') || !!localStorage.getItem('refreshToken'),
+  isAuthenticated: !!localStorage.getItem('accessToken'),
   loading: false,
+  userLoading: false,
   error: null,
 }
 
@@ -32,7 +42,6 @@ export const loginUser = createAsyncThunk(
       localStorage.setItem('accessToken', tokens.accessToken)
       localStorage.setItem('refreshToken', tokens.refreshToken)
       const { data: user } = await axiosInstance.get('/api/v1/auth-manager/me')
-      // console.log({ tokens, user })
       return { tokens, user }
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string; error?: string } }; message?: string }
@@ -79,27 +88,6 @@ export const updateProfile = createAsyncThunk(
   }
 )
 
-export const refreshSession = createAsyncThunk(
-  'auth/refreshSession',
-  async (_, { rejectWithValue }) => {
-    try {
-      const refreshToken = localStorage.getItem('refreshToken')
-      if (!refreshToken) return rejectWithValue('No refresh token available')
-      const { data } = await axios.post(
-        'http://localhost:6970/api/v1/auth-manager/auth/refresh',
-        {},
-        { headers: { Authorization: `Bearer ${refreshToken}` } }
-      )
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-      return { accessToken: data.accessToken as string, refreshToken: data.refreshToken as string }
-    } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string }
-      return rejectWithValue(error.response?.data?.message || error.message || 'Session refresh failed')
-    }
-  }
-)
-
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -111,6 +99,12 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+    },
+    setTokens: (state, action: { payload: { accessToken: string; refreshToken: string } }) => {
+      state.accessToken = action.payload.accessToken
+      state.refreshToken = action.payload.refreshToken
+      state.isAuthenticated = true
     },
     clearAuthError: (state) => {
       state.error = null
@@ -128,19 +122,26 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.tokens.refreshToken
         state.user = action.payload.user
         state.isAuthenticated = true
+        localStorage.setItem('user', JSON.stringify(action.payload.user))
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.userLoading = true
+      })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.userLoading = false
         state.user = action.payload
         state.isAuthenticated = true
+        localStorage.setItem('user', JSON.stringify(action.payload))
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload
         state.loading = false
         state.error = null
+        localStorage.setItem('user', JSON.stringify(action.payload))
       })
       .addCase(updateProfile.pending, (state) => {
         state.loading = true
@@ -151,32 +152,11 @@ const authSlice = createSlice({
         state.error = action.payload as string
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
-        state.user = null
-        state.accessToken = null
-        localStorage.removeItem('accessToken')
-        // Only fully sign out when the refresh token is also gone.
-        // If the refresh token still exists, the interceptor will use it on the
-        // next request — don't redirect the user yet.
-        if (!localStorage.getItem('refreshToken')) {
-          state.refreshToken = null
-          state.isAuthenticated = false
-        }
-      })
-      .addCase(refreshSession.fulfilled, (state, action) => {
-        state.accessToken = action.payload.accessToken
-        state.refreshToken = action.payload.refreshToken
-        state.isAuthenticated = true
-      })
-      .addCase(refreshSession.rejected, (state) => {
-        state.user = null
-        state.accessToken = null
-        state.refreshToken = null
-        state.isAuthenticated = false
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        state.userLoading = false
+        if (!state.isAuthenticated) state.user = null
       })
   },
 })
 
-export const { logout, clearAuthError } = authSlice.actions
+export const { logout, setTokens, clearAuthError } = authSlice.actions
 export default authSlice.reducer

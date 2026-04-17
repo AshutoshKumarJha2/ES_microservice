@@ -66,7 +66,16 @@ export const LoginForm: React.FC = () => {
         })
         return
       }
-      navigate('/dashboard', { replace: true })
+      const role = (result.payload as { user: { role: string } }).user.role
+      const roleRoutes: Record<string, string> = {
+        ADMIN:           '/admin/dashboard',
+        ORGANIZER:       '/organizer/dashboard',
+        VENUE_MANAGER:   '/organizer/dashboard',
+        FINANCE_OFFICER: '/organizer/dashboard',
+        VENDOR:          '/dashboard',
+        ATTENDEE:        '/dashboard',
+      }
+      navigate(roleRoutes[role] ?? '/dashboard', { replace: true })
     }
   }
 

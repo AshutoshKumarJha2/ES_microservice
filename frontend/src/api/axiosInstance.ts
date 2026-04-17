@@ -1,5 +1,35 @@
 import axios from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
+import type { Store } from '@reduxjs/toolkit'
+import { jwtDecode } from 'jwt-decode'
+import { logout, setTokens } from '../store/slices/authSlice'
+
+const REFRESH_BUFFER_SECONDS = 30
+
+function isTokenExpiringSoon(token: string): boolean {
+  try {
+    const { exp } = jwtDecode<{ exp?: number }>(token)
+    if (!exp) return true
+    return exp - Date.now() / 1000 < REFRESH_BUFFER_SECONDS
+  } catch {
+    return true
+  }
+}
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const { exp } = jwtDecode<{ exp?: number }>(token)
+    if (!exp) return true
+    return exp < Date.now() / 1000
+  } catch {
+    return true
+  }
+}
+
+let _store: Store
+export function injectStore(s: Store) {
+  _store = s
+}
 
 const axiosInstance = axios.create({
   baseURL: 'http://localhost:6970',
@@ -8,9 +38,23 @@ const axiosInstance = axios.create({
   },
 })
 
+const refreshClient = axios.create({
+  baseURL: 'http://localhost:6970',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken')
+  async (config) => {
+    let token = localStorage.getItem('accessToken')
+    if (token && isTokenExpiringSoon(token)) {
+      try {
+        token = await doRefresh()
+      } catch (e) {
+        return Promise.reject(e)
+      }
+    }
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -33,10 +77,47 @@ function processQueue(error: unknown, token: string | null) {
   failedQueue = []
 }
 
-function logout() {
-  localStorage.removeItem('accessToken')
-  localStorage.removeItem('refreshToken')
-  window.location.href = '/login'
+function forceLogout() {
+  delete axiosInstance.defaults.headers.common.Authorization
+  _store.dispatch(logout())
+}
+
+async function doRefresh(): Promise<string> {
+  const refreshToken = localStorage.getItem('refreshToken')
+  if (!refreshToken || isTokenExpired(refreshToken)) {
+    forceLogout()
+    return Promise.reject(new Error('No valid refresh token'))
+  }
+
+  if (isRefreshing) {
+    return new Promise<string>((resolve, reject) => {
+      failedQueue.push({ resolve, reject })
+    })
+  }
+
+  isRefreshing = true
+
+  try {
+    const { data } = await refreshClient.post(
+      '/api/v1/auth-manager/auth/refresh',
+      {},
+      { headers: { Authorization: `Bearer ${refreshToken}` } }
+    )
+
+    localStorage.setItem('accessToken', data.accessToken)
+    localStorage.setItem('refreshToken', data.refreshToken)
+
+    _store.dispatch(setTokens({ accessToken: data.accessToken, refreshToken: data.refreshToken }))
+
+    processQueue(null, data.accessToken)
+    return data.accessToken as string
+  } catch (refreshError: unknown) {
+    processQueue(refreshError, null)
+    forceLogout()
+    return Promise.reject(refreshError)
+  } finally {
+    isRefreshing = false
+  }
 }
 
 axiosInstance.interceptors.response.use(
@@ -48,50 +129,20 @@ axiosInstance.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const refreshToken = localStorage.getItem('refreshToken')
-    if (!refreshToken) {
-      logout()
-      return Promise.reject(error)
-    }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        failedQueue.push({ resolve, reject })
-      }).then((token) => {
-        originalRequest.headers.Authorization = `Bearer ${token}`
-        return axiosInstance(originalRequest)
-      })
-    }
-
     originalRequest._retry = true
-    isRefreshing = true
 
     try {
-      const { data } = await axios.post(
-        'http://localhost:6970/api/v1/auth-manager/auth/refresh',
-        {},
-        { headers: { Authorization: `Bearer ${refreshToken}` } }
-      )
-
-      localStorage.setItem('accessToken', data.accessToken)
-      localStorage.setItem('refreshToken', data.refreshToken)
-
-      axiosInstance.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`
-      originalRequest.headers.Authorization = `Bearer ${data.accessToken}`
-
-      processQueue(null, data.accessToken)
+      const newToken = await doRefresh()
+      originalRequest.headers.Authorization = `Bearer ${newToken}`
       return axiosInstance(originalRequest)
-    } catch (refreshError:unknown) {
-      processQueue(refreshError, null)
-      const status = (refreshError as {response?: { status?:number}})?.response?.status
-      if(status === 401 || status === 403){
-        logout()
-      }
+    } catch (refreshError) {
       return Promise.reject(refreshError)
-    } finally {
-      isRefreshing = false
     }
   }
 )
+
+export function clearAuthHeader() {
+  delete axiosInstance.defaults.headers.common.Authorization
+}
 
 export default axiosInstance

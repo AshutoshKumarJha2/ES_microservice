@@ -1,35 +1,18 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '../../../store/hooks'
-import { fetchCurrentUser, logout, refreshSession } from '../../../store/slices/authSlice'
+import { fetchCurrentUser, logout } from '../../../store/slices/authSlice'
 import { toast, Bounce } from 'react-toastify'
-
-function isAccessTokenExpired(): boolean {
-  const token = localStorage.getItem('accessToken')
-  if (!token) return true
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return payload.exp * 1000 < Date.now()
-  } catch {
-    return true
-  }
-}
 
 export const AdminRoute: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth)
-  const { pathname } = useLocation()
+  const { user, isAuthenticated, userLoading } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
     if (!isAuthenticated) return
+    if (user) return
 
-    const run = async () => {
-      if (isAccessTokenExpired()) {
-        const refreshResult = await dispatch(refreshSession())
-        if (refreshSession.rejected.match(refreshResult)) return
-      }
-
-      const result = await dispatch(fetchCurrentUser())
+    dispatch(fetchCurrentUser()).then((result) => {
       if (fetchCurrentUser.fulfilled.match(result) && result.payload.status === 'SUSPENDED') {
         toast.error('Your account has been suspended. Please contact support.', {
           position: 'top-right',
@@ -43,13 +26,14 @@ export const AdminRoute: React.FC = () => {
         })
         dispatch(logout())
       }
-    }
-
-    run()
-  }, [pathname, dispatch, isAuthenticated])
+    })
+  }, [dispatch, isAuthenticated, user])
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user && user.role !== 'ADMIN') return <Navigate to="/" replace />
+
+  if (userLoading || !user) return null
+
+  if (user.role !== 'ADMIN') return <Navigate to="/" replace />
 
   return <Outlet />
 }
