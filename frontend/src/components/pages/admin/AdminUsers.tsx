@@ -1,49 +1,47 @@
 import { useEffect, useState, useMemo } from 'react'
-import { NavLink } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchUsers, updateUserRole, updateUserStatus } from '../../../store/slices/adminSlice'
 import type { UserResponseDto } from '../../../types/events'
-import styles from '../../../css/admin/AdminPanel.module.css'
+import { AdminSubNav } from '../../elements/admin/AdminSubNav'
+import {
+  Container, Row, Col, Card, Table, Badge, Button, Modal, Form,
+  InputGroup, ButtonGroup, Spinner, Pagination,
+} from 'react-bootstrap'
+import { Search } from 'react-bootstrap-icons'
 
 const ROLES: UserResponseDto['role'][] = ['ADMIN', 'ORGANIZER', 'ATTENDEE', 'VENDOR', 'VENUE_MANAGER', 'FINANCE_OFFICER']
 const PAGE_SIZE = 10
 
-const ROLE_BADGE: Record<string, string> = {
-  ADMIN:           styles['badge-admin'],
-  ORGANIZER:       styles['badge-organizer'],
-  ATTENDEE:        styles['badge-attendee'],
-  VENDOR:          styles['badge-vendor'],
-  FINANCE_OFFICER: styles['badge-finance'],
-  VENUE_MANAGER:   styles['badge-venue'],
+const roleBadgeClass = (role: string) => {
+  const map: Record<string, string> = {
+    ADMIN: 'es-badge-admin', ORGANIZER: 'es-badge-organizer',
+    ATTENDEE: 'es-badge-attendee', VENDOR: 'es-badge-vendor',
+    FINANCE_OFFICER: 'es-badge-finance', VENUE_MANAGER: 'es-badge-venue',
+  }
+  return map[role] ?? 'es-badge-draft'
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  ACTIVE:    styles['badge-active'],
-  INACTIVE:  styles['badge-inactive'],
-  SUSPENDED: styles['badge-suspended'],
-}
+const statusBadgeClass = (status: string) =>
+  status === 'ACTIVE' ? 'es-badge-active' : 'es-badge-suspended'
 
-interface EditRoleModal {
-  userId: string
-  name: string
-}
+const initials = (name: string) =>
+  name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+
+interface EditRoleModal { userId: string; name: string }
 
 export const AdminUsers: React.FC = () => {
   const dispatch = useAppDispatch()
   const { allUsers, loadingUsers } = useAppSelector((state) => state.admin)
 
-  const [search, setSearch]       = useState('')
-  const [roleFilter, setRoleFilter] = useState<string>('ALL')
-  const [page, setPage]           = useState(0)
-  const [editModal, setEditModal] = useState<EditRoleModal | null>(null)
+  const [search, setSearch]         = useState('')
+  const [roleFilter, setRoleFilter]  = useState<string>('ALL')
+  const [page, setPage]              = useState(0)
+  const [editModal, setEditModal]    = useState<EditRoleModal | null>(null)
   const [selectedRole, setSelectedRole] = useState<UserResponseDto['role']>('ATTENDEE')
-  const [saving, setSaving]       = useState(false)
+  const [saving, setSaving]          = useState(false)
 
-  useEffect(() => {
-    dispatch(fetchUsers())
-  }, [dispatch])
+  useEffect(() => { dispatch(fetchUsers()) }, [dispatch])
 
-  // Client-side filter + search
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
     return allUsers.filter((u) => {
@@ -53,11 +51,10 @@ export const AdminUsers: React.FC = () => {
     })
   }, [allUsers, search, roleFilter])
 
-  // Reset to page 0 when filter changes
   useEffect(() => { setPage(0) }, [search, roleFilter])
 
-  const totalPages  = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageUsers   = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const pageUsers  = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const openEditModal = (u: UserResponseDto) => {
     setSelectedRole(u.role)
@@ -77,149 +74,167 @@ export const AdminUsers: React.FC = () => {
     await dispatch(updateUserStatus({ userId: u.userId, status: newStatus }))
   }
 
-  const initials = (name: string) =>
-    name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-
   return (
-    <div className={styles.page}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className={styles.banner}>
-        <div className={styles['banner-inner']}>
-          <div className={styles['banner-text']}>
-            <h1>User Management</h1>
-            <p>View, update roles, suspend accounts</p>
-          </div>
-        </div>
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3">
+          <h1 className="fw-bold fs-3 mb-1">User Management</h1>
+          <p className="mb-0 text-white-50 small">View, update roles, suspend accounts</p>
+        </Container>
       </div>
 
-      {/* Sub-nav */}
-      <div className={styles.subnav}>
-        <div className={styles['subnav-inner']}>
-          <NavLink to="/admin/dashboard"  className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Dashboard</NavLink>
-          <NavLink to="/admin/users"      className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Users</NavLink>
-          <NavLink to="/admin/events"     className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Events</NavLink>
-          <NavLink to="/admin/audit-logs" className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Audit Logs</NavLink>
-        </div>
-      </div>
+      <AdminSubNav />
 
-      <div className={styles.content}>
-        <div className={styles.card}>
-          <div className={styles['card-title']}>
-            All Users
-            <span style={{ fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-muted)' }}>
-              {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-            </span>
-          </div>
-
-          {/* Toolbar */}
-          <div className={styles.toolbar} style={{ marginBottom: '0.85rem' }}>
-            <div className={styles['search-wrap']}>
-              <span className={styles['search-icon']}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <Container fluid className="px-3 px-md-4 py-4">
+        <Card className="es-card border shadow-sm">
+          <Card.Body className="p-3 p-md-4">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>
+                All Users
+              </Card.Title>
+              <span className="small" style={{ color: 'var(--text-muted)' }}>
+                {filtered.length} result{filtered.length !== 1 ? 's' : ''}
               </span>
-              <input
-                className={styles['search-input']}
+            </div>
+
+            {/* Search */}
+            <InputGroup className="mb-3" style={{ maxWidth: 420 }}>
+              <InputGroup.Text style={{ background: 'var(--bg-input)', borderColor: 'var(--border-color)' }}>
+                <Search size={14} style={{ color: 'var(--text-muted)' }} />
+              </InputGroup.Text>
+              <Form.Control
                 placeholder="Search by name or email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                className="es-form-control"
               />
-            </div>
-          </div>
+            </InputGroup>
 
-          {/* Role chips */}
-          <div className={styles['filter-row']} style={{ marginBottom: '1rem' }}>
-            {['ALL', ...ROLES].map((r) => (
-              <button
-                key={r}
-                className={`${styles.chip}${roleFilter === r ? ` ${styles.active}` : ''}`}
-                onClick={() => setRoleFilter(r)}
-              >
-                {r === 'ALL' ? 'All' : r.replace('_', ' ')}
-              </button>
-            ))}
-          </div>
+            {/* Role filters */}
+            <ButtonGroup className="flex-wrap gap-1 mb-3">
+              {['ALL', ...ROLES].map((r) => (
+                <Button
+                  key={r}
+                  size="sm"
+                  variant={roleFilter === r ? 'primary' : 'outline-secondary'}
+                  className="rounded-pill"
+                  onClick={() => setRoleFilter(r)}
+                  style={{ fontSize: '0.78rem' }}
+                >
+                  {r === 'ALL' ? 'All' : r.replace('_', ' ')}
+                </Button>
+              ))}
+            </ButtonGroup>
 
-          {/* Table */}
-          <div className={styles['table-wrapper']}>
+            {/* Table */}
             {loadingUsers ? (
-              <p className={styles.loading}>Loading…</p>
+              <div className="text-center py-5">
+                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+              </div>
             ) : (
-              <table>
+              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead>
-                  <tr>
-                    <th>User</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                  <tr style={{ color: 'var(--text-secondary)' }}>
+                    <th className="fw-medium border-0 pb-2">User</th>
+                    <th className="fw-medium border-0 pb-2">Email</th>
+                    <th className="fw-medium border-0 pb-2">Role</th>
+                    <th className="fw-medium border-0 pb-2">Status</th>
+                    <th className="fw-medium border-0 pb-2">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
                   {pageUsers.length === 0 ? (
-                    <tr><td colSpan={5} className={styles.empty}>No users found</td></tr>
+                    <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
                   ) : pageUsers.map((u) => (
                     <tr key={u.userId}>
-                      <td>
-                        <div className={styles['user-cell']}>
-                          <div className={styles.avatar}>{initials(u.name || u.email)}</div>
-                          <span className={styles['user-name-cell']}>{u.name || '—'}</span>
+                      <td className="align-middle">
+                        <div className="d-flex align-items-center gap-2">
+                          <div
+                            className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+                            style={{ width: 28, height: 28, fontSize: '0.65rem', background: 'var(--blue)' }}
+                          >
+                            {initials(u.name || u.email)}
+                          </div>
+                          <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{u.name || '—'}</span>
                         </div>
                       </td>
-                      <td><span className={styles['user-email-cell']}>{u.email}</span></td>
-                      <td><span className={`${styles.badge} ${ROLE_BADGE[u.role] ?? ''}`}>{u.role}</span></td>
-                      <td><span className={`${styles.badge} ${STATUS_BADGE[u.status] ?? styles['badge-inactive']}`}>{u.status}</span></td>
-                      <td>
-                        <div className={styles.actions}>
-                          <button className={styles['btn-sm']} onClick={() => openEditModal(u)}>Edit Role</button>
+                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{u.email}</td>
+                      <td className="align-middle">
+                        <Badge className={`${roleBadgeClass(u.role)} border-0`} style={{ fontSize: '0.7rem' }}>{u.role}</Badge>
+                      </td>
+                      <td className="align-middle">
+                        <Badge className={`${statusBadgeClass(u.status)} border-0`} style={{ fontSize: '0.7rem' }}>{u.status}</Badge>
+                      </td>
+                      <td className="align-middle">
+                        <div className="d-flex gap-1 flex-wrap">
+                          <Button variant="outline-primary" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }} onClick={() => openEditModal(u)}>
+                            Edit Role
+                          </Button>
                           {u.status === 'ACTIVE' ? (
-                            <button className={styles['btn-danger']} onClick={() => handleToggleStatus(u)}>Suspend</button>
+                            <Button variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }} onClick={() => handleToggleStatus(u)}>
+                              Suspend
+                            </Button>
                           ) : (
-                            <button className={styles['btn-success']} onClick={() => handleToggleStatus(u)}>Activate</button>
+                            <Button variant="outline-success" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }} onClick={() => handleToggleStatus(u)}>
+                              Activate
+                            </Button>
                           )}
                         </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </Table>
             )}
-          </div>
 
-          {/* Pagination */}
-          {filtered.length > PAGE_SIZE && (
-            <div className={styles.pagination} style={{ marginTop: '1rem' }}>
-              <button disabled={page === 0} onClick={() => setPage((p) => p - 1)}>← Prev</button>
-              <span>Page {page + 1} of {totalPages} · {filtered.length} users</span>
-              <button disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)}>Next →</button>
-            </div>
-          )}
-        </div>
-      </div>
+            {/* Pagination */}
+            {filtered.length > PAGE_SIZE && (
+              <div className="d-flex justify-content-between align-items-center mt-3">
+                <small style={{ color: 'var(--text-muted)' }}>
+                  Page {page + 1} of {totalPages} · {filtered.length} users
+                </small>
+                <Pagination size="sm" className="mb-0">
+                  <Pagination.Prev disabled={page === 0} onClick={() => setPage((p) => p - 1)} />
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                    <Pagination.Item key={i} active={i === page} onClick={() => setPage(i)}>{i + 1}</Pagination.Item>
+                  ))}
+                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)} />
+                </Pagination>
+              </div>
+            )}
+          </Card.Body>
+        </Card>
+      </Container>
 
       {/* Edit Role Modal */}
-      {editModal && (
-        <div className={styles['modal-backdrop']} onClick={() => setEditModal(null)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 className={styles['modal-title']}>Edit Role — {editModal.name}</h3>
-            <div className={styles['modal-field']}>
-              <label className={styles['modal-label']}>New Role</label>
-              <select
-                className={styles['modal-select']}
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value as UserResponseDto['role'])}
-              >
-                {ROLES.map((r) => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
-              </select>
-            </div>
-            <div className={styles['modal-footer']}>
-              <button className={styles['modal-btn-primary']} onClick={handleSaveRole} disabled={saving}>
-                {saving ? 'Saving…' : 'Save'}
-              </button>
-              <button className={styles['modal-btn-cancel']} onClick={() => setEditModal(null)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <Modal show={!!editModal} onHide={() => setEditModal(null)} centered>
+        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>
+            Edit Role — {editModal?.name}
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
+          <Form.Group>
+            <Form.Label className="es-label">New Role</Form.Label>
+            <Form.Select
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value as UserResponseDto['role'])}
+              className="es-form-control"
+            >
+              {ROLES.map((r) => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
+            </Form.Select>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setEditModal(null)}>
+            Cancel
+          </Button>
+          <Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={handleSaveRole} disabled={saving}>
+            {saving ? <><Spinner animation="border" size="sm" className="me-1" />Saving…</> : 'Save'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   )
 }

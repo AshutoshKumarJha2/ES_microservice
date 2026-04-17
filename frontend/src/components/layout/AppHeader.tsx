@@ -3,9 +3,8 @@ import { useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { toggleTheme } from '../../store/slices/uiSlice'
 import type { UserResponseDto } from '../../types/events'
-import styles from '../../css/layout/header/AppHeader.module.css'
-
-// ── Breadcrumb helper ─────────────────────────────────────────────────────────
+import { Navbar, Container, Breadcrumb, Badge, Button } from 'react-bootstrap'
+import { SunFill, MoonFill } from 'react-bootstrap-icons'
 
 const ROUTE_LABELS: Record<string, string> = {
   organizer:    'Organizer',
@@ -36,15 +35,13 @@ const buildBreadcrumb = (pathname: string) => {
   }))
 }
 
-// ── Role chip styles ──────────────────────────────────────────────────────────
-
-const ROLE_CHIP_CLASS: Record<UserResponseDto['role'], string> = {
-  ORGANIZER:       styles.organizer,
-  ADMIN:           styles.admin,
-  ATTENDEE:        styles.attendee,
-  FINANCE_OFFICER: styles.finance,
-  VENUE_MANAGER:   styles.venue,
-  VENDOR:          styles.vendor,
+const ROLE_BADGE_CLASS: Record<UserResponseDto['role'], string> = {
+  ORGANIZER:       'es-badge-organizer',
+  ADMIN:           'es-badge-admin',
+  ATTENDEE:        'es-badge-attendee',
+  FINANCE_OFFICER: 'es-badge-finance',
+  VENUE_MANAGER:   'es-badge-venue',
+  VENDOR:          'es-badge-vendor',
 }
 
 const ROLE_LABELS: Record<UserResponseDto['role'], string> = {
@@ -55,40 +52,6 @@ const ROLE_LABELS: Record<UserResponseDto['role'], string> = {
   VENUE_MANAGER:   'Venue Mgr',
   VENDOR:          'Vendor',
 }
-
-// ── Inline SVG Icons ──────────────────────────────────────────────────────────
-
-const IconSun = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="5"/>
-    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-  </svg>
-)
-
-const IconMoon = () => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </svg>
-)
-
-const IconChevron = () => (
-  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="9 18 15 12 9 6"/>
-  </svg>
-)
-
-const IconMenu = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-    <line x1="3" y1="6" x2="21" y2="6"/>
-    <line x1="3" y1="12" x2="21" y2="12"/>
-    <line x1="3" y1="18" x2="21" y2="18"/>
-  </svg>
-)
-
-// ── Component ─────────────────────────────────────────────────────────────────
 
 export const AppHeader: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -102,56 +65,64 @@ export const AppHeader: React.FC = () => {
     : '?'
 
   return (
-    <header className={styles.header}>
-      {/* Left: hamburger + breadcrumb */}
-      <div className={styles.left}>
-        <button
-          className={styles['menu-btn']}
-          aria-label="Open sidebar"
-          // On mobile this can open the sidebar overlay; desktop handled by Sidebar itself
-        >
-          <IconMenu />
-        </button>
+    <Navbar
+      className="es-app-header border-bottom px-0 py-2"
+      style={{ minHeight: 56 }}
+    >
+      <Container fluid className="px-3 px-md-4 d-flex justify-content-between align-items-center">
 
-        <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+        {/* Left: breadcrumb */}
+        <Breadcrumb className="mb-0" listProps={{ className: 'mb-0 align-items-center' }}>
           {breadcrumbs.map((crumb, idx) => (
-            <React.Fragment key={idx}>
-              {idx > 0 && (
-                <span className={styles['breadcrumb-sep']}>
-                  <IconChevron />
-                </span>
-              )}
-              <span
-                className={`${styles['breadcrumb-item']}${crumb.isLast ? ` ${styles.active}` : ''}`}
-              >
-                {crumb.label}
-              </span>
-            </React.Fragment>
+            <Breadcrumb.Item
+              key={idx}
+              active={crumb.isLast}
+              style={{
+                color: crumb.isLast ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontWeight: crumb.isLast ? 600 : 400,
+                fontSize: '0.88rem',
+              }}
+            >
+              {crumb.label}
+            </Breadcrumb.Item>
           ))}
-        </nav>
-      </div>
+        </Breadcrumb>
 
-      {/* Right: theme toggle + user pill */}
-      <div className={styles.right}>
-        <button
-          className={styles['theme-btn']}
-          onClick={() => dispatch(toggleTheme())}
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          title={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? <IconMoon /> : <IconSun />}
-        </button>
+        {/* Right: theme toggle + user pill */}
+        <div className="d-flex align-items-center gap-2">
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            className="rounded-circle d-flex align-items-center justify-content-center p-0"
+            style={{ width: 32, height: 32, borderColor: 'var(--border-color)', color: 'var(--text-secondary)' }}
+            onClick={() => dispatch(toggleTheme())}
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <MoonFill size={13} /> : <SunFill size={13} />}
+          </Button>
 
-        {user && (
-          <div className={styles['user-pill']}>
-            <div className={styles['user-avatar']}>{initials}</div>
-            <span className={styles['user-name']}>{user.name}</span>
-            <span className={`${styles['role-chip']} ${ROLE_CHIP_CLASS[user.role]}`}>
-              {ROLE_LABELS[user.role]}
-            </span>
-          </div>
-        )}
-      </div>
-    </header>
+          {user && (
+            <div className="d-flex align-items-center gap-2">
+              <div
+                className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white"
+                style={{ width: 30, height: 30, fontSize: '0.7rem', background: 'var(--blue)', flexShrink: 0 }}
+              >
+                {initials}
+              </div>
+              <span className="fw-medium d-none d-sm-inline" style={{ fontSize: '0.88rem', color: 'var(--text-primary)' }}>
+                {user.name}
+              </span>
+              <Badge
+                className={`${ROLE_BADGE_CLASS[user.role]} border-0`}
+                style={{ fontSize: '0.7rem' }}
+              >
+                {ROLE_LABELS[user.role]}
+              </Badge>
+            </div>
+          )}
+        </div>
+
+      </Container>
+    </Navbar>
   )
 }

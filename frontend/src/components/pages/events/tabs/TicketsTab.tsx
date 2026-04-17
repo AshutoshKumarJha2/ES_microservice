@@ -2,14 +2,11 @@ import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import { createTicket, updateTicket, deleteTicket, fetchTicketsByEvent } from '../../../../store/slices/ticketsSlice'
 import { TicketModal } from '../../../elements/events/TicketModal'
-import { PanelHeader } from '../../../elements/events/PanelHeader'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
 import type { CreateTicketRequest, TicketResponseDto } from '../../../../types/events'
-import styles from '../../../../css/events/EventsPanel.module.css'
+import { Card, Table, Button, Spinner } from 'react-bootstrap'
 
-interface Props {
-  eventId: string
-}
+interface Props { eventId: string }
 
 export const TicketsTab = ({ eventId }: Props) => {
   const dispatch = useAppDispatch()
@@ -29,53 +26,54 @@ export const TicketsTab = ({ eventId }: Props) => {
   }
 
   return (
-    <div className={styles.card}>
-      <PanelHeader title="Tickets">
-        <button
-          className={styles['btn-primary']}
-          onClick={() => { setEditingTicket(null); setModalOpen(true) }}
-        >
-          + Add Ticket
-        </button>
-      </PanelHeader>
+    <Card className="es-card border shadow-sm">
+      <Card.Body className="p-3 p-md-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>Tickets</Card.Title>
+          <Button
+            variant="primary"
+            size="sm"
+            className="rounded-3"
+            onClick={() => { setEditingTicket(null); setModalOpen(true) }}
+          >
+            + Add Ticket
+          </Button>
+        </div>
 
-      {loading ? (
-        <p className={styles.loading}>Loading tickets…</p>
-      ) : tickets.length === 0 ? (
-        <p className={styles.empty}>No tickets yet. Add one to get started.</p>
-      ) : (
-        <div className={styles['table-wrapper']}>
-          <table>
+        {loading ? (
+          <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
+        ) : tickets.length === 0 ? (
+          <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No tickets yet. Add one to get started.</p>
+        ) : (
+          <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
             <thead>
-              <tr><th>Type</th><th>Price</th><th>Status</th><th>Actions</th></tr>
+              <tr style={{ color: 'var(--text-secondary)' }}>
+                <th className="fw-medium border-0 pb-2">Type</th>
+                <th className="fw-medium border-0 pb-2">Price</th>
+                <th className="fw-medium border-0 pb-2">Status</th>
+                <th className="fw-medium border-0 pb-2">Actions</th>
+              </tr>
             </thead>
             <tbody>
               {tickets.map((t) => (
                 <tr key={t.ticketId}>
-                  <td style={{ fontWeight: 600 }}>{t.type}</td>
-                  <td>₹{t.price.toFixed(2)}</td>
-                  <td>
-                    <EventStatusBadge
-                      status={t.status}
-                      variant="event"
-                    />
-                  </td>
-                  <td>
-                    <div className={styles.actions}>
-                      <button className={styles['btn-sm']} onClick={() => { setEditingTicket(t); setModalOpen(true) }}>
-                        Edit
-                      </button>
-                      <button className={styles['btn-danger']} onClick={() => dispatch(deleteTicket(t.ticketId))}>
-                        Delete
-                      </button>
+                  <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{t.type}</td>
+                  <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>₹{t.price.toFixed(2)}</td>
+                  <td className="align-middle"><EventStatusBadge status={t.status} variant="event" /></td>
+                  <td className="align-middle">
+                    <div className="d-flex gap-1">
+                      <Button variant="outline-primary" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
+                        onClick={() => { setEditingTicket(t); setModalOpen(true) }}>Edit</Button>
+                      <Button variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
+                        onClick={() => dispatch(deleteTicket(t.ticketId))}>Delete</Button>
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
-      )}
+          </Table>
+        )}
+      </Card.Body>
 
       {modalOpen && (
         <TicketModal
@@ -84,6 +82,6 @@ export const TicketsTab = ({ eventId }: Props) => {
           existing={editingTicket}
         />
       )}
-    </div>
+    </Card>
   )
 }

@@ -1,240 +1,256 @@
-import { useState } from "react";
-import styles from '../../../css/auth/RegisterForm.module.css'
-import { toast, Bounce } from 'react-toastify';
-import axiosInstance from '../../../api/axiosInstance';
-import { Eye, EyeSlash } from 'react-bootstrap-icons';
-import { useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { formSchema } from "../../../validations/authValidation";
+import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
+import { toast, Bounce } from 'react-toastify'
+import axiosInstance from '../../../api/axiosInstance'
+import { Eye, EyeSlash } from 'react-bootstrap-icons'
+import { z } from 'zod'
+import { formSchema } from '../../../validations/authValidation'
+import {
+  Container, Row, Col, Card, Form, Button, Spinner, InputGroup,
+} from 'react-bootstrap'
 
-type FormState = z.infer<typeof formSchema>;
+type FormState = z.infer<typeof formSchema>
 
 interface RegisterRequest {
-  name: string;
-  email: string;
-  password: string;
-  phone: string;
+  name: string
+  email: string
+  password: string
+  phone: string
 }
 
 interface RegisterResponse {
-  userId: string;
-  userName: string;
-  userEmail: string;
-  role: string;
-  phone: string;
-  status: string;
-  message: string;
+  userId: string
+  userName: string
+  userEmail: string
+  role: string
+  phone: string
+  status: string
+  message: string
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const RegisterForm: React.FC = () => {
-  const [form, setForm] = useState<FormState>({
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
-  const navigate = useNavigate();
+  const [form, setForm] = useState<FormState>({ fullName: '', email: '', phone: '', password: '' })
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({})
+  const navigate = useNavigate()
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
-  };
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+    if (errors[name as keyof FormState]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }))
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
+    e.preventDefault()
+    setLoading(true)
 
-    const result = formSchema.safeParse(form);
+    const result = formSchema.safeParse(form)
     if (!result.success) {
-      const fieldErrors: Partial<Record<keyof FormState, string>> = {};
-      result.error.issues.forEach(err => {
-        const field = err.path[0] as keyof FormState;
-        fieldErrors[field] = err.message;
-      });
-      setErrors(fieldErrors);
-      setLoading(false);
-      return;
+      const fieldErrors: Partial<Record<keyof FormState, string>> = {}
+      result.error.issues.forEach((err) => {
+        const field = err.path[0] as keyof FormState
+        fieldErrors[field] = err.message
+      })
+      setErrors(fieldErrors)
+      setLoading(false)
+      return
     }
-    setErrors({});
+    setErrors({})
 
     const payload: RegisterRequest = {
       name: form.fullName,
       email: form.email,
       password: form.password,
       phone: form.phone,
-    };
+    }
 
     try {
       const { data } = await axiosInstance.post<RegisterResponse>(
         '/api/v1/auth-manager/auth/register',
         payload
-      );
-      toast.success(data.message,{
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
+      )
+      toast.success(data.message, {
+        position: 'top-right', autoClose: 5000, hideProgressBar: true,
+        closeOnClick: true, pauseOnHover: true, draggable: true,
+        theme: 'light', transition: Bounce,
       })
       navigate('/login', {
         replace: true,
-        state: {
-          prefill: {
-            email: form.email,
-            password: form.password,
-          },
-        },
+        state: { prefill: { email: form.email, password: form.password } },
       })
     } catch (err: unknown) {
-      const axiosErr = err as { response?: { data?: { message?: string; error?: string } } };
+      const axiosErr = err as { response?: { data?: { message?: string; error?: string } } }
       const message =
         axiosErr.response?.data?.message ||
         axiosErr.response?.data?.error ||
-        (err instanceof Error ? err.message : 'Registration failed. Please try again.');
+        (err instanceof Error ? err.message : 'Registration failed. Please try again.')
       toast.error(message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: true,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-        transition: Bounce,
-      });
-      navigate('/login', {replace:true})
+        position: 'top-right', autoClose: 5000, hideProgressBar: true,
+        closeOnClick: true, pauseOnHover: true, draggable: true,
+        theme: 'light', transition: Bounce,
+      })
+      navigate('/login', { replace: true })
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  return(
-    <>
-      <div className={styles['page-wrapper']}>
-        <div className={styles.card}>
-          {/* Logo */}
-          <div className={styles.logo}>
-            <span className={styles.event}>event</span>
-            <span className={styles.sphere}>sphere</span>
-          </div>
-
-          <h1 className={styles.heading}>Create Account</h1>
-          <p className={styles.subheading}>Join EventSphere</p>
-
-          <form className={styles.form} onSubmit={handleSubmit}>
-            {/* Row 1: Full Name + Phone */}
-            <div className={styles['form-row']}>
-              <div className={styles.field}>
-                <label htmlFor="fullName">Full Name</label>
-                <input
-                  id="fullName"
-                  name="fullName"
-                  type="text"
-                  placeholder="John Doe"
-                  value={form.fullName}
-                  onChange={handleChange}
-                  autoComplete="name"
-                />
-                {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
-              </div>
-              <div className={styles.field}>
-                <label htmlFor="phone">Phone</label>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="+91 98765 43210"
-                  value={form.phone}
-                  onChange={handleChange}
-                  autoComplete="tel"
-                />
-                {errors.phone && <span className={styles.error}>{errors.phone}</span>}
-              </div>
-            </div>
-
-            {/* Row 2: Email + Password */}
-            <div className={styles['form-row']}>
-              <div className={styles.field}>
-                <label htmlFor="email">Email Address</label>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  placeholder="user@example.com"
-                  value={form.email}
-                  onChange={handleChange}
-                  autoComplete="email"
-                />
-                {errors.email && <span className={styles.error}>{errors.email}</span>}
-              </div>
-              <div className={styles.field}>
-                <label htmlFor="password">Password</label>
-                <div className={styles['input-wrapper']}>
-                  <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="••••••••"
-                    value={form.password}
-                    onChange={handleChange}
-                    autoComplete="new-password"
-                  />
-                  <button
-                    type="button"
-                    className={styles['toggle-password']}
-                    onClick={() => setShowPassword(prev => !prev)}
-                    aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  >
-                    {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
-                  </button>
+  return (
+    <div className="es-auth-bg d-flex align-items-center justify-content-center py-5">
+      <Container>
+        <Row className="justify-content-center">
+          <Col xs={12} sm={11} md={9} lg={7}>
+            <Card className="es-card border shadow-sm rounded-4">
+              <Card.Body className="p-4 p-md-5">
+                {/* Logo */}
+                <div className="mb-3">
+                  <Link to="/" className="es-logo text-decoration-none">
+                    <span className="es-event">event</span>
+                    <span className="es-sphere">sphere</span>
+                  </Link>
                 </div>
-                {errors.password && <span className={styles.error}>{errors.password}</span>}
-              </div>
-            </div>
 
-            {/* Feedback */}
-            {/* {error && <p className={styles.error}>{error}erty</p>} */}
-            {/* Toastify.success('Title', 'This is the body of the notification'); */}
-            {/* {success && <p className={styles.success}>{success}</p>} */}
+                <h1 className="fw-bold fs-3 mb-1" style={{ color: 'var(--text-primary)' }}>
+                  Create Account
+                </h1>
+                <p className="mb-4" style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
+                  Join EventSphere
+                </p>
 
-            {/* Submit */}
-            <button
-              type="submit"
-              className={styles['btn-submit']}
-              disabled={loading}
-            >
-              {loading ? 'Creating Account...' : 'Create Account'}
-            </button>
-          </form>
+                <Form onSubmit={handleSubmit}>
+                  <Row>
+                    {/* Full Name */}
+                    <Col xs={12} md={6} className="mb-3">
+                      <Form.Group>
+                        <Form.Label className="es-label">Full Name</Form.Label>
+                        <Form.Control
+                          id="fullName"
+                          name="fullName"
+                          type="text"
+                          placeholder="John Doe"
+                          value={form.fullName}
+                          onChange={handleChange}
+                          autoComplete="name"
+                          isInvalid={!!errors.fullName}
+                          className="es-form-control rounded-3"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.fullName}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
 
-          <p className={styles['footer-text']}>
-            Already have an account? <a href="/login" className={styles['footer-link']}>Sign In</a>
-          </p>
-        </div>
-      </div>
-    </>
+                    {/* Phone */}
+                    <Col xs={12} md={6} className="mb-3">
+                      <Form.Group>
+                        <Form.Label className="es-label">Phone</Form.Label>
+                        <Form.Control
+                          id="phone"
+                          name="phone"
+                          type="tel"
+                          placeholder="+91 98765 43210"
+                          value={form.phone}
+                          onChange={handleChange}
+                          autoComplete="tel"
+                          isInvalid={!!errors.phone}
+                          className="es-form-control rounded-3"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.phone}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+
+                    {/* Email */}
+                    <Col xs={12} md={6} className="mb-3">
+                      <Form.Group>
+                        <Form.Label className="es-label">Email Address</Form.Label>
+                        <Form.Control
+                          id="email"
+                          name="email"
+                          type="email"
+                          placeholder="user@example.com"
+                          value={form.email}
+                          onChange={handleChange}
+                          autoComplete="email"
+                          isInvalid={!!errors.email}
+                          className="es-form-control rounded-3"
+                        />
+                        <Form.Control.Feedback type="invalid">
+                          {errors.email}
+                        </Form.Control.Feedback>
+                      </Form.Group>
+                    </Col>
+
+                    {/* Password */}
+                    <Col xs={12} md={6} className="mb-3">
+                      <Form.Group>
+                        <Form.Label className="es-label">Password</Form.Label>
+                        <InputGroup hasValidation>
+                          <Form.Control
+                            id="password"
+                            name="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="••••••••"
+                            value={form.password}
+                            onChange={handleChange}
+                            autoComplete="new-password"
+                            isInvalid={!!errors.password}
+                            className="es-form-control rounded-3"
+                            style={{ borderRight: 'none' }}
+                          />
+                          <Button
+                            variant="outline-secondary"
+                            onClick={() => setShowPassword((p) => !p)}
+                            aria-label={showPassword ? 'Hide password' : 'Show password'}
+                            style={{
+                              borderLeft: 'none',
+                              background: 'var(--bg-input)',
+                              borderColor: 'var(--border-color)',
+                              color: 'var(--text-muted)',
+                            }}
+                          >
+                            {showPassword ? <EyeSlash size={16} /> : <Eye size={16} />}
+                          </Button>
+                          <Form.Control.Feedback type="invalid">
+                            {errors.password}
+                          </Form.Control.Feedback>
+                        </InputGroup>
+                      </Form.Group>
+                    </Col>
+                  </Row>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="w-100 fw-semibold py-2 rounded-3 mt-1"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Creating Account…
+                      </>
+                    ) : (
+                      'Create Account'
+                    )}
+                  </Button>
+                </Form>
+
+                <p className="text-center mt-3 mb-0" style={{ color: 'var(--text-muted)', fontSize: '0.88rem' }}>
+                  Already have an account?{' '}
+                  <Link to="/login" style={{ color: 'var(--blue)', fontWeight: 600 }}>
+                    Sign In
+                  </Link>
+                </p>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   )
 }

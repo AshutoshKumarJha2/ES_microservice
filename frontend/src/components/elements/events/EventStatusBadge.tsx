@@ -1,32 +1,32 @@
-import styles from '../../../css/events/EventsPanel.module.css'
+import { Badge } from 'react-bootstrap'
 
 type BadgeVariant = 'event' | 'registration' | 'expense' | 'schedule'
 
 const EVENT_MAP: Record<string, string> = {
-  draft:     styles['badge-draft'],
-  published: styles['badge-published'],
-  completed: styles['badge-completed'],
-  cancelled: styles['badge-cancelled'],
+  draft:     'es-badge-draft',
+  published: 'es-badge-published',
+  completed: 'es-badge-completed',
+  cancelled: 'es-badge-cancelled',
 }
 
 const REG_MAP: Record<string, string> = {
-  PENDING:  styles['badge-pending'],
-  APPROVED: styles['badge-approved'],
-  REJECTED: styles['badge-rejected'],
+  PENDING:  'es-badge-pending',
+  APPROVED: 'es-badge-approved',
+  REJECTED: 'es-badge-rejected',
 }
 
 const EXP_MAP: Record<string, string> = {
-  APPROVED:  styles['badge-approved'],
-  PAID:      styles['badge-paid'],
-  REJECTED:  styles['badge-rejected'],
-  SUBMITTED: styles['badge-submitted'],
+  APPROVED:  'es-badge-approved',
+  PAID:      'es-badge-paid',
+  REJECTED:  'es-badge-rejected',
+  SUBMITTED: 'es-badge-submitted',
 }
 
 const SCHEDULE_MAP: Record<string, string> = {
-  draft:      styles['badge-draft'],
-  active:     styles['badge-published'],
-  completed:  styles['badge-completed'],
-  terminated: styles['badge-cancelled'],
+  draft:      'es-badge-draft',
+  active:     'es-badge-published',
+  completed:  'es-badge-completed',
+  terminated: 'es-badge-cancelled',
 }
 
 const MAPS: Record<BadgeVariant, Record<string, string>> = {
@@ -37,10 +37,10 @@ const MAPS: Record<BadgeVariant, Record<string, string>> = {
 }
 
 const FALLBACKS: Record<BadgeVariant, string> = {
-  event:        styles['badge-draft'],
-  registration: styles['badge-pending'],
-  expense:      styles['badge-submitted'],
-  schedule:     styles['badge-draft'],
+  event:        'es-badge-draft',
+  registration: 'es-badge-pending',
+  expense:      'es-badge-submitted',
+  schedule:     'es-badge-draft',
 }
 
 interface Props {
@@ -51,5 +51,9 @@ interface Props {
 export const EventStatusBadge = ({ status, variant }: Props) => {
   const map = MAPS[variant]
   const cls = map[status] ?? map[status?.toLowerCase()] ?? FALLBACKS[variant]
-  return <span className={`${styles.badge} ${cls}`}>{status}</span>
+  return (
+    <Badge className={`${cls} border-0`} style={{ fontSize: '0.7rem' }}>
+      {status}
+    </Badge>
+  )
 }

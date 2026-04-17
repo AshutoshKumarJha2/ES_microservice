@@ -1,9 +1,8 @@
 import { useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import { approveRegistration, rejectRegistration } from '../../../../store/slices/registrationsSlice'
-import { PanelHeader } from '../../../elements/events/PanelHeader'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
-import styles from '../../../../css/events/EventsPanel.module.css'
+import { Card, Table, Button, ButtonGroup, Spinner } from 'react-bootstrap'
 
 type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -16,73 +15,91 @@ export const RegistrationsTab = () => {
   const filtered = regFilter === 'ALL' ? registrations : registrations.filter((r) => r.status === regFilter)
 
   return (
-    <div className={styles.card}>
-      <PanelHeader title="Registrations" />
+    <Card className="es-card border shadow-sm">
+      <Card.Body className="p-3 p-md-4">
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>Registrations</Card.Title>
+        </div>
 
-      <div className={styles['filter-row']}>
-        {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as RegFilter[]).map((f) => (
-          <button
-            key={f}
-            className={`${styles.chip}${regFilter === f ? ` ${styles.active}` : ''}`}
-            onClick={() => setRegFilter(f)}
-          >
-            {f}
-          </button>
-        ))}
-      </div>
+        {/* Filters */}
+        <ButtonGroup className="mb-3 flex-wrap gap-1">
+          {(['ALL', 'PENDING', 'APPROVED', 'REJECTED'] as RegFilter[]).map((f) => (
+            <Button
+              key={f}
+              size="sm"
+              variant={regFilter === f ? 'primary' : 'outline-secondary'}
+              className="rounded-pill"
+              onClick={() => setRegFilter(f)}
+              style={{ fontSize: '0.78rem' }}
+            >
+              {f}
+            </Button>
+          ))}
+        </ButtonGroup>
 
-      {loading ? (
-        <p className={styles.loading}>Loading registrations…</p>
-      ) : filtered.length === 0 ? (
-        <p className={styles.empty}>No registrations found.</p>
-      ) : (
-        <div className={styles['table-wrapper']}>
-          <table>
+        {loading ? (
+          <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
+        ) : filtered.length === 0 ? (
+          <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No registrations found.</p>
+        ) : (
+          <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
             <thead>
-              <tr><th>Registration ID</th><th>Attendee</th><th>Ticket ID</th><th>Status</th><th>Actions</th></tr>
+              <tr style={{ color: 'var(--text-secondary)' }}>
+                <th className="fw-medium border-0 pb-2">Registration ID</th>
+                <th className="fw-medium border-0 pb-2">Attendee</th>
+                <th className="fw-medium border-0 pb-2">Ticket ID</th>
+                <th className="fw-medium border-0 pb-2">Status</th>
+                <th className="fw-medium border-0 pb-2">Actions</th>
+              </tr>
             </thead>
             <tbody>
               {filtered.map((r) => (
                 <tr key={r.registrationId}>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.registrationId}</td>
-                  <td>
+                  <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    {r.registrationId}
+                  </td>
+                  <td className="align-middle">
                     {r.attendeeDetails ? (
                       <div>
-                        <div>{r.attendeeDetails.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{r.attendeeDetails.email}</div>
+                        <div style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{r.attendeeDetails.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{r.attendeeDetails.email}</div>
                       </div>
                     ) : (
-                      <span style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.attendeeId}</span>
+                      <span style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>{r.attendeeId}</span>
                     )}
                   </td>
-                  <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{r.ticketId}</td>
-                  <td><EventStatusBadge status={r.status} variant="registration" /></td>
-                  <td>
+                  <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
+                    {r.ticketId}
+                  </td>
+                  <td className="align-middle">
+                    <EventStatusBadge status={r.status} variant="registration" />
+                  </td>
+                  <td className="align-middle">
                     {r.status === 'PENDING' && (
-                      <div className={styles.actions}>
-                        <button
-                          className={styles['btn-success']}
+                      <div className="d-flex gap-1">
+                        <Button
+                          variant="outline-success" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
                           disabled={actionLoading === r.registrationId}
                           onClick={() => dispatch(approveRegistration(r.registrationId))}
                         >
                           Approve
-                        </button>
-                        <button
-                          className={styles['btn-danger']}
+                        </Button>
+                        <Button
+                          variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
                           disabled={actionLoading === r.registrationId}
                           onClick={() => dispatch(rejectRegistration(r.registrationId))}
                         >
                           Reject
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+          </Table>
+        )}
+      </Card.Body>
+    </Card>
   )
 }

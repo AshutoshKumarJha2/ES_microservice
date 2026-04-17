@@ -9,7 +9,11 @@ import { OverviewTab } from './tabs/OverviewTab'
 import { TicketsTab } from './tabs/TicketsTab'
 import { RegistrationsTab } from './tabs/RegistrationsTab'
 import { BudgetTab } from './tabs/BudgetTab'
-import styles from '../../../css/events/EventsPanel.module.css'
+import {
+  Container, Button, Nav, Spinner,
+} from 'react-bootstrap'
+import { ArrowLeft } from 'react-bootstrap-icons'
+import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 
 type Tab = 'overview' | 'tickets' | 'registrations' | 'budget'
 
@@ -38,53 +42,75 @@ export const EventDetail = () => {
   }, [id, dispatch])
 
   if (!selectedEvent) {
-    return <div className={styles.page}><p className={styles.loading}>Loading event…</p></div>
+    return (
+      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
+        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      </div>
+    )
   }
 
   return (
-    <div className={styles.page}>
-      <div className={styles.banner}>
-        <div className={styles['banner-inner']}>
-          <div className={styles['banner-text']}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      {/* Banner */}
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
             <button
               onClick={() => navigate('/organizer/dashboard')}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.7)', fontSize: '0.82rem', cursor: 'pointer', padding: 0, marginBottom: '0.4rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+              className="btn btn-link p-0 mb-2 d-flex align-items-center gap-1"
+              style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.82rem', textDecoration: 'none' }}
             >
-              ← Dashboard
+              <ArrowLeft size={13} /> Dashboard
             </button>
-            <h1>{selectedEvent.eventName}</h1>
-            <p>
-              {selectedEvent.startAt} → {selectedEvent.endAt}
-              &nbsp;&nbsp;·&nbsp;&nbsp;
-              <span style={{ textTransform: 'capitalize' }}>{selectedEvent.status}</span>
-            </p>
+            <h1 className="fw-bold fs-3 mb-1">{selectedEvent.eventName}</h1>
+            <div className="d-flex align-items-center gap-2 flex-wrap">
+              <span className="text-white-50 small">
+                {selectedEvent.startAt} → {selectedEvent.endAt}
+              </span>
+              <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
+            </div>
           </div>
-          <div className={styles['banner-actions']}>
-            <button className={styles['btn-primary']} onClick={() => navigate(`/organizer/analytics/${id}`)}>
-              Analytics
-            </button>
-          </div>
-        </div>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
+            Analytics
+          </Button>
+        </Container>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles['tab-strip']}>
-          {TABS.map(({ key, label }) => (
-            <button
-              key={key}
-              className={`${styles['tab-btn']}${activeTab === key ? ` ${styles.active}` : ''}`}
-              onClick={() => setActiveTab(key)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+      {/* Tab navigation */}
+      <div
+        className="border-bottom"
+        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)', transition: 'background 0.3s' }}
+      >
+        <Container fluid className="px-3 px-md-4">
+          <Nav>
+            {TABS.map(({ key, label }) => (
+              <Nav.Link
+                key={key}
+                onClick={() => setActiveTab(key)}
+                style={{
+                  color: activeTab === key ? 'var(--blue)' : 'var(--text-secondary)',
+                  fontWeight: activeTab === key ? 600 : 400,
+                  borderBottom: activeTab === key ? '2px solid var(--blue)' : '2px solid transparent',
+                  paddingBottom: '0.6rem',
+                  paddingTop: '0.6rem',
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  marginRight: '0.25rem',
+                }}
+              >
+                {label}
+              </Nav.Link>
+            ))}
+          </Nav>
+        </Container>
+      </div>
 
+      <Container fluid className="px-3 px-md-4 py-4">
         {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} />}
         {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
         {activeTab === 'registrations' && <RegistrationsTab />}
         {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
-      </div>
+      </Container>
     </div>
   )
 }
