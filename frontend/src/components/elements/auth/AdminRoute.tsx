@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
-import { Navigate, Outlet, useLocation } from 'react-router-dom'
+import { Navigate, Outlet } from 'react-router-dom'
 import { useAppSelector, useAppDispatch } from '../../../store/hooks'
 import { fetchCurrentUser, logout } from '../../../store/slices/authSlice'
 import { toast, Bounce } from 'react-toastify'
 
 export const AdminRoute: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { user, isAuthenticated } = useAppSelector((state) => state.auth)
-  const { pathname } = useLocation()
+  const { user, isAuthenticated, userLoading } = useAppSelector((state) => state.auth)
 
   useEffect(() => {
     if (!isAuthenticated) return
+    if (user) return
+
     dispatch(fetchCurrentUser()).then((result) => {
       if (fetchCurrentUser.fulfilled.match(result) && result.payload.status === 'SUSPENDED') {
         toast.error('Your account has been suspended. Please contact support.', {
@@ -26,10 +27,13 @@ export const AdminRoute: React.FC = () => {
         dispatch(logout())
       }
     })
-  }, [pathname, dispatch, isAuthenticated])
+  }, [dispatch, isAuthenticated, user])
 
   if (!isAuthenticated) return <Navigate to="/login" replace />
-  if (user && user.role !== 'ADMIN') return <Navigate to="/" replace />
+
+  if (userLoading || !user) return null
+
+  if (user.role !== 'ADMIN') return <Navigate to="/" replace />
 
   return <Outlet />
 }
