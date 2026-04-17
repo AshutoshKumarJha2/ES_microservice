@@ -134,13 +134,13 @@ export const AdminUsers: React.FC = () => {
               </div>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead>
-                  <tr style={{ color: 'var(--text-secondary)' }}>
-                    <th className="fw-medium border-0 pb-2">User</th>
-                    <th className="fw-medium border-0 pb-2">Email</th>
-                    <th className="fw-medium border-0 pb-2">Role</th>
-                    <th className="fw-medium border-0 pb-2">Status</th>
-                    <th className="fw-medium border-0 pb-2">Actions</th>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>User</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Email</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Role</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

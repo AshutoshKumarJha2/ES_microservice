@@ -155,13 +155,13 @@ export const AdminAuditLogs: React.FC = () => {
               </div>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
-                <thead>
-                  <tr style={{ color: 'var(--text-secondary)' }}>
-                    <th className="fw-medium border-0 pb-2">Timestamp</th>
-                    <th className="fw-medium border-0 pb-2">User ID</th>
-                    <th className="fw-medium border-0 pb-2">Action</th>
-                    <th className="fw-medium border-0 pb-2">Entity</th>
-                    <th className="fw-medium border-0 pb-2">Entity Name</th>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Timestamp</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>User ID</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Action</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity Name</th>
                   </tr>
                 </thead>
                 <tbody>

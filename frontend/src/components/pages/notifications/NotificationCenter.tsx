@@ -236,14 +236,14 @@ export const NotificationCenter = () => {
             </p>
           ) : (
             <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ color: 'var(--text-secondary)' }}>
-                  <th className="fw-medium border-0 px-4 pb-2 pt-3" style={{ width: 28 }}></th>
-                  <th className="fw-medium border-0 pb-2 pt-3">Title / Message</th>
-                  <th className="fw-medium border-0 pb-2 pt-3">Type</th>
-                  <th className="fw-medium border-0 pb-2 pt-3">Sent To</th>
-                  <th className="fw-medium border-0 pb-2 pt-3">Time</th>
-                  <th className="fw-medium border-0 pb-2 pt-3">Actions</th>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  <th className="fw-semibold border-0 px-4 pb-2 pt-3" style={{ width: 28, color: 'var(--text-primary)' }}></th>
+                  <th className="fw-semibold border-0 pb-2 pt-3" style={{ color: 'var(--text-primary)' }}>Title / Message</th>
+                  <th className="fw-semibold border-0 pb-2 pt-3" style={{ color: 'var(--text-primary)' }}>Type</th>
+                  <th className="fw-semibold border-0 pb-2 pt-3" style={{ color: 'var(--text-primary)' }}>Sent To</th>
+                  <th className="fw-semibold border-0 pb-2 pt-3" style={{ color: 'var(--text-primary)' }}>Time</th>
+                  <th className="fw-semibold border-0 pb-2 pt-3" style={{ color: 'var(--text-primary)' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>

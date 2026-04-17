@@ -115,17 +115,22 @@
 
 html, body {
   height: 100%;
+  background: var(--bg-page);
   font-family: 'Urbanist', system-ui, -apple-system, sans-serif;
 }
 
 body {
-  background: var(--bg-page);
   color: var(--text-primary);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   height: 100%;
+}
+
+/* Navbar collapse inherits the navbar's surface background on mobile */
+.navbar-collapse {
+  background: var(--bg-surface);
 }
 
 a {

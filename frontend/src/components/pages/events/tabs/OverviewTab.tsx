@@ -128,13 +128,13 @@ export const OverviewTab = ({ eventId, eventStartAt }: Props) => {
             <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No sessions added yet.</p>
           ) : (
             <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-              <thead>
-                <tr style={{ color: 'var(--text-secondary)' }}>
-                  <th className="fw-medium border-0 pb-2">Date</th>
-                  <th className="fw-medium border-0 pb-2">Time Slot</th>
-                  <th className="fw-medium border-0 pb-2">Activity</th>
-                  <th className="fw-medium border-0 pb-2">Status</th>
-                  <th className="fw-medium border-0 pb-2">Actions</th>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Date</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Time Slot</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Activity</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
                 </tr>
               </thead>
               <tbody>

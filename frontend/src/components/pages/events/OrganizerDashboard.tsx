@@ -138,13 +138,13 @@ export const OrganizerDashboard = () => {
               </p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead>
-                  <tr style={{ color: 'var(--text-secondary)' }}>
-                    <th className="fw-medium border-0 pb-2">Event Name</th>
-                    <th className="fw-medium border-0 pb-2">Start Date</th>
-                    <th className="fw-medium border-0 pb-2">End Date</th>
-                    <th className="fw-medium border-0 pb-2">Status</th>
-                    <th className="fw-medium border-0 pb-2">Actions</th>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event Name</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Start Date</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>End Date</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
                   </tr>
                 </thead>
                 <tbody>

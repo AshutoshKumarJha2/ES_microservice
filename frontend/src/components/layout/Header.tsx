@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { NavLink, Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { logout } from '../../store/slices/authSlice'
 import { clearAuthHeader } from '../../api/axiosInstance'
@@ -60,30 +60,7 @@ export const Header = () => {
         <Navbar.Toggle aria-controls="main-nav" />
 
         <Navbar.Collapse id="main-nav">
-          {/* Nav links */}
-          <Nav className="me-auto gap-1">
-            {[
-              { to: '/', label: 'Home', end: true },
-              { to: '/about', label: 'About', end: false },
-              { to: '/contact', label: 'Contact', end: false },
-            ].map(({ to, label, end }) => (
-              <Nav.Link
-                key={to}
-                as={NavLink}
-                to={to}
-                end={end}
-                onClick={() => setExpanded(false)}
-                style={({ isActive }: { isActive: boolean }) => ({
-                  color: isActive ? 'var(--blue)' : 'var(--text-body)',
-                  fontWeight: isActive ? 600 : 500,
-                  fontSize: '0.92rem',
-                  borderRadius: '6px',
-                })}
-              >
-                {label}
-              </Nav.Link>
-            ))}
-          </Nav>
+          <Nav className="me-auto" />
 
           {/* Right actions */}
           <div className="d-flex align-items-center gap-2 mt-2 mt-lg-0">

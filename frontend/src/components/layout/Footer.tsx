@@ -14,13 +14,6 @@ const FOOTER_COLS = [
     ],
   },
   {
-    heading: 'Organizers',
-    links: [
-      { label: 'Organizer Portal', to: '/organizer/dashboard' },
-      { label: 'Create Event',     to: '/organizer/events/create' },
-    ],
-  },
-  {
     heading: 'Legal',
     links: [
       { label: 'Privacy Policy', to: '#' },
