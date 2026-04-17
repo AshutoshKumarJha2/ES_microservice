@@ -146,14 +146,12 @@ a {
 
 /* ── Form controls with brand left-border accent ─────────────────────────────── */
 .es-form-control {
-  border-left: 3px solid var(--saffron) !important;
   background: var(--bg-input) !important;
   color: var(--text-primary) !important;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 .es-form-control:focus {
   border-color: var(--blue) !important;
-  border-left-color: var(--saffron) !important;
   box-shadow: 0 0 0 3px var(--blue-subtle) !important;
   background: var(--bg-surface) !important;
 }
