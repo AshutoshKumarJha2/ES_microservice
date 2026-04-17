@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { loginUser, clearAuthError, logout } from '../../../store/slices/authSlice'
 import styles from '../../../css/auth/LoginForm.module.css'
@@ -14,6 +14,7 @@ interface FormState {
 export const LoginForm: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const { loading, error } = useAppSelector((state) => state.auth)
 
   const [form, setForm] = useState<FormState>({ email: '', password: '' })
@@ -38,6 +39,18 @@ export const LoginForm: React.FC = () => {
       dispatch(clearAuthError())
     }
   }, [error, dispatch])
+
+  useEffect(() => {
+    const prefill = (location.state as { prefill?: { email?: string; password?: string } } | null)?.prefill
+    if (!prefill) return
+
+    setForm({
+      email: prefill.email ?? '',
+      password: prefill.password ?? '',
+    })
+
+    navigate('/login', { replace: true, state: null })
+  }, [location.state, navigate])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -78,6 +91,8 @@ export const LoginForm: React.FC = () => {
       navigate(roleRoutes[role] ?? '/dashboard', { replace: true })
     }
   }
+
+  // console.log("Render");
 
   return (
     <>

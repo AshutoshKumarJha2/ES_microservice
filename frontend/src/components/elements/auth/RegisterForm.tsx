@@ -3,13 +3,11 @@ import styles from '../../../css/auth/RegisterForm.module.css'
 import { toast, Bounce } from 'react-toastify';
 import axiosInstance from '../../../api/axiosInstance';
 import { Eye, EyeSlash } from 'react-bootstrap-icons';
+import { useNavigate } from "react-router-dom";
+import { z } from "zod";
+import { formSchema } from "../../../validations/authValidation";
 
-interface FormState {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-}
+type FormState = z.infer<typeof formSchema>;
 
 interface RegisterRequest {
   name: string;
@@ -28,6 +26,20 @@ interface RegisterResponse {
   message: string;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const RegisterForm: React.FC = () => {
   const [form, setForm] = useState<FormState>({
     fullName: '',
@@ -37,6 +49,8 @@ export const RegisterForm: React.FC = () => {
   });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
+  const navigate = useNavigate();
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -48,6 +62,19 @@ export const RegisterForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+
+    const result = formSchema.safeParse(form);
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof FormState, string>> = {};
+      result.error.issues.forEach(err => {
+        const field = err.path[0] as keyof FormState;
+        fieldErrors[field] = err.message;
+      });
+      setErrors(fieldErrors);
+      setLoading(false);
+      return;
+    }
+    setErrors({});
 
     const payload: RegisterRequest = {
       name: form.fullName,
@@ -72,6 +99,15 @@ export const RegisterForm: React.FC = () => {
         theme: "light",
         transition: Bounce,
       })
+      navigate('/login', {
+        replace: true,
+        state: {
+          prefill: {
+            email: form.email,
+            password: form.password,
+          },
+        },
+      })
     } catch (err: unknown) {
       const axiosErr = err as { response?: { data?: { message?: string; error?: string } } };
       const message =
@@ -89,6 +125,7 @@ export const RegisterForm: React.FC = () => {
         theme: "light",
         transition: Bounce,
       });
+      navigate('/login', {replace:true})
     } finally {
       setLoading(false);
     }
@@ -121,6 +158,7 @@ export const RegisterForm: React.FC = () => {
                   onChange={handleChange}
                   autoComplete="name"
                 />
+                {errors.fullName && <span className={styles.error}>{errors.fullName}</span>}
               </div>
               <div className={styles.field}>
                 <label htmlFor="phone">Phone</label>
@@ -133,6 +171,7 @@ export const RegisterForm: React.FC = () => {
                   onChange={handleChange}
                   autoComplete="tel"
                 />
+                {errors.phone && <span className={styles.error}>{errors.phone}</span>}
               </div>
             </div>
 
@@ -149,6 +188,7 @@ export const RegisterForm: React.FC = () => {
                   onChange={handleChange}
                   autoComplete="email"
                 />
+                {errors.email && <span className={styles.error}>{errors.email}</span>}
               </div>
               <div className={styles.field}>
                 <label htmlFor="password">Password</label>
@@ -171,6 +211,7 @@ export const RegisterForm: React.FC = () => {
                     {showPassword ? <EyeSlash size={17} /> : <Eye size={17} />}
                   </button>
                 </div>
+                {errors.password && <span className={styles.error}>{errors.password}</span>}
               </div>
             </div>
 
