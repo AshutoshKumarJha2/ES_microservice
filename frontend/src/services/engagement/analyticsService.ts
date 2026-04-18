@@ -1,5 +1,10 @@
 import axiosInstance from '../../api/axiosInstance'
-import type { EngagementRequestDto, EngagementResponseDto, FeedbackRequestDto, FeedbackResponseDto, PageFeedbackResponseDto, RegistrationDto } from '../../types/events'
+import type {
+  EngagementRequestDto, EngagementResponseDto,
+  EventAnalyticsDto,
+  FeedbackRequestDto, FeedbackResponseDto, PageFeedbackResponseDto,
+  RegistrationDto, ScheduleResponseDto,
+} from '../../types/events'
 
 export const analyticsService = {
   async getEngagementsByEvent(eventId: string): Promise<EngagementResponseDto[]> {
@@ -37,6 +42,31 @@ export const analyticsService = {
       await axiosInstance.post('/api/v1/engagement-manager/engagements/log', payload)
     } catch {
       // intentionally swallowed — engagement logging is non-critical
+    }
+  },
+
+  /** Fetches registration + check-in analytics from event-manager (via engagement-manager proxy) */
+  async getEventSummary(eventId: string): Promise<EventAnalyticsDto> {
+    try {
+      const { data } = await axiosInstance.get(
+        `/api/v1/engagement-manager/engagements/event/${eventId}/summary`
+      )
+      return data
+    } catch {
+      return { eventId, totalRegistrations: 0, pending: 0, confirmed: 0, checkedIn: 0, cancelled: 0 }
+    }
+  },
+
+  /** Fetches the list of scheduled sessions for an event from event-manager */
+  async getSchedulesByEvent(eventId: string): Promise<ScheduleResponseDto[]> {
+    try {
+      const { data } = await axiosInstance.get(
+        `/api/v1/event-manager/events/${eventId}/schedules`
+      )
+      // event-manager may return a Page wrapper or a plain array
+      return Array.isArray(data) ? data : (data.content ?? [])
+    } catch {
+      return []
     }
   },
 }

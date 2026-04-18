@@ -30,6 +30,9 @@
 **/*.tmp
 **/*.swp
 
+# Local seed data
+seed_*.sql
+
 # Claude
 **/.claude/
 

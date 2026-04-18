@@ -1,7 +1,9 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
+import com.cts.eventsphere.eventmanager.client.EngagementServiceClient;
 import com.cts.eventsphere.eventmanager.client.LogServiceClient;
 import com.cts.eventsphere.eventmanager.client.UserServiceClient;
+import com.cts.eventsphere.eventmanager.dto.engagement.EngagementLogDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.registration.RegistrationDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
@@ -25,6 +27,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,6 +53,7 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final EventRepository eventRepository;
     private final LogServiceClient logServiceClient;
     private final UserServiceClient userServiceClient;
+    private final EngagementServiceClient engagementServiceClient;
 
     /**
      * {@inheritDoc}
@@ -81,6 +85,7 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("User {} registered for event {} with ticket {}", userId, eventId, ticketId);
 
         notifyUser(userId, "Your registration for event \"" + event.getName() + "\" is pending approval.");
+        logEngagement(eventId, userId, "REGISTRATION");
 
         return RegistrationDtoMapper.toDto(newRegistration,
                 fetchUserDetails(List.of(userId)).get(userId));
@@ -139,6 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         notifyUser(registration.getAttendeeId(),
                 "Your registration for event \"" + registration.getEvent().getName() + "\" has been confirmed.");
+        logEngagement(registration.getEvent().getEventId(), registration.getAttendeeId(), "REGISTRATION_CONFIRMATION");
 
         return new GenericResponse("Registration approved successfully");
     }
@@ -170,6 +176,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         notifyUser(registration.getAttendeeId(),
                 "You have successfully checked in to event \"" + registration.getEvent().getName() + "\".");
+        logEngagement(registration.getEvent().getEventId(), registration.getAttendeeId(), "CHECK_IN");
 
         return new GenericResponse("Check-in successful");
     }
@@ -336,6 +343,25 @@ public class RegistrationServiceImpl implements RegistrationService {
             logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
         } catch (FeignException e) {
             log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
+    }
+
+    /**
+     * Logs an engagement activity to engagement-manager via the internal service endpoint.
+     * Fire-and-forget — failures are logged as warnings and never interrupt the main operation.
+     *
+     * @param eventId    the event the activity belongs to
+     * @param attendeeId the attendee performing or receiving the activity
+     * @param activity   the engagement type string (e.g. "REGISTRATION", "CHECK_IN")
+     */
+    private void logEngagement(String eventId, String attendeeId, String activity) {
+        try {
+            engagementServiceClient.logEngagement(
+                    new EngagementLogDto(eventId, attendeeId, activity, LocalDateTime.now(), null)
+            );
+            log.debug("Logged engagement activity={} for attendee={} event={}", activity, attendeeId, eventId);
+        } catch (FeignException e) {
+            log.warn("Failed to log engagement activity={} for attendee={}: {}", activity, attendeeId, e.getMessage());
         }
     }
 

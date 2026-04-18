@@ -3,8 +3,10 @@ package com.eventsphere.engagement_manager.service.impl;
 import com.eventsphere.engagement_manager.Exception.EngagementNotFoundException;
 import com.eventsphere.engagement_manager.Exception.InvalidEngagementException;
 import com.eventsphere.engagement_manager.auth.dto.UserPrincipal;
+import com.eventsphere.engagement_manager.client.EventServiceClient;
 import com.eventsphere.engagement_manager.client.LogServiceClient;
 import com.eventsphere.engagement_manager.dto.audit.AuditAction;
+import com.eventsphere.engagement_manager.dto.client.EventAnalyticsDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
 import com.eventsphere.engagement_manager.dto.mapper.engagement.EngagementRequestDtoMapper;
@@ -42,6 +44,7 @@ public class EngagementServiceImpl implements EngagementService {
     private final EngagementRepository engagementRepository;
     private final AuditService auditService;
     private final LogServiceClient logServiceClient;
+    private final EventServiceClient eventServiceClient;
 
     private static final String NOTIFICATION_CATEGORY = "ENGAGEMENT";
 
@@ -122,6 +125,25 @@ public class EngagementServiceImpl implements EngagementService {
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public EventAnalyticsDto getEventSummary(String eventId) {
+        log.info("Fetching event summary for eventId={}", eventId);
+        try {
+            return eventServiceClient.getEventAnalytics(eventId);
+        } catch (FeignException e) {
+            log.warn("Could not fetch analytics from event-manager for event={}: {}", eventId, e.getMessage());
+            return new EventAnalyticsDto(eventId, 0L, 0L, 0L, 0L, 0L);
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long getSessionJoinCount(String scheduleId) {
+        log.info("Counting SESSION_JOIN engagements for scheduleId={}", scheduleId);
+        return engagementRepository.countByScheduleIdAndActivity(scheduleId, EngagementType.SESSION_JOIN);
     }
 
     private void notifyUser(String userId, String message) {

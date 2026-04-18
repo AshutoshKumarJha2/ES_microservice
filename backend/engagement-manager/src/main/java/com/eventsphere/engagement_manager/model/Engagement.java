@@ -39,6 +39,10 @@ public class Engagement {
     @Column(name = "attendeeId", nullable = false, columnDefinition = "CHAR(36)")
     private String attendeeId;
 
+    /** Optional — populated for session-level engagements (SESSION_JOIN, SESSION_LEAVE, etc.) */
+    @Column(name = "scheduleId", nullable = true, columnDefinition = "CHAR(36)")
+    private String scheduleId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
     private EngagementType activity;
