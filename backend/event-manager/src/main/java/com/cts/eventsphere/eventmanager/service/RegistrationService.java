@@ -99,16 +99,20 @@ public interface RegistrationService {
     RegistrationListResponseDto getRegistrationsByUserId(String actorId, String userId, int size, int page);
 
     /**
-     * Retrieves a paginated list of registrations for a specific event, optionally filtered by status.
+     * Retrieves a paginated list of registrations for a specific event, with optional filters.
      *
-     * @param actorId the ID of the actor making the request
-     * @param eventId the ID of the event
-     * @param status  the registration status to filter by, or {@code null} for all
-     * @param size    the number of records per page
-     * @param page    the page number (zero-based)
+     * @param actorId      the ID of the actor making the request
+     * @param eventId      the ID of the event
+     * @param status       a single registration status to filter by, or {@code null} for all
+     * @param statuses     comma-separated list of statuses for multi-status filtering (e.g. {@code "CONFIRMED,CHECKED_IN"}),
+     *                     takes priority over {@code status} when both are present
+     * @param ticketType   the ticket type to filter by (case-insensitive), or {@code null} for all
+     * @param attendeeName substring to match against attendee name or email (case-insensitive), or {@code null} for all
+     * @param size         the number of records per page
+     * @param page         the page number (zero-based)
      * @return a {@link RegistrationListResponseDto} containing the event's registrations
      */
-    RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, int size, int page);
+    RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, String statuses, String ticketType, String attendeeName, int size, int page);
 
     /**
      * Retrieves a paginated list of all registrations in the system.

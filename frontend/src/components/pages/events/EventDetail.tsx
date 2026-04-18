@@ -8,6 +8,7 @@ import { fetchBudget, fetchExpenses } from '../../../store/slices/budgetSlice'
 import { OverviewTab } from './tabs/OverviewTab'
 import { TicketsTab } from './tabs/TicketsTab'
 import { RegistrationsTab } from './tabs/RegistrationsTab'
+import { AttendeesTab } from './tabs/AttendeesTab'
 import { BudgetTab } from './tabs/BudgetTab'
 import {
   Container, Button, Nav, Spinner,
@@ -15,12 +16,13 @@ import {
 import { ArrowLeft } from 'react-bootstrap-icons'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 
-type Tab = 'overview' | 'tickets' | 'registrations' | 'budget'
+type Tab = 'overview' | 'tickets' | 'registrations' | 'attendees' | 'budget'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'overview',      label: 'Overview' },
   { key: 'tickets',       label: 'Tickets' },
   { key: 'registrations', label: 'Registrations' },
+  { key: 'attendees',     label: 'Attendees' },
   { key: 'budget',        label: 'Budget' },
 ]
 
@@ -106,9 +108,10 @@ export const EventDetail = () => {
       </div>
 
       <Container fluid className="px-3 px-md-4 py-4">
-        {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} />}
+        {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} eventEndAt={selectedEvent.endAt} />}
         {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
         {activeTab === 'registrations' && <RegistrationsTab />}
+        {activeTab === 'attendees'     && <AttendeesTab />}
         {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
       </Container>
     </div>

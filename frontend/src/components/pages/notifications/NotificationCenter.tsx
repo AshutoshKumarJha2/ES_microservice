@@ -28,24 +28,14 @@ const FILTERS: { key: FilterKey; label: string }[] = [
 
 const CATEGORIES = ['EVENT', 'REGISTRATION', 'EXPENSE', 'SYSTEM', 'VENUE', 'INVOICE', 'CONTRACT']
 
-const BADGE_COLORS: Record<string, string> = {
-  EVENT:        '#dbeafe',
-  REGISTRATION: '#d1fae5',
-  EXPENSE:      '#fef3c7',
-  SYSTEM:       '#e0e7ff',
-  VENUE:        '#fce7f3',
-  INVOICE:      '#f3e8ff',
-  CONTRACT:     '#f1f5f9',
-}
-
-const BADGE_TEXT: Record<string, string> = {
-  EVENT:        '#1d4ed8',
-  REGISTRATION: '#065f46',
-  EXPENSE:      '#92400e',
-  SYSTEM:       '#3730a3',
-  VENUE:        '#9d174d',
-  INVOICE:      '#6b21a8',
-  CONTRACT:     '#334155',
+const BADGE_VARIANT: Record<string, string> = {
+  EVENT:        'primary',
+  REGISTRATION: 'success',
+  EXPENSE:      'warning',
+  SYSTEM:       'secondary',
+  VENUE:        'danger',
+  INVOICE:      'info',
+  CONTRACT:     'dark',
 }
 
 function formatDate(iso: string): string {
@@ -280,13 +270,8 @@ export const NotificationCenter = () => {
                       {/* Category badge */}
                       <td className="align-middle">
                         <Badge
-                          style={{
-                            background: BADGE_COLORS[cat] ?? '#f1f5f9',
-                            color:      BADGE_TEXT[cat]   ?? '#334155',
-                            fontSize:   '0.7rem',
-                            fontWeight: 600,
-                          }}
-                          className="border-0"
+                          bg={BADGE_VARIANT[cat] ?? 'secondary'}
+                          style={{ fontSize: '0.7rem', fontWeight: 600 }}
                         >
                           {cat}
                         </Badge>

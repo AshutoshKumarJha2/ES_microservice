@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
+
 /* ── CSS Custom Properties (Theme) ───────────────────────────────────────────── */
 
 :root {
@@ -138,8 +140,6 @@ a {
 }
 
 /* ── Brand font (logo) ───────────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
-
 .es-logo {
   font-family: 'Playwrite IE', cursive;
   font-size: 1.5rem;
@@ -149,7 +149,27 @@ a {
 .es-logo .es-event  { color: var(--text-primary); }
 .es-logo .es-sphere { color: var(--saffron); }
 
-/* ── Form controls with brand left-border accent ─────────────────────────────── */
+/* ── Form controls — global defaults (light + dark) ─────────────────────────── */
+.form-control,
+.form-select {
+  background-color: var(--bg-input) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus,
+.form-select:focus {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 0 3px var(--blue-subtle) !important;
+  background: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+}
+.form-control::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
+}
+
+/* ── Form controls with brand left-border accent (legacy alias) ──────────────── */
 .es-form-control {
   background: var(--bg-input) !important;
   color: var(--text-primary) !important;
@@ -159,6 +179,10 @@ a {
   border-color: var(--blue) !important;
   box-shadow: 0 0 0 3px var(--blue-subtle) !important;
   background: var(--bg-surface) !important;
+}
+.es-form-control::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
 }
 
 /* ── Form labels (compact uppercase) ─────────────────────────────────────────── */
@@ -314,6 +338,17 @@ a {
   background-color: var(--bg-input) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
+}
+[data-theme="dark"] .form-control:focus,
+[data-theme="dark"] .form-select:focus {
+  border-color: var(--blue) !important;
+  box-shadow: 0 0 0 3px var(--blue-subtle) !important;
+  background-color: var(--bg-surface) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .form-control::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 1;
 }
 [data-theme="dark"] .navbar {
   background-color: var(--bg-surface) !important;

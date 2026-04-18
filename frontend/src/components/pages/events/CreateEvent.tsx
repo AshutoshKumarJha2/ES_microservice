@@ -131,7 +131,7 @@ export const CreateEvent = () => {
     if (session.scheduleId) {
       setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
       try {
-        await eventService.deleteSchedule(session.scheduleId)
+        await eventService.deleteSchedule(id!, session.scheduleId)
       } catch {
         setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to delete' } : s))
         return

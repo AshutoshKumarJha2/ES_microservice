@@ -41,7 +41,7 @@ export const eventService = {
     return data
   },
 
-  async deleteSchedule(scheduleId: string): Promise<void> {
-    await axiosInstance.delete(`/api/v1/event-manager/events/schedules/${scheduleId}`)
+  async deleteSchedule(eventId: string, scheduleId: string): Promise<void> {
+    await axiosInstance.delete(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`)
   },
 }

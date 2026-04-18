@@ -5,11 +5,14 @@ export const registrationService = {
   async getByEventId(
     eventId: string,
     status?: string,
+    statuses?: string,
+    ticketType?: string,
+    attendeeName?: string,
     page = 0,
     size = 10
   ): Promise<RegistrationListResponseDto> {
     const { data } = await axiosInstance.get(`/api/v1/event-manager/events/${eventId}/registrations`, {
-      params: { status, page, size },
+      params: { status, statuses, ticketType, attendeeName, page, size },
     })
     return data
   },

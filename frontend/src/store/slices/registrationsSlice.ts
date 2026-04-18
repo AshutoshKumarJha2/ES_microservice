@@ -21,11 +21,19 @@ const initialState: RegistrationsState = {
 export const fetchRegistrationsByEvent = createAsyncThunk(
   'registrations/fetchByEvent',
   async (
-    { eventId, status, page = 0, size = 10 }: { eventId: string; status?: string; page?: number; size?: number },
+    { eventId, status, statuses, ticketType, attendeeName, page = 0, size = 10 }: {
+      eventId: string
+      status?: string
+      statuses?: string
+      ticketType?: string
+      attendeeName?: string
+      page?: number
+      size?: number
+    },
     { rejectWithValue }
   ) => {
     try {
-      return await registrationService.getByEventId(eventId, status, page, size)
+      return await registrationService.getByEventId(eventId, status, statuses, ticketType, attendeeName, page, size)
     } catch (err: unknown) {
       return rejectWithValue((err as Error).message)
     }
@@ -49,6 +57,18 @@ export const rejectRegistration = createAsyncThunk(
   async (registrationId: string, { rejectWithValue }) => {
     try {
       await registrationService.reject(registrationId)
+      return registrationId
+    } catch (err: unknown) {
+      return rejectWithValue((err as Error).message)
+    }
+  }
+)
+
+export const checkInRegistration = createAsyncThunk(
+  'registrations/checkIn',
+  async (registrationId: string, { rejectWithValue }) => {
+    try {
+      await registrationService.checkIn(registrationId)
       return registrationId
     } catch (err: unknown) {
       return rejectWithValue((err as Error).message)
@@ -90,6 +110,14 @@ const registrationsSlice = createSlice({
         if (reg) reg.status = 'REJECTED'
       })
       .addCase(rejectRegistration.rejected, (state, action) => { state.actionLoading = null; state.error = action.payload as string })
+
+      .addCase(checkInRegistration.pending, (state, action) => { state.actionLoading = action.meta.arg })
+      .addCase(checkInRegistration.fulfilled, (state, action) => {
+        state.actionLoading = null
+        const reg = state.registrations.find((r) => r.registrationId === action.payload)
+        if (reg) reg.status = 'CHECKED_IN'
+      })
+      .addCase(checkInRegistration.rejected, (state, action) => { state.actionLoading = null; state.error = action.payload as string })
   },
 })
 

@@ -15,20 +15,26 @@ import com.cts.eventsphere.eventmanager.model.Registration;
 public class RegistrationDtoMapper {
 
     public static RegistrationDto toDto(Registration registration) {
+        var ticket = registration.getTicket();
         return RegistrationDto.builder()
                 .registrationId(registration.getRegistrationId())
                 .eventId(registration.getEvent().getEventId())
-                .ticketId(registration.getTicket().getTicketId())
+                .ticketId(ticket != null ? ticket.getTicketId() : null)
+                .ticketType(ticket != null ? ticket.getType() : null)
+                .ticketPrice(ticket != null && ticket.getPrice() != null ? ticket.getPrice().doubleValue() : null)
                 .attendeeId(registration.getAttendeeId())
                 .status(registration.getStatus().name())
                 .build();
     }
 
     public static RegistrationDto toDto(Registration registration, UserDetailsDto userDetails) {
+        var ticket = registration.getTicket();
         return RegistrationDto.builder()
                 .registrationId(registration.getRegistrationId())
                 .eventId(registration.getEvent().getEventId())
-                .ticketId(registration.getTicket().getTicketId())
+                .ticketId(ticket != null ? ticket.getTicketId() : null)
+                .ticketType(ticket != null ? ticket.getType() : null)
+                .ticketPrice(ticket != null && ticket.getPrice() != null ? ticket.getPrice().doubleValue() : null)
                 .attendeeId(registration.getAttendeeId())
                 .status(registration.getStatus().name())
                 .attendeeDetails(userDetails)
