@@ -6,13 +6,17 @@ import com.cts.venue_manager.dto.booking.BookingResponseVenueManagerDto;
 import com.cts.venue_manager.dto.mapper.booking.BookingRepsonseVenueManagerDtoMapper;
 import com.cts.venue_manager.dto.mapper.booking.BookingRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.booking.BookingResponseDtoMapper;
+import com.cts.venue_manager.dto.mapper.resource.ResourceVenueManagerDtoMapper;
+import com.cts.venue_manager.dto.resource.ResourceVenueManagerResponseDto;
 import com.cts.venue_manager.exception.booking.BookingNotFoundException;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
 import com.cts.venue_manager.model.Booking;
+import com.cts.venue_manager.model.ResourceAllocation;
 import com.cts.venue_manager.model.Venue;
 //import com.cts.venue_manager.model.data.AuditAction;
 import com.cts.venue_manager.model.data.BookingStatus;
 import com.cts.venue_manager.repository.BookingRepository;
+import com.cts.venue_manager.repository.ResourceAllocationRepository;
 import com.cts.venue_manager.repository.VenueRepository;
 //import com.cts.venue_manager.service.AuditService;
 import com.cts.venue_manager.service.BookingService;
@@ -24,7 +28,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Service Implementation for Booking operations.
@@ -41,6 +47,7 @@ public class BookingServiceImpl implements BookingService {
 //    private final NotificationService notificationService;
     private final BookingRequestDtoMapper requestMapper;
     private final BookingResponseDtoMapper responseMapper;
+    private final ResourceAllocationRepository resourceAllocationRepository;
     private final BookingRepsonseVenueManagerDtoMapper venueManagerMapper;
 
     /**
@@ -114,11 +121,28 @@ public class BookingServiceImpl implements BookingService {
                 .toList();
     }
 
+    /**
+     * Retrieves all bookings for a specific venue and maps them to DTOs.
+     * Fetches associated resource allocations based on the event ID from each booking.
+     *
+     * @param actorId the ID of the user performing the action
+     * @param venueId the unique identifier of the venue
+     * @return a list of BookingResponseVenueManagerDto containing booking and resource details
+     */
     @Override
     public List<BookingResponseVenueManagerDto> getBookingsByVenue(String actorId, String venueId) {
         return bookingRepository.findByVenue_VenueId(venueId).stream()
-//                .peek(b -> auditService.logAudit(actorId, AuditAction.READ, Booking.class, b.getBookingId()))
-                .map(b -> venueManagerMapper.toDto(b, new ArrayList<>()))
+                .map(booking -> {
+                    String eventId = booking.getEventId();
+                    List<ResourceAllocation> allocations = resourceAllocationRepository.findByEventId(eventId);
+
+
+                    List<ResourceVenueManagerResponseDto> allocationDtos = allocations.stream()
+                            .map(ResourceVenueManagerDtoMapper::toDto)
+                            .toList();
+
+                    return venueManagerMapper.toDto(booking, allocationDtos);
+                })
                 .toList();
     }
 

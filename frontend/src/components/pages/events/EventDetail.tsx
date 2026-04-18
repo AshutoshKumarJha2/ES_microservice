@@ -10,14 +10,16 @@ import { TicketsTab } from './tabs/TicketsTab'
 import { RegistrationsTab } from './tabs/RegistrationsTab'
 import { BudgetTab } from './tabs/BudgetTab'
 import styles from '../../../css/events/EventsPanel.module.css'
+import BookingVenueAndResource from '../booking/BookingVenueAndResource'
 
-type Tab = 'overview' | 'tickets' | 'registrations' | 'budget'
+type Tab = 'overview' | 'tickets' | 'registrations' | 'budget' | 'venue-and-resource'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'overview',      label: 'Overview' },
   { key: 'tickets',       label: 'Tickets' },
   { key: 'registrations', label: 'Registrations' },
   { key: 'budget',        label: 'Budget' },
+  { key: 'venue-and-resource', label: 'Venue and Resource' }
 ]
 
 export const EventDetail = () => {
@@ -83,6 +85,7 @@ export const EventDetail = () => {
         {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} />}
         {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
         {activeTab === 'registrations' && <RegistrationsTab />}
+        {activeTab === 'venue-and-resource' && <BookingVenueAndResource eventId={id!} />}
         {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
       </div>
     </div>

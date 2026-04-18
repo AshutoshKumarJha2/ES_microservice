@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { venueService } from '../../../services/venue/venueService'
 import { bookingService } from '../../../services/booking/bookingService'
-import { resourceSource } from '../../../services/resource/resourceSource'
+import { resourceSource } from '../../../services/resource/resourceService'
 import type {
   VenueResponseDto,
   VenueRequestDto,

@@ -50,7 +50,8 @@ export const VenueBookings = () => {
   }, [selectedVenueId, dispatch])
 
   const handleStatusChange = (bookingId: string, status: BookingStatus) => {
-    dispatch(updateBookingStatus({ bookingId, status }))
+    dispatch(updateBookingStatus({ bookingId, status }));
+    dispatch(approve)
   }
 
   const selectedVenueName = venues.find((v) => v.id === selectedVenueId)?.name ?? ''

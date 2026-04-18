@@ -29,6 +29,7 @@ import { VenueManagerDashboard } from './components/pages/venue/VenueManagerDash
 import { Venues } from './components/pages/venue/Venues'
 import { VenueBookings } from './components/pages/venue/VenueBookings'
 import { VenueResources } from './components/pages/venue/VenueResources'
+import BookingVenueAndResource from './components/pages/booking/BookingVenueAndResource'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -76,6 +77,7 @@ export const App = () => {
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
+            { path: '/organizer/booking',         element: <BookingVenueAndResource /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
           ],

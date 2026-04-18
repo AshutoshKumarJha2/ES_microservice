@@ -1,12 +1,5 @@
 import axiosInstance from '../../api/axiosInstance'
 import type {
-    VenueRequestDto,
-    VenueResponseDto,
-    AvailabilityStatus,
-    BookingRequestDto,
-    BookingResponseDto,
-    BookingResponseVenueManagerDto,
-    BookingStatus,
     ResourceRequestDto,
     ResourceResponseDto,
     ResourceAllocationRequestDto,
