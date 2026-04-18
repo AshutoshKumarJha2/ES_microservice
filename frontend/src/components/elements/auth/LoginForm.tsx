@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { loginUser, clearAuthError, logout } from '../../../store/slices/authSlice'
 import styles from '../../../css/auth/LoginForm.module.css'
@@ -14,6 +14,7 @@ interface FormState {
 export const LoginForm: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
+  const location = useLocation()
   const { loading, error } = useAppSelector((state) => state.auth)
 
   const [form, setForm] = useState<FormState>({ email: '', password: '' })
@@ -39,13 +40,25 @@ export const LoginForm: React.FC = () => {
     }
   }, [error, dispatch])
 
+  useEffect(() => {
+    const prefill = (location.state as { prefill?: { email?: string; password?: string } } | null)?.prefill
+    if (!prefill) return
+
+    setForm({
+      email: prefill.email ?? '',
+      password: prefill.password ?? '',
+    })
+
+    navigate('/login', { replace: true, state: null })
+  }, [location.state, navigate])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
     if (fieldError === name) setFieldError(null)
   }
 
-  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const result = await dispatch(loginUser({ email: form.email, password: form.password }))
     if (loginUser.fulfilled.match(result)) {
@@ -66,9 +79,20 @@ export const LoginForm: React.FC = () => {
         })
         return
       }
-      navigate('/dashboard', { replace: true })
+      const role = (result.payload as { user: { role: string } }).user.role
+      const roleRoutes: Record<string, string> = {
+        ADMIN:           '/admin/dashboard',
+        ORGANIZER:       '/organizer/dashboard',
+        VENUE_MANAGER:   '/organizer/dashboard',
+        FINANCE_OFFICER: '/organizer/dashboard',
+        VENDOR:          '/dashboard',
+        ATTENDEE:        '/dashboard',
+      }
+      navigate(roleRoutes[role] ?? '/dashboard', { replace: true })
     }
   }
+
+  // console.log("Render");
 
   return (
     <>
@@ -83,7 +107,7 @@ export const LoginForm: React.FC = () => {
           <h1 className={styles.heading}>Welcome Back</h1>
           <p className={styles.subheading}>Sign in to your EventSphere account</p>
 
-          <div className={styles.form}>
+          <form className={styles.form} onSubmit={handleSubmit}>
             {/* Row: Email + Password */}
             <div className={styles['form-row']}>
               <div className={`${styles.field} ${fieldError === 'email' ? styles['field--error'] : ''}`}>
@@ -131,13 +155,13 @@ export const LoginForm: React.FC = () => {
 
             {/* Submit */}
             <button
+              type="submit"
               className={styles['btn-submit']}
-              onClick={handleSubmit}
               disabled={loading}
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
-          </div>
+          </form>
 
           <p className={styles['footer-text']}>
             Don't have an account?{' '}
