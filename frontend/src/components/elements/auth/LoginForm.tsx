@@ -84,7 +84,7 @@ export const LoginForm: React.FC = () => {
         ADMIN:           '/admin/dashboard',
         ORGANIZER:       '/organizer/dashboard',
         VENUE_MANAGER:   '/organizer/dashboard',
-        FINANCE_OFFICER: '/organizer/dashboard',
+        FINANCE_OFFICER: '/finance/dashboard',
         VENDOR:          '/dashboard',
         ATTENDEE:        '/dashboard',
       }
