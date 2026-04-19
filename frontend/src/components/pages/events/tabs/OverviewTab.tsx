@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useAppSelector } from '../../../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
+import { updateEvent, fetchEventById } from '../../../../store/slices/eventsSlice'
 import { eventService } from '../../../../services/events/eventService'
 import { SessionFormFields, parseTimeSlot, buildTimeSlot } from '../../../elements/events/SessionFormFields'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
-import type { ScheduleResponseDto, ScheduleRequestDto } from '../../../../types/events'
+import type { ScheduleResponseDto, ScheduleRequestDto, EventStatus } from '../../../../types/events'
 import {
   Card, Row, Col, Button, Form, Spinner, Alert,
 } from 'react-bootstrap'
@@ -140,8 +141,42 @@ const GapZone = ({ boundary, hovered, onMouseEnter, onMouseLeave, onClick }: Gap
 // ── Main component ────────────────────────────────────────────────────────────
 
 export const OverviewTab = ({ eventId, eventStartAt, eventEndAt }: Props) => {
-  const { tickets }       = useAppSelector((s) => s.tickets)
+  const dispatch        = useAppDispatch()
+  const { tickets }     = useAppSelector((s) => s.tickets)
   const { registrations } = useAppSelector((s) => s.registrations)
+  const selectedEvent   = useAppSelector((s) => s.events.selectedEvent)
+
+  const [statusLoading, setStatusLoading] = useState(false)
+  const [statusError,   setStatusError]   = useState<string | null>(null)
+
+  const handleStatusChange = async (newStatus: EventStatus) => {
+    if (!selectedEvent) return
+    const confirmMsgs: Partial<Record<EventStatus, string>> = {
+      CANCELLED: 'Cancel this event? This action cannot be undone.',
+      COMPLETED: 'Mark this event as Completed?',
+    }
+    if (confirmMsgs[newStatus] && !window.confirm(confirmMsgs[newStatus])) return
+    setStatusLoading(true)
+    setStatusError(null)
+    try {
+      await dispatch(updateEvent({
+        id: selectedEvent.id,
+        payload: {
+          name: selectedEvent.eventName,
+          organizerId: selectedEvent.organizerId,
+          startDate: selectedEvent.startAt,
+          endDate: selectedEvent.endAt,
+          venueId: selectedEvent.venueId ?? '',
+          status: newStatus,
+        },
+      })).unwrap()
+      dispatch(fetchEventById(selectedEvent.id))
+    } catch (err: unknown) {
+      setStatusError((err as string) ?? 'Failed to update event status.')
+    } finally {
+      setStatusLoading(false)
+    }
+  }
 
   const [schedules, setSchedules]               = useState<ScheduleResponseDto[]>([])
   const [schedulesLoading, setSchedulesLoading] = useState(false)
@@ -434,8 +469,57 @@ export const OverviewTab = ({ eventId, eventStartAt, eventEndAt }: Props) => {
     alignItems: 'center',
   }
 
+  // ── Status action helpers ────────────────────────────────────────────────
+  const status = selectedEvent?.status
+
+  const statusActions = status === 'DRAFT' ? (
+    <Button
+      variant="outline-primary" size="sm" className="rounded-3 fw-semibold"
+      onClick={() => handleStatusChange('PUBLISHED')} disabled={statusLoading}
+    >
+      {statusLoading ? <><Spinner animation="border" size="sm" className="me-1" />Publishing…</> : 'Publish Event'}
+    </Button>
+  ) : status === 'PUBLISHED' ? (
+    <div className="d-flex gap-2">
+      <Button
+        variant="outline-secondary" size="sm" className="rounded-3 fw-semibold"
+        onClick={() => handleStatusChange('COMPLETED')} disabled={statusLoading}
+      >
+        {statusLoading ? <Spinner animation="border" size="sm" /> : 'Mark Complete'}
+      </Button>
+      <Button
+        variant="outline-danger" size="sm" className="rounded-3 fw-semibold"
+        onClick={() => handleStatusChange('CANCELLED')} disabled={statusLoading}
+      >
+        {statusLoading ? <Spinner animation="border" size="sm" /> : 'Cancel Event'}
+      </Button>
+    </div>
+  ) : (
+    <span className="small" style={{ color: 'var(--text-muted)' }}>
+      {status === 'COMPLETED' ? 'Event completed — no further actions.' : 'Event cancelled — no further actions.'}
+    </span>
+  )
+
   return (
     <>
+      {/* Event Status card */}
+      {selectedEvent && (
+        <Card className="es-card border shadow-sm mb-3">
+          <Card.Body className="p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div className="d-flex align-items-center gap-2">
+              <span className="small fw-medium" style={{ color: 'var(--text-secondary)' }}>Current Status</span>
+              <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
+            </div>
+            <div>
+              {statusActions}
+              {statusError && (
+                <Alert variant="danger" className="py-1 px-2 mt-2 mb-0 small">{statusError}</Alert>
+              )}
+            </div>
+          </Card.Body>
+        </Card>
+      )}
+
       {/* Quick stats */}
       <Row className="g-3 mb-3">
         {[

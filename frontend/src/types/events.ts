@@ -66,6 +66,7 @@ export interface EventResponseDto {
   endAt: string
   status: EventStatus
   venueId: string
+  venue?: VenueResponseDto
 }
 
 // ── Schedules ─────────────────────────────────────────────────────────────────

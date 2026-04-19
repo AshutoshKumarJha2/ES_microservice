@@ -3,11 +3,11 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllEvents, deleteEvent, createEvent, updateEvent } from '../../../store/slices/eventsSlice'
 import { venueService } from '../../../services/events/venueService'
-import type { EventResponseDto, EventRequestDto, VenueResponseDto } from '../../../types/events'
+import type { EventResponseDto, EventRequestDto, VenueResponseDto, EventStatus } from '../../../types/events'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
-  Spinner, Alert,
+  Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
 
 const EMPTY_FORM: EventRequestDto = {
@@ -20,12 +20,24 @@ export const OrganizerDashboard = () => {
   const { events, loading } = useAppSelector((state) => state.events)
   const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
 
-  const [venues, setVenues]           = useState<VenueResponseDto[]>([])
-  const [editId, setEditId]           = useState<string | null>(null)
-  const [showModal, setShowModal]     = useState(false)
-  const [form, setForm]               = useState<EventRequestDto>({ ...EMPTY_FORM })
-  const [submitting, setSubmitting]   = useState(false)
-  const [formError, setFormError]     = useState<string | null>(null)
+  const [venues, setVenues]               = useState<VenueResponseDto[]>([])
+  const [editId, setEditId]               = useState<string | null>(null)
+  const [showModal, setShowModal]         = useState(false)
+  const [form, setForm]                   = useState<EventRequestDto>({ ...EMPTY_FORM })
+  const [submitting, setSubmitting]       = useState(false)
+  const [formError, setFormError]         = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors]     = useState<{ startDate?: string; endDate?: string }>({})
+  const [actionLoading, setActionLoading] = useState<string | null>(null)   // event ID being status-mutated
+
+  const today = new Date().toISOString().split('T')[0]
+
+  const validateDates = (startDate: string, endDate: string) => {
+    const errors: { startDate?: string; endDate?: string } = {}
+    if (startDate && startDate < today) errors.startDate = 'Start date cannot be in the past.'
+    if (endDate && endDate <= today)    errors.endDate   = 'End date must be a future date.'
+    if (startDate && endDate && endDate <= startDate) errors.endDate = 'End date must be after the start date.'
+    return errors
+  }
 
   useEffect(() => { dispatch(fetchAllEvents()) }, [dispatch])
   useEffect(() => { venueService.getAll().then(setVenues).catch(console.error) }, [])
@@ -35,16 +47,19 @@ export const OrganizerDashboard = () => {
   const pendingEvents   = events.filter((e) => e.status === 'DRAFT').length
 
   const STATS = [
-    { label: 'Active Events', value: activeEvents,    accent: 'es-stat-card-blue' },
+    { label: 'Active Events', value: activeEvents,    accent: 'es-stat-card-blue'   },
     { label: 'Total Events',  value: events.length,   accent: 'es-stat-card-orange' },
-    { label: 'Completed',     value: completedEvents, accent: 'es-stat-card-green' },
-    { label: 'Drafts',        value: pendingEvents,   accent: 'es-stat-card-amber' },
+    { label: 'Completed',     value: completedEvents, accent: 'es-stat-card-green'  },
+    { label: 'Drafts',        value: pendingEvents,   accent: 'es-stat-card-amber'  },
   ]
+
+  // ── Modal helpers ──────────────────────────────────────────────────────────
 
   const openCreate = () => {
     setEditId(null)
     setForm({ ...EMPTY_FORM, organizerId: userId })
     setFormError(null)
+    setFieldErrors({})
     setShowModal(true)
   }
 
@@ -56,18 +71,27 @@ export const OrganizerDashboard = () => {
       venueId: event.venueId ?? '', status: event.status,
     })
     setFormError(null)
+    setFieldErrors({})
     setShowModal(true)
   }
 
-  const closeModal = () => { setShowModal(false); setFormError(null) }
+  const closeModal = () => { setShowModal(false); setFormError(null); setFieldErrors({}) }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setForm((prev) => ({ ...prev, [name]: value }))
+    setForm((prev) => {
+      const next = { ...prev, [name]: value }
+      if (name === 'startDate' || name === 'endDate') {
+        setFieldErrors(validateDates(next.startDate, next.endDate))
+      }
+      return next
+    })
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    const errors = validateDates(form.startDate, form.endDate)
+    if (Object.keys(errors).length > 0) { setFieldErrors(errors); return }
     setSubmitting(true)
     setFormError(null)
     try {
@@ -78,17 +102,106 @@ export const OrganizerDashboard = () => {
       }
       dispatch(fetchAllEvents())
       closeModal()
-    } catch {
-      setFormError(`Failed to ${editId ? 'update' : 'create'} event. Please try again.`)
+    } catch (err: unknown) {
+      setFormError((err as string) ?? `Failed to ${editId ? 'update' : 'create'} event.`)
     } finally {
       setSubmitting(false)
     }
   }
 
+  // ── Table actions ──────────────────────────────────────────────────────────
+
   const handleDelete = (id: string) => {
-    if (!window.confirm('Delete this event?')) return
+    if (!window.confirm('Delete this event? This cannot be undone.')) return
     dispatch(deleteEvent(id))
   }
+
+  const handleStatusChange = async (event: EventResponseDto, newStatus: EventStatus) => {
+    const confirmMsgs: Partial<Record<EventStatus, string>> = {
+      CANCELLED: 'Cancel this event? Attendees will be notified.',
+      COMPLETED: 'Mark this event as Completed?',
+    }
+    if (confirmMsgs[newStatus] && !window.confirm(confirmMsgs[newStatus])) return
+
+    setActionLoading(event.id)
+    try {
+      await dispatch(updateEvent({
+        id: event.id,
+        payload: {
+          name: event.eventName,
+          organizerId: event.organizerId,
+          startDate: event.startAt,
+          endDate: event.endAt,
+          venueId: event.venueId ?? '',
+          status: newStatus,
+        },
+      })).unwrap()
+      dispatch(fetchAllEvents())
+    } catch { /* error already in Redux */ } finally {
+      setActionLoading(null)
+    }
+  }
+
+  // ── Overflow menu per row ──────────────────────────────────────────────────
+
+  const RowMenu = ({ event }: { event: EventResponseDto }) => {
+    const busy = actionLoading === event.id
+    return (
+      <Dropdown onClick={(e) => e.stopPropagation()}>
+        <Dropdown.Toggle
+          variant="link"
+          size="sm"
+          bsPrefix="btn"
+          className="p-1 rounded-2 border-0"
+          style={{ color: 'var(--text-muted)', lineHeight: 1, fontSize: '1.1rem' }}
+          disabled={busy}
+        >
+          {busy ? <Spinner animation="border" size="sm" /> : '⋮'}
+        </Dropdown.Toggle>
+
+        <Dropdown.Menu align="end" style={{ fontSize: '0.85rem', minWidth: 160 }}>
+          {/* Edit — always available */}
+          <Dropdown.Item onClick={() => openEdit(event)}>Edit</Dropdown.Item>
+
+          {/* Status transitions */}
+          {event.status === 'DRAFT' && (
+            <>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={() => handleStatusChange(event, 'PUBLISHED')}>
+                Publish
+              </Dropdown.Item>
+            </>
+          )}
+          {event.status === 'PUBLISHED' && (
+            <>
+              <Dropdown.Divider />
+              <Dropdown.Item onClick={() => handleStatusChange(event, 'COMPLETED')}>
+                Mark Complete
+              </Dropdown.Item>
+              <Dropdown.Item
+                className="text-danger"
+                onClick={() => handleStatusChange(event, 'CANCELLED')}
+              >
+                Cancel Event
+              </Dropdown.Item>
+            </>
+          )}
+
+          {/* Delete — only for DRAFT or CANCELLED */}
+          {(event.status === 'DRAFT' || event.status === 'CANCELLED') && (
+            <>
+              <Dropdown.Divider />
+              <Dropdown.Item className="text-danger" onClick={() => handleDelete(event.id)}>
+                Delete
+              </Dropdown.Item>
+            </>
+          )}
+        </Dropdown.Menu>
+      </Dropdown>
+    )
+  }
+
+  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
@@ -140,11 +253,9 @@ export const OrganizerDashboard = () => {
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event Name</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Start Date</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>End Date</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
+                    {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
+                      <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
@@ -160,15 +271,8 @@ export const OrganizerDashboard = () => {
                       <td className="align-middle">
                         <EventStatusBadge status={event.status?.toLowerCase()} variant="event" />
                       </td>
-                      <td className="align-middle" onClick={(e) => e.stopPropagation()}>
-                        <div className="d-flex gap-1">
-                          <Button variant="outline-primary" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }} onClick={() => openEdit(event)}>
-                            Edit
-                          </Button>
-                          <Button variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }} onClick={() => handleDelete(event.id)}>
-                            Delete
-                          </Button>
-                        </div>
+                      <td className="align-middle text-end" style={{ width: 48 }} onClick={(e) => e.stopPropagation()}>
+                        <RowMenu event={event} />
                       </td>
                     </tr>
                   ))}
@@ -198,6 +302,11 @@ export const OrganizerDashboard = () => {
                     placeholder="Enter event name" required
                     className="es-form-control rounded-3"
                   />
+                  {!editId && (
+                    <Form.Text style={{ color: 'var(--text-muted)' }}>
+                      Event will be saved as Draft. You can publish it later.
+                    </Form.Text>
+                  )}
                 </Form.Group>
               </Col>
               <Col xs={12} sm={6}>
@@ -205,9 +314,11 @@ export const OrganizerDashboard = () => {
                   <Form.Label className="es-label">Start Date *</Form.Label>
                   <Form.Control
                     name="startDate" type="date" value={form.startDate}
-                    onChange={handleChange} required
+                    min={today} onChange={handleChange} required
+                    isInvalid={!!fieldErrors.startDate}
                     className="es-form-control rounded-3"
                   />
+                  <Form.Control.Feedback type="invalid">{fieldErrors.startDate}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
               <Col xs={12} sm={6}>
@@ -215,9 +326,11 @@ export const OrganizerDashboard = () => {
                   <Form.Label className="es-label">End Date *</Form.Label>
                   <Form.Control
                     name="endDate" type="date" value={form.endDate}
-                    min={form.startDate} onChange={handleChange} required
+                    min={form.startDate || today} onChange={handleChange} required
+                    isInvalid={!!fieldErrors.endDate}
                     className="es-form-control rounded-3"
                   />
+                  <Form.Control.Feedback type="invalid">{fieldErrors.endDate}</Form.Control.Feedback>
                 </Form.Group>
               </Col>
               <Col xs={12} sm={6}>
@@ -231,17 +344,21 @@ export const OrganizerDashboard = () => {
                   </Form.Select>
                 </Form.Group>
               </Col>
-              <Col xs={12} sm={6}>
-                <Form.Group>
-                  <Form.Label className="es-label">Status</Form.Label>
-                  <Form.Select name="status" value={form.status} onChange={handleChange} className="es-form-control rounded-3">
-                    <option value="DRAFT">Draft</option>
-                    <option value="PUBLISHED">Published</option>
-                    <option value="COMPLETED">Completed</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </Form.Select>
-                </Form.Group>
-              </Col>
+
+              {/* Status — edit mode only */}
+              {editId && (
+                <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label className="es-label">Status</Form.Label>
+                    <Form.Select name="status" value={form.status} onChange={handleChange} className="es-form-control rounded-3">
+                      <option value="DRAFT">Draft</option>
+                      <option value="PUBLISHED">Published</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              )}
             </Row>
           </Form>
         </Modal.Body>

@@ -28,19 +28,26 @@ public interface EventService {
 
     /**
      * Retrieves all events available in the system.
+     * DRAFT events are excluded when the caller's role is {@code ATTENDEE}.
      *
-     * @return a list of response DTOs representing all events
+     * @param userId the ID of the requesting user (for audit)
+     * @param role   the role of the requesting user
+     * @return a list of response DTOs representing all visible events
      */
-    List<EventResponseDto> findAllEvents(String userId);
+    List<EventResponseDto> findAllEvents(String userId, String role);
 
     /**
      * Finds an event by its unique identifier.
+     * DRAFT events are treated as not found when the caller's role is {@code ATTENDEE}.
      *
      * @param eventId the unique identifier of the event
+     * @param userId  the ID of the requesting user (for audit)
+     * @param role    the role of the requesting user
      * @return the response DTO representing the event
-     * @throws EventNotFoundException if no event exists with the given ID
+     * @throws EventNotFoundException if no event exists with the given ID, or the event
+     *                                is a DRAFT and the caller is an ATTENDEE
      */
-    EventResponseDto findById(String eventId, String userId) throws EventNotFoundException;
+    EventResponseDto findById(String eventId, String userId, String role) throws EventNotFoundException;
 
     /**
      * Updates an existing event by its unique identifier.

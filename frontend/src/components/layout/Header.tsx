@@ -9,6 +9,8 @@ import {
   Navbar, Nav, Container, NavDropdown, Badge,
 } from 'react-bootstrap'
 
+const NAV_LINK_STYLE = { fontSize: '0.9rem', color: 'var(--text-primary)' }
+
 const ROLE_BADGE: Record<string, string> = {
   ADMIN:           'es-badge-admin',
   ORGANIZER:       'es-badge-organizer',
@@ -60,7 +62,29 @@ export const Header = () => {
         <Navbar.Toggle aria-controls="main-nav" />
 
         <Navbar.Collapse id="main-nav">
-          <Nav className="me-auto" />
+          <Nav className="me-auto">
+            {user?.role === 'ATTENDEE' && (
+              <>
+                <Nav.Link as={Link} to="/events"                  onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Browse Events</Nav.Link>
+                <Nav.Link as={Link} to="/attendee/registrations"  onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>My Registrations</Nav.Link>
+              </>
+            )}
+            {user?.role === 'ORGANIZER' && (
+              <>
+                <Nav.Link as={Link} to="/organizer/dashboard" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+              </>
+            )}
+            {user?.role === 'ADMIN' && (
+              <Nav.Link as={Link} to="/admin/dashboard" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+            )}
+            {user?.role === 'FINANCE_OFFICER' && (
+              <>
+                <Nav.Link as={Link} to="/finance/expenses" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Expenses</Nav.Link>
+                <Nav.Link as={Link} to="/finance/payments" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Payments</Nav.Link>
+                <Nav.Link as={Link} to="/finance/budget"   onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Budget</Nav.Link>
+              </>
+            )}
+          </Nav>
 
           {/* Right actions */}
           <div className="d-flex align-items-center gap-2 mt-2 mt-lg-0">

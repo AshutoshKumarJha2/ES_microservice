@@ -106,6 +106,21 @@ public class VenueServiceImpl implements VenueService {
     }
 
     /**
+     * Retrieves venue details for a batch of venue IDs in a single DB query.
+     * Venues whose IDs are not found are silently omitted from the result.
+     *
+     * @param ids the list of venue UUIDs to look up
+     * @return a list of matched VenueResponseDto objects
+     */
+    @Override
+    public List<VenueResponseDto> findAllByIds(List<String> ids) {
+        log.info("Bulk fetching {} venue id(s)", ids.size());
+        return venueRepository.findAllById(ids).stream()
+                .map(venueResponseDtoMapper::toDto)
+                .toList();
+    }
+
+    /**
      * Retrieves venues filtered by a specific geographic location.
      *
      * @param actorId  The unique identifier of the user requesting the data.

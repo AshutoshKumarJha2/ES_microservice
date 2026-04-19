@@ -46,14 +46,15 @@ const FALLBACKS: Record<BadgeVariant, string> = {
 interface Props {
   status: string
   variant: BadgeVariant
+  label?: string
 }
 
-export const EventStatusBadge = ({ status, variant }: Props) => {
+export const EventStatusBadge = ({ status, variant, label }: Props) => {
   const map = MAPS[variant]
   const cls = map[status] ?? map[status?.toLowerCase()] ?? FALLBACKS[variant]
   return (
     <Badge className={`${cls} border-0`} style={{ fontSize: '0.7rem' }}>
-      {status}
+      {label ?? status}
     </Badge>
   )
 }

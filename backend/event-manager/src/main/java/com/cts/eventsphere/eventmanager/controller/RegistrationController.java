@@ -61,6 +61,17 @@ public class RegistrationController {
         return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, statuses, ticketType, attendeeName, size, page));
     }
 
+    @GetMapping("/my-registrations")
+    @PreAuthorize("hasRole('ATTENDEE')")
+    public ResponseEntity<RegistrationListResponseDto> getMyRegistrations(
+            @AuthenticationPrincipal UserPrincipal userDetails,
+            @RequestParam(defaultValue = "100") @Min(1) @Max(200) int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page) {
+        var userId = userDetails.userId();
+        log.info("Fetching all registrations for attendee: {}", userId);
+        return ResponseEntity.ok(registrationService.getRegistrationsByUserId(userId, userId, size, page));
+    }
+
     @GetMapping("/events/{eventId}/my-registration")
     @PreAuthorize("hasRole('ATTENDEE')")
     public ResponseEntity<RegistrationDto> getMyRegistrationForEvent(

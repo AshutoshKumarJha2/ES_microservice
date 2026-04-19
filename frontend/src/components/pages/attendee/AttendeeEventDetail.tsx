@@ -1,0 +1,409 @@
+import { useEffect, useState } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import {
+  Container, Row, Col, Card, Nav, Spinner, Alert, Button,
+  Form, Table, Badge,
+} from 'react-bootstrap'
+import { toast } from 'react-toastify'
+import { eventService } from '../../../services/events/eventService'
+import { ticketService } from '../../../services/events/ticketService'
+import { registrationService } from '../../../services/events/registrationService'
+import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import { PanelHeader } from '../../elements/events/PanelHeader'
+import type {
+  EventResponseDto, ScheduleResponseDto, TicketResponseDto, RegistrationDto,
+} from '../../../types/events'
+
+const EVENT_LABEL: Record<string, string> = {
+  PUBLISHED: 'Upcoming',
+  COMPLETED: 'Ended',
+  CANCELLED: 'Cancelled',
+}
+
+const REG_BADGE_LABEL: Record<string, string> = {
+  PENDING:    'Registered',
+  CONFIRMED:  'Confirmed',
+  CHECKED_IN: 'Checked In',
+  CANCELLED:  'Cancelled',
+}
+
+const REG_BADGE_COLOR: Record<string, string> = {
+  PENDING:    '#f59e0b',
+  CONFIRMED:  '#22c55e',
+  CHECKED_IN: '#3b82f6',
+  CANCELLED:  '#6b7280',
+}
+
+type Tab = 'overview' | 'schedule' | 'registration'
+
+const REG_STATUS_COLOR: Record<string, string> = {
+  PENDING:    'warning',
+  CONFIRMED:  'success',
+  CHECKED_IN: 'primary',
+  CANCELLED:  'secondary',
+}
+
+export const AttendeeEventDetail = () => {
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  const [tab, setTab]                   = useState<Tab>('overview')
+  const [event, setEvent]               = useState<EventResponseDto | null>(null)
+  const [schedules, setSchedules]       = useState<ScheduleResponseDto[]>([])
+  const [tickets, setTickets]           = useState<TicketResponseDto[]>([])
+  const [registration, setRegistration] = useState<RegistrationDto | null>(null)
+  const [loading, setLoading]           = useState(true)
+  const [error, setError]               = useState<string | null>(null)
+
+  // Registration form state
+  const [selectedTicket, setSelectedTicket] = useState('')
+  const [registering, setRegistering]       = useState(false)
+  const [regError, setRegError]             = useState<string | null>(null)
+  const [cancelling, setCancelling]         = useState(false)
+
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    Promise.allSettled([
+      eventService.getById(id),
+      eventService.getSchedules(id),
+      ticketService.getByEventId(id, 0, 50),
+      registrationService.getMyRegistration(id),
+    ])
+      .then(([evtR, schedsR, ticketsR, regR]) => {
+        if (evtR.status === 'rejected') { setError('Failed to load event details.'); return }
+        const evt = evtR.value
+        setEvent(evt)
+        if (schedsR.status === 'fulfilled') setSchedules(schedsR.value)
+        if (ticketsR.status === 'fulfilled') setTickets(ticketsR.value.tickets ?? [])
+        if (regR.status === 'fulfilled')    setRegistration(regR.value)
+      })
+      .finally(() => setLoading(false))
+  }, [id])
+
+  const handleRegister = async () => {
+    if (!id || !selectedTicket) return
+    setRegistering(true)
+    setRegError(null)
+    try {
+      const reg = await registrationService.register(id, selectedTicket)
+      setRegistration(reg)
+      toast.success('Successfully registered for the event!')
+    } catch {
+      setRegError('Registration failed. You may already be registered or the event is not accepting registrations.')
+    } finally {
+      setRegistering(false)
+    }
+  }
+
+  const handleCancel = async () => {
+    if (!registration) return
+    if (!window.confirm('Cancel your registration for this event?')) return
+    setCancelling(true)
+    try {
+      await registrationService.cancel(registration.registrationId)
+      setRegistration((prev) => prev ? { ...prev, status: 'CANCELLED' } : prev)
+      toast.info('Registration cancelled.')
+    } catch {
+      toast.error('Failed to cancel registration.')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }} className="d-flex align-items-center justify-content-center">
+        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      </div>
+    )
+  }
+
+  if (error || !event) {
+    return (
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }} className="p-4">
+        <Alert variant="danger">{error ?? 'Event not found.'}</Alert>
+        <Button variant="outline-secondary" size="sm" onClick={() => navigate('/events')}>← Back to Events</Button>
+      </div>
+    )
+  }
+
+  const canRegister    = event.status === 'PUBLISHED' && !registration
+  const canCancel      = registration && (registration.status === 'PENDING' || registration.status === 'CONFIRMED')
+  const isCompleted    = event.status === 'COMPLETED'
+  const activeTickets  = tickets.filter((t) => t.status === 'ACTIVE')
+
+  return (
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      {/* Banner */}
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3">
+          <Button
+            variant="link"
+            className="text-white-50 p-0 mb-2 small"
+            style={{ textDecoration: 'none' }}
+            onClick={() => navigate('/events')}
+          >
+            ← Browse Events
+          </Button>
+          <div className="d-flex flex-wrap align-items-center gap-3">
+            <div>
+              <h1 className="fw-bold fs-3 mb-1">{event.eventName}</h1>
+              <p className="mb-0 text-white-50 small">{event.startAt} — {event.endAt}</p>
+            </div>
+            <EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} />
+            {registration && (
+              <span
+                className="rounded-2 px-2 py-1 fw-semibold"
+                style={{
+                  fontSize: '0.75rem',
+                  background: REG_BADGE_COLOR[registration.status] ?? '#6b7280',
+                  color: '#fff',
+                }}
+              >
+                {REG_BADGE_LABEL[registration.status] ?? registration.status}
+              </span>
+            )}
+          </div>
+        </Container>
+      </div>
+
+      {/* Tab navigation */}
+      <div
+        className="border-bottom"
+        style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)', transition: 'background 0.3s' }}
+      >
+        <Container fluid className="px-3 px-md-4">
+          <Nav>
+            {([
+              { key: 'overview',     label: 'Overview'        },
+              { key: 'schedule',     label: 'Schedule'        },
+              { key: 'registration', label: 'My Registration' },
+            ] as { key: Tab; label: string }[]).map(({ key, label }) => (
+              <Nav.Link
+                key={key}
+                onClick={() => setTab(key)}
+                style={{
+                  color:        tab === key ? 'var(--blue)' : 'var(--text-secondary)',
+                  fontWeight:   tab === key ? 600 : 400,
+                  borderBottom: tab === key ? '2px solid var(--blue)' : '2px solid transparent',
+                  paddingBottom: '0.6rem',
+                  paddingTop:    '0.6rem',
+                  fontSize:      '0.9rem',
+                  cursor:        'pointer',
+                  marginRight:   '0.25rem',
+                }}
+              >
+                {label}
+              </Nav.Link>
+            ))}
+          </Nav>
+        </Container>
+      </div>
+
+      <Container fluid className="px-3 px-md-4 py-4">
+
+        {/* ── Overview tab ───────────────────────────────────────────────── */}
+        {tab === 'overview' && (
+          <Row className="g-3">
+            <Col xs={12} lg={6}>
+              <Card className="es-card border shadow-sm h-100">
+                <Card.Body className="p-3 p-md-4">
+                  <PanelHeader title="Event Details" />
+                  <dl className="mb-0" style={{ fontSize: '0.88rem' }}>
+                    <Row as="div" className="g-2">
+                      <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Name</Col>
+                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.eventName}</Col>
+                      <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Start Date</Col>
+                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.startAt}</Col>
+                      <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>End Date</Col>
+                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.endAt}</Col>
+                      <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
+                      <Col xs={7}><EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} /></Col>
+                    </Row>
+                  </dl>
+                </Card.Body>
+              </Card>
+            </Col>
+
+            <Col xs={12} lg={6}>
+              <Card className="es-card border shadow-sm h-100">
+                <Card.Body className="p-3 p-md-4">
+                  <PanelHeader title="Venue" />
+                  {event.venue ? (
+                    <dl className="mb-0" style={{ fontSize: '0.88rem' }}>
+                      <Row as="div" className="g-2">
+                        <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Name</Col>
+                        <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.venue!.name}</Col>
+                        <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Location</Col>
+                        <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.venue!.location}</Col>
+                        <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Capacity</Col>
+                        <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.venue!.capacity.toLocaleString()} seats</Col>
+                        <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Availability</Col>
+                        <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.venue!.availabilityStatus}</Col>
+                      </Row>
+                    </dl>
+                  ) : (
+                    <p className="mb-0 small" style={{ color: 'var(--text-muted)' }}>No venue assigned to this event.</p>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        )}
+
+        {/* ── Schedule tab ───────────────────────────────────────────────── */}
+        {tab === 'schedule' && (
+          <Card className="es-card border shadow-sm">
+            <Card.Body className="p-3 p-md-4">
+              <PanelHeader title="Event Schedule">
+                <span className="small" style={{ color: 'var(--text-muted)' }}>{schedules.length} session{schedules.length !== 1 ? 's' : ''}</span>
+              </PanelHeader>
+
+              {schedules.length === 0 ? (
+                <p className="text-center py-4 mb-0 small" style={{ color: 'var(--text-muted)' }}>
+                  No sessions scheduled yet.
+                </p>
+              ) : (
+                <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                  <thead style={{ background: 'var(--bg-subtle)' }}>
+                    <tr>
+                      {['Date', 'Time Slot', 'Activity', 'Status'].map((h) => (
+                        <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {schedules.map((s) => (
+                      <tr key={s.scheduleId}>
+                        <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{s.date}</td>
+                        <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{s.timeSlot}</td>
+                        <td className="align-middle fw-medium" style={{ color: 'var(--text-primary)' }}>{s.activity}</td>
+                        <td className="align-middle">
+                          <EventStatusBadge status={s.status?.toLowerCase()} variant="schedule" />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              )}
+            </Card.Body>
+          </Card>
+        )}
+
+        {/* ── My Registration tab ────────────────────────────────────────── */}
+        {tab === 'registration' && (
+          <Row className="g-3">
+            <Col xs={12} lg={7}>
+              <Card className="es-card border shadow-sm">
+                <Card.Body className="p-3 p-md-4">
+                  <PanelHeader title="My Registration" />
+
+                  {registration && registration.status !== 'CANCELLED' ? (
+                    /* Already registered */
+                    <>
+                      <dl className="mb-3" style={{ fontSize: '0.88rem' }}>
+                        <Row as="div" className="g-2">
+                          <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Registration ID</Col>
+                          <Col xs={7} style={{ color: 'var(--text-primary)', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                            {registration.registrationId}
+                          </Col>
+                          <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Ticket Type</Col>
+                          <Col xs={7} style={{ color: 'var(--text-primary)' }}>{registration.ticketType ?? '—'}</Col>
+                          <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Ticket Price</Col>
+                          <Col xs={7} style={{ color: 'var(--text-primary)' }}>
+                            {registration.ticketPrice != null ? `₹ ${registration.ticketPrice.toLocaleString()}` : '—'}
+                          </Col>
+                          <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
+                          <Col xs={7}>
+                            <Badge bg={REG_STATUS_COLOR[registration.status] ?? 'secondary'} className="rounded-2">
+                              {registration.status}
+                            </Badge>
+                          </Col>
+                        </Row>
+                      </dl>
+
+                      {canCancel && (
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="rounded-3"
+                          onClick={handleCancel}
+                          disabled={cancelling}
+                        >
+                          {cancelling ? <><Spinner animation="border" size="sm" className="me-1" />Cancelling…</> : 'Cancel Registration'}
+                        </Button>
+                      )}
+                    </>
+                  ) : registration?.status === 'CANCELLED' ? (
+                    <Alert variant="secondary" className="py-2 mb-0 small">
+                      Your registration was cancelled.
+                    </Alert>
+                  ) : canRegister ? (
+                    /* Not registered — show registration form */
+                    <>
+                      {regError && <Alert variant="danger" className="py-2 mb-3 small">{regError}</Alert>}
+                      <Form.Group className="mb-3">
+                        <Form.Label className="es-label">Select Ticket *</Form.Label>
+                        {activeTickets.length === 0 ? (
+                          <p className="small mb-0" style={{ color: 'var(--text-muted)' }}>No tickets available for this event.</p>
+                        ) : (
+                          <Form.Select
+                            value={selectedTicket}
+                            onChange={(e) => setSelectedTicket(e.target.value)}
+                            className="es-form-control rounded-3"
+                          >
+                            <option value="">Choose a ticket…</option>
+                            {activeTickets.map((t) => (
+                              <option key={t.ticketId} value={t.ticketId}>
+                                {t.type ?? 'General'} — ₹{t.price?.toLocaleString() ?? '0'}
+                              </option>
+                            ))}
+                          </Form.Select>
+                        )}
+                      </Form.Group>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        className="fw-semibold rounded-3"
+                        onClick={handleRegister}
+                        disabled={!selectedTicket || registering || activeTickets.length === 0}
+                      >
+                        {registering ? <><Spinner animation="border" size="sm" className="me-1" />Registering…</> : 'Register Now'}
+                      </Button>
+                    </>
+                  ) : (
+                    <Alert variant="warning" className="py-2 mb-0 small">
+                      {event.status === 'DRAFT' && 'This event is not open for registration yet.'}
+                      {event.status === 'COMPLETED' && 'This event has ended.'}
+                      {event.status === 'CANCELLED' && 'This event has been cancelled.'}
+                    </Alert>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
+
+            {/* Engagement / feedback card */}
+            {isCompleted && (
+              <Col xs={12} lg={5}>
+                <Card className="es-card border shadow-sm h-100">
+                  <Card.Body className="p-3 p-md-4">
+                    <PanelHeader title="Your Engagement" />
+                    <p className="small mb-3" style={{ color: 'var(--text-secondary)' }}>
+                      This event has concluded. Share your experience and help improve future events.
+                    </p>
+                    <Link to={`/attendee/feedback/${event.id}`}>
+                      <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium">
+                        Submit Feedback
+                      </Button>
+                    </Link>
+                  </Card.Body>
+                </Card>
+              </Col>
+            )}
+          </Row>
+        )}
+      </Container>
+    </div>
+  )
+}

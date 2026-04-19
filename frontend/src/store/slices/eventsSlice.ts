@@ -1,6 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import axios from 'axios'
 import { eventService } from '../../services/events/eventService'
 import type { EventResponseDto, EventRequestDto } from '../../types/events'
+
+function extractMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const data = err.response?.data
+    return data?.message ?? data?.error ?? data?.detail ?? err.message
+  }
+  return (err as Error).message
+}
 
 interface EventsState {
   events: EventResponseDto[]
@@ -20,7 +29,7 @@ export const fetchAllEvents = createAsyncThunk('events/fetchAll', async (_, { re
   try {
     return await eventService.getAll()
   } catch (err: unknown) {
-    return rejectWithValue((err as Error).message)
+    return rejectWithValue(extractMessage(err))
   }
 })
 
@@ -28,7 +37,7 @@ export const fetchEventById = createAsyncThunk('events/fetchById', async (id: st
   try {
     return await eventService.getById(id)
   } catch (err: unknown) {
-    return rejectWithValue((err as Error).message)
+    return rejectWithValue(extractMessage(err))
   }
 })
 
@@ -36,7 +45,7 @@ export const createEvent = createAsyncThunk('events/create', async (payload: Eve
   try {
     return await eventService.create(payload)
   } catch (err: unknown) {
-    return rejectWithValue((err as Error).message)
+    return rejectWithValue(extractMessage(err))
   }
 })
 
@@ -46,7 +55,7 @@ export const updateEvent = createAsyncThunk(
     try {
       return await eventService.update(id, payload)
     } catch (err: unknown) {
-      return rejectWithValue((err as Error).message)
+      return rejectWithValue(extractMessage(err))
     }
   }
 )
@@ -56,7 +65,7 @@ export const deleteEvent = createAsyncThunk('events/delete', async (id: string, 
     await eventService.delete(id)
     return id
   } catch (err: unknown) {
-    return rejectWithValue((err as Error).message)
+    return rejectWithValue(extractMessage(err))
   }
 })
 

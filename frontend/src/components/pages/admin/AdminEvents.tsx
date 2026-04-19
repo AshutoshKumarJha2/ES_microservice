@@ -6,16 +6,7 @@ import {
   Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Spinner, Pagination,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
-
-interface EventDto {
-  id: string
-  name: string
-  organizerName?: string
-  startDate?: string
-  endDate?: string
-  venueName?: string
-  status?: string
-}
+import type { EventResponseDto } from '../../../types/events'
 
 const STATUSES = ['ALL', 'PUBLISHED', 'DRAFT', 'COMPLETED', 'CANCELLED']
 const PAGE_SIZE = 10
@@ -36,7 +27,7 @@ const formatDate = (iso?: string) => {
 
 export const AdminEvents: React.FC = () => {
   const navigate = useNavigate()
-  const [allEvents, setAllEvents] = useState<EventDto[]>([])
+  const [allEvents, setAllEvents] = useState<EventResponseDto[]>([])
   const [loading, setLoading]     = useState(false)
   const [search, setSearch]       = useState('')
   const [status, setStatus]       = useState('ALL')
@@ -54,7 +45,7 @@ export const AdminEvents: React.FC = () => {
     const q = search.toLowerCase()
     return allEvents.filter((ev) => {
       const matchStatus = status === 'ALL' || ev.status === status
-      const matchSearch = !q || ev.name.toLowerCase().includes(q) || ev.organizerName?.toLowerCase().includes(q)
+      const matchSearch = !q || ev.eventName.toLowerCase().includes(q)
       return matchStatus && matchSearch
     })
   }, [allEvents, search, status])
@@ -123,7 +114,7 @@ export const AdminEvents: React.FC = () => {
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer ID</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Dates</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Venue</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
@@ -135,13 +126,13 @@ export const AdminEvents: React.FC = () => {
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
                   ) : pageEvents.map((ev) => (
                     <tr key={ev.id}>
-                      <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{ev.name}</td>
-                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.organizerName || '—'}</td>
+                      <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{ev.eventName}</td>
+                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.organizerId}</td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                        {formatDate(ev.startDate)}
-                        {ev.endDate && ev.endDate !== ev.startDate ? ` – ${formatDate(ev.endDate)}` : ''}
+                        {formatDate(ev.startAt)}
+                        {ev.endAt && ev.endAt !== ev.startAt ? ` – ${formatDate(ev.endAt)}` : ''}
                       </td>
-                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.venueName || '—'}</td>
+                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.venue ? `${ev.venue.name}, ${ev.venue.location}` : '—'}</td>
                       <td className="align-middle">
                         {ev.status
                           ? <Badge className={`${statusBadgeClass(ev.status)} border-0`} style={{ fontSize: '0.7rem' }}>{ev.status}</Badge>
