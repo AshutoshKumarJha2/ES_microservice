@@ -35,8 +35,8 @@ export const resourceSource = {
             return data
         },
 
-        async approveAllocation(allocationId: string): Promise<MessageResponseDto> {
-            const { data } = await axiosInstance.patch(`${BASE}/resources/allocation/${allocationId}/approve`)
+        async approveAllocation(eventId: string): Promise<MessageResponseDto> {
+            const { data } = await axiosInstance.patch(`${BASE}/resources/allocation/${eventId}/approve`)
             return data
         },
 

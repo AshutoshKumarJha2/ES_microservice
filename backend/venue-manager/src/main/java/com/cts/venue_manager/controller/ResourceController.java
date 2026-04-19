@@ -137,15 +137,15 @@ public class ResourceController {
      * @param userPrincipal the authenticated user performing the action
      * @return a confirmation message string wrapped in a ResponseEntity
      */
-    @PatchMapping("/resources/allocation/{allocationId}/approve")
+    @PatchMapping("/resources/allocation/{eventId}/approve")
     @PreAuthorize("hasRole('VENUE_MANAGER')")
     public ResponseEntity<MessageResponseDto> approveAllocation(
-            @PathVariable @NotBlank(message = "Allocation ID is required") String allocationId,
+            @PathVariable @NotBlank(message = "Event ID is required") String eventId,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String actorId = userPrincipal.userId();
-        log.info("REST request to approve allocation: {} by actor: {}", allocationId, actorId);
-        resourceService.approveAllocation(actorId, allocationId);
-        return ResponseEntity.ok(new MessageResponseDto("Resource allocation approved and inventory updated."));
+        log.info("REST request to approve all allocations for event: {} by actor: {}", eventId, actorId);
+        resourceService.approveAllocation(actorId, eventId);
+        return ResponseEntity.ok(new MessageResponseDto("Resource allocations approved and inventory updated."));
     }
 
     /**

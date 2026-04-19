@@ -40,6 +40,7 @@ public class ResourceVenueManagerDtoMapper {
                 : "Unknown Resource";
 
         return new ResourceVenueManagerResponseDto(
+                allocation.getAllocationId(),
                 name,
                 allocation.getQuantity()
         );

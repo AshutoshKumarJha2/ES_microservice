@@ -123,47 +123,48 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     /**
-     * Approves an allocation and deducts units from the resource inventory.
+     * Approves all pending resource allocations for a given event and deducts units from inventory.
      *
      * @param actorId the unique identifier of the user performing the approval
-     * @param allocationId the unique identifier of the allocation request
-     * @throws InsufficientResourceException if requested units exceed available units
+     * @param eventId the unique identifier of the event whose allocations should be approved
+     * @throws InsufficientResourceException if requested units exceed available units for any allocation
      */
     @Override
     @Transactional
-    public void approveAllocation(String actorId, String allocationId) {
-        log.info("Actor {} (Venue Manager) approving allocation ID: {}", actorId, allocationId);
+    public void approveAllocation(String actorId, String eventId) {
+        log.info("Actor {} (Venue Manager) approving all allocations for event ID: {}", actorId, eventId);
 
-        ResourceAllocation allocation = resourceAllocationRepository.findById(allocationId)
-                .orElseThrow(() -> new ResourceNotFoundException("Allocation request not found"));
+        List<ResourceAllocation> allocations = resourceAllocationRepository.findByEventId(eventId);
 
-        if (allocation.getStatus() != AllocationStatus.PENDING) {
-            throw new IllegalArgumentException("Allocation is already " + allocation.getStatus().name().toLowerCase() + " and cannot be approved again.");
+        if (allocations.isEmpty()) {
+            throw new ResourceNotFoundException("No allocation requests found for event: " + eventId);
         }
 
-        Resource resource = allocation.getResource();
+        for (ResourceAllocation allocation : allocations) {
+            if (allocation.getStatus() != AllocationStatus.PENDING) {
+                log.info("Skipping allocation {} — already {}", allocation.getAllocationId(), allocation.getStatus().name().toLowerCase());
+                continue;
+            }
 
-        if (resource.getUnit() < allocation.getQuantity()) {
-            throw new InsufficientResourceException("Cannot approve: Units no longer available");
+            Resource resource = allocation.getResource();
+
+            if (resource.getUnit() < allocation.getQuantity()) {
+                throw new InsufficientResourceException(
+                        "Cannot approve: Insufficient units for resource '" + resource.getName() + "'");
+            }
+
+            int updatedUnits = resource.getUnit() - allocation.getQuantity();
+            resource.setUnit(updatedUnits);
+            if (updatedUnits == 0) {
+                resource.setAvailability(Availability.UNAVAILABLE);
+            }
+            resourceRepository.save(resource);
+
+            allocation.setStatus(AllocationStatus.APPROVED);
+            resourceAllocationRepository.save(allocation);
+
+            log.info("Allocation {} approved by {}. Inventory updated for: {}", allocation.getAllocationId(), actorId, resource.getName());
         }
-
-        int updatedUnits = resource.getUnit() - allocation.getQuantity();
-        resource.setUnit(updatedUnits);
-        if (updatedUnits == 0) {
-            resource.setAvailability(Availability.UNAVAILABLE);
-        }
-        resourceRepository.save(resource);
-
-        allocation.setStatus(AllocationStatus.APPROVED);
-        resourceAllocationRepository.save(allocation);
-
-//        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resource.getResourceId());
-
-//        sendSafeNotification(actorId,
-//                String.format("Allocation for resource '%s' (Qty: %d) has been approved.", resource.getName(), allocation.getQuantity()),
-//                "ALLOCATION_APPROVE");
-
-        log.info("Allocation approved by {}. Inventory updated for: {}", actorId, resource.getName());
     }
 
     /**

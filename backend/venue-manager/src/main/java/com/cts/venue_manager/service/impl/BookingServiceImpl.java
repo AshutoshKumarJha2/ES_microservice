@@ -131,9 +131,11 @@ public class BookingServiceImpl implements BookingService {
      */
     @Override
     public List<BookingResponseVenueManagerDto> getBookingsByVenue(String actorId, String venueId) {
-        return bookingRepository.findByVenue_VenueId(venueId).stream()
+
+        List<BookingResponseVenueManagerDto> bookingResponseVenueManager = bookingRepository.findByVenue_VenueId(venueId).stream()
                 .map(booking -> {
                     String eventId = booking.getEventId();
+
                     List<ResourceAllocation> allocations = resourceAllocationRepository.findByEventId(eventId);
 
 
@@ -144,6 +146,8 @@ public class BookingServiceImpl implements BookingService {
                     return venueManagerMapper.toDto(booking, allocationDtos);
                 })
                 .toList();
+
+        return bookingResponseVenueManager;
     }
 
     @Override

@@ -9,6 +9,7 @@ import {
 } from '../../../store/slices/venue/venueSlice'
 import type { BookingStatus } from '../../../types/venue'
 import styles from '../../../css/venue/Venue.module.css'
+import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -36,6 +37,7 @@ export const VenueBookings = () => {
   } = useAppSelector((s) => s.venue)
 
   const [selectedVenueId, setSelectedVenueId] = useState<string>('')
+  
 
   /* load venues once on mount */
   useEffect(() => {
@@ -49,9 +51,11 @@ export const VenueBookings = () => {
     else dispatch(clearBookings())
   }, [selectedVenueId, dispatch])
 
-  const handleStatusChange = (bookingId: string, status: BookingStatus) => {
+  const handleStatusChange = (bookingId: string, status: BookingStatus, eventId?: string) => {
     dispatch(updateBookingStatus({ bookingId, status }));
-    dispatch(approve)
+    if (status === 'CONFIRMED' && eventId) {
+      dispatch(approveRequestedAllocation(eventId))
+    }
   }
 
   const selectedVenueName = venues.find((v) => v.id === selectedVenueId)?.name ?? ''
@@ -149,7 +153,7 @@ export const VenueBookings = () => {
                         <button
                           className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
                           disabled={actionLoading}
-                          onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED')}
+                          onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED', b.eventId)}
                         >
                           Confirm
                         </button>
