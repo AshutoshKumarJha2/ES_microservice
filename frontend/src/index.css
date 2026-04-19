@@ -359,6 +359,16 @@ a {
   background-color: var(--bg-surface);
   color: var(--text-primary);
 }
+/* Force the native date/time popup calendar to render in light mode so it is
+   always readable regardless of the OS dark-mode setting.
+   The input field itself stays dark via the explicit bg/color from .es-form-control. */
+[data-theme="dark"] input[type="date"],
+[data-theme="dark"] input[type="datetime-local"],
+[data-theme="dark"] input[type="time"] {
+  color-scheme: light;
+}
+
+/* The calendar icon sits on a dark input background, so keep it light. */
 [data-theme="dark"] ::-webkit-calendar-picker-indicator {
   filter: invert(0.8) hue-rotate(180deg);
   cursor: pointer;
