@@ -3,7 +3,7 @@ import { Outlet, NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { fetchCurrentUser, logout } from '../../store/slices/authSlice'
 import { DarkModeToggle } from '../elements/DarkModeToggle'
-import styles from '../../css/finance/Finance.module.css'
+import styles from '../../css/venue/Venue.module.css'
 
 /* ── Inline SVG Icons ──────────────────────────────────────────────────────── */
 
@@ -53,7 +53,7 @@ const ROLE_LABELS: Record<string, string> = {
 
 /* ── Component ─────────────────────────────────────────────────────────────── */
 
-export const FinanceLayout = () => {
+export const VenueLayout = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { user, accessToken } = useAppSelector((s) => s.auth)
@@ -160,22 +160,19 @@ export const FinanceLayout = () => {
         </div>
       </nav>
 
-      {/* ── Sub-Navbar (Finance tabs) ──────────────────────────────────────── */}
+      {/* ── Sub-Navbar (Venue tabs) ────────────────────────────────────────── */}
       <div className={styles.subNavbar}>
         <div className={styles.subNavbarInner}>
-          <span className={styles.subNavbarLabel}>Finance Officer Portal</span>
+          <span className={styles.subNavbarLabel}>Venue Manager Portal</span>
           <nav className={styles.subNavTabs}>
-            <NavLink to="/finance/dashboard" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
-              Dashboard
+            <NavLink to="/venue-manager/venues" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Venues
             </NavLink>
-            <NavLink to="/finance/expenses" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
-              Expense Approvals
+            <NavLink to="/venue-manager/venue/bookings" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Bookings
             </NavLink>
-            <NavLink to="/finance/payments" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
-              Payments
-            </NavLink>
-            <NavLink to="/finance/budget" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
-              Budget Overview
+            <NavLink to="/venue-manager/venue/resources" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Resources
             </NavLink>
           </nav>
         </div>

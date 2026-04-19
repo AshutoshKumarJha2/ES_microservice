@@ -15,6 +15,7 @@ import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard
 import { EventDetail } from './components/pages/events/EventDetail'
 import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
 import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
+import { FinanceDashboard } from './components/pages/finance/FinanceDashboard'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'
@@ -27,6 +28,12 @@ import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
 import { AttendeeEventBrowser } from './components/pages/attendee/AttendeeEventBrowser'
 import { AttendeeEventDetail } from './components/pages/attendee/AttendeeEventDetail'
 import { AttendeeMyRegistrations } from './components/pages/attendee/AttendeeMyRegistrations'
+import { VenueLayout } from './components/layout/VenueLayout'
+import { VenueManagerDashboard } from './components/pages/venue/VenueManagerDashboard'
+import { Venues } from './components/pages/venue/Venues'
+import { VenueBookings } from './components/pages/venue/VenueBookings'
+import { VenueResources } from './components/pages/venue/VenueResources'
+import BookingVenueAndResource from './components/pages/booking/BookingVenueAndResource'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -74,6 +81,7 @@ export const App = () => {
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
+            { path: '/organizer/booking',         element: <BookingVenueAndResource /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
             { path: '/events',                       element: <AttendeeEventBrowser /> },
@@ -89,6 +97,7 @@ export const App = () => {
       path: '/finance',
       element: <FinanceLayout />,
       children: [
+        { path: 'dashboard', element: <FinanceDashboard /> },
         { path: 'expenses', element: <ExpenseApprovals /> },
         { path: 'payments', element: <Payments /> },
         { path: 'budget', element: <BudgetOverview /> },
@@ -107,6 +116,18 @@ export const App = () => {
             { path: '/admin/audit-logs', element: <AdminAuditLogs /> },
           ],
         },
+      ],
+    },
+
+    // ── Venue Manager Portal (separate layout) ─────────────────────────────────
+    {
+     
+      element: <VenueLayout />,
+      children: [
+        { path:'/venue-manager/dashboard', element: <VenueManagerDashboard /> },
+        { path: '/venue-manager/venues',    element: <Venues /> },
+        { path: '/venue-manager/venue/bookings',  element: <VenueBookings /> },
+        { path: '/venue-manager/venue/resources', element: <VenueResources /> },
       ],
     },
   ])

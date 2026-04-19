@@ -15,8 +15,9 @@ import {
 } from 'react-bootstrap'
 import { ArrowLeft } from 'react-bootstrap-icons'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import BookingVenueAndResource from '../booking/BookingVenueAndResource'
 
-type Tab = 'overview' | 'tickets' | 'registrations' | 'attendees' | 'budget'
+type Tab = 'overview' | 'tickets' | 'registrations' | 'attendees' | 'budget' | 'venue-and-resource'
 
 const TABS: { key: Tab; label: string }[] = [
   { key: 'overview',      label: 'Overview' },
@@ -24,6 +25,7 @@ const TABS: { key: Tab; label: string }[] = [
   { key: 'registrations', label: 'Registrations' },
   { key: 'attendees',     label: 'Attendees' },
   { key: 'budget',        label: 'Budget' },
+  { key: 'venue-and-resource', label: 'Venue and Resource' }
 ]
 
 export const EventDetail = () => {
@@ -112,6 +114,7 @@ export const EventDetail = () => {
         {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
         {activeTab === 'registrations' && <RegistrationsTab />}
         {activeTab === 'attendees'     && <AttendeesTab />}
+        {activeTab === 'venue-and-resource' && <BookingVenueAndResource eventId={id!} />}
         {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
       </Container>
     </div>

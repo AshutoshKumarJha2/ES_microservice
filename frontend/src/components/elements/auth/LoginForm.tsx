@@ -66,8 +66,8 @@ export const LoginForm: React.FC = () => {
       const roleRoutes: Record<string, string> = {
         ADMIN:           '/admin/dashboard',
         ORGANIZER:       '/organizer/dashboard',
-        VENUE_MANAGER:   '/organizer/dashboard',
-        FINANCE_OFFICER: '/organizer/dashboard',
+        VENUE_MANAGER:   '/venue-manager/dashboard',
+        FINANCE_OFFICER: '/finance/dashboard',
         VENDOR:          '/dashboard',
         ATTENDEE:        '/events',
       }

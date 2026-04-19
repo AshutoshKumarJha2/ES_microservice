@@ -191,6 +191,12 @@
   color: var(--saffron);
 }
 
+.action-green {
+  background: var(--green-subtle);
+  border-color: var(--green-border);
+  color: var(--green);
+}
+
 .action-red {
   background: var(--red-subtle);
   border-color: var(--red-border);

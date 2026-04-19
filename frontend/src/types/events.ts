@@ -209,6 +209,18 @@ export interface EngagementResponseDto {
   attendeeId?: string
   activity: string
   activityTimestamp?: string
+  scheduleId?: string
+}
+
+// ── Event Analytics (from event-manager via engagement-manager proxy) ─────────
+
+export interface EventAnalyticsDto {
+  eventId: string
+  totalRegistrations: number
+  pending: number
+  confirmed: number
+  checkedIn: number
+  cancelled: number
 }
 
 export interface FeedbackResponseDto {

@@ -1,9 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
-import { fetchEngagements, fetchFeedback } from '../../../store/slices/analyticsSlice'
+import { fetchEngagements, fetchFeedback, fetchEventSummary, fetchSchedules } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
-import { fetchRegistrationsByEvent } from '../../../store/slices/registrationsSlice'
 import styles from '../../../css/engagement/EngagementAnalytics.module.css'
 
 const ORGANIZER_ROLES = ['ORGANIZER', 'ADMIN']
@@ -30,9 +29,26 @@ const getDotClass = (activity: string): string => {
 
 const formatTime = (ts?: string) => {
   if (!ts) return ''
-  // Backend returns LocalDateTime — append 'Z' if no timezone info so the browser parses it correctly
   const iso = ts.includes('Z') || ts.includes('+') ? ts : ts + 'Z'
   return new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+}
+
+const formatSessionDateTime = (date: string, timeSlot: string) => {
+  try {
+    const d = new Date(date)
+    const dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+    return `${dateStr} · ${timeSlot}`
+  } catch {
+    return `${date} · ${timeSlot}`
+  }
+}
+
+const getStatusBadgeClass = (status: string): string => {
+  const s = status?.toUpperCase()
+  if (s === 'ACTIVE') return styles['badge-active']
+  if (s === 'COMPLETED') return styles['badge-completed']
+  if (s === 'TERMINATED') return styles['badge-terminated']
+  return styles['badge-draft']
 }
 
 export const EngagementAnalytics = () => {
@@ -40,9 +56,9 @@ export const EngagementAnalytics = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
 
-  const { engagements, feedback, loading } = useAppSelector((s) => s.analytics)
+  const { engagements, feedback, loading, eventSummary, schedules, schedulesLoading } =
+    useAppSelector((s) => s.analytics)
   const { selectedEvent } = useAppSelector((s) => s.events)
-  const { registrations } = useAppSelector((s) => s.registrations)
   const { user } = useAppSelector((s) => s.auth)
 
   const isOrganizerOrAdmin = ORGANIZER_ROLES.includes(user?.role ?? '')
@@ -53,17 +69,16 @@ export const EngagementAnalytics = () => {
   const handleExport = () => {
     const eventName = selectedEvent?.eventName ?? eventId ?? 'event'
 
-    // Engagements sheet
     const engRows = [
-      ['Activity', 'Attendee ID', 'Timestamp'],
+      ['Activity', 'Attendee ID', 'Schedule ID', 'Timestamp'],
       ...engagements.map((e) => [
         e.activity,
         e.attendeeId ?? '',
+        e.scheduleId ?? '',
         e.activityTimestamp ?? '',
       ]),
     ]
 
-    // Feedback sheet appended after a blank line
     const fbRows = [
       [],
       ['--- Feedback ---'],
@@ -93,23 +108,14 @@ export const EngagementAnalytics = () => {
     dispatch(fetchEventById(eventId))
     dispatch(fetchEngagements(eventId))
     dispatch(fetchFeedback({ eventId, size: 100 }))
-    // Registrations & check-ins: event-manager is source of truth for registration status.
-    // Page is organizer/admin only so this endpoint is always authorised here.
-    dispatch(fetchRegistrationsByEvent({ eventId, size: 100 }))
+    dispatch(fetchEventSummary(eventId))
+    dispatch(fetchSchedules(eventId))
   }, [eventId, dispatch, isOrganizerOrAdmin])
 
   // ── Stat counts ──────────────────────────────────────────────────────────────
-  // Registrations & check-ins come from event-manager (source of truth for status).
-  // Total engagements & activity feed come from engagement-manager.
-  const stats = useMemo(() => {
-    const registers = registrations.filter((r) =>
-      ['APPROVED', 'CONFIRMED', 'CHECK_IN', 'CHECKED_IN'].includes(r.status?.toUpperCase() ?? '')
-    ).length
-    const checkins = registrations.filter((r) =>
-      ['CHECK_IN', 'CHECKED_IN'].includes(r.status?.toUpperCase() ?? '')
-    ).length
-    return { registers, checkins }
-  }, [registrations])
+  // Registration + check-in counts come from event-manager analytics (source of truth).
+  const totalRegistrations = eventSummary?.totalRegistrations ?? 0
+  const totalCheckedIn = eventSummary?.checkedIn ?? 0
 
   const avgRating = useMemo(() => {
     const rated = feedback.filter((f) => f.rating != null && f.rating > 0)
@@ -149,6 +155,28 @@ export const EngagementAnalytics = () => {
       .filter((e) => matchesFilter(e.activity, activeFilter))
       .slice(0, 10)
   }, [engagements, activeFilter])
+
+  // ── Session-wise attendance ──────────────────────────────────────────────────
+  // Count SESSION_JOIN engagements per scheduleId from the already-loaded engagements array.
+  const sessionJoinMap = useMemo(() => {
+    const map: Record<string, number> = {}
+    for (const eng of engagements) {
+      if (eng.scheduleId && eng.activity === 'SESSION_JOIN') {
+        map[eng.scheduleId] = (map[eng.scheduleId] ?? 0) + 1
+      }
+    }
+    return map
+  }, [engagements])
+
+  const sessionSummary = useMemo(() => {
+    const totalSessions = schedules.length
+    const totalSessionCheckIns = Object.values(sessionJoinMap).reduce((a, b) => a + b, 0)
+    const avgAttendanceRate =
+      totalRegistrations > 0 && totalSessions > 0
+        ? Math.round((totalSessionCheckIns / (totalSessions * totalRegistrations)) * 100)
+        : 0
+    return { totalSessions, totalSessionCheckIns, avgAttendanceRate }
+  }, [schedules, sessionJoinMap, totalRegistrations])
 
   // ── Access guard (after all hooks) ───────────────────────────────────────────
   if (!isOrganizerOrAdmin) {
@@ -208,11 +236,11 @@ export const EngagementAnalytics = () => {
             <div className={styles['stat-label']}>Total Engagements</div>
           </div>
           <div className={`${styles['stat-card']} ${styles['stat-orange']}`}>
-            <div className={styles['stat-num']}>{stats.registers}</div>
+            <div className={styles['stat-num']}>{totalRegistrations}</div>
             <div className={styles['stat-label']}>Registrations</div>
           </div>
           <div className={`${styles['stat-card']} ${styles['stat-green']}`}>
-            <div className={styles['stat-num']}>{stats.checkins}</div>
+            <div className={styles['stat-num']}>{totalCheckedIn}</div>
             <div className={styles['stat-label']}>Check-ins</div>
           </div>
           <div className={`${styles['stat-card']} ${styles['stat-purple']}`}>
@@ -301,6 +329,83 @@ export const EngagementAnalytics = () => {
                   </div>
                 )}
               </div>
+            </div>
+
+            {/* ── Session-wise Attendance ── */}
+            <div className={styles.card}>
+              <h2 className={styles['card-title']}>Session-wise Attendance</h2>
+
+              {/* Summary strip */}
+              <div className={styles['session-summary-strip']}>
+                <div className={styles['session-summary-item']}>
+                  <span className={styles['session-summary-num']}>{sessionSummary.totalSessions}</span>
+                  <span className={styles['session-summary-label']}>Total Sessions</span>
+                </div>
+                <div className={styles['session-summary-divider']} />
+                <div className={styles['session-summary-item']}>
+                  <span className={styles['session-summary-num']}>{sessionSummary.totalSessionCheckIns}</span>
+                  <span className={styles['session-summary-label']}>Total Session Check-ins</span>
+                </div>
+                <div className={styles['session-summary-divider']} />
+                <div className={styles['session-summary-item']}>
+                  <span className={styles['session-summary-num']}>{sessionSummary.avgAttendanceRate}%</span>
+                  <span className={styles['session-summary-label']}>Avg Attendance Rate</span>
+                </div>
+              </div>
+
+              {schedulesLoading ? (
+                <p className={styles.empty}>Loading sessions…</p>
+              ) : schedules.length === 0 ? (
+                <p className={styles.empty}>No sessions scheduled for this event.</p>
+              ) : (
+                <div className={styles['table-wrapper']}>
+                  <table className={styles.table}>
+                    <thead>
+                      <tr>
+                        <th>Session</th>
+                        <th>Date &amp; Time</th>
+                        <th>Total Registered</th>
+                        <th>Checked In</th>
+                        <th>Attendance</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {schedules.map((schedule) => {
+                        const checkedIn = sessionJoinMap[schedule.scheduleId] ?? 0
+                        const registered = totalRegistrations
+                        const pct = registered > 0 ? Math.round((checkedIn / registered) * 100) : 0
+                        return (
+                          <tr key={schedule.scheduleId}>
+                            <td className={styles['td-activity']}>{schedule.activity}</td>
+                            <td className={styles['td-datetime']}>
+                              {formatSessionDateTime(schedule.date, schedule.timeSlot)}
+                            </td>
+                            <td className={styles['td-count']}>{registered}</td>
+                            <td className={styles['td-count']}>{checkedIn}</td>
+                            <td>
+                              <div className={styles['session-progress-wrap']}>
+                                <div className={styles['progress-bar']}>
+                                  <div
+                                    className={styles['progress-fill']}
+                                    style={{ width: `${pct}%` }}
+                                  />
+                                </div>
+                                <span className={styles['td-pct']}>{pct}%</span>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`${styles.badge} ${getStatusBadgeClass(schedule.status)}`}>
+                                {schedule.status}
+                              </span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
 
             {/* ── Recent Activity Feed ── */}
