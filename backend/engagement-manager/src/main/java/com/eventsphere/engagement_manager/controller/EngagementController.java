@@ -1,5 +1,6 @@
 package com.eventsphere.engagement_manager.controller;
 
+import com.eventsphere.engagement_manager.dto.client.EventAnalyticsDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
@@ -80,5 +81,28 @@ public class EngagementController {
 
         log.info("API: filter engagements event={} activity={} range={}..{}", eventId, activity, start, end);
         return ResponseEntity.ok(engagementService.getFilteredEngagements(eventId, activity, start, end));
+    }
+
+    /**
+     * Returns registration + check-in analytics for an event by proxying
+     * the event-manager analytics endpoint through engagement-manager.
+     * Used by the frontend analytics dashboard to get accurate registration counts.
+     */
+    @GetMapping("/event/{eventId}/summary")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<EventAnalyticsDto> getEventSummary(@PathVariable String eventId) {
+        log.info("API: get event summary for event={}", eventId);
+        return ResponseEntity.ok(engagementService.getEventSummary(eventId));
+    }
+
+    /**
+     * Counts SESSION_JOIN engagements for a given schedule (session).
+     * Used by the Session-wise Attendance section of the analytics dashboard.
+     */
+    @GetMapping("/session/{scheduleId}/count")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<Long> getSessionJoinCount(@PathVariable String scheduleId) {
+        log.info("API: get session join count for scheduleId={}", scheduleId);
+        return ResponseEntity.ok(engagementService.getSessionJoinCount(scheduleId));
     }
 }
