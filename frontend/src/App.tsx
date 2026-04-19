@@ -15,6 +15,7 @@ import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard
 import { EventDetail } from './components/pages/events/EventDetail'
 import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
 import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
+import { FinanceDashboard } from './components/pages/finance/FinanceDashboard'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'
@@ -90,6 +91,7 @@ export const App = () => {
       path: '/finance',
       element: <FinanceLayout />,
       children: [
+        { path: 'dashboard', element: <FinanceDashboard /> },
         { path: 'expenses', element: <ExpenseApprovals /> },
         { path: 'payments', element: <Payments /> },
         { path: 'budget', element: <BudgetOverview /> },
