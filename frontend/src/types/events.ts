@@ -58,6 +58,12 @@ export interface EventRequestDto {
   status?: EventStatus
 }
 
+export interface OrganizerDto {
+  id: string
+  name: string
+  email: string
+}
+
 export interface EventResponseDto {
   id: string
   eventName: string
@@ -67,6 +73,7 @@ export interface EventResponseDto {
   status: EventStatus
   venueId: string
   venue?: VenueResponseDto
+  organizer?: OrganizerDto
 }
 
 // ── Schedules ─────────────────────────────────────────────────────────────────

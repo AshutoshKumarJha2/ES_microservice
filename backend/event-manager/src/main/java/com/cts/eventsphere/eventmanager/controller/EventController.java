@@ -45,7 +45,7 @@ public class EventController {
     public ResponseEntity<EventResponseDto> create(@Valid @RequestBody EventRequestDto event, @AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to create a new event: {}", event.name());
-        EventResponseDto createdEvent = eventService.create(userId,event);
+        EventResponseDto createdEvent = eventService.create(userId, userDetails.role(), event);
         log.info("Successfully created event with ID: {}", createdEvent.id());
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
