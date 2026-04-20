@@ -34,6 +34,12 @@ import { Venues } from './components/pages/venue/Venues'
 import { VenueBookings } from './components/pages/venue/VenueBookings'
 import { VenueResources } from './components/pages/venue/VenueResources'
 import BookingVenueAndResource from './components/pages/booking/BookingVenueAndResource'
+import { VendorLayout } from './components/layout/VendorLayout'
+import { VendorManagerDashboard } from './components/pages/vendor/VendorManagerDashboard'
+import { VendorProfile } from './components/pages/vendor/VendorProfile'
+import { Contracts } from './components/pages/vendor/Contracts'
+import { Deliveries } from './components/pages/vendor/Deliveries'
+import { Invoices } from './components/pages/vendor/Invoices'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -81,7 +87,6 @@ export const App = () => {
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
-            { path: '/organizer/booking',         element: <BookingVenueAndResource /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
             { path: '/events',                       element: <AttendeeEventBrowser /> },
@@ -121,13 +126,25 @@ export const App = () => {
 
     // ── Venue Manager Portal (separate layout) ─────────────────────────────────
     {
-     
+
       element: <VenueLayout />,
       children: [
         { path:'/venue-manager/dashboard', element: <VenueManagerDashboard /> },
         { path: '/venue-manager/venues',    element: <Venues /> },
         { path: '/venue-manager/venue/bookings',  element: <VenueBookings /> },
         { path: '/venue-manager/venue/resources', element: <VenueResources /> },
+      ],
+    },
+
+    // ── Vendor Portal (separate layout) ───────────────────────────────────────
+    {
+      element: <VendorLayout />,
+      children: [
+        { path: '/vendor/dashboard',  element: <VendorManagerDashboard /> },
+        { path: '/vendor/profile',    element: <VendorProfile /> },
+        { path: '/vendor/contracts',  element: <Contracts /> },
+        { path: '/vendor/deliveries', element: <Deliveries /> },
+        { path: '/vendor/invoices',   element: <Invoices /> },
       ],
     },
   ])
