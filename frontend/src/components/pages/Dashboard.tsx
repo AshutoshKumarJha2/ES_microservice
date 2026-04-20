@@ -1,6 +1,14 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import styles from '../../css/Dashboard.module.css'
+
+const ROLE_HOME: Record<string, string> = {
+  ADMIN:           '/admin/dashboard',
+  ORGANIZER:       '/organizer/dashboard',
+  FINANCE_OFFICER: '/finance/expenses',
+  ATTENDEE:        '/events',
+}
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Administrator',
@@ -49,7 +57,13 @@ export const Dashboard = () => {
   const navigate = useNavigate()
   const { user } = useAppSelector((state) => state.auth)
 
-  if (!user) return null
+  useEffect(() => {
+    if (user && ROLE_HOME[user.role]) {
+      navigate(ROLE_HOME[user.role], { replace: true })
+    }
+  }, [user, navigate])
+
+  if (!user || ROLE_HOME[user.role]) return null
 
   const quickActions = getQuickActions(user.role)
   const initials = user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()

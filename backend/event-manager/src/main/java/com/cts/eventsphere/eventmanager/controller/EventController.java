@@ -58,7 +58,7 @@ public class EventController {
     public ResponseEntity<List<EventResponseDto>> readAll(@AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to fetch all events");
-        List<EventResponseDto> events = eventService.findAllEvents(userId);
+        List<EventResponseDto> events = eventService.findAllEvents(userId, userDetails.role());
         log.info("Successfully retrieved {} events", events.size());
         return ResponseEntity.ok(events);
     }
@@ -85,7 +85,7 @@ public class EventController {
     public ResponseEntity<EventResponseDto> getById(@PathVariable String id, @AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to get event with ID: {}", id);
-        return ResponseEntity.ok(eventService.findById(id,userId));
+        return ResponseEntity.ok(eventService.findById(id, userId, userDetails.role()));
 
     }
 
