@@ -2,6 +2,7 @@ package com.cts.eventsphere.eventmanager.service.impl;
 
 import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
+import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleBulkRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
@@ -15,6 +16,8 @@ import com.cts.eventsphere.eventmanager.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Implementation for Service of Schedule Entity.
@@ -34,6 +37,43 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final ScheduleResponseDtoMapper scheduleResponseDtoMapper;
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
     private final NotificationService notificationService;
+
+    /**
+     * Retrieves a schedule by its unique identifier within a specific event.
+     *
+     * @param eventId the unique identifier of the event to which the schedule belongs
+     * @param id the unique identifier of the schedule to retrieve
+     * @return the response DTO representing the found schedule
+     * @throws ScheduleNotFoundException if no schedule exists with the given ID
+     */
+    @Override
+    public ScheduleResponseDto getById(String eventId, String id) throws ScheduleNotFoundException {
+        log.info("Attempting to retrieve schedule ID: {} for event ID: {}", id, eventId);
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Retrieval failed: Schedule with ID {} not found", id);
+                    return new ScheduleNotFoundException(id);
+                });
+        return scheduleResponseDtoMapper.toDTO(schedule);
+    }
+
+    /**
+     * Retrieves multiple schedules by their unique identifiers within a specific event.
+     *
+     * @param eventId the unique identifier of the event to which the schedules belong
+     * @param request the request DTO containing the list of schedule IDs (max 100)
+     * @return list of response DTOs for the found schedules
+     */
+    @Override
+    public List<ScheduleResponseDto> getBulkByIds(String eventId, ScheduleBulkRequestDto request) {
+        log.info("Attempting to bulk retrieve {} schedule(s) for event ID: {}", request.ids().size(), eventId);
+        List<ScheduleResponseDto> result = scheduleRepository.findAllById(request.ids())
+                .stream()
+                .map(scheduleResponseDtoMapper::toDTO)
+                .toList();
+        log.info("Returning {} schedule(s) for event ID: {}", result.size(), eventId);
+        return result;
+    }
 
     /**
      * Updates an existing schedule by its unique identifier within a specific event

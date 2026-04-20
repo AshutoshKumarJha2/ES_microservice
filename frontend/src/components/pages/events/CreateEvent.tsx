@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams, NavLink } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { createEvent, updateEvent, fetchEventById } from '../../../store/slices/eventsSlice'
 import { venueService } from '../../../services/events/venueService'
@@ -9,17 +9,25 @@ import styles from '../../../css/events/EventsPanel.module.css'
 
 interface SessionRow extends Omit<ScheduleRequestDto, 'eventId'> {
   localId: number
+  scheduleId?: string
+  dirty?: boolean
+  saving?: boolean
+  saveError?: string
 }
 
 const EMPTY_SESSION: Omit<SessionRow, 'localId'> = {
   date: '',
   timeSlot: '',
   activity: '',
-  status: 'draft',
+  status: 'DRAFT',
 }
 
-const navLink = ({ isActive }: { isActive: boolean }) =>
-  `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`
+const parseTimeSlot = (slot: string) => {
+  const [start = '', end = ''] = slot.split('-')
+  return { start, end }
+}
+
+const buildTimeSlot = (start: string, end: string) => `${start}-${end}`
 
 export const CreateEvent = () => {
   const navigate = useNavigate()
@@ -28,6 +36,7 @@ export const CreateEvent = () => {
   const isEdit = Boolean(id)
 
   const { loading, error } = useAppSelector((state) => state.events)
+  const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
 
   const [venues, setVenues]     = useState<VenueResponseDto[]>([])
   const [sessions, setSessions] = useState<SessionRow[]>([])
@@ -38,14 +47,16 @@ export const CreateEvent = () => {
     startDate: '',
     endDate: '',
     venueId: '',
-    status: 'draft',
+    status: 'DRAFT',
   })
 
   useEffect(() => {
     venueService.getAll().then(setVenues).catch(console.error)
-    const userId = localStorage.getItem('userId') ?? ''
-    setForm((prev) => ({ ...prev, organizerId: userId }))
   }, [])
+
+  useEffect(() => {
+    if (userId) setForm((prev) => ({ ...prev, organizerId: userId }))
+  }, [userId])
 
   useEffect(() => {
     if (isEdit && id) {
@@ -64,6 +75,7 @@ export const CreateEvent = () => {
             setSessions(
               schedules.map((s, i) => ({
                 localId: i + 1,
+                scheduleId: s.scheduleId,
                 date: s.date,
                 timeSlot: s.timeSlot,
                 activity: s.activity,
@@ -87,28 +99,61 @@ export const CreateEvent = () => {
     setNextId((n) => n + 1)
   }
 
-  const removeSession = (localId: number) => {
-    setSessions((prev) => prev.filter((s) => s.localId !== localId))
-  }
-
   const handleSessionChange = (localId: number, field: keyof Omit<SessionRow, 'localId'>, value: string) => {
     setSessions((prev) =>
-      prev.map((s) => (s.localId === localId ? { ...s, [field]: value } : s))
+      prev.map((s) => (s.localId === localId ? { ...s, [field]: value, dirty: true } : s))
     )
+  }
+
+  const handleSaveSession = async (localId: number) => {
+    const session = sessions.find((s) => s.localId === localId)
+    if (!session || !id) return
+    const { scheduleId, localId: _lid, dirty: _d, saving: _s, saveError: _e, ...rest } = session
+    setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
+    try {
+      if (scheduleId) {
+        await eventService.updateSchedule(id, scheduleId, { ...rest, eventId: id })
+        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, dirty: false } : s))
+      } else {
+        const created = await eventService.createSchedule(id, { ...rest, eventId: id })
+        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, dirty: false, scheduleId: created.scheduleId } : s))
+      }
+    } catch {
+      setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to save' } : s))
+    }
+  }
+
+  const handleDeleteSession = async (localId: number) => {
+    const session = sessions.find((s) => s.localId === localId)
+    if (!session) return
+    if (session.scheduleId) {
+      setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
+      try {
+        await eventService.deleteSchedule(session.scheduleId)
+      } catch {
+        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to delete' } : s))
+        return
+      }
+    }
+    setSessions((prev) => prev.filter((s) => s.localId !== localId))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       if (isEdit && id) {
-        const event = await dispatch(updateEvent({ id, payload: form })).unwrap()
+        await dispatch(updateEvent({ id, payload: form })).unwrap()
         for (const session of sessions) {
-          await eventService.createSchedule(event.id, { ...session, eventId: event.id })
+          const { scheduleId, localId: _localId, dirty, saving: _s, saveError: _e, ...rest } = session
+          if (!scheduleId) {
+            await eventService.createSchedule(id, { ...rest, eventId: id })
+          }
         }
       } else {
         const event = await dispatch(createEvent(form)).unwrap()
         for (const session of sessions) {
-          await eventService.createSchedule(event.id, { ...session, eventId: event.id })
+          const { scheduleId: _sid, localId: _localId, dirty: _d, saving: _s, saveError: _e, ...rest } = session
+          await eventService.createSchedule(event.id, { ...rest, eventId: event.id })
         }
       }
       navigate('/organizer/dashboard')
@@ -129,17 +174,9 @@ export const CreateEvent = () => {
         </div>
       </div>
 
-      {/* Sub-nav */}
-      <div className={styles.subnav}>
-        <div className={styles['subnav-inner']}>
-          <NavLink to="/organizer/dashboard"     end className={navLink}>Dashboard</NavLink>
-          <NavLink to="/organizer/events/create"     className={navLink}>Create Event</NavLink>
-        </div>
-      </div>
-
       <div className={styles.content}>
         <div className={styles.card}>
-          <form onSubmit={handleSubmit}>
+          <form id="event-form" onSubmit={handleSubmit}>
             <p className={styles['section-heading']}>Event Details</p>
             <div className={styles['form-grid']}>
               <div className={`${styles.field} ${styles.full}`}>
@@ -181,80 +218,147 @@ export const CreateEvent = () => {
               <div className={styles.field}>
                 <label>Status</label>
                 <select name="status" value={form.status} onChange={handleChange}>
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="PUBLISHED">Published</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CANCELLED">Cancelled</option>
                 </select>
               </div>
             </div>
 
-            <hr className={styles.divider} />
+          </form>
 
-            <div className={styles['sessions-header']}>
-              <p className={styles['section-heading']} style={{ margin: 0 }}>Sessions (Optional)</p>
-              <button type="button" className={styles['btn-add-session']} onClick={addSession}>
-                + Add Session
-              </button>
-            </div>
+          <hr className={styles.divider} />
 
-            {sessions.map((session) => (
+          <div className={styles['sessions-header']}>
+            <p className={styles['section-heading']} style={{ margin: 0 }}>Sessions (Optional)</p>
+            <button type="button" className={styles['btn-add-session']} onClick={addSession}>
+              + Add Session
+            </button>
+          </div>
+
+          {sessions.map((session) => (
               <div key={session.localId} className={styles['session-row']}>
-                <div className={styles.field}>
-                  <label>Date</label>
-                  <input
-                    type="date"
-                    value={session.date}
-                    onChange={(e) => handleSessionChange(session.localId, 'date', e.target.value)}
-                  />
+                {/* Fields row */}
+                <div className={styles['session-row-fields']}>
+                  <div className={styles.field}>
+                    <label>Date</label>
+                    <input
+                      type="date"
+                      value={session.date}
+                      onChange={(e) => handleSessionChange(session.localId, 'date', e.target.value)}
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Time Slot</label>
+                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
+                      <input
+                        type="time"
+                        value={parseTimeSlot(session.timeSlot).start}
+                        onChange={(e) =>
+                          handleSessionChange(
+                            session.localId,
+                            'timeSlot',
+                            buildTimeSlot(e.target.value, parseTimeSlot(session.timeSlot).end)
+                          )
+                        }
+                        style={{ flex: 1, minWidth: 0 }}
+                      />
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>to</span>
+                      <input
+                        type="time"
+                        value={parseTimeSlot(session.timeSlot).end}
+                        min={parseTimeSlot(session.timeSlot).start || undefined}
+                        onChange={(e) =>
+                          handleSessionChange(
+                            session.localId,
+                            'timeSlot',
+                            buildTimeSlot(parseTimeSlot(session.timeSlot).start, e.target.value)
+                          )
+                        }
+                        style={{ flex: 1, minWidth: 0 }}
+                      />
+                    </div>
+                  </div>
+                  <div className={styles.field}>
+                    <label>Activity</label>
+                    <input
+                      type="text"
+                      placeholder="Session title or description"
+                      value={session.activity}
+                      onChange={(e) => handleSessionChange(session.localId, 'activity', e.target.value)}
+                    />
+                  </div>
+                  <div className={styles.field}>
+                    <label>Status</label>
+                    <select
+                      value={session.status}
+                      onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
+                    >
+                      <option value="DRAFT">Draft</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="TERMINATED">Terminated</option>
+                    </select>
+                  </div>
                 </div>
-                <div className={styles.field}>
-                  <label>Time Slot</label>
-                  <input
-                    type="text"
-                    placeholder="09:00-10:00"
-                    value={session.timeSlot}
-                    onChange={(e) => handleSessionChange(session.localId, 'timeSlot', e.target.value)}
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Activity</label>
-                  <input
-                    type="text"
-                    placeholder="Session title or description"
-                    value={session.activity}
-                    onChange={(e) => handleSessionChange(session.localId, 'activity', e.target.value)}
-                  />
-                </div>
-                <div className={styles.field}>
-                  <label>Status</label>
-                  <select
-                    value={session.status}
-                    onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
+
+                {/* Actions row */}
+                <div className={styles['session-row-actions']}>
+                  {session.saveError && (
+                    <span style={{ fontSize: '0.68rem', color: 'var(--red)', marginRight: 'auto' }}>
+                      {session.saveError}
+                    </span>
+                  )}
+                  {session.scheduleId && session.dirty && (
+                    <span style={{
+                      fontSize: '0.68rem',
+                      fontWeight: 600,
+                      color: 'var(--saffron, #f59e0b)',
+                      background: 'color-mix(in srgb, var(--saffron, #f59e0b) 12%, transparent)',
+                      border: '1px solid color-mix(in srgb, var(--saffron, #f59e0b) 35%, transparent)',
+                      borderRadius: '4px',
+                      padding: '1px 6px',
+                      marginRight: 'auto',
+                    }}>edited</span>
+                  )}
+                  {isEdit && (
+                    <button
+                      type="button"
+                      className={styles['btn-add-session']}
+                      disabled={!session.dirty || session.saving}
+                      onClick={() => handleSaveSession(session.localId)}
+                      style={{
+                        borderColor: session.dirty ? 'var(--blue)' : undefined,
+                        color: session.dirty ? 'var(--blue)' : undefined,
+                        opacity: !session.dirty ? 0.45 : 1,
+                      }}
+                    >
+                      {session.saving ? '…' : '↑ Save'}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles['btn-remove']}
+                    disabled={session.saving}
+                    onClick={() => handleDeleteSession(session.localId)}
                   >
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="terminated">Terminated</option>
-                  </select>
+                    {session.saving ? '…' : '✕ Remove'}
+                  </button>
                 </div>
-                <button type="button" className={styles['btn-remove']} onClick={() => removeSession(session.localId)}>
-                  ✕
-                </button>
               </div>
             ))}
 
-            {error && <p className={styles['error-msg']}>{error}</p>}
+          {error && <p className={styles['error-msg']}>{error}</p>}
 
-            <div className={styles['form-footer']}>
-              <button type="submit" className={styles['btn-submit']} disabled={loading}>
-                {loading ? 'Saving…' : isEdit ? 'Update Event' : 'Create Event'}
-              </button>
-              <button type="button" className={styles['btn-cancel-form']} onClick={() => navigate('/organizer/dashboard')}>
-                Cancel
-              </button>
-            </div>
-          </form>
+          <div className={styles['form-footer']}>
+            <button type="submit" form="event-form" className={styles['btn-submit']} disabled={loading}>
+              {loading ? 'Saving…' : isEdit ? 'Update Event' : 'Create Event'}
+            </button>
+            <button type="button" className={styles['btn-cancel-form']} onClick={() => navigate('/organizer/dashboard')}>
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </div>

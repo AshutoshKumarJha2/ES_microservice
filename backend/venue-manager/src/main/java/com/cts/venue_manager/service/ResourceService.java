@@ -33,11 +33,11 @@ public interface ResourceService {
     List<ResourceResponseDto> getAllResources(String actorId);
 
     /**
-     * Approves a specific resource allocation and updates inventory.
+     * Approves all pending resource allocations for a given event and updates inventory.
      * * @param actorId the unique identifier of the user performing the approval
-     * @param allocationId the unique identifier of the allocation request
+     * @param eventId the unique identifier of the event whose allocations should be approved
      */
-    void approveAllocation(String actorId, String allocationId);
+    void approveAllocation(String actorId, String eventId);
 
     /**
      * Finds a specific resource by its UUID.

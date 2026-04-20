@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.*;
@@ -25,14 +26,12 @@ class JwtUtilTest {
 
     private JwtUtil jwtUtil;
 
-    private static final String SECRET = "nvjfenvjnjv53352434rnnc19dnwqdneciu439jn";
     private static final String USER_ID = "user-abc-123";
     private static final String ROLE    = "ADMIN";
 
     @BeforeEach
-    void setUp() {
-        jwtUtil = new JwtUtil();
-        ReflectionTestUtils.setField(jwtUtil, "SECRET_KEY", SECRET);
+    void setUp() throws NoSuchAlgorithmException {
+        jwtUtil = new JwtUtil(new RsaKeyProvider());
         ReflectionTestUtils.setField(jwtUtil, "ACCESS_EXPIRATION_TIME_IN_M", 15L);
         ReflectionTestUtils.setField(jwtUtil, "REFRESH_EXPIRATION_TIME_IN_D", 7L);
     }

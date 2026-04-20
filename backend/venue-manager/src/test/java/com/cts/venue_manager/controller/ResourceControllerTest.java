@@ -5,6 +5,7 @@ import com.cts.venue_manager.dto.resource.ResourceAllocationRequestDto;
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
 import com.cts.venue_manager.dto.resource.ResourceRequestDto;
 import com.cts.venue_manager.dto.resource.ResourceResponseDto;
+import com.cts.venue_manager.dto.shared.MessageResponseDto;
 import com.cts.venue_manager.model.data.Availability;
 import com.cts.venue_manager.model.data.ResourceType;
 import com.cts.venue_manager.service.ResourceService;
@@ -87,17 +88,17 @@ class ResourceControllerTest {
         ResourceAllocationRequestDto request = new ResourceAllocationRequestDto("event-1", "v-1", "b-1", elements);
         doNothing().when(resourceService).requestAllocation("user-1", "b-1", "event-1", "v-1", elements);
 
-        ResponseEntity<String> response = resourceController.requestAllocation(request, user);
+        ResponseEntity<MessageResponseDto> response = resourceController.requestAllocation(request, user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).isEqualTo("Resource Requested");
+        assertThat(response.getBody().message()).isEqualTo("Resource Requested");
     }
 
     @Test
     void approveAllocation_returns200() {
         doNothing().when(resourceService).approveAllocation("user-1", "alloc-1");
 
-        ResponseEntity<String> response = resourceController.approveAllocation("alloc-1", user);
+        ResponseEntity<MessageResponseDto> response = resourceController.approveAllocation("alloc-1", user);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         verify(resourceService).approveAllocation("user-1", "alloc-1");

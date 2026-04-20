@@ -1,9 +1,13 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
+import com.cts.eventsphere.eventmanager.client.EngagementServiceClient;
 import com.cts.eventsphere.eventmanager.client.LogServiceClient;
+import com.cts.eventsphere.eventmanager.client.UserServiceClient;
+import com.cts.eventsphere.eventmanager.dto.engagement.EngagementLogDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.registration.RegistrationDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationDto;
 import com.cts.eventsphere.eventmanager.dto.registration.RegistrationListResponseDto;
+import com.cts.eventsphere.eventmanager.dto.user.UserDetailsDto;
 import com.cts.eventsphere.eventmanager.dto.shared.GenericResponse;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
 import com.cts.eventsphere.eventmanager.exception.registration.DuplicateRegistrationException;
@@ -22,6 +26,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of {@link RegistrationService} for managing event registrations.
@@ -42,6 +52,8 @@ public class RegistrationServiceImpl implements RegistrationService {
     private final TicketRepository ticketRepository;
     private final EventRepository eventRepository;
     private final LogServiceClient logServiceClient;
+    private final UserServiceClient userServiceClient;
+    private final EngagementServiceClient engagementServiceClient;
 
     /**
      * {@inheritDoc}
@@ -73,8 +85,10 @@ public class RegistrationServiceImpl implements RegistrationService {
         log.info("User {} registered for event {} with ticket {}", userId, eventId, ticketId);
 
         notifyUser(userId, "Your registration for event \"" + event.getName() + "\" is pending approval.");
+        logEngagement(eventId, userId, "REGISTRATION");
 
-        return RegistrationDtoMapper.toDto(newRegistration);
+        return RegistrationDtoMapper.toDto(newRegistration,
+                fetchUserDetails(List.of(userId)).get(userId));
     }
 
     /**
@@ -130,6 +144,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         notifyUser(registration.getAttendeeId(),
                 "Your registration for event \"" + registration.getEvent().getName() + "\" has been confirmed.");
+        logEngagement(registration.getEvent().getEventId(), registration.getAttendeeId(), "REGISTRATION_CONFIRMATION");
 
         return new GenericResponse("Registration approved successfully");
     }
@@ -161,6 +176,7 @@ public class RegistrationServiceImpl implements RegistrationService {
 
         notifyUser(registration.getAttendeeId(),
                 "You have successfully checked in to event \"" + registration.getEvent().getName() + "\".");
+        logEngagement(registration.getEvent().getEventId(), registration.getAttendeeId(), "CHECK_IN");
 
         return new GenericResponse("Check-in successful");
     }
@@ -193,8 +209,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     public RegistrationListResponseDto getRegistrationsByUserId(String actorId, String userId, int size, int page) {
         var pageable = PageRequest.of(page, size);
         var pages = registrationRepo.findByAttendeeId(userId, pageable);
+        var userDetailsMap = fetchUserDetails(pages.getContent().stream()
+                .map(r -> r.getAttendeeId()).distinct().toList());
         var registrations = pages.getContent().stream()
-                .map(RegistrationDtoMapper::toDto)
+                .map(r -> RegistrationDtoMapper.toDto(r, userDetailsMap.get(r.getAttendeeId())))
                 .toList();
         log.info("Fetched {} registrations for userId: {} by actor: {}", registrations.size(), userId, actorId);
         return new RegistrationListResponseDto(
@@ -229,8 +247,10 @@ public class RegistrationServiceImpl implements RegistrationService {
             }
             pages = registrationRepo.findByEventEventIdAndStatus(eventId, statusEnum, pageable);
         }
+        var userDetailsMap = fetchUserDetails(pages.getContent().stream()
+                .map(r -> r.getAttendeeId()).distinct().toList());
         var registrations = pages.getContent().stream()
-                .map(RegistrationDtoMapper::toDto)
+                .map(r -> RegistrationDtoMapper.toDto(r, userDetailsMap.get(r.getAttendeeId())))
                 .toList();
         log.info("Fetched {} registrations for eventId: {} by actor: {}", registrations.size(), eventId, actorId);
         return new RegistrationListResponseDto(
@@ -249,8 +269,10 @@ public class RegistrationServiceImpl implements RegistrationService {
     public RegistrationListResponseDto getAllRegistrations(String actorId, int size, int page) {
         var pageable = PageRequest.of(page, size);
         var pages = registrationRepo.findAll(pageable);
+        var userDetailsMap = fetchUserDetails(pages.getContent().stream()
+                .map(r -> r.getAttendeeId()).distinct().toList());
         var registrations = pages.getContent().stream()
-                .map(RegistrationDtoMapper::toDto)
+                .map(r -> RegistrationDtoMapper.toDto(r, userDetailsMap.get(r.getAttendeeId())))
                 .toList();
         log.info("Fetched {} registrations by actor: {}", registrations.size(), actorId);
         return new RegistrationListResponseDto(
@@ -272,7 +294,8 @@ public class RegistrationServiceImpl implements RegistrationService {
         var registration = registrationRepo.findById(registrationId)
                 .orElseThrow(() -> new RegistrationNotFoundException(String.format("Registration with id '%s' not found", registrationId)));
         log.info("Fetched registration with id: {} by actor: {}", registrationId, actorId);
-        return RegistrationDtoMapper.toDto(registration);
+        return RegistrationDtoMapper.toDto(registration,
+                fetchUserDetails(List.of(registration.getAttendeeId())).get(registration.getAttendeeId()));
     }
 
     /**
@@ -286,7 +309,26 @@ public class RegistrationServiceImpl implements RegistrationService {
                 .orElseThrow(() -> new RegistrationNotFoundException(
                         String.format("Registration for eventId: '%s' and userId: '%s' not found", eventId, userId)));
         log.info("Fetched registration for userId: {}, eventId: {} by actor: {}", userId, eventId, actorId);
-        return RegistrationDtoMapper.toDto(registration);
+        return RegistrationDtoMapper.toDto(registration,
+                fetchUserDetails(List.of(registration.getAttendeeId())).get(registration.getAttendeeId()));
+    }
+
+    /**
+     * Fetches user details for the given IDs from auth-manager and returns them
+     * keyed by {@code userId}. On failure the map is empty and {@code attendeeDetails}
+     * will be {@code null} in the returned DTOs.
+     *
+     * @param userIds the list of user UUIDs to look up
+     * @return a map of userId → {@link UserDetailsDto}
+     */
+    private Map<String, UserDetailsDto> fetchUserDetails(List<String> userIds) {
+        try {
+            return userServiceClient.getUserDetails(userIds).stream()
+                    .collect(Collectors.toMap(UserDetailsDto::userId, Function.identity()));
+        } catch (FeignException e) {
+            log.warn("Failed to fetch user details: {}", e.getMessage());
+            return Map.of();
+        }
     }
 
     /**
@@ -301,6 +343,25 @@ public class RegistrationServiceImpl implements RegistrationService {
             logServiceClient.sendNotification(userId, message, NOTIFICATION_CATEGORY);
         } catch (FeignException e) {
             log.warn("Failed to send notification to user {}: {}", userId, e.getMessage());
+        }
+    }
+
+    /**
+     * Logs an engagement activity to engagement-manager via the internal service endpoint.
+     * Fire-and-forget — failures are logged as warnings and never interrupt the main operation.
+     *
+     * @param eventId    the event the activity belongs to
+     * @param attendeeId the attendee performing or receiving the activity
+     * @param activity   the engagement type string (e.g. "REGISTRATION", "CHECK_IN")
+     */
+    private void logEngagement(String eventId, String attendeeId, String activity) {
+        try {
+            engagementServiceClient.logEngagement(
+                    new EngagementLogDto(eventId, attendeeId, activity, LocalDateTime.now(), null)
+            );
+            log.debug("Logged engagement activity={} for attendee={} event={}", activity, attendeeId, eventId);
+        } catch (FeignException e) {
+            log.warn("Failed to log engagement activity={} for attendee={}: {}", activity, attendeeId, e.getMessage());
         }
     }
 

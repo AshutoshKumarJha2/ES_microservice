@@ -8,12 +8,14 @@ import com.cts.eventsphere.iamservice.model.User;
 import com.cts.eventsphere.iamservice.model.data.UserRoles;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.impl.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -38,6 +40,12 @@ class UserServiceImplTest {
     @Mock
     private UserRepository userRepo;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private AuditService auditService;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -51,7 +59,7 @@ class UserServiceImplTest {
         );
         when(userRepo.findAll()).thenReturn(users);
 
-        List<UserResponseDto> result = userService.getAllUsers(any());
+        List<UserResponseDto> result = userService.getAllUsers("admin");
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).userId()).isEqualTo("u1");
@@ -62,7 +70,7 @@ class UserServiceImplTest {
     void getAllUsers_WhenNoUsers_ShouldReturnEmptyList() {
         when(userRepo.findAll()).thenReturn(List.of());
 
-        assertThat(userService.getAllUsers(any())).isEmpty();
+        assertThat(userService.getAllUsers("admin")).isEmpty();
     }
 
     // ─── getUsers (bulk) ──────────────────────────────────────────────────────
@@ -113,8 +121,7 @@ class UserServiceImplTest {
         User existing = buildUser("u1", "Alice", "alice@e.com", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         UserRequestDto dto = new UserRequestDto("Alice Updated", null, "newpass", "1112223333");
 
-        when(userRepo.existsById("u1")).thenReturn(true);
-        when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
+when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
         when(userRepo.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         UserResponseDto result = userService.updateUserDetails("u1", dto);
@@ -128,8 +135,7 @@ class UserServiceImplTest {
         User existing = buildUser("u1", "Alice", "alice@e.com", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         UserRequestDto dto = new UserRequestDto(null, "newalice@e.com", null, null);
 
-        when(userRepo.existsById("u1")).thenReturn(true);
-        when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
+when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
         when(userRepo.existsByEmail("newalice@e.com")).thenReturn(false);
         when(userRepo.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -143,8 +149,7 @@ class UserServiceImplTest {
         User existing = buildUser("u1", "Alice", "alice@e.com", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         UserRequestDto dto = new UserRequestDto(null, "alice@e.com", null, null); // same email
 
-        when(userRepo.existsById("u1")).thenReturn(true);
-        when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
+when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
         when(userRepo.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         UserResponseDto result = userService.updateUserDetails("u1", dto);
@@ -158,8 +163,7 @@ class UserServiceImplTest {
         User existing = buildUser("u1", "Alice", "alice@e.com", UserRoles.ATTENDEE, UserStatus.ACTIVE);
         UserRequestDto dto = new UserRequestDto(null, "taken@e.com", null, null);
 
-        when(userRepo.existsById("u1")).thenReturn(true);
-        when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
+when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
         when(userRepo.existsByEmail("taken@e.com")).thenReturn(true);
 
         assertThatThrownBy(() -> userService.updateUserDetails("u1", dto))
@@ -169,11 +173,10 @@ class UserServiceImplTest {
 
     @Test
     void updateUserDetails_WithNonExistentUserId_ShouldThrowIllegalArgumentException() {
-        when(userRepo.existsById("ghost")).thenReturn(false);
         UserRequestDto dto = new UserRequestDto("Name", null, null, null);
 
         assertThatThrownBy(() -> userService.updateUserDetails("ghost", dto))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(UserNotFoundException.class)
                 .hasMessageContaining("ghost");
     }
 
@@ -183,8 +186,7 @@ class UserServiceImplTest {
         existing.setPassword("$2a$existing");
         UserRequestDto dto = new UserRequestDto(null, null, "   ", null); // blank password
 
-        when(userRepo.existsById("u1")).thenReturn(true);
-        when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
+when(userRepo.findById("u1")).thenReturn(Optional.of(existing));
         when(userRepo.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
 
         userService.updateUserDetails("u1", dto);

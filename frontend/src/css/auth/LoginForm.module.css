@@ -131,6 +131,22 @@
   box-shadow: 0 0 0 3px var(--blue-subtle);
 }
 
+.field--error label {
+  color: var(--red);
+}
+
+.field--error input {
+  border-color: var(--red);
+  border-left-color: var(--red);
+  background: var(--red-subtle);
+}
+
+.field--error input:focus {
+  border-color: var(--red);
+  border-left-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-subtle);
+}
+
 .forgot-link {
   text-align: right;
   font-size: 0.82rem;

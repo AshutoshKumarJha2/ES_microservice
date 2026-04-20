@@ -37,7 +37,7 @@ export const eventService = {
   },
 
   async updateSchedule(eventId: string, scheduleId: string, payload: ScheduleRequestDto): Promise<ScheduleResponseDto> {
-    const { data } = await axiosInstance.post(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`, payload)
+    const { data } = await axiosInstance.put(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`, payload)
     return data
   },
 

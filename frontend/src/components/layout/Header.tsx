@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { logout } from '../../store/slices/authSlice'
+import { clearAuthHeader } from '../../api/axiosInstance'
 import { Bell, BoxArrowRight, ChevronDown, List, Person, Speedometer2, X } from 'react-bootstrap-icons'
 import styles from '../../css/layout/Header.module.css'
 import { DarkModeToggle } from '../elements/DarkModeToggle'
@@ -19,6 +20,7 @@ export const Header = () => {
 
   const handleLogout = () => {
     setDropdownOpen(false)
+    clearAuthHeader()
     dispatch(logout())
     navigate('/login', { replace: true })
   }

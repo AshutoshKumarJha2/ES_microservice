@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
 import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
@@ -12,7 +13,9 @@ import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
 import com.cts.eventsphere.eventmanager.model.Event;
 import com.cts.eventsphere.eventmanager.model.Schedule;
+import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
+import com.cts.eventsphere.eventmanager.repository.RegistrationRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
 import com.cts.eventsphere.eventmanager.service.AuditService;
 import com.cts.eventsphere.eventmanager.service.EventService;
@@ -38,6 +41,7 @@ import java.util.List;
 @Slf4j
 public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
+    private final RegistrationRepository registrationRepository;
     private final EventResponseDtoMapper eventResponseDtoMapper;
     private final EventRequestDtoMapper eventRequestDtoMapper;
     private final ScheduleRepository scheduleRepository;
@@ -214,5 +218,29 @@ public class EventServiceImpl implements EventService {
                 .toList();
         log.debug("Found {} activities matching event ID: {}", schedules.size(), eventId);
         return schedules;
+    }
+
+    /**
+     * Retrieves registration analytics for a specific event, broken down by status.
+     *
+     * @param eventId the unique identifier of the event
+     * @return DTO containing total registrations and counts per status
+     * @throws EventNotFoundException if no event exists with the given ID
+     */
+    @Override
+    public EventAnalyticsResponseDto getAnalytics(String eventId) throws EventNotFoundException {
+        log.info("Fetching analytics for event ID: {}", eventId);
+        if (!eventRepository.existsById(eventId)) {
+            log.error("Analytics failed: Event ID {} not found", eventId);
+            throw new EventNotFoundException(eventId);
+        }
+        long total     = registrationRepository.countByEventEventId(eventId);
+        long pending   = registrationRepository.countByEventEventIdAndStatus(eventId, RegistrationStatus.PENDING);
+        long confirmed = registrationRepository.countByEventEventIdAndStatus(eventId, RegistrationStatus.CONFIRMED);
+        long checkedIn = registrationRepository.countByEventEventIdAndStatus(eventId, RegistrationStatus.CHECKED_IN);
+        long cancelled = registrationRepository.countByEventEventIdAndStatus(eventId, RegistrationStatus.CANCELLED);
+        log.info("Analytics for event ID {}: total={}, pending={}, confirmed={}, checkedIn={}, cancelled={}",
+                eventId, total, pending, confirmed, checkedIn, cancelled);
+        return new EventAnalyticsResponseDto(eventId, total, pending, confirmed, checkedIn, cancelled);
     }
 }

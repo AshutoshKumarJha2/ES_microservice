@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { ToastContainer, Bounce } from 'react-toastify'
 import './App.css'
 import { Home } from './components/pages/Home'
 import { Contact } from './components/pages/Contact'
@@ -11,9 +12,10 @@ import { Login } from './components/pages/auth/Login'
 import { Profile } from './components/pages/auth/Profile'
 import { Dashboard } from './components/pages/Dashboard'
 import { OrganizerDashboard } from './components/pages/events/OrganizerDashboard'
-import { CreateEvent } from './components/pages/events/CreateEvent'
 import { EventDetail } from './components/pages/events/EventDetail'
-import { Analytics } from './components/pages/events/Analytics'
+import { SubmitFeedback } from './components/pages/engagement/SubmitFeedback'
+import { EngagementAnalytics } from './components/pages/engagement/EngagementAnalytics'
+import { FinanceDashboard } from './components/pages/finance/FinanceDashboard'
 import { FinanceLayout } from './components/layout/FinanceLayout'
 import { ExpenseApprovals } from './components/pages/finance/ExpenseApprovals'
 import { Payments } from './components/pages/finance/Payments'
@@ -23,6 +25,12 @@ import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
 import { AdminEvents } from './components/pages/admin/AdminEvents'
 import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
+import { VenueLayout } from './components/layout/VenueLayout'
+import { VenueManagerDashboard } from './components/pages/venue/VenueManagerDashboard'
+import { Venues } from './components/pages/venue/Venues'
+import { VenueBookings } from './components/pages/venue/VenueBookings'
+import { VenueResources } from './components/pages/venue/VenueResources'
+import BookingVenueAndResource from './components/pages/booking/BookingVenueAndResource'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -69,10 +77,10 @@ export const App = () => {
           element: <AppLayout />,
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
-            { path: '/organizer/events/create',      element: <CreateEvent /> },
-            { path: '/organizer/events/:id/edit',    element: <CreateEvent /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
-            { path: '/organizer/analytics/:eventId', element: <Analytics /> },
+            { path: '/organizer/booking',         element: <BookingVenueAndResource /> },
+            { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
+            {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
           ],
         },
       ],
@@ -83,6 +91,7 @@ export const App = () => {
       path: '/finance',
       element: <FinanceLayout />,
       children: [
+        { path: 'dashboard', element: <FinanceDashboard /> },
         { path: 'expenses', element: <ExpenseApprovals /> },
         { path: 'payments', element: <Payments /> },
         { path: 'budget', element: <BudgetOverview /> },
@@ -103,7 +112,36 @@ export const App = () => {
         },
       ],
     },
+
+    // ── Venue Manager Portal (separate layout) ─────────────────────────────────
+    {
+     
+      element: <VenueLayout />,
+      children: [
+        { path:'/venue-manager/dashboard', element: <VenueManagerDashboard /> },
+        { path: '/venue-manager/venues',    element: <Venues /> },
+        { path: '/venue-manager/venue/bookings',  element: <VenueBookings /> },
+        { path: '/venue-manager/venue/resources', element: <VenueResources /> },
+      ],
+    },
   ])
 
-  return <RouterProvider router={router} />
+  return (
+    <>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition={Bounce}
+      />
+      <RouterProvider router={router} />
+    </>
+  )
 }

@@ -10,7 +10,9 @@ import com.cts.eventsphere.iamservice.dto.user.UserResponseDto;
 import com.cts.eventsphere.iamservice.exception.GlobalExceptionHandler;
 import com.cts.eventsphere.iamservice.model.data.UserRoles;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
+import com.cts.eventsphere.iamservice.security.RsaKeyProvider;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.AuthService;
 import com.cts.eventsphere.iamservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -54,6 +56,12 @@ class AuthControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private AuditService auditService;
+
+    @Mock
+    private RsaKeyProvider rsaKeyProvider;
+
     @InjectMocks
     private AuthController authController;
 
@@ -64,7 +72,7 @@ class AuthControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(authController)
-                .setControllerAdvice(new GlobalExceptionHandler(any()))
+                .setControllerAdvice(new GlobalExceptionHandler(auditService))
                 .build();
     }
 
@@ -141,26 +149,4 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.userRole").value("ADMIN"));
     }
 
-    // ─── POST /auth/users/userdetails ─────────────────────────────────────────
-
-    @Test
-    void getUserDetails_ShouldReturn200WithListOfUserResponseDto() throws Exception {
-        List<String> userIds = List.of("user-001", "user-002");
-        List<UserResponseDto> responseList = List.of(
-                new UserResponseDto("user-001", "Alice", UserRoles.ATTENDEE,
-                        "alice@example.com", "0987654321", UserStatus.ACTIVE),
-                new UserResponseDto("user-002", "Bob", UserRoles.ORGANIZER,
-                        "bob@example.com", "1234567890", UserStatus.ACTIVE)
-        );
-
-        when(userService.getUsers(userIds)).thenReturn(responseList);
-
-        mockMvc.perform(post("/auth/users/userdetails")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(userIds)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].userId").value("user-001"))
-                .andExpect(jsonPath("$[1].userId").value("user-002"));
-    }
 }

@@ -1,12 +1,37 @@
+import { useEffect } from 'react'
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAppSelector } from '../../../store/hooks'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { fetchCurrentUser, logout } from '../../../store/slices/authSlice'
+import { toast, Bounce } from 'react-toastify'
 
 export const ProtectedRoute: React.FC = () => {
-  const { isAuthenticated } = useAppSelector((state) => state.auth)
+  const dispatch = useAppDispatch()
+  const { isAuthenticated, user, userLoading } = useAppSelector((state) => state.auth)
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />
-  }
+  useEffect(() => {
+    if (!isAuthenticated) return
+    if (user) return
+
+    dispatch(fetchCurrentUser()).then((result) => {
+      if (fetchCurrentUser.fulfilled.match(result) && result.payload.status === 'SUSPENDED') {
+        toast.error('Your account has been suspended. Please contact support.', {
+          position: 'top-right',
+          autoClose: 5000,
+          hideProgressBar: true,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          theme: 'light',
+          transition: Bounce,
+        })
+        dispatch(logout())
+      }
+    })
+  }, [dispatch, isAuthenticated, user])
+
+  if (!isAuthenticated) return <Navigate to="/login" replace />
+
+  if (userLoading || !user) return null
 
   return <Outlet />
 }

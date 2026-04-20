@@ -64,4 +64,21 @@ public interface RegistrationRepository extends JpaRepository<Registration, Stri
      * @return an {@link Optional} containing the matching registration, or empty if not found
      */
     Optional<Registration> findByAttendeeIdAndEventEventId(String attendeeId, String eventId);
+
+    /**
+     * Counts all registrations for the given event.
+     *
+     * @param eventId the ID of the event
+     * @return total number of registrations for the event
+     */
+    long countByEventEventId(String eventId);
+
+    /**
+     * Counts registrations for the given event filtered by status.
+     *
+     * @param eventId the ID of the event
+     * @param status  the registration status to filter by
+     * @return number of registrations matching the event and status
+     */
+    long countByEventEventIdAndStatus(String eventId, RegistrationStatus status);
 }

@@ -23,6 +23,7 @@ public class EngagementRequestDtoMapper {
                 .eventId(dto.eventId())
                 .attendeeId(dto.attendeeId())
                 .activity(dto.activity())
+                .scheduleId(dto.scheduleId())
                 .build();
     }
 }

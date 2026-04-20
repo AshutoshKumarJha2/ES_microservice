@@ -7,6 +7,7 @@ import com.cts.eventsphere.iamservice.exception.GlobalExceptionHandler;
 import com.cts.eventsphere.iamservice.model.data.UserRoles;
 import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.security.UserPrincipal;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,9 @@ class UserControllerTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private AuditService auditService;
+
     @InjectMocks
     private UserController userController;
 
@@ -66,7 +70,7 @@ class UserControllerTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(userController)
-                .setControllerAdvice(new GlobalExceptionHandler(any()))
+                .setControllerAdvice(new GlobalExceptionHandler(auditService))
                 .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .build();
     }
@@ -105,7 +109,7 @@ class UserControllerTest {
         when(userService.updateUserDetails("user-001", updateRequest)).thenReturn(ALICE_DTO);
 
         ResponseEntity<UserResponseDto> response =
-                userController.updateUserDetails("user-001", updateRequest, any());
+                userController.updateUserDetails("user-001", updateRequest, null);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(ALICE_DTO);
