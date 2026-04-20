@@ -38,6 +38,14 @@ const getQuickActions = (role: string): QuickAction[] => {
         { label: 'View Bookings',    desc: 'Confirm or cancel venue booking requests',  path: '/venue-manager/venue/bookings',  color: 'green' },
         { label: 'Manage Resources', desc: 'Equipment and staff resources per venue',   path: '/venue-manager/venue/resources', color: 'red' },
       ]
+    case 'VENDOR':
+      return [
+        { label: 'Vendor Portal',  desc: 'Go to your vendor management dashboard',  path: '/vendor/dashboard',  color: 'blue' },
+        { label: 'My Profile',     desc: 'Register or update your vendor profile',   path: '/vendor/profile',    color: 'orange' },
+        { label: 'Contracts',      desc: 'View and sign vendor agreements',          path: '/vendor/contracts',  color: 'green' },
+        { label: 'Deliveries',     desc: 'Log and track goods & equipment',          path: '/vendor/deliveries', color: 'red' },
+        { label: 'Invoices',       desc: 'View billing records and download PDFs',   path: '/vendor/invoices',   color: 'blue' },
+      ]
     default:
       return [
         { label: 'Browse Events', desc: 'Discover upcoming events', path: '/', color: 'blue' },
