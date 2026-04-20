@@ -220,6 +220,15 @@ export const AttendeeEventDetail = () => {
                       <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.endAt}</Col>
                       <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
                       <Col xs={7}><EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} /></Col>
+                      {event.organizer && (
+                        <>
+                          <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Organizer</Col>
+                          <Col xs={7} style={{ color: 'var(--text-primary)' }}>
+                            {event.organizer.name}
+                            <span className="ms-1 small" style={{ color: 'var(--text-muted)' }}>({event.organizer.email})</span>
+                          </Col>
+                        </>
+                      )}
                     </Row>
                   </dl>
                 </Card.Body>

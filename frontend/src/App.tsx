@@ -25,6 +25,7 @@ import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
 import { AdminEvents } from './components/pages/admin/AdminEvents'
 import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
+import { CreateEvent } from './components/pages/events/CreateEvent'
 import { AttendeeEventBrowser } from './components/pages/attendee/AttendeeEventBrowser'
 import { AttendeeEventDetail } from './components/pages/attendee/AttendeeEventDetail'
 import { AttendeeMyRegistrations } from './components/pages/attendee/AttendeeMyRegistrations'
@@ -115,10 +116,13 @@ export const App = () => {
         {
           element: <AppLayout />,
           children: [
-            { path: '/admin/dashboard',  element: <AdminDashboard /> },
-            { path: '/admin/users',      element: <AdminUsers /> },
-            { path: '/admin/events',     element: <AdminEvents /> },
-            { path: '/admin/audit-logs', element: <AdminAuditLogs /> },
+            { path: '/admin/dashboard',     element: <AdminDashboard /> },
+            { path: '/admin/users',         element: <AdminUsers /> },
+            { path: '/admin/events',          element: <AdminEvents /> },
+            { path: '/admin/events/create',   element: <CreateEvent /> },
+            { path: '/admin/events/:id',      element: <EventDetail /> },
+            { path: '/admin/events/:id/edit', element: <CreateEvent /> },
+            { path: '/admin/audit-logs',    element: <AdminAuditLogs /> },
           ],
         },
       ],

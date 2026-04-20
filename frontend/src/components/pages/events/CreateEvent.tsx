@@ -1,49 +1,44 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { createEvent, updateEvent, fetchEventById } from '../../../store/slices/eventsSlice'
+import { fetchUsers } from '../../../store/slices/adminSlice'
 import { venueService } from '../../../services/events/venueService'
 import { eventService } from '../../../services/events/eventService'
-import type { EventRequestDto, ScheduleRequestDto, VenueResponseDto } from '../../../types/events'
+import { SessionManager } from '../../elements/events/SessionManager'
+import type { SessionRow } from '../../elements/events/SessionManager'
+import type { EventRequestDto, VenueResponseDto, UserResponseDto } from '../../../types/events'
 import {
-  Container, Row, Col, Card, Form, Button, Spinner, Alert, Badge,
+  Container, Row, Col, Card, Form, Button, Spinner, Alert,
 } from 'react-bootstrap'
 
-interface SessionRow extends Omit<ScheduleRequestDto, 'eventId'> {
-  localId: number
-  scheduleId?: string
-  dirty?: boolean
-  saving?: boolean
-  saveError?: string
-}
-
-const EMPTY_SESSION: Omit<SessionRow, 'localId'> = {
-  date: '',
-  timeSlot: '',
-  activity: '',
-  status: 'DRAFT',
-}
-
-const parseTimeSlot = (slot: string) => {
-  const [start = '', end = ''] = slot.split('-')
-  return { start, end }
-}
-
-const buildTimeSlot = (start: string, end: string) => `${start}-${end}`
-
 export const CreateEvent = () => {
-  const navigate = useNavigate()
-  const dispatch = useAppDispatch()
-  const { id }  = useParams<{ id?: string }>()
-  const isEdit  = Boolean(id)
+  const navigate  = useNavigate()
+  const location  = useLocation()
+  const dispatch  = useAppDispatch()
+  const { id }    = useParams<{ id?: string }>()
+  const isEdit    = Boolean(id)
 
   const { loading, error } = useAppSelector((state) => state.events)
-  const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
+  const userId     = useAppSelector((state) => state.auth.user?.userId ?? '')
+  const isAdmin    = useAppSelector((state) => state.auth.user?.role === 'ADMIN')
+  const allUsers   = useAppSelector((state) => state.admin.allUsers)
+  const organizers = (allUsers as UserResponseDto[]).filter(
+    (u) => u.role === 'ORGANIZER' && u.status === 'ACTIVE'
+  )
+  const returnPath = location.pathname.startsWith('/admin') ? '/admin/events' : '/organizer/dashboard'
 
-  const [venues, setVenues]     = useState<VenueResponseDto[]>([])
-  const [sessions, setSessions] = useState<SessionRow[]>([])
-  const [nextId, setNextId]     = useState(1)
-  const [form, setForm]         = useState<EventRequestDto>({
+  const [venues, setVenues]                   = useState<VenueResponseDto[]>([])
+  const [organizerSearch, setOrganizerSearch] = useState('')
+  const [pickerOpen, setPickerOpen]           = useState(false)
+
+  // Sessions — controlled only in create mode; edit mode delegates to SessionManager
+  const [sessions, setSessions]         = useState<SessionRow[]>([])
+  // ISO timestamps used by SessionManager for bounds validation in edit mode
+  const [eventStartAt, setEventStartAt] = useState('')
+  const [eventEndAt, setEventEndAt]     = useState('')
+
+  const [form, setForm] = useState<EventRequestDto>({
     name: '',
     organizerId: '',
     startDate: '',
@@ -56,9 +51,15 @@ export const CreateEvent = () => {
     venueService.getAll().then(setVenues).catch(console.error)
   }, [])
 
+  // Non-admin users are always the organizer; admins pick from the dropdown
   useEffect(() => {
-    if (userId) setForm((prev) => ({ ...prev, organizerId: userId }))
-  }, [userId])
+    if (!isAdmin && userId) setForm((prev) => ({ ...prev, organizerId: userId }))
+  }, [userId, isAdmin])
+
+  // Pre-load organizer list when admin opens the form
+  useEffect(() => {
+    if (isAdmin) dispatch(fetchUsers())
+  }, [isAdmin, dispatch])
 
   useEffect(() => {
     if (isEdit && id) {
@@ -73,19 +74,9 @@ export const CreateEvent = () => {
             venueId:     event.venueId,
             status:      event.status,
           })
-          eventService.getSchedules(id).then((schedules) => {
-            setSessions(
-              schedules.map((s, i) => ({
-                localId:    i + 1,
-                scheduleId: s.scheduleId,
-                date:       s.date,
-                timeSlot:   s.timeSlot,
-                activity:   s.activity,
-                status:     s.status,
-              }))
-            )
-            setNextId(schedules.length + 1)
-          })
+          // Store ISO timestamps for SessionManager bounds validation
+          setEventStartAt(event.startAt)
+          setEventEndAt(event.endAt)
         })
         .catch(console.error)
     }
@@ -96,69 +87,21 @@ export const CreateEvent = () => {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const addSession = () => {
-    setSessions((prev) => [...prev, { ...EMPTY_SESSION, localId: nextId }])
-    setNextId((n) => n + 1)
-  }
-
-  const handleSessionChange = (localId: number, field: keyof Omit<SessionRow, 'localId'>, value: string) => {
-    setSessions((prev) =>
-      prev.map((s) => (s.localId === localId ? { ...s, [field]: value, dirty: true } : s))
-    )
-  }
-
-  const handleSaveSession = async (localId: number) => {
-    const session = sessions.find((s) => s.localId === localId)
-    if (!session || !id) return
-    const { scheduleId, localId: _lid, dirty: _d, saving: _s, saveError: _e, ...rest } = session
-    setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
-    try {
-      if (scheduleId) {
-        await eventService.updateSchedule(id, scheduleId, { ...rest, eventId: id })
-        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, dirty: false } : s))
-      } else {
-        const created = await eventService.createSchedule(id, { ...rest, eventId: id })
-        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, dirty: false, scheduleId: created.scheduleId } : s))
-      }
-    } catch {
-      setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to save' } : s))
-    }
-  }
-
-  const handleDeleteSession = async (localId: number) => {
-    const session = sessions.find((s) => s.localId === localId)
-    if (!session) return
-    if (session.scheduleId) {
-      setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
-      try {
-        await eventService.deleteSchedule(id!, session.scheduleId)
-      } catch {
-        setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to delete' } : s))
-        return
-      }
-    }
-    setSessions((prev) => prev.filter((s) => s.localId !== localId))
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       if (isEdit && id) {
+        // Sessions in edit mode are saved immediately by SessionManager — just update event details
         await dispatch(updateEvent({ id, payload: form })).unwrap()
-        for (const session of sessions) {
-          const { scheduleId, localId: _localId, dirty, saving: _s, saveError: _e, ...rest } = session
-          if (!scheduleId) {
-            await eventService.createSchedule(id, { ...rest, eventId: id })
-          }
-        }
       } else {
+        // Create mode — create event then batch-save all locally accumulated sessions
         const event = await dispatch(createEvent(form)).unwrap()
         for (const session of sessions) {
-          const { scheduleId: _sid, localId: _localId, dirty: _d, saving: _s, saveError: _e, ...rest } = session
+          const { localId: _lid, scheduleId: _sid, ...rest } = session
           await eventService.createSchedule(event.id, { ...rest, eventId: event.id })
         }
       }
-      navigate('/organizer/dashboard')
+      navigate(returnPath)
     } catch {
       // error shown from redux state
     }
@@ -195,11 +138,66 @@ export const CreateEvent = () => {
                     />
                   </Form.Group>
                 </Col>
+
+                {/* Admin-only: searchable organizer picker */}
+                {isAdmin && (() => {
+                  const selectedOrganizer = organizers.find((o) => o.userId === form.organizerId)
+                  const filteredOrganizers = organizers.filter((o) => {
+                    const q = organizerSearch.toLowerCase()
+                    return !q || o.name.toLowerCase().includes(q) || o.email.toLowerCase().includes(q)
+                  })
+                  return (
+                    <Col xs={12} sm={6}>
+                      <Form.Group>
+                        <Form.Label className="es-label">Assign Organizer *</Form.Label>
+                        <div className="position-relative">
+                          <Form.Control
+                            placeholder="Search by name or email…"
+                            value={organizerSearch !== '' ? organizerSearch : (selectedOrganizer ? `${selectedOrganizer.name} (${selectedOrganizer.email})` : '')}
+                            onFocus={() => { setOrganizerSearch(''); setPickerOpen(true) }}
+                            onChange={(e) => { setOrganizerSearch(e.target.value); setPickerOpen(true) }}
+                            onBlur={() => setTimeout(() => setPickerOpen(false), 150)}
+                            className="es-form-control rounded-3"
+                          />
+                          {/* Hidden sentinel to trigger native required validation if no organizer is selected */}
+                          {!form.organizerId && (
+                            <input type="text" style={{ opacity: 0, height: 0, position: 'absolute' }} required />
+                          )}
+                          {pickerOpen && (
+                            <div
+                              className="position-absolute w-100 border rounded-3 shadow-sm"
+                              style={{ background: 'var(--bg-surface)', zIndex: 10, maxHeight: 220, overflowY: 'auto', top: '100%' }}
+                            >
+                              {filteredOrganizers.length === 0 ? (
+                                <div className="px-3 py-2 small" style={{ color: 'var(--text-muted)' }}>No organizers found</div>
+                              ) : filteredOrganizers.map((o) => (
+                                <div
+                                  key={o.userId}
+                                  className="px-3 py-2"
+                                  style={{ cursor: 'pointer', fontSize: '0.88rem', color: 'var(--text-primary)' }}
+                                  onMouseDown={() => {
+                                    setForm((prev) => ({ ...prev, organizerId: o.userId }))
+                                    setOrganizerSearch('')
+                                    setPickerOpen(false)
+                                  }}
+                                >
+                                  <span className="fw-semibold">{o.name}</span>
+                                  <span className="ms-2" style={{ color: 'var(--text-muted)' }}>{o.email}</span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </Form.Group>
+                    </Col>
+                  )
+                })()}
+
                 <Col xs={12} sm={6}>
                   <Form.Group>
                     <Form.Label className="es-label">Start Date *</Form.Label>
                     <Form.Control
-                      type="date" name="startDate" value={form.startDate}
+                      type="date" name="startDate" value={form.startDate?.split('T')[0] ?? ''}
                       onChange={handleChange} required className="es-form-control rounded-3"
                     />
                   </Form.Group>
@@ -208,8 +206,8 @@ export const CreateEvent = () => {
                   <Form.Group>
                     <Form.Label className="es-label">End Date *</Form.Label>
                     <Form.Control
-                      type="date" name="endDate" value={form.endDate}
-                      min={form.startDate} onChange={handleChange}
+                      type="date" name="endDate" value={form.endDate?.split('T')[0] ?? ''}
+                      min={form.startDate?.split('T')[0]} onChange={handleChange}
                       required className="es-form-control rounded-3"
                     />
                   </Form.Group>
@@ -251,137 +249,29 @@ export const CreateEvent = () => {
           </Card.Body>
         </Card>
 
-        {/* Sessions */}
-        <Card className="es-card border shadow-sm mb-3">
-          <Card.Body className="p-3 p-md-4">
-            <div className="d-flex align-items-center justify-content-between mb-3">
-              <Card.Title className="fw-semibold mb-0" style={{ color: 'var(--text-primary)' }}>
-                Sessions
-                <span className="ms-2 small fw-normal" style={{ color: 'var(--text-muted)' }}>(Optional)</span>
-              </Card.Title>
-              <Button variant="outline-primary" size="sm" className="rounded-3" onClick={addSession}>
-                + Add Session
-              </Button>
+        {/* Sessions — API-backed in edit mode, locally controlled in create mode */}
+        {isEdit ? (
+          // Edit mode: SessionManager owns sessions and syncs to API immediately
+          eventStartAt && (
+            <div className="mb-3">
+              <SessionManager
+                eventId={id}
+                eventStartAt={eventStartAt}
+                eventEndAt={eventEndAt}
+              />
             </div>
-
-            {sessions.length === 0 ? (
-              <p className="small mb-0 text-center py-3" style={{ color: 'var(--text-muted)' }}>
-                No sessions added yet. Click "+ Add Session" to get started.
-              </p>
-            ) : (
-              <div className="d-flex flex-column gap-3">
-                {sessions.map((session) => (
-                  <div
-                    key={session.localId}
-                    className="rounded-3 p-3"
-                    style={{ background: 'var(--bg-page)', border: '1px solid var(--border-subtle)' }}
-                  >
-                    <Row className="g-3 mb-2">
-                      <Col xs={12} sm={6} md={3}>
-                        <Form.Group>
-                          <Form.Label className="es-label">Date</Form.Label>
-                          <Form.Control
-                            type="date" value={session.date}
-                            onChange={(e) => handleSessionChange(session.localId, 'date', e.target.value)}
-                            className="es-form-control rounded-3"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12} sm={6} md={3}>
-                        <Form.Group>
-                          <Form.Label className="es-label">Time Slot</Form.Label>
-                          <div className="d-flex align-items-center gap-1">
-                            <Form.Control
-                              type="time"
-                              value={parseTimeSlot(session.timeSlot).start}
-                              onChange={(e) =>
-                                handleSessionChange(session.localId, 'timeSlot',
-                                  buildTimeSlot(e.target.value, parseTimeSlot(session.timeSlot).end))
-                              }
-                              className="es-form-control rounded-3"
-                            />
-                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>–</span>
-                            <Form.Control
-                              type="time"
-                              value={parseTimeSlot(session.timeSlot).end}
-                              min={parseTimeSlot(session.timeSlot).start || undefined}
-                              onChange={(e) =>
-                                handleSessionChange(session.localId, 'timeSlot',
-                                  buildTimeSlot(parseTimeSlot(session.timeSlot).start, e.target.value))
-                              }
-                              className="es-form-control rounded-3"
-                            />
-                          </div>
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12} sm={6} md={4}>
-                        <Form.Group>
-                          <Form.Label className="es-label">Activity</Form.Label>
-                          <Form.Control
-                            type="text" placeholder="Session title or description"
-                            value={session.activity}
-                            onChange={(e) => handleSessionChange(session.localId, 'activity', e.target.value)}
-                            className="es-form-control rounded-3"
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col xs={12} sm={6} md={2}>
-                        <Form.Group>
-                          <Form.Label className="es-label">Status</Form.Label>
-                          <Form.Select
-                            value={session.status}
-                            onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
-                            className="es-form-control rounded-3"
-                          >
-                            <option value="DRAFT">Draft</option>
-                            <option value="ACTIVE">Active</option>
-                            <option value="COMPLETED">Completed</option>
-                            <option value="TERMINATED">Terminated</option>
-                          </Form.Select>
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    {/* Session actions row */}
-                    <div className="d-flex align-items-center gap-2 flex-wrap">
-                      {session.saveError && (
-                        <span style={{ fontSize: '0.72rem', color: 'var(--red)' }}>{session.saveError}</span>
-                      )}
-                      {session.scheduleId && session.dirty && (
-                        <Badge
-                          style={{ background: 'color-mix(in srgb, var(--saffron) 15%, transparent)', color: 'var(--saffron)', fontSize: '0.68rem', fontWeight: 600, border: '1px solid color-mix(in srgb, var(--saffron) 35%, transparent)' }}
-                          className="border-0"
-                        >
-                          edited
-                        </Badge>
-                      )}
-                      <div className="ms-auto d-flex gap-2">
-                        {isEdit && (
-                          <Button
-                            type="button" variant="outline-primary" size="sm" className="rounded-3"
-                            style={{ fontSize: '0.78rem' }}
-                            disabled={!session.dirty || session.saving}
-                            onClick={() => handleSaveSession(session.localId)}
-                          >
-                            {session.saving ? <Spinner animation="border" size="sm" /> : '↑ Save'}
-                          </Button>
-                        )}
-                        <Button
-                          type="button" variant="outline-danger" size="sm" className="rounded-3"
-                          style={{ fontSize: '0.78rem' }}
-                          disabled={session.saving}
-                          onClick={() => handleDeleteSession(session.localId)}
-                        >
-                          {session.saving ? <Spinner animation="border" size="sm" /> : '✕ Remove'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card.Body>
-        </Card>
+          )
+        ) : (
+          // Create mode: sessions accumulated locally, saved on submit
+          <div className="mb-3">
+            <SessionManager
+              eventStartAt={form.startDate}
+              eventEndAt={form.endDate}
+              sessions={sessions}
+              onSessionsChange={setSessions}
+            />
+          </div>
+        )}
 
         {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
 
@@ -398,7 +288,7 @@ export const CreateEvent = () => {
           </Button>
           <Button
             type="button" variant="outline-secondary" className="rounded-3"
-            onClick={() => navigate('/organizer/dashboard')}
+            onClick={() => navigate(returnPath)}
           >
             Cancel
           </Button>

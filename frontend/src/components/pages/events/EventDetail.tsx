@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import { fetchTicketsByEvent } from '../../../store/slices/ticketsSlice'
@@ -31,8 +31,13 @@ const TABS: { key: Tab; label: string }[] = [
 export const EventDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const dispatch = useAppDispatch()
   const { selectedEvent } = useAppSelector((s) => s.events)
+
+  const isAdmin    = location.pathname.startsWith('/admin')
+  const backPath   = isAdmin ? '/admin/events' : '/organizer/dashboard'
+  const backLabel  = isAdmin ? 'All Events' : 'Dashboard'
 
   const [activeTab, setActiveTab] = useState<Tab>('overview')
 
@@ -60,11 +65,11 @@ export const EventDetail = () => {
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <button
-              onClick={() => navigate('/organizer/dashboard')}
+              onClick={() => navigate(backPath)}
               className="btn btn-link p-0 mb-2 d-flex align-items-center gap-1"
               style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.82rem', textDecoration: 'none' }}
             >
-              <ArrowLeft size={13} /> Dashboard
+              <ArrowLeft size={13} /> {backLabel}
             </button>
             <h1 className="fw-bold fs-3 mb-1">{selectedEvent.eventName}</h1>
             <div className="d-flex align-items-center gap-2 flex-wrap">
@@ -73,10 +78,23 @@ export const EventDetail = () => {
               </span>
               <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
             </div>
+            {selectedEvent.organizer && (
+              <p className="mb-0 mt-1 small" style={{ color: 'rgba(255,255,255,0.65)' }}>
+                Organizer: <span className="fw-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{selectedEvent.organizer.name}</span>
+                <span className="ms-1">({selectedEvent.organizer.email})</span>
+              </p>
+            )}
           </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
-            Analytics
-          </Button>
+          <div className="d-flex gap-2">
+            {isAdmin && (
+              <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
+                Edit Event
+              </Button>
+            )}
+            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
+              Analytics
+            </Button>
+          </div>
         </Container>
       </div>
 

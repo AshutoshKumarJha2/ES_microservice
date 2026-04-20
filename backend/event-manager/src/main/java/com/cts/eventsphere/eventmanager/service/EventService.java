@@ -21,10 +21,12 @@ public interface EventService {
     /**
      * Creates a new event in the system.
      *
-     * @param event the request DTO containing event details
+     * @param userId the ID of the authenticated caller (used for audit)
+     * @param role   the role of the authenticated caller (ADMIN may set a custom organizerId)
+     * @param event  the request DTO containing event details
      * @return the response DTO representing the created event
      */
-    EventResponseDto create(String userId, EventRequestDto event);
+    EventResponseDto create(String userId, String role, EventRequestDto event);
 
     /**
      * Retrieves all events available in the system.

@@ -72,9 +72,20 @@ export const AdminEvents: React.FC = () => {
           <Card.Body className="p-3 p-md-4">
             <div className="d-flex justify-content-between align-items-center mb-3">
               <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>All Events</Card.Title>
-              <span className="small" style={{ color: 'var(--text-muted)' }}>
-                {filtered.length} result{filtered.length !== 1 ? 's' : ''}
-              </span>
+              <div className="d-flex align-items-center gap-3">
+                <span className="small" style={{ color: 'var(--text-muted)' }}>
+                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                </span>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="rounded-3"
+                  style={{ fontSize: '0.82rem' }}
+                  onClick={() => navigate('/admin/events/create')}
+                >
+                  + Create Event
+                </Button>
+              </div>
             </div>
 
             {/* Toolbar */}
@@ -114,7 +125,7 @@ export const AdminEvents: React.FC = () => {
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer ID</th>
+                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Dates</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Venue</th>
                     <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
@@ -127,7 +138,15 @@ export const AdminEvents: React.FC = () => {
                   ) : pageEvents.map((ev) => (
                     <tr key={ev.id}>
                       <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{ev.eventName}</td>
-                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.organizerId}</td>
+                      <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>
+                        {ev.organizer ? (
+                          <span title={ev.organizerId}>
+                            <span style={{ color: 'var(--text-primary)' }}>{ev.organizer.name}</span>
+                            <br />
+                            <span style={{ fontSize: '0.78rem' }}>{ev.organizer.email}</span>
+                          </span>
+                        ) : ev.organizerId}
+                      </td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                         {formatDate(ev.startAt)}
                         {ev.endAt && ev.endAt !== ev.startAt ? ` – ${formatDate(ev.endAt)}` : ''}
@@ -144,9 +163,9 @@ export const AdminEvents: React.FC = () => {
                           size="sm"
                           className="rounded-3"
                           style={{ fontSize: '0.78rem' }}
-                          onClick={() => navigate(`/organizer/events/${ev.id}`)}
+                          onClick={() => navigate(`/admin/events/${ev.id}`)}
                         >
-                          View
+                          Manage
                         </Button>
                       </td>
                     </tr>

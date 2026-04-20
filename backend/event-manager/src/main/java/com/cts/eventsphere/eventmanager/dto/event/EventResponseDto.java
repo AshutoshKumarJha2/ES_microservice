@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.dto.event;
 
+import com.cts.eventsphere.eventmanager.dto.user.OrganizerDto;
 import com.cts.eventsphere.eventmanager.dto.venue.VenueDetailsDto;
 import com.cts.eventsphere.eventmanager.model.data.EventStatus;
 import jakarta.validation.constraints.NotBlank;
@@ -35,6 +36,8 @@ public record EventResponseDto(
 
         String venueId,
 
-        VenueDetailsDto venue
+        VenueDetailsDto venue,
+
+        OrganizerDto organizer
 ) {
 }

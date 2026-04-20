@@ -34,7 +34,7 @@ public class TicketController {
     private final TicketService ticketService;
 
     @PostMapping("/events/{eventId}/tickets")
-    @PreAuthorize("hasRole('ORGANIZER')")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
     public ResponseEntity<TicketResponseDto> createTicket(
             @RequestBody @Valid CreateTicketRequest request,
             @PathVariable String eventId,

@@ -1,10 +1,13 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
+import com.cts.eventsphere.eventmanager.client.UserServiceClient;
 import com.cts.eventsphere.eventmanager.client.VenueClient;
 import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
 import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
+import com.cts.eventsphere.eventmanager.dto.user.OrganizerDto;
+import com.cts.eventsphere.eventmanager.dto.user.UserDetailsDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.mapper.event.EventResponseDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMapper;
@@ -55,6 +58,7 @@ public class EventServiceImpl implements EventService {
     private final AuditService auditService;
     private final NotificationService notificationService;
     private final VenueClient venueClient;
+    private final UserServiceClient userServiceClient;
 
     private static final int VENUE_BATCH_SIZE = 50;
 
@@ -89,28 +93,75 @@ public class EventServiceImpl implements EventService {
     }
 
     /**
-     * Creates a new event in the system and triggers a notification with event details.
+     * Fetches organizer details for a list of events in a single batch call.
+     * Failures are swallowed so an unavailable auth-manager never breaks event reads.
      *
+     * @param events the events whose organizer details should be resolved
+     * @return a map of organizerId → OrganizerDto (only for IDs that resolved)
+     */
+    private Map<String, OrganizerDto> fetchOrganizerMap(List<Event> events) {
+        List<String> organizerIds = events.stream()
+                .map(Event::getOrganizerId)
+                .filter(id -> id != null && !id.isBlank())
+                .distinct()
+                .toList();
+
+        if (organizerIds.isEmpty()) return Map.of();
+
+        try {
+            return userServiceClient.getUserDetails(organizerIds).stream()
+                    .collect(Collectors.toMap(
+                            UserDetailsDto::userId,
+                            u -> OrganizerDto.builder()
+                                    .id(u.userId())
+                                    .name(u.name())
+                                    .email(u.email())
+                                    .build()
+                    ));
+        } catch (Exception ex) {
+            log.warn("Organizer lookup failed, organizer details will be omitted: {}", ex.getMessage());
+            return Map.of();
+        }
+    }
+
+    /**
+     * Creates a new event in the system and triggers a notification with event details.
+     * Only ADMIN callers may supply a custom organizerId; all other roles have their
+     * own userId forced as the organizerId regardless of what the DTO contains.
+     *
+     * @param userId       the ID of the authenticated caller (used for audit)
+     * @param role         the role of the authenticated caller
      * @param eventRequest the DTO containing event details to be created
      * @return the response DTO representing the newly created event
      */
     @Override
-    public EventResponseDto create(String userId, EventRequestDto eventRequest) {
-        log.info("Creating a new event: {}", eventRequest.name());
-        Event event = eventRequestDtoMapper.toEntity(eventRequest);
+    public EventResponseDto create(String userId, String role, EventRequestDto eventRequest) {
+        EventRequestDto effectiveRequest = "ADMIN".equals(role)
+                ? eventRequest
+                : EventRequestDto.builder()
+                        .name(eventRequest.name())
+                        .organizerId(userId)
+                        .startDate(eventRequest.startDate())
+                        .endDate(eventRequest.endDate())
+                        .venueId(eventRequest.venueId())
+                        .status(eventRequest.status())
+                        .build();
+
+        log.info("Creating a new event: {}", effectiveRequest.name());
+        Event event = eventRequestDtoMapper.toEntity(effectiveRequest);
         Event savedEvent = eventRepository.save(event);
         log.info("Successfully saved event with ID: {}", savedEvent.getEventId());
 
         auditService.logAudit(userId, AuditAction.CREATE, Event.class, savedEvent.getEventId());
 
-        var venueId = eventRequest.venueId() == null ? "null" : eventRequest.venueId();
+        var venueId = effectiveRequest.venueId() == null ? "null" : effectiveRequest.venueId();
 
         notificationService.sendNotification(
-                eventRequest.organizerId(),
-                "New Event Created: " + eventRequest.name() +
+                effectiveRequest.organizerId(),
+                "New Event Created: " + effectiveRequest.name() +
                         " at venue " + venueId +
-                        " from " + eventRequest.startDate() +
-                        " to " + eventRequest.endDate(),
+                        " from " + effectiveRequest.startDate() +
+                        " to " + effectiveRequest.endDate(),
                 "EVENT"
         );
 
@@ -136,8 +187,9 @@ public class EventServiceImpl implements EventService {
         }
         events.forEach(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()));
         Map<String, VenueDetailsDto> venueMap = fetchVenueMap(events);
+        Map<String, OrganizerDto> organizerMap = fetchOrganizerMap(events);
         List<EventResponseDto> result = events.stream()
-                .map(e -> eventResponseDtoMapper.toDTO(e, venueMap.get(e.getVenueId())))
+                .map(e -> eventResponseDtoMapper.toDTO(e, venueMap.get(e.getVenueId()), organizerMap.get(e.getOrganizerId())))
                 .toList();
         log.debug("Found {} events in total", result.size());
         return result;
@@ -168,7 +220,8 @@ public class EventServiceImpl implements EventService {
         }
         auditService.logAudit(userId, AuditAction.READ, Event.class, event.getEventId());
         Map<String, VenueDetailsDto> venueMap = fetchVenueMap(List.of(event));
-        return eventResponseDtoMapper.toDTO(event, venueMap.get(event.getVenueId()));
+        Map<String, OrganizerDto> organizerMap = fetchOrganizerMap(List.of(event));
+        return eventResponseDtoMapper.toDTO(event, venueMap.get(event.getVenueId()), organizerMap.get(event.getOrganizerId()));
     }
 
     /**
