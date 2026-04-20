@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { SessionFormFields, parseTimeSlot, buildTimeSlot } from './SessionFormFields'
 import { EventStatusBadge } from './EventStatusBadge'
 import { eventService } from '../../../services/events/eventService'
-import type { ScheduleRequestDto } from '../../../types/events'
+import type { ScheduleRequestDto, ScheduleStatus } from '../../../types/events'
 import { Card, Form, Button, Spinner, Alert } from 'react-bootstrap'
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -13,7 +13,7 @@ export interface SessionRow {
   date: string
   timeSlot: string
   activity: string
-  status: string
+  status: ScheduleStatus
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
