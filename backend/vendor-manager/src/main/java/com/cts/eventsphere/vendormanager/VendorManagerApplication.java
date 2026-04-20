@@ -8,7 +8,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 @EnableFeignClients
 @EnableDiscoveryClient
 @SpringBootApplication
-public class VendorManagerApplication {
+public class  VendorManagerApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(VendorManagerApplication.class, args);

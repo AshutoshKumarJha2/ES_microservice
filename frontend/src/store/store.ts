@@ -10,6 +10,7 @@ import financeReducer from './slices/Finance/financeSlice'
 import adminReducer from './slices/adminSlice'
 import notificationsReducer from './slices/notificationsSlice'
 import venueReducer from './slices/venue/venueSlice'
+import vendorReducer from './slices/vendor/vendorSlice'
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +25,7 @@ export const store = configureStore({
     finance: financeReducer,
     notifications: notificationsReducer,
     venue: venueReducer,
+    vendor: vendorReducer,
   },
 })
 
