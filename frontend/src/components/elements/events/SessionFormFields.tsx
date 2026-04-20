@@ -13,9 +13,11 @@ type SessionValues = Omit<ScheduleRequestDto, 'eventId'>
 interface Props {
   values: SessionValues
   onChange: (patch: Partial<SessionValues>) => void
+  minDate?: string
+  maxDate?: string
 }
 
-export const SessionFormFields = ({ values, onChange }: Props) => (
+export const SessionFormFields = ({ values, onChange, minDate, maxDate }: Props) => (
   <div className={styles['session-row-fields']}>
     <div className={styles.field}>
       <label>Date</label>
@@ -23,6 +25,8 @@ export const SessionFormFields = ({ values, onChange }: Props) => (
         type="date"
         value={values.date}
         onChange={(e) => onChange({ date: e.target.value })}
+        min={minDate}
+        max={maxDate}
         required
       />
     </div>

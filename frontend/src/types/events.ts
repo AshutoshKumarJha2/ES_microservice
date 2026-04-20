@@ -66,6 +66,7 @@ export interface EventResponseDto {
   endAt: string
   status: EventStatus
   venueId: string
+  venue?: VenueResponseDto
 }
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
@@ -132,6 +133,8 @@ export interface RegistrationDto {
   registrationId: string
   eventId: string
   ticketId: string
+  ticketType: string | null
+  ticketPrice: number | null
   attendeeId: string
   status: string
   attendeeDetails: UserDetailsDto | null

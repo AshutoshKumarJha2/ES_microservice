@@ -18,12 +18,12 @@ import com.cts.eventsphere.eventmanager.model.Registration;
 import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
 import com.cts.eventsphere.eventmanager.repository.RegistrationRepository;
+import com.cts.eventsphere.eventmanager.repository.RegistrationSpecification;
 import com.cts.eventsphere.eventmanager.repository.TicketRepository;
 import com.cts.eventsphere.eventmanager.service.RegistrationService;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -233,22 +233,60 @@ public class RegistrationServiceImpl implements RegistrationService {
      * @throws RegistrationNotFoundException if {@code status} is not a valid {@link RegistrationStatus} value
      */
     @Override
-    public RegistrationListResponseDto getRegistrationsByEventIdStatus(String actorId, String eventId, String status, int size, int page) {
-        var pageable = PageRequest.of(page, size);
-        Page<Registration> pages;
-        if (status == null || status.isEmpty()) {
-            pages = registrationRepo.findByEventEventId(eventId, pageable);
-        } else {
-            RegistrationStatus statusEnum;
+    public RegistrationListResponseDto getRegistrationsByEventIdStatus(
+            String actorId, String eventId, String status, String statuses, String ticketType, String attendeeName, int size, int page) {
+
+        var specBuilder = RegistrationSpecification.builder()
+                .eventId(eventId)
+                .ticketType(ticketType);
+
+        if (statuses != null && !statuses.isBlank()) {
+            var statusList = java.util.Arrays.stream(statuses.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> {
+                        try {
+                            return RegistrationStatus.valueOf(s);
+                        } catch (IllegalArgumentException e) {
+                            throw new RegistrationNotFoundException(String.format("Invalid status value '%s'", s));
+                        }
+                    })
+                    .toList();
+            specBuilder.statuses(statusList);
+        } else if (status != null && !status.isBlank()) {
             try {
-                statusEnum = RegistrationStatus.valueOf(status);
+                RegistrationStatus.valueOf(status);
             } catch (IllegalArgumentException e) {
                 throw new RegistrationNotFoundException(String.format("Invalid status value '%s'", status));
             }
-            pages = registrationRepo.findByEventEventIdAndStatus(eventId, statusEnum, pageable);
+            specBuilder.status(status);
         }
+
+        var spec = specBuilder.build();
+
+        if (attendeeName != null && !attendeeName.isEmpty()) {
+            var all = registrationRepo.findAll(spec, PageRequest.of(0, Integer.MAX_VALUE));
+            var userDetailsMap = fetchUserDetails(all.getContent().stream()
+                    .map(Registration::getAttendeeId).distinct().toList());
+            String term = attendeeName.toLowerCase();
+            var filtered = all.getContent().stream()
+                    .map(r -> RegistrationDtoMapper.toDto(r, userDetailsMap.get(r.getAttendeeId())))
+                    .filter(r -> r.attendeeDetails() != null && (
+                            r.attendeeDetails().name().toLowerCase().contains(term) ||
+                            r.attendeeDetails().email().toLowerCase().contains(term)))
+                    .toList();
+            int start = page * size;
+            var pageSlice = filtered.subList(
+                    Math.min(start, filtered.size()),
+                    Math.min(start + size, filtered.size()));
+            int totalPages = size > 0 ? (int) Math.ceil((double) filtered.size() / size) : 0;
+            log.info("Fetched {} registrations (name-filtered) for eventId: {} by actor: {}", filtered.size(), eventId, actorId);
+            return new RegistrationListResponseDto(pageSlice, page, size, filtered.size(), totalPages);
+        }
+
+        var pages = registrationRepo.findAll(spec, PageRequest.of(page, size));
         var userDetailsMap = fetchUserDetails(pages.getContent().stream()
-                .map(r -> r.getAttendeeId()).distinct().toList());
+                .map(Registration::getAttendeeId).distinct().toList());
         var registrations = pages.getContent().stream()
                 .map(r -> RegistrationDtoMapper.toDto(r, userDetailsMap.get(r.getAttendeeId())))
                 .toList();

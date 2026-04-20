@@ -2,6 +2,7 @@ import axios from 'axios'
 import type { InternalAxiosRequestConfig } from 'axios'
 import type { Store } from '@reduxjs/toolkit'
 import { jwtDecode } from 'jwt-decode'
+import { toast } from 'react-toastify'
 import { logout, setTokens } from '../store/slices/authSlice'
 
 const REFRESH_BUFFER_SECONDS = 30
@@ -124,6 +125,12 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
+
+    if (error.response?.status === 503) {
+      toast.error('A service is temporarily unavailable. Please try again later.', { toastId: 'svc-unavailable' })
+      if (error.response) error.response.data = { message: 'Service temporarily unavailable.' }
+      return Promise.reject(error)
+    }
 
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error)

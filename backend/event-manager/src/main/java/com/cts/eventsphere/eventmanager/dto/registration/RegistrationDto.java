@@ -16,6 +16,8 @@ public record RegistrationDto(
         String registrationId,
         String eventId,
         String ticketId,
+        String ticketType,
+        Double ticketPrice,
         String attendeeId,
         String status,
         UserDetailsDto attendeeDetails
