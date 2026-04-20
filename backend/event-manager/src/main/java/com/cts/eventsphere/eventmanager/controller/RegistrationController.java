@@ -51,11 +51,25 @@ public class RegistrationController {
             @PathVariable String eventId,
             @AuthenticationPrincipal UserPrincipal userDetails,
             @RequestParam(required = false) String status,
+            @RequestParam(required = false) String statuses,
+            @RequestParam(required = false) String ticketType,
+            @RequestParam(required = false) String attendeeName,
             @RequestParam(defaultValue = "10") @Min(1) @Max(100) int size,
             @RequestParam(defaultValue = "0") @Min(0) int page) {
         var actorId = userDetails.userId();
         log.info("Getting registrations for eventId: {}, actorId: {}", eventId, actorId);
-        return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, size, page));
+        return ResponseEntity.ok(registrationService.getRegistrationsByEventIdStatus(actorId, eventId, status, statuses, ticketType, attendeeName, size, page));
+    }
+
+    @GetMapping("/my-registrations")
+    @PreAuthorize("hasRole('ATTENDEE')")
+    public ResponseEntity<RegistrationListResponseDto> getMyRegistrations(
+            @AuthenticationPrincipal UserPrincipal userDetails,
+            @RequestParam(defaultValue = "100") @Min(1) @Max(200) int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page) {
+        var userId = userDetails.userId();
+        log.info("Fetching all registrations for attendee: {}", userId);
+        return ResponseEntity.ok(registrationService.getRegistrationsByUserId(userId, userId, size, page));
     }
 
     @GetMapping("/events/{eventId}/my-registration")

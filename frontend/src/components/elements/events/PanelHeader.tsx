@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react'
-import styles from '../../../css/events/EventsPanel.module.css'
 
 interface Props {
   title: string
@@ -7,8 +6,8 @@ interface Props {
 }
 
 export const PanelHeader = ({ title, children }: Props) => (
-  <div className={styles['panel-header']}>
-    <h3 className={styles['panel-title']}>{title}</h3>
+  <div className="d-flex justify-content-between align-items-center mb-3">
+    <h6 className="fw-semibold mb-0" style={{ color: 'var(--text-primary)' }}>{title}</h6>
     {children}
   </div>
 )

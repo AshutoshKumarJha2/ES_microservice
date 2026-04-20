@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.service.impl;
 
+import com.cts.eventsphere.eventmanager.client.VenueClient;
 import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
 import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
@@ -10,6 +11,7 @@ import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleRequestDtoMa
 import com.cts.eventsphere.eventmanager.dto.mapper.schedule.ScheduleResponseDtoMapper;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
+import com.cts.eventsphere.eventmanager.dto.venue.VenueDetailsDto;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
 import com.cts.eventsphere.eventmanager.model.Event;
 import com.cts.eventsphere.eventmanager.model.Schedule;
@@ -24,7 +26,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Implementation for Service Interface for Event Class.
@@ -49,6 +54,39 @@ public class EventServiceImpl implements EventService {
     private final ScheduleRequestDtoMapper scheduleRequestDtoMapper;
     private final AuditService auditService;
     private final NotificationService notificationService;
+    private final VenueClient venueClient;
+
+    private static final int VENUE_BATCH_SIZE = 50;
+
+    /**
+     * Fetches venue details for a list of events in batches of {@value VENUE_BATCH_SIZE}.
+     * Venues whose IDs are null or blank are skipped. Failures in the venue-manager
+     * call are swallowed so an unavailable venue service never breaks event reads.
+     *
+     * @param events the events whose venue details should be resolved
+     * @return a map of venueId → VenueDetailsDto (only for IDs that resolved)
+     */
+    private Map<String, VenueDetailsDto> fetchVenueMap(List<Event> events) {
+        List<String> venueIds = events.stream()
+                .map(Event::getVenueId)
+                .filter(id -> id != null && !id.isBlank())
+                .distinct()
+                .toList();
+
+        if (venueIds.isEmpty()) return Map.of();
+
+        List<VenueDetailsDto> fetched = new ArrayList<>();
+        for (int i = 0; i < venueIds.size(); i += VENUE_BATCH_SIZE) {
+            List<String> batch = venueIds.subList(i, Math.min(i + VENUE_BATCH_SIZE, venueIds.size()));
+            try {
+                fetched.addAll(venueClient.getBulkVenues(batch));
+            } catch (Exception ex) {
+                log.warn("Venue batch lookup failed for {} ids, venue details will be omitted: {}",
+                        batch.size(), ex.getMessage());
+            }
+        }
+        return fetched.stream().collect(Collectors.toMap(VenueDetailsDto::id, v -> v));
+    }
 
     /**
      * Creates a new event in the system and triggers a notification with event details.
@@ -81,38 +119,56 @@ public class EventServiceImpl implements EventService {
 
     /**
      * Retrieves all events available in the system.
+     * DRAFT events are excluded when the caller's role is {@code ATTENDEE}.
      *
-     * @return a list of response DTOs representing all events
+     * @param userId the ID of the requesting user (for audit)
+     * @param role   the role of the requesting user
+     * @return a list of response DTOs representing all visible events
      */
     @Override
-    public List<EventResponseDto> findAllEvents(String userId) {
+    public List<EventResponseDto> findAllEvents(String userId, String role) {
         log.info("Fetching all events from repository");
-        List<EventResponseDto> events = eventRepository.findAll().stream()
-                .peek(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()))
-                .map(eventResponseDtoMapper::toDTO)
+        List<Event> events = eventRepository.findAll();
+        if ("ATTENDEE".equals(role)) {
+            events = events.stream()
+                    .filter(e -> e.getStatus() != com.cts.eventsphere.eventmanager.model.data.EventStatus.DRAFT)
+                    .toList();
+        }
+        events.forEach(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()));
+        Map<String, VenueDetailsDto> venueMap = fetchVenueMap(events);
+        List<EventResponseDto> result = events.stream()
+                .map(e -> eventResponseDtoMapper.toDTO(e, venueMap.get(e.getVenueId())))
                 .toList();
-        log.debug("Found {} events in total", events.size());
-        return events;
+        log.debug("Found {} events in total", result.size());
+        return result;
     }
 
     /**
      * Finds an event by its unique identifier.
+     * DRAFT events are treated as not found when the caller's role is {@code ATTENDEE}.
      *
      * @param eventId the unique identifier of the event
+     * @param userId  the ID of the requesting user (for audit)
+     * @param role    the role of the requesting user
      * @return the response DTO representing the event
-     * @throws EventNotFoundException if no event exists with the given ID
+     * @throws EventNotFoundException if no event exists with the given ID, or the event
+     *                                is a DRAFT and the caller is an ATTENDEE
      */
     @Override
-    public EventResponseDto findById(String eventId, String userId) throws EventNotFoundException {
+    public EventResponseDto findById(String eventId, String userId, String role) throws EventNotFoundException {
         log.info("Searching for event with ID: {}", eventId);
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> {
                     log.error("Event lookup failed: ID {} not found", eventId);
                     return new EventNotFoundException(eventId);
                 });
+        if ("ATTENDEE".equals(role) && event.getStatus() == com.cts.eventsphere.eventmanager.model.data.EventStatus.DRAFT) {
+            log.warn("Attendee {} attempted to access DRAFT event {}", userId, eventId);
+            throw new EventNotFoundException(eventId);
+        }
         auditService.logAudit(userId, AuditAction.READ, Event.class, event.getEventId());
-
-        return eventResponseDtoMapper.toDTO(event);
+        Map<String, VenueDetailsDto> venueMap = fetchVenueMap(List.of(event));
+        return eventResponseDtoMapper.toDTO(event, venueMap.get(event.getVenueId()));
     }
 
     /**

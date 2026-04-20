@@ -25,6 +25,9 @@ import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
 import { AdminEvents } from './components/pages/admin/AdminEvents'
 import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
+import { AttendeeEventBrowser } from './components/pages/attendee/AttendeeEventBrowser'
+import { AttendeeEventDetail } from './components/pages/attendee/AttendeeEventDetail'
+import { AttendeeMyRegistrations } from './components/pages/attendee/AttendeeMyRegistrations'
 import { VenueLayout } from './components/layout/VenueLayout'
 import { VenueManagerDashboard } from './components/pages/venue/VenueManagerDashboard'
 import { Venues } from './components/pages/venue/Venues'
@@ -85,7 +88,10 @@ export const App = () => {
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
-            {path:'/attendee/feedback/:eventId',element:<SubmitFeedback />},
+            { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
+            { path: '/events',                       element: <AttendeeEventBrowser /> },
+            { path: '/attendee/events/:id',          element: <AttendeeEventDetail /> },
+            { path: '/attendee/registrations',       element: <AttendeeMyRegistrations /> },
           ],
         },
       ],

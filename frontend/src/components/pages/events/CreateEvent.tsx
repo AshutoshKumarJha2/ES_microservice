@@ -5,7 +5,9 @@ import { createEvent, updateEvent, fetchEventById } from '../../../store/slices/
 import { venueService } from '../../../services/events/venueService'
 import { eventService } from '../../../services/events/eventService'
 import type { EventRequestDto, ScheduleRequestDto, VenueResponseDto } from '../../../types/events'
-import styles from '../../../css/events/EventsPanel.module.css'
+import {
+  Container, Row, Col, Card, Form, Button, Spinner, Alert, Badge,
+} from 'react-bootstrap'
 
 interface SessionRow extends Omit<ScheduleRequestDto, 'eventId'> {
   localId: number
@@ -32,8 +34,8 @@ const buildTimeSlot = (start: string, end: string) => `${start}-${end}`
 export const CreateEvent = () => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
-  const { id } = useParams<{ id?: string }>()
-  const isEdit = Boolean(id)
+  const { id }  = useParams<{ id?: string }>()
+  const isEdit  = Boolean(id)
 
   const { loading, error } = useAppSelector((state) => state.events)
   const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
@@ -64,22 +66,22 @@ export const CreateEvent = () => {
         .unwrap()
         .then((event) => {
           setForm({
-            name: event.eventName,
+            name:        event.eventName,
             organizerId: event.organizerId,
-            startDate: event.startAt,
-            endDate: event.endAt,
-            venueId: event.venueId,
-            status: event.status,
+            startDate:   event.startAt,
+            endDate:     event.endAt,
+            venueId:     event.venueId,
+            status:      event.status,
           })
           eventService.getSchedules(id).then((schedules) => {
             setSessions(
               schedules.map((s, i) => ({
-                localId: i + 1,
+                localId:    i + 1,
                 scheduleId: s.scheduleId,
-                date: s.date,
-                timeSlot: s.timeSlot,
-                activity: s.activity,
-                status: s.status,
+                date:       s.date,
+                timeSlot:   s.timeSlot,
+                activity:   s.activity,
+                status:     s.status,
               }))
             )
             setNextId(schedules.length + 1)
@@ -89,7 +91,7 @@ export const CreateEvent = () => {
     }
   }, [id, isEdit, dispatch])
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLElement & { name: string; value: string }>) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
@@ -129,7 +131,7 @@ export const CreateEvent = () => {
     if (session.scheduleId) {
       setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: true, saveError: undefined } : s))
       try {
-        await eventService.deleteSchedule(session.scheduleId)
+        await eventService.deleteSchedule(id!, session.scheduleId)
       } catch {
         setSessions((prev) => prev.map((s) => s.localId === localId ? { ...s, saving: false, saveError: 'Failed to delete' } : s))
         return
@@ -163,204 +165,246 @@ export const CreateEvent = () => {
   }
 
   return (
-    <div className={styles.page}>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+
       {/* Banner */}
-      <div className={styles.banner}>
-        <div className={styles['banner-inner']}>
-          <div className={styles['banner-text']}>
-            <h1>{isEdit ? 'Edit Event' : 'Create New Event'}</h1>
-            <p>{isEdit ? 'Update the details for your event.' : 'Fill in the details below to create your event.'}</p>
-          </div>
-        </div>
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3">
+          <h1 className="fw-bold fs-3 mb-1">{isEdit ? 'Edit Event' : 'Create New Event'}</h1>
+          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.75)' }}>
+            {isEdit ? 'Update the details for your event.' : 'Fill in the details below to create your event.'}
+          </p>
+        </Container>
       </div>
 
-      <div className={styles.content}>
-        <div className={styles.card}>
-          <form id="event-form" onSubmit={handleSubmit}>
-            <p className={styles['section-heading']}>Event Details</p>
-            <div className={styles['form-grid']}>
-              <div className={`${styles.field} ${styles.full}`}>
-                <label>Event Name *</label>
-                <input
-                  name="name"
-                  value={form.name}
-                  onChange={handleChange}
-                  placeholder="Enter event name"
-                  required
-                />
-              </div>
-              <div className={styles.field}>
-                <label>Start Date *</label>
-                <input name="startDate" type="date" value={form.startDate} onChange={handleChange} required />
-              </div>
-              <div className={styles.field}>
-                <label>End Date *</label>
-                <input
-                  name="endDate"
-                  type="date"
-                  value={form.endDate}
-                  min={form.startDate}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className={styles.field}>
-                <label>Venue</label>
-                <select name="venueId" value={form.venueId} onChange={handleChange}>
-                  <option value="">Select a venue</option>
-                  {venues.map((v) => (
-                    <option key={v.id} value={v.id}>
-                      {v.name} — {v.location} (cap: {v.capacity})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className={styles.field}>
-                <label>Status</label>
-                <select name="status" value={form.status} onChange={handleChange}>
-                  <option value="DRAFT">Draft</option>
-                  <option value="PUBLISHED">Published</option>
-                  <option value="COMPLETED">Completed</option>
-                  <option value="CANCELLED">Cancelled</option>
-                </select>
-              </div>
-            </div>
+      <Container fluid className="px-3 px-md-4 py-4">
 
-          </form>
+        {/* Event Details */}
+        <Card className="es-card border shadow-sm mb-3">
+          <Card.Body className="p-3 p-md-4">
+            <Card.Title className="fw-semibold mb-3" style={{ color: 'var(--text-primary)' }}>Event Details</Card.Title>
 
-          <hr className={styles.divider} />
-
-          <div className={styles['sessions-header']}>
-            <p className={styles['section-heading']} style={{ margin: 0 }}>Sessions (Optional)</p>
-            <button type="button" className={styles['btn-add-session']} onClick={addSession}>
-              + Add Session
-            </button>
-          </div>
-
-          {sessions.map((session) => (
-              <div key={session.localId} className={styles['session-row']}>
-                {/* Fields row */}
-                <div className={styles['session-row-fields']}>
-                  <div className={styles.field}>
-                    <label>Date</label>
-                    <input
-                      type="date"
-                      value={session.date}
-                      onChange={(e) => handleSessionChange(session.localId, 'date', e.target.value)}
+            <Form id="event-form" onSubmit={handleSubmit}>
+              <Row className="g-3">
+                <Col xs={12}>
+                  <Form.Group>
+                    <Form.Label className="es-label">Event Name *</Form.Label>
+                    <Form.Control
+                      name="name" value={form.name} onChange={handleChange}
+                      placeholder="Enter event name" required className="es-form-control rounded-3"
                     />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Time Slot</label>
-                    <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-                      <input
-                        type="time"
-                        value={parseTimeSlot(session.timeSlot).start}
-                        onChange={(e) =>
-                          handleSessionChange(
-                            session.localId,
-                            'timeSlot',
-                            buildTimeSlot(e.target.value, parseTimeSlot(session.timeSlot).end)
-                          )
-                        }
-                        style={{ flex: 1, minWidth: 0 }}
-                      />
-                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>to</span>
-                      <input
-                        type="time"
-                        value={parseTimeSlot(session.timeSlot).end}
-                        min={parseTimeSlot(session.timeSlot).start || undefined}
-                        onChange={(e) =>
-                          handleSessionChange(
-                            session.localId,
-                            'timeSlot',
-                            buildTimeSlot(parseTimeSlot(session.timeSlot).start, e.target.value)
-                          )
-                        }
-                        style={{ flex: 1, minWidth: 0 }}
-                      />
-                    </div>
-                  </div>
-                  <div className={styles.field}>
-                    <label>Activity</label>
-                    <input
-                      type="text"
-                      placeholder="Session title or description"
-                      value={session.activity}
-                      onChange={(e) => handleSessionChange(session.localId, 'activity', e.target.value)}
+                  </Form.Group>
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label className="es-label">Start Date *</Form.Label>
+                    <Form.Control
+                      type="date" name="startDate" value={form.startDate}
+                      onChange={handleChange} required className="es-form-control rounded-3"
                     />
-                  </div>
-                  <div className={styles.field}>
-                    <label>Status</label>
-                    <select
-                      value={session.status}
-                      onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
+                  </Form.Group>
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label className="es-label">End Date *</Form.Label>
+                    <Form.Control
+                      type="date" name="endDate" value={form.endDate}
+                      min={form.startDate} onChange={handleChange}
+                      required className="es-form-control rounded-3"
+                    />
+                  </Form.Group>
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label className="es-label">Venue</Form.Label>
+                    <Form.Select
+                      name="venueId" value={form.venueId}
+                      onChange={handleChange}
+                      className="es-form-control rounded-3"
+                    >
+                      <option value="">Select a venue</option>
+                      {venues.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.name} — {v.location} (cap: {v.capacity})
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col xs={12} sm={6}>
+                  <Form.Group>
+                    <Form.Label className="es-label">Status</Form.Label>
+                    <Form.Select
+                      name="status" value={form.status}
+                      onChange={handleChange}
+                      className="es-form-control rounded-3"
                     >
                       <option value="DRAFT">Draft</option>
-                      <option value="ACTIVE">Active</option>
+                      <option value="PUBLISHED">Published</option>
                       <option value="COMPLETED">Completed</option>
-                      <option value="TERMINATED">Terminated</option>
-                    </select>
-                  </div>
-                </div>
+                      <option value="CANCELLED">Cancelled</option>
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+              </Row>
+            </Form>
+          </Card.Body>
+        </Card>
 
-                {/* Actions row */}
-                <div className={styles['session-row-actions']}>
-                  {session.saveError && (
-                    <span style={{ fontSize: '0.68rem', color: 'var(--red)', marginRight: 'auto' }}>
-                      {session.saveError}
-                    </span>
-                  )}
-                  {session.scheduleId && session.dirty && (
-                    <span style={{
-                      fontSize: '0.68rem',
-                      fontWeight: 600,
-                      color: 'var(--saffron, #f59e0b)',
-                      background: 'color-mix(in srgb, var(--saffron, #f59e0b) 12%, transparent)',
-                      border: '1px solid color-mix(in srgb, var(--saffron, #f59e0b) 35%, transparent)',
-                      borderRadius: '4px',
-                      padding: '1px 6px',
-                      marginRight: 'auto',
-                    }}>edited</span>
-                  )}
-                  {isEdit && (
-                    <button
-                      type="button"
-                      className={styles['btn-add-session']}
-                      disabled={!session.dirty || session.saving}
-                      onClick={() => handleSaveSession(session.localId)}
-                      style={{
-                        borderColor: session.dirty ? 'var(--blue)' : undefined,
-                        color: session.dirty ? 'var(--blue)' : undefined,
-                        opacity: !session.dirty ? 0.45 : 1,
-                      }}
-                    >
-                      {session.saving ? '…' : '↑ Save'}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className={styles['btn-remove']}
-                    disabled={session.saving}
-                    onClick={() => handleDeleteSession(session.localId)}
+        {/* Sessions */}
+        <Card className="es-card border shadow-sm mb-3">
+          <Card.Body className="p-3 p-md-4">
+            <div className="d-flex align-items-center justify-content-between mb-3">
+              <Card.Title className="fw-semibold mb-0" style={{ color: 'var(--text-primary)' }}>
+                Sessions
+                <span className="ms-2 small fw-normal" style={{ color: 'var(--text-muted)' }}>(Optional)</span>
+              </Card.Title>
+              <Button variant="outline-primary" size="sm" className="rounded-3" onClick={addSession}>
+                + Add Session
+              </Button>
+            </div>
+
+            {sessions.length === 0 ? (
+              <p className="small mb-0 text-center py-3" style={{ color: 'var(--text-muted)' }}>
+                No sessions added yet. Click "+ Add Session" to get started.
+              </p>
+            ) : (
+              <div className="d-flex flex-column gap-3">
+                {sessions.map((session) => (
+                  <div
+                    key={session.localId}
+                    className="rounded-3 p-3"
+                    style={{ background: 'var(--bg-page)', border: '1px solid var(--border-subtle)' }}
                   >
-                    {session.saving ? '…' : '✕ Remove'}
-                  </button>
-                </div>
+                    <Row className="g-3 mb-2">
+                      <Col xs={12} sm={6} md={3}>
+                        <Form.Group>
+                          <Form.Label className="es-label">Date</Form.Label>
+                          <Form.Control
+                            type="date" value={session.date}
+                            onChange={(e) => handleSessionChange(session.localId, 'date', e.target.value)}
+                            className="es-form-control rounded-3"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12} sm={6} md={3}>
+                        <Form.Group>
+                          <Form.Label className="es-label">Time Slot</Form.Label>
+                          <div className="d-flex align-items-center gap-1">
+                            <Form.Control
+                              type="time"
+                              value={parseTimeSlot(session.timeSlot).start}
+                              onChange={(e) =>
+                                handleSessionChange(session.localId, 'timeSlot',
+                                  buildTimeSlot(e.target.value, parseTimeSlot(session.timeSlot).end))
+                              }
+                              className="es-form-control rounded-3"
+                            />
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', flexShrink: 0 }}>–</span>
+                            <Form.Control
+                              type="time"
+                              value={parseTimeSlot(session.timeSlot).end}
+                              min={parseTimeSlot(session.timeSlot).start || undefined}
+                              onChange={(e) =>
+                                handleSessionChange(session.localId, 'timeSlot',
+                                  buildTimeSlot(parseTimeSlot(session.timeSlot).start, e.target.value))
+                              }
+                              className="es-form-control rounded-3"
+                            />
+                          </div>
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12} sm={6} md={4}>
+                        <Form.Group>
+                          <Form.Label className="es-label">Activity</Form.Label>
+                          <Form.Control
+                            type="text" placeholder="Session title or description"
+                            value={session.activity}
+                            onChange={(e) => handleSessionChange(session.localId, 'activity', e.target.value)}
+                            className="es-form-control rounded-3"
+                          />
+                        </Form.Group>
+                      </Col>
+                      <Col xs={12} sm={6} md={2}>
+                        <Form.Group>
+                          <Form.Label className="es-label">Status</Form.Label>
+                          <Form.Select
+                            value={session.status}
+                            onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
+                            className="es-form-control rounded-3"
+                          >
+                            <option value="DRAFT">Draft</option>
+                            <option value="ACTIVE">Active</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="TERMINATED">Terminated</option>
+                          </Form.Select>
+                        </Form.Group>
+                      </Col>
+                    </Row>
+
+                    {/* Session actions row */}
+                    <div className="d-flex align-items-center gap-2 flex-wrap">
+                      {session.saveError && (
+                        <span style={{ fontSize: '0.72rem', color: 'var(--red)' }}>{session.saveError}</span>
+                      )}
+                      {session.scheduleId && session.dirty && (
+                        <Badge
+                          style={{ background: 'color-mix(in srgb, var(--saffron) 15%, transparent)', color: 'var(--saffron)', fontSize: '0.68rem', fontWeight: 600, border: '1px solid color-mix(in srgb, var(--saffron) 35%, transparent)' }}
+                          className="border-0"
+                        >
+                          edited
+                        </Badge>
+                      )}
+                      <div className="ms-auto d-flex gap-2">
+                        {isEdit && (
+                          <Button
+                            type="button" variant="outline-primary" size="sm" className="rounded-3"
+                            style={{ fontSize: '0.78rem' }}
+                            disabled={!session.dirty || session.saving}
+                            onClick={() => handleSaveSession(session.localId)}
+                          >
+                            {session.saving ? <Spinner animation="border" size="sm" /> : '↑ Save'}
+                          </Button>
+                        )}
+                        <Button
+                          type="button" variant="outline-danger" size="sm" className="rounded-3"
+                          style={{ fontSize: '0.78rem' }}
+                          disabled={session.saving}
+                          onClick={() => handleDeleteSession(session.localId)}
+                        >
+                          {session.saving ? <Spinner animation="border" size="sm" /> : '✕ Remove'}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
+          </Card.Body>
+        </Card>
 
-          {error && <p className={styles['error-msg']}>{error}</p>}
+        {error && <Alert variant="danger" className="mb-3">{error}</Alert>}
 
-          <div className={styles['form-footer']}>
-            <button type="submit" form="event-form" className={styles['btn-submit']} disabled={loading}>
-              {loading ? 'Saving…' : isEdit ? 'Update Event' : 'Create Event'}
-            </button>
-            <button type="button" className={styles['btn-cancel-form']} onClick={() => navigate('/organizer/dashboard')}>
-              Cancel
-            </button>
-          </div>
+        {/* Footer actions */}
+        <div className="d-flex gap-2">
+          <Button
+            type="submit" form="event-form" variant="primary"
+            className="fw-semibold rounded-3" disabled={loading}
+          >
+            {loading
+              ? <><Spinner animation="border" size="sm" className="me-2" />Saving…</>
+              : isEdit ? 'Update Event' : 'Create Event'
+            }
+          </Button>
+          <Button
+            type="button" variant="outline-secondary" className="rounded-3"
+            onClick={() => navigate('/organizer/dashboard')}
+          >
+            Cancel
+          </Button>
         </div>
-      </div>
+
+      </Container>
     </div>
   )
 }
