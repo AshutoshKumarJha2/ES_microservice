@@ -88,24 +88,39 @@ export const Home = () => {
     <>
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section className="es-hero text-white">
-        <Container>
+        {/* decorative grid pattern */}
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+          <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <pattern id="hero-grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#hero-grid)" />
+          </svg>
+        </div>
+
+        <Container style={{ position: 'relative' }}>
           <Row className="justify-content-center text-center">
             <Col xs={12} lg={8}>
               <Badge
                 bg="light"
                 text="primary"
                 className="mb-3 px-3 py-2 fw-semibold"
-                style={{ fontSize: '0.8rem' }}
+                style={{ fontSize: '0.75rem', letterSpacing: '0.06em', textTransform: 'uppercase' }}
               >
                 <LightningChargeFill className="me-1" size={11} /> Event Management Platform
               </Badge>
 
-              <h1 className="display-4 fw-bold mb-3">
+              <h1
+                className="fw-bold mb-3"
+                style={{ fontSize: 'clamp(2.25rem, 5vw, 3rem)', lineHeight: 1.1, letterSpacing: '-0.02em' }}
+              >
                 Plan. Manage.{' '}
                 <span style={{ color: 'var(--saffron)' }}>Succeed.</span>
               </h1>
 
-              <p className="lead mb-4 text-white-50">
+              <p className="lead mb-4" style={{ color: 'rgba(255,255,255,0.72)', fontSize: '1.0625rem', lineHeight: 1.65, maxWidth: 560, margin: '0 auto 1.5rem' }}>
                 EventSphere is a full-featured event management platform built for organisers,
                 administrators, and attendees — all in one connected system.
               </p>
@@ -115,8 +130,11 @@ export const Home = () => {
                   <Button
                     as={Link as React.ElementType}
                     to={getDashboardPath()}
-                    variant="light"
-                    className="fw-semibold px-4 py-2 rounded-3"
+                    className="fw-semibold px-4 rounded-3"
+                    style={{
+                      background: 'var(--gradient-accent)', border: 'none', color: '#fff',
+                      height: 48, display: 'inline-flex', alignItems: 'center',
+                    }}
                   >
                     Go to Dashboard <ArrowRight size={15} className="ms-1" />
                   </Button>
@@ -125,8 +143,11 @@ export const Home = () => {
                     <Button
                       as={Link as React.ElementType}
                       to="/register"
-                      variant="light"
-                      className="fw-semibold px-4 py-2 rounded-3"
+                      className="fw-semibold px-4 rounded-3"
+                      style={{
+                        background: 'var(--gradient-accent)', border: 'none', color: '#fff',
+                        height: 48, display: 'inline-flex', alignItems: 'center',
+                      }}
                     >
                       Get Started Free <ArrowRight size={15} className="ms-1" />
                     </Button>
@@ -134,7 +155,8 @@ export const Home = () => {
                       as={Link as React.ElementType}
                       to="/login"
                       variant="outline-light"
-                      className="fw-semibold px-4 py-2 rounded-3"
+                      className="fw-semibold px-4 rounded-3"
+                      style={{ height: 48, display: 'inline-flex', alignItems: 'center' }}
                     >
                       Sign In
                     </Button>
@@ -144,8 +166,8 @@ export const Home = () => {
 
               <div className="d-flex flex-wrap gap-3 justify-content-center">
                 {['Role-based access control', 'Real-time analytics', 'Full audit trail'].map((item) => (
-                  <span key={item} className="text-white-50 d-flex align-items-center gap-1" style={{ fontSize: '0.88rem' }}>
-                    <CheckCircleFill size={13} style={{ color: '#4ade80' }} /> {item}
+                  <span key={item} className="d-flex align-items-center gap-1" style={{ fontSize: '0.875rem', color: 'rgba(255,255,255,0.7)' }}>
+                    <CheckCircleFill size={13} style={{ color: '#6ee7b7' }} /> {item}
                   </span>
                 ))}
               </div>

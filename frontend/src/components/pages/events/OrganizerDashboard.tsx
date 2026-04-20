@@ -206,13 +206,13 @@ export const OrganizerDashboard = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <h1 className="fw-bold fs-3 mb-1">Organizer Portal</h1>
-            <p className="mb-0 text-white-50 small">Manage your events, tickets, registrations and budget</p>
+            <p className="mb-0 text-secondary small">Manage your events, tickets, registrations and budget</p>
           </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
+          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
             + New Event
           </Button>
         </Container>

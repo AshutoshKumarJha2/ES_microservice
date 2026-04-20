@@ -1,14 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-
 .page {
-  font-family: 'Urbanist', sans-serif;
   background: var(--bg-page);
   transition: background 0.3s;
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #001A5C 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 5rem 2rem 4rem;
   text-align: center;
 }
@@ -30,9 +27,9 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #F47920;
-  background: rgba(244, 121, 32, 0.15);
-  border: 1px solid rgba(244, 121, 32, 0.35);
+  color: var(--saffron);
+  background: var(--saffron-subtle);
+  border: 1px solid var(--saffron-border);
   border-radius: 100px;
   padding: 0.3rem 0.85rem;
 }
@@ -46,7 +43,7 @@
 }
 
 .hero-accent {
-  color: #F47920;
+  color: var(--saffron);
 }
 
 .hero-sub {
@@ -383,7 +380,7 @@
 
 /* ── CTA band ────────────────────────────────────────────────────────────── */
 .cta-band {
-  background: linear-gradient(135deg, #001A5C 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 4rem 2rem;
   text-align: center;
 }

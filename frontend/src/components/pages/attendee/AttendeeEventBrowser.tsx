@@ -68,10 +68,10 @@ export const AttendeeEventBrowser = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <h1 className="fw-bold fs-3 mb-1">Browse Events</h1>
-          <p className="mb-0 text-white-50 small">Discover and register for upcoming events</p>
+          <p className="mb-0 text-secondary small">Discover and register for upcoming events</p>
         </Container>
       </div>
 

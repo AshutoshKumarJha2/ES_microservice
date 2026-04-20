@@ -61,37 +61,37 @@ export const EventDetail = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <button
               onClick={() => navigate(backPath)}
               className="btn btn-link p-0 mb-2 d-flex align-items-center gap-1"
-              style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.82rem', textDecoration: 'none' }}
+              style={{ color: 'var(--text-muted)', fontSize: '0.82rem', textDecoration: 'none' }}
             >
               <ArrowLeft size={13} /> {backLabel}
             </button>
             <h1 className="fw-bold fs-3 mb-1">{selectedEvent.eventName}</h1>
             <div className="d-flex align-items-center gap-2 flex-wrap">
-              <span className="text-white-50 small">
+              <span className="text-secondary small">
                 {selectedEvent.startAt} → {selectedEvent.endAt}
               </span>
               <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
             </div>
             {selectedEvent.organizer && (
-              <p className="mb-0 mt-1 small" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Organizer: <span className="fw-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{selectedEvent.organizer.name}</span>
+              <p className="mb-0 mt-1 small" style={{ color: 'var(--text-secondary)' }}>
+                Organizer: <span className="fw-semibold" style={{ color: 'var(--text-primary)' }}>{selectedEvent.organizer.name}</span>
                 <span className="ms-1">({selectedEvent.organizer.email})</span>
               </p>
             )}
           </div>
           <div className="d-flex gap-2">
             {isAdmin && (
-              <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
+              <Button variant="outline-primary" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
                 Edit Event
               </Button>
             )}
-            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
+            <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
               Analytics
             </Button>
           </div>

@@ -52,17 +52,17 @@ export const AdminDashboard: React.FC = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <h1 className="fw-bold fs-3 mb-1">Admin Dashboard</h1>
-            <p className="mb-0 text-white-50 small">Platform overview &amp; controls</p>
+            <p className="mb-0 text-secondary small">Platform overview &amp; controls</p>
           </div>
           <div className="d-flex gap-2">
-            <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/admin/audit-logs')}>
+            <Button variant="outline-primary" size="sm" className="rounded-3" onClick={() => navigate('/admin/audit-logs')}>
               View Audit Logs
             </Button>
-            <Button variant="light" size="sm" className="rounded-3 fw-semibold" onClick={() => navigate('/admin/users')}>
+            <Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={() => navigate('/admin/users')}>
               Manage Users
             </Button>
           </div>

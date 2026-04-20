@@ -1,37 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
 
-/* ── CSS Custom Properties (Theme) ───────────────────────────────────────────── */
+/* ── CSS Custom Properties (Design System v2) ────────────────────────────────── */
 
 :root {
   color-scheme: light;
 
-  /* ── Brand colours ───────────────────────────────────────────────────── */
-  --blue:        #1d4ed8;
-  --blue-hover:  #1e40af;
-  --blue-subtle: #eff6ff;
-  --blue-border: #bfdbfe;
+  /* ── Brand — Indigo primary + Amber accent ───────────────────────────── */
+  --blue:        #4f46e5;
+  --blue-hover:  #4338ca;
+  --blue-subtle: #eef2ff;
+  --blue-border: #c7d2fe;
 
-  --saffron:        #f97316;
-  --saffron-hover:  #ea6c0a;
+  --saffron:        #ea580c;
+  --saffron-hover:  #c2410c;
   --saffron-subtle: #fff7ed;
-  --saffron-border: #fed7aa;
+  --saffron-border: #fdba74;
 
-  /* ── Status colours ──────────────────────────────────────────────────── */
-  --green:        #16a34a;
-  --green-subtle: #f0fdf4;
-  --green-border: #bbf7d0;
+  /* ── Semantic status ─────────────────────────────────────────────────── */
+  --green:        #10b981;
+  --green-subtle: #ecfdf5;
+  --green-border: #a7f3d0;
   --red:          #dc2626;
   --red-subtle:   #fef2f2;
   --red-border:   #fecaca;
   --amber:        #d97706;
   --amber-subtle: #fffbeb;
+  --amber-border: #fde68a;
+  --info:         #0284c7;
+  --info-subtle:  #f0f9ff;
+  --info-border:  #bae6fd;
 
   /* ── Surfaces ────────────────────────────────────────────────────────── */
-  --bg-page:    #f1f5f9;
+  --bg-page:    #f8fafc;
   --bg-surface: #ffffff;
-  --bg-subtle:  #f8faff;
-  --bg-hover:   #f1f5f9;
-  --bg-input:   #eef1fb;
+  --bg-subtle:  #f1f5f9;
+  --bg-hover:   #eef2f7;
+  --bg-input:   #f1f5f9;
 
   /* ── Text ────────────────────────────────────────────────────────────── */
   --text-primary:   #0f172a;
@@ -43,20 +47,49 @@
   --border-color:  #e2e8f0;
   --border-subtle: #f1f5f9;
 
-  /* ── Bootstrap variable overrides (reference custom vars where possible) */
+  /* ── Shadow scale (Indigo-tinted) ────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(79,70,229,0.04), 0 0 0 1px rgba(79,70,229,0.03);
+  --shadow-sm: 0 2px 6px rgba(79,70,229,0.06), 0 0 0 1px rgba(79,70,229,0.04);
+  --shadow-md: 0 4px 16px rgba(79,70,229,0.10), 0 0 0 1px rgba(79,70,229,0.06);
+  --shadow-lg: 0 8px 30px rgba(79,70,229,0.14), 0 0 0 1px rgba(79,70,229,0.08);
+
+  /* ── Gradient tokens ─────────────────────────────────────────────────── */
+  --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --gradient-hero:    linear-gradient(135deg, #312e81 0%, #4f46e5 60%, #6366f1 100%);
+  --gradient-accent:  linear-gradient(135deg, #ea580c 0%, #f97316 100%);
+  --gradient-subtle:  linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%);
+
+  /* ── Border radius scale ─────────────────────────────────────────────── */
+  --radius-xs:   4px;
+  --radius-sm:   6px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* ── Motion tokens ───────────────────────────────────────────────────── */
+  --motion-fast:   0.12s ease;
+  --motion-normal: 0.22s ease-out;
+  --motion-slow:   0.38s ease-out;
+  --motion-exit:   0.15s ease-in;
+
+  /* ── Font ────────────────────────────────────────────────────────────── */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* ── Bootstrap variable overrides ────────────────────────────────────── */
   --bs-primary:          var(--blue);
-  --bs-primary-rgb:      29, 78, 216;
+  --bs-primary-rgb:      79, 70, 229;
   --bs-secondary:        var(--text-secondary);
   --bs-secondary-rgb:    100, 116, 139;
   --bs-success:          var(--green);
-  --bs-success-rgb:      22, 163, 74;
+  --bs-success-rgb:      16, 185, 129;
   --bs-danger:           var(--red);
   --bs-danger-rgb:       220, 38, 38;
   --bs-warning:          var(--amber);
   --bs-warning-rgb:      217, 119, 6;
-  --bs-info:             var(--saffron);
-  --bs-info-rgb:         249, 115, 22;
-  --bs-body-font-family: 'Urbanist', system-ui, -apple-system, sans-serif;
+  --bs-info:             var(--info);
+  --bs-info-rgb:         2, 132, 199;
+  --bs-body-font-family: var(--font-sans);
   --bs-body-bg:          var(--bg-page);
   --bs-body-color:       var(--text-body);
   --bs-border-color:     var(--border-color);
@@ -66,45 +99,54 @@
   --bs-link-hover-color: var(--blue-hover);
 }
 
-/* Dark theme — only custom vars need updating; BS vars that reference them resolve automatically */
+/* ── Dark theme ──────────────────────────────────────────────────────────────── */
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --blue:        #4d88ff;
-  --blue-hover:  #6a9fff;
-  --blue-subtle: rgba(77, 136, 255, 0.12);
-  --blue-border: rgba(77, 136, 255, 0.35);
+  --blue:        #6366f1;
+  --blue-hover:  #818cf8;
+  --blue-subtle: rgba(99, 102, 241, 0.12);
+  --blue-border: rgba(99, 102, 241, 0.30);
 
-  --saffron:        #ff8c2a;
-  --saffron-hover:  #ffa040;
-  --saffron-subtle: rgba(255, 140, 42, 0.1);
-  --saffron-border: rgba(255, 140, 42, 0.3);
+  --saffron:        #fb923c;
+  --saffron-hover:  #f97316;
+  --saffron-subtle: rgba(234, 88, 12, 0.12);
+  --saffron-border: rgba(234, 88, 12, 0.30);
 
-  --green:        #22dd7a;
-  --green-subtle: rgba(34, 221, 122, 0.1);
-  --green-border: rgba(34, 221, 122, 0.3);
-  --red:          #ff5252;
-  --red-subtle:   rgba(255, 82, 82, 0.1);
-  --red-border:   rgba(255, 82, 82, 0.3);
-  --amber:        #ff8c2a;
-  --amber-subtle: rgba(255, 140, 42, 0.1);
+  --green:        #34d399;
+  --green-subtle: rgba(16, 185, 129, 0.12);
+  --green-border: rgba(16, 185, 129, 0.30);
+  --red:          #f87171;
+  --red-subtle:   rgba(220, 38, 38, 0.12);
+  --red-border:   rgba(220, 38, 38, 0.30);
+  --amber:        #fbbf24;
+  --amber-subtle: rgba(217, 119, 6, 0.12);
+  --amber-border: rgba(217, 119, 6, 0.30);
+  --info:         #38bdf8;
+  --info-subtle:  rgba(2, 132, 199, 0.12);
+  --info-border:  rgba(2, 132, 199, 0.30);
 
-  --bg-page:    #070a14;
-  --bg-surface: #0f1220;
-  --bg-subtle:  #0d1117;
-  --bg-hover:   #1a1e35;
+  --bg-page:    #0c0e14;
+  --bg-surface: #161923;
+  --bg-subtle:  #111420;
+  --bg-hover:   #1c2030;
   --bg-input:   rgba(255, 255, 255, 0.06);
 
-  --text-primary:   #e8eaff;
-  --text-body:      #b0b8d8;
-  --text-secondary: #7a85b0;
-  --text-muted:     #4a5270;
+  --text-primary:   #f1f5f9;
+  --text-body:      #cbd5e1;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
 
-  --border-color:  rgba(100, 120, 255, 0.18);
-  --border-subtle: rgba(100, 120, 255, 0.08);
+  --border-color:  rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+
+  --shadow-xs: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
 
   /* RGB overrides can't use var() — must be plain numbers */
-  --bs-primary-rgb: 77, 136, 255;
+  --bs-primary-rgb: 99, 102, 241;
 }
 
 /* ── Global resets ───────────────────────────────────────────────────────────── */
@@ -118,7 +160,7 @@
 html, body {
   height: 100%;
   background: var(--bg-page);
-  font-family: 'Urbanist', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
 }
 
 body {
@@ -155,7 +197,10 @@ a {
   background-color: var(--bg-input) !important;
   border-color: var(--border-color) !important;
   color: var(--text-primary) !important;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: var(--radius-sm) !important;
+  font-family: var(--font-sans) !important;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  min-height: 44px;
 }
 .form-control:focus,
 .form-select:focus {
@@ -169,11 +214,14 @@ a {
   opacity: 1;
 }
 
-/* ── Form controls with brand left-border accent (legacy alias) ──────────────── */
+/* ── Legacy form control alias ───────────────────────────────────────────────── */
 .es-form-control {
   background: var(--bg-input) !important;
   color: var(--text-primary) !important;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: var(--font-sans) !important;
+  border-radius: var(--radius-sm) !important;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  min-height: 44px;
 }
 .es-form-control:focus {
   border-color: var(--blue) !important;
@@ -187,10 +235,10 @@ a {
 
 /* ── Form labels (compact uppercase) ─────────────────────────────────────────── */
 .es-label {
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  color: var(--blue) !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em !important;
+  color: var(--text-secondary) !important;
   text-transform: uppercase !important;
   margin-bottom: 0.3rem;
 }
@@ -206,13 +254,23 @@ a {
 .es-card {
   background: var(--bg-surface) !important;
   border-color: var(--border-color) !important;
-  transition: background 0.3s, border-color 0.3s;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-sm) !important;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.2s, transform 0.2s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .es-card:hover {
+    box-shadow: var(--shadow-md) !important;
+  }
 }
 
 /* ── Hero section ─────────────────────────────────────────────────────────────── */
 .es-hero {
-  background: linear-gradient(135deg, #001a5c 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 5rem 0;
+  position: relative;
+  overflow: hidden;
 }
 
 /* ── Stats strip ──────────────────────────────────────────────────────────────── */
@@ -221,18 +279,24 @@ a {
   border-top: 1px solid var(--border-color);
   border-bottom: 1px solid var(--border-color);
   padding: 1.5rem 0;
+  box-shadow: var(--shadow-xs);
 }
 
 /* ── CTA band ─────────────────────────────────────────────────────────────────── */
 .es-cta-band {
-  background: linear-gradient(135deg, #001a5c 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 4rem 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* ── Page banner ──────────────────────────────────────────────────────────────── */
+/* ── Page banner (dashboard sections) ────────────────────────────────────────── */
 .es-banner {
-  background: linear-gradient(135deg, #001a5c 0%, #002888 60%, #003fbc 100%);
+  background: var(--bg-page);
   padding: 2rem 0;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  transition: background 0.3s, border-color 0.3s;
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────────────── */
@@ -253,19 +317,29 @@ a {
 .es-sidebar.collapsed { width: 64px; }
 
 .es-sidebar .nav-link {
-  color: var(--text-body);
-  border-radius: 8px;
-  padding: 0.55rem 0.75rem;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  padding: 0 12px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 10px;
   white-space: nowrap;
   font-weight: 500;
-  font-size: 0.92rem;
-  transition: background 0.15s, color 0.15s;
+  font-size: 0.875rem;
+  transition: background var(--motion-fast), color var(--motion-fast);
 }
-.es-sidebar .nav-link:hover  { background: var(--bg-hover);   color: var(--text-primary); }
-.es-sidebar .nav-link.active { background: var(--blue-subtle); color: var(--blue); }
+.es-sidebar .nav-link:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+.es-sidebar .nav-link.active {
+  background: var(--blue-subtle);
+  color: var(--blue);
+  font-weight: 600;
+  border-left: 2px solid var(--blue);
+  padding-left: 10px;
+}
 
 /* ── AppHeader ────────────────────────────────────────────────────────────────── */
 .es-app-header {
@@ -274,57 +348,73 @@ a {
   transition: background 0.3s, border-color 0.3s;
 }
 
-/* ── Stat card accents ────────────────────────────────────────────────────────── */
-.es-stat-card-blue   { border-top: 4px solid var(--blue)    !important; }
-.es-stat-card-orange { border-top: 4px solid var(--saffron) !important; }
-.es-stat-card-green  { border-top: 4px solid var(--green)   !important; }
-.es-stat-card-red    { border-top: 4px solid var(--red)     !important; }
-.es-stat-card-amber  { border-top: 4px solid var(--amber)   !important; }
+/* ── Stat card accents — left border (replaces top border) ───────────────────── */
+.es-stat-card-blue   { border-left: 3px solid var(--blue)    !important; }
+.es-stat-card-orange { border-left: 3px solid var(--saffron) !important; }
+.es-stat-card-green  { border-left: 3px solid var(--green)   !important; }
+.es-stat-card-red    { border-left: 3px solid var(--red)     !important; }
+.es-stat-card-amber  { border-left: 3px solid var(--amber)   !important; }
+
+/* ── Skip link (accessibility) ───────────────────────────────────────────────── */
+.es-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--blue);
+  color: #fff;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: top 0.12s ease;
+}
+.es-skip-link:focus {
+  top: 1rem;
+}
 
 /* ── Role / status badge colours ─────────────────────────────────────────────── */
-/* Double-class specificity (.badge.es-badge-*) beats Bootstrap's .bg-primary     */
-.badge.es-badge-admin    { background: #dbeafe !important; color: #1d4ed8 !important; }
-.badge.es-badge-organizer{ background: #ede9fe !important; color: #6d28d9 !important; }
-.badge.es-badge-attendee { background: #dcfce7 !important; color: #16a34a !important; }
-.badge.es-badge-vendor   { background: #fef9c3 !important; color: #a16207 !important; }
-.badge.es-badge-venue    { background: #ffedd5 !important; color: #c2410c !important; }
-.badge.es-badge-finance  { background: #e0f2fe !important; color: #0369a1 !important; }
-.badge.es-badge-active   { background: #dcfce7 !important; color: #16a34a !important; }
-.badge.es-badge-suspended{ background: #fee2e2 !important; color: #dc2626 !important; }
-.badge.es-badge-published{ background: #dcfce7 !important; color: #16a34a !important; }
+.badge.es-badge-admin    { background: #eef2ff !important; color: #4f46e5 !important; }
+.badge.es-badge-organizer{ background: #f3e8ff !important; color: #7c3aed !important; }
+.badge.es-badge-attendee { background: #ecfdf5 !important; color: #10b981 !important; }
+.badge.es-badge-vendor   { background: #fffbeb !important; color: #d97706 !important; }
+.badge.es-badge-venue    { background: #fff7ed !important; color: #ea580c !important; }
+.badge.es-badge-finance  { background: #f0f9ff !important; color: #0284c7 !important; }
+.badge.es-badge-active   { background: #ecfdf5 !important; color: #10b981 !important; }
+.badge.es-badge-suspended{ background: #fef2f2 !important; color: #dc2626 !important; }
+.badge.es-badge-published{ background: #ecfdf5 !important; color: #10b981 !important; }
 .badge.es-badge-draft    { background: #f1f5f9 !important; color: #64748b !important; }
-.badge.es-badge-completed{ background: #e0f2fe !important; color: #0369a1 !important; }
-.badge.es-badge-cancelled{ background: #fee2e2 !important; color: #dc2626 !important; }
-.badge.es-badge-pending  { background: #fef9c3 !important; color: #a16207 !important; }
-.badge.es-badge-approved { background: #dcfce7 !important; color: #16a34a !important; }
-.badge.es-badge-rejected { background: #fee2e2 !important; color: #dc2626 !important; }
-.badge.es-badge-paid     { background: #dcfce7 !important; color: #16a34a !important; }
-.badge.es-badge-submitted{ background: #dbeafe !important; color: #1d4ed8 !important; }
+.badge.es-badge-completed{ background: #f0f9ff !important; color: #0284c7 !important; }
+.badge.es-badge-cancelled{ background: #fef2f2 !important; color: #dc2626 !important; }
+.badge.es-badge-pending  { background: #fffbeb !important; color: #d97706 !important; }
+.badge.es-badge-approved { background: #ecfdf5 !important; color: #10b981 !important; }
+.badge.es-badge-rejected { background: #fef2f2 !important; color: #dc2626 !important; }
+.badge.es-badge-paid     { background: #ecfdf5 !important; color: #10b981 !important; }
+.badge.es-badge-submitted{ background: #eef2ff !important; color: #4f46e5 !important; }
 
-[data-theme="dark"] .badge.es-badge-admin    { background: rgba(29,78,216,0.2)   !important; color: #93b4ff !important; }
-[data-theme="dark"] .badge.es-badge-organizer{ background: rgba(109,40,217,0.2)  !important; color: #c4b5fd !important; }
-[data-theme="dark"] .badge.es-badge-attendee { background: rgba(22,163,74,0.2)   !important; color: #86efac !important; }
-[data-theme="dark"] .badge.es-badge-vendor   { background: rgba(161,98,7,0.2)    !important; color: #fde68a !important; }
-[data-theme="dark"] .badge.es-badge-venue    { background: rgba(194,65,12,0.2)   !important; color: #fdba74 !important; }
-[data-theme="dark"] .badge.es-badge-finance  { background: rgba(3,105,161,0.2)   !important; color: #7dd3fc !important; }
-[data-theme="dark"] .badge.es-badge-active   { background: rgba(22,163,74,0.2)   !important; color: #86efac !important; }
-[data-theme="dark"] .badge.es-badge-suspended{ background: rgba(220,38,38,0.2)   !important; color: #fca5a5 !important; }
-[data-theme="dark"] .badge.es-badge-published{ background: rgba(22,163,74,0.2)   !important; color: #86efac !important; }
-[data-theme="dark"] .badge.es-badge-draft    { background: rgba(100,116,139,0.2) !important; color: #94a3b8 !important; }
-[data-theme="dark"] .badge.es-badge-completed{ background: rgba(3,105,161,0.2)   !important; color: #7dd3fc !important; }
-[data-theme="dark"] .badge.es-badge-cancelled{ background: rgba(220,38,38,0.2)   !important; color: #fca5a5 !important; }
-[data-theme="dark"] .badge.es-badge-pending  { background: rgba(161,98,7,0.2)    !important; color: #fde047 !important; }
-[data-theme="dark"] .badge.es-badge-approved { background: rgba(22,163,74,0.2)   !important; color: #86efac !important; }
-[data-theme="dark"] .badge.es-badge-rejected { background: rgba(220,38,38,0.2)   !important; color: #fca5a5 !important; }
-[data-theme="dark"] .badge.es-badge-paid     { background: rgba(22,163,74,0.2)   !important; color: #86efac !important; }
-[data-theme="dark"] .badge.es-badge-submitted{ background: rgba(29,78,216,0.2)   !important; color: #93b4ff !important; }
+[data-theme="dark"] .badge.es-badge-admin    { background: rgba(99,102,241,0.15)  !important; color: #a5b4fc !important; }
+[data-theme="dark"] .badge.es-badge-organizer{ background: rgba(124,58,237,0.15) !important; color: #c4b5fd !important; }
+[data-theme="dark"] .badge.es-badge-attendee { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
+[data-theme="dark"] .badge.es-badge-vendor   { background: rgba(217,119,6,0.15)   !important; color: #fde68a !important; }
+[data-theme="dark"] .badge.es-badge-venue    { background: rgba(234,88,12,0.15)   !important; color: #fdba74 !important; }
+[data-theme="dark"] .badge.es-badge-finance  { background: rgba(2,132,199,0.15)   !important; color: #7dd3fc !important; }
+[data-theme="dark"] .badge.es-badge-active   { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
+[data-theme="dark"] .badge.es-badge-suspended{ background: rgba(220,38,38,0.15)   !important; color: #fca5a5 !important; }
+[data-theme="dark"] .badge.es-badge-published{ background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
+[data-theme="dark"] .badge.es-badge-draft    { background: rgba(100,116,139,0.15) !important; color: #94a3b8 !important; }
+[data-theme="dark"] .badge.es-badge-completed{ background: rgba(2,132,199,0.15)   !important; color: #7dd3fc !important; }
+[data-theme="dark"] .badge.es-badge-cancelled{ background: rgba(220,38,38,0.15)   !important; color: #fca5a5 !important; }
+[data-theme="dark"] .badge.es-badge-pending  { background: rgba(217,119,6,0.15)   !important; color: #fde68a !important; }
+[data-theme="dark"] .badge.es-badge-approved { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
+[data-theme="dark"] .badge.es-badge-rejected { background: rgba(220,38,38,0.15)   !important; color: #fca5a5 !important; }
+[data-theme="dark"] .badge.es-badge-paid     { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
+[data-theme="dark"] .badge.es-badge-submitted{ background: rgba(99,102,241,0.15)  !important; color: #a5b4fc !important; }
 
 /* ── Dark mode Bootstrap component overrides ──────────────────────────────────── */
-/* Cards and list items resolve automatically via --bs-card-bg / --bs-body-bg.   */
-/* Only components that need a surface elevation above --bg-page need overrides. */
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .dropdown-menu {
-  background-color: var(--bg-surface) !important;
+  background-color: #1e2330 !important;
   border-color: var(--border-color) !important;
 }
 [data-theme="dark"] .table {
@@ -354,26 +444,20 @@ a {
   background-color: var(--bg-surface) !important;
   border-color: var(--border-color) !important;
 }
-/* Native picker elements */
 [data-theme="dark"] option {
   background-color: var(--bg-surface);
   color: var(--text-primary);
 }
-/* Force the native date/time popup calendar to render in light mode so it is
-   always readable regardless of the OS dark-mode setting.
-   The input field itself stays dark via the explicit bg/color from .es-form-control. */
+/* Native date pickers always render light so they're readable */
 [data-theme="dark"] input[type="date"],
 [data-theme="dark"] input[type="datetime-local"],
 [data-theme="dark"] input[type="time"] {
   color-scheme: light;
 }
-
-/* The calendar icon sits on a dark input background, so keep it light. */
 [data-theme="dark"] ::-webkit-calendar-picker-indicator {
   filter: invert(0.8) hue-rotate(180deg);
   cursor: pointer;
 }
-
 [data-theme="dark"] .nav-link          { color: var(--text-body) !important; }
 [data-theme="dark"] .breadcrumb-item   { color: var(--text-secondary) !important; }
 [data-theme="dark"] .breadcrumb-item.active { color: var(--text-primary) !important; }
@@ -382,3 +466,24 @@ a {
 [data-theme="dark"] .dropdown-item:focus { background-color: var(--bg-hover) !important; color: var(--text-primary) !important; }
 [data-theme="dark"] .dropdown-item.text-danger { color: #f87171 !important; }
 [data-theme="dark"] .dropdown-divider  { border-color: var(--border-color) !important; }
+
+/* Dark mode card glow instead of shadow */
+[data-theme="dark"] .es-card {
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  [data-theme="dark"] .es-card:hover {
+    border-color: rgba(99, 102, 241, 0.40) !important;
+    box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.20) !important;
+  }
+}
+
+/* ── Global prefers-reduced-motion reset ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -136,11 +136,11 @@ export const AttendeeEventDetail = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <Button
             variant="link"
-            className="text-white-50 p-0 mb-2 small"
+            className="text-secondary p-0 mb-2 small"
             style={{ textDecoration: 'none' }}
             onClick={() => navigate('/events')}
           >
@@ -149,7 +149,7 @@ export const AttendeeEventDetail = () => {
           <div className="d-flex flex-wrap align-items-center gap-3">
             <div>
               <h1 className="fw-bold fs-3 mb-1">{event.eventName}</h1>
-              <p className="mb-0 text-white-50 small">{event.startAt} — {event.endAt}</p>
+              <p className="mb-0 text-secondary small">{event.startAt} — {event.endAt}</p>
             </div>
             <EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} />
             {registration && (
