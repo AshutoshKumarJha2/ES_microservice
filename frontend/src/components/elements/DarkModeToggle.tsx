@@ -12,8 +12,8 @@ export const DarkModeToggle = () => {
       onClick={toggleTheme}
       title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-      className="d-flex align-items-center gap-2 text-decoration-none px-2 py-1 rounded-3"
-      style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500 }}
+      className="d-inline-flex align-items-center gap-1 text-decoration-none px-2 rounded-3"
+      style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500, height: 34 }}
     >
       {isDark
         ? <><SunFill size={14} /> Light</>

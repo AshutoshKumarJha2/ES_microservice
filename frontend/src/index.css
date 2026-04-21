@@ -347,6 +347,20 @@ a {
   transition: background 0.3s, border-color 0.3s;
 }
 
+/* ── Profile dropdown caret — centered + animates on open ───────────────────── */
+#user-dropdown.dropdown-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+#user-dropdown.dropdown-toggle::after {
+  transition: transform 0.2s ease;
+  vertical-align: 0;
+  margin-left: 0.35em;
+}
+#user-dropdown.dropdown-toggle[aria-expanded="true"]::after {
+  transform: rotate(180deg);
+}
+
 /* ── Stat card accents — left border (replaces top border) ───────────────────── */
 .es-stat-card-blue   { border-left: 3px solid var(--blue)    !important; }
 .es-stat-card-orange { border-left: 3px solid var(--saffron) !important; }

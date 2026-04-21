@@ -95,8 +95,8 @@ export const Header = () => {
                 as={Link}
                 to="/notifications"
                 aria-label="Notifications"
-                className="position-relative p-2"
-                style={{ color: 'var(--text-secondary)' }}
+                className="position-relative d-inline-flex align-items-center justify-content-center p-0 rounded-3"
+                style={{ color: 'var(--text-secondary)', width: 34, height: 34 }}
               >
                 <Bell size={17} />
                 {unreadCount > 0 && (
