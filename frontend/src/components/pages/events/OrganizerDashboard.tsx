@@ -5,11 +5,14 @@ import { fetchAllEvents, deleteEvent, createEvent, updateEvent } from '../../../
 import { venueService } from '../../../services/events/venueService'
 import type { EventResponseDto, EventRequestDto, VenueResponseDto, EventStatus } from '../../../types/events'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import { StatCard } from '../../elements/common/StatCard'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { EmptyState } from '../../elements/common/EmptyState'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
-import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarFill, CheckCircleFill, PencilFill,
 } from 'react-bootstrap-icons'
@@ -215,42 +218,21 @@ export const OrganizerDashboard = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Organizer Portal</h1>
-            <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Manage your events, tickets, registrations and budget</p>
-          </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
-            + New Event
-          </Button>
-        </Container>
-      </div>
+      <PageBanner
+        title="Organizer Portal"
+        subtitle="Manage your events, tickets, registrations and budget"
+        actions={<Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>+ New Event</Button>}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat cards */}
-        {loading ? <StatCardsSkeleton count={4} /> : (
-          <Row className="g-3 mb-4">
-            {STATS.map((s) => (
-              <Col key={s.label} xs={6} lg={3}>
-                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                  <Card.Body className="p-3">
-                    <div className="d-flex justify-content-between align-items-start">
-                      <div>
-                        <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                        <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
-                      </div>
-                      <div style={{ width: 36, height: 36, borderRadius: 10, background: s.iconBg, color: s.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        {s.icon}
-                      </div>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        )}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => (
+            <Col key={s.label} xs={6} lg={3}>
+              <StatCard {...s} loading={loading} />
+            </Col>
+          ))}
+        </Row>
 
         {/* Events table */}
         <Card className="es-card border shadow-sm">
@@ -260,32 +242,13 @@ export const OrganizerDashboard = () => {
               <span className="small" style={{ color: 'var(--text-muted)' }}>{events.length} total</span>
             </div>
 
-            {loading ? (
-              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead style={{ background: 'var(--bg-subtle)' }}>
-                  <tr>
-                    {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
-                      <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <TableRowsSkeleton rows={5} cols={5} />
-                </tbody>
-              </Table>
-            ) : events.length === 0 ? (
-              <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
-                <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--blue-subtle)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <CalendarEventFill size={24} />
-                </div>
-                <div>
-                  <div className="fw-semibold mb-1" style={{ color: 'var(--text-primary)' }}>No events yet</div>
-                  <div className="small" style={{ color: 'var(--text-muted)' }}>Create your first event to get started.</div>
-                </div>
-                <Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={openCreate}>
-                  + Create Event
-                </Button>
-              </div>
+            {!loading && events.length === 0 ? (
+              <EmptyState
+                icon={<CalendarEventFill size={24} />}
+                title="No events yet"
+                subtitle="Create your first event to get started."
+                action={<Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={openCreate}>+ Create Event</Button>}
+              />
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
@@ -296,7 +259,9 @@ export const OrganizerDashboard = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {events.map((event: EventResponseDto) => (
+                  {loading ? (
+                    <TableRowsSkeleton rows={5} cols={5} colWidths={['65%','44%','44%','36%','12%']} />
+                  ) : events.map((event: EventResponseDto) => (
                     <tr
                       key={event.id}
                       style={{ cursor: 'pointer' }}

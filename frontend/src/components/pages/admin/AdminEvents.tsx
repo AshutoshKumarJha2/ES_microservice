@@ -2,6 +2,9 @@ import { useEffect, useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../api/axiosInstance'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import { fmtDate } from '../../../utils/dateHelpers'
 import {
   Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Pagination,
 } from 'react-bootstrap'
@@ -11,20 +14,6 @@ import type { EventResponseDto } from '../../../types/events'
 
 const STATUSES = ['ALL', 'PUBLISHED', 'DRAFT', 'COMPLETED', 'CANCELLED']
 const PAGE_SIZE = 10
-
-const statusBadgeClass = (status: string) => {
-  const map: Record<string, string> = {
-    PUBLISHED: 'es-badge-published', DRAFT: 'es-badge-draft',
-    COMPLETED: 'es-badge-completed', CANCELLED: 'es-badge-cancelled',
-  }
-  return map[status] ?? 'es-badge-draft'
-}
-
-const formatDate = (iso?: string) => {
-  if (!iso) return '—'
-  try { return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) }
-  catch { return iso }
-}
 
 export const AdminEvents: React.FC = () => {
   const navigate = useNavigate()
@@ -58,13 +47,7 @@ export const AdminEvents: React.FC = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">All Events</h1>
-          <p className="mb-0 text-secondary small">Monitor every event on the platform</p>
-        </Container>
-      </div>
+      <PageBanner title="All Events" subtitle="Monitor every event on the platform" />
 
       <AdminSubNav />
 
@@ -129,7 +112,7 @@ export const AdminEvents: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? <TableRowsSkeleton rows={10} cols={6} /> : pageEvents.length === 0 ? (
+                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : pageEvents.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
                   ) : pageEvents.map((ev) => (
                     <tr key={ev.id}>
@@ -144,13 +127,13 @@ export const AdminEvents: React.FC = () => {
                         ) : ev.organizerId}
                       </td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                        {formatDate(ev.startAt)}
-                        {ev.endAt && ev.endAt !== ev.startAt ? ` – ${formatDate(ev.endAt)}` : ''}
+                        {fmtDate(ev.startAt)}
+                        {ev.endAt && ev.endAt !== ev.startAt ? ` – ${fmtDate(ev.endAt)}` : ''}
                       </td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{ev.venue ? `${ev.venue.name}, ${ev.venue.location}` : '—'}</td>
                       <td className="align-middle">
                         {ev.status
-                          ? <Badge className={`${statusBadgeClass(ev.status)} border-0`} style={{ fontSize: '0.7rem' }}>{ev.status}</Badge>
+                          ? <EventStatusBadge status={ev.status?.toLowerCase()} variant="event" />
                           : '—'}
                       </td>
                       <td className="align-middle">

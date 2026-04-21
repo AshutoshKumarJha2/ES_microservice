@@ -2,8 +2,10 @@ import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAuditLogs } from '../../../store/slices/adminSlice'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { formatDateTime } from '../../../utils/dateHelpers'
 import {
-  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Spinner, Pagination,
+  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Pagination,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search, Download } from 'react-bootstrap-icons'
@@ -44,15 +46,6 @@ export const AdminAuditLogs: React.FC = () => {
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
   const pageLogs   = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
-  const formatDate = (iso: string) => {
-    try {
-      return new Date(iso).toLocaleString('en-US', {
-        month: 'short', day: 'numeric', year: 'numeric',
-        hour: '2-digit', minute: '2-digit',
-      })
-    } catch { return iso }
-  }
-
   const handleExportCSV = () => {
     if (!filtered.length) return
     const header = 'ID,Timestamp,UserId,Action,EntityId,EntityName\n'
@@ -71,13 +64,10 @@ export const AdminAuditLogs: React.FC = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Audit Logs</h1>
-            <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Full activity history across the platform</p>
-          </div>
+      <PageBanner
+        title="Audit Logs"
+        subtitle="Full activity history across the platform"
+        actions={
           <Button
             variant="outline-light"
             size="sm"
@@ -87,8 +77,8 @@ export const AdminAuditLogs: React.FC = () => {
           >
             <Download size={14} /> Export CSV
           </Button>
-        </Container>
-      </div>
+        }
+      />
 
       <AdminSubNav />
 
@@ -161,12 +151,12 @@ export const AdminAuditLogs: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loadingLogs ? <TableRowsSkeleton rows={15} cols={5} /> : pageLogs.length === 0 ? (
+                {loadingLogs ? <TableRowsSkeleton rows={15} cols={5} colWidths={['52%','58%','42%','32%','68%']} /> : pageLogs.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No audit logs found</td></tr>
                   ) : pageLogs.map((log) => (
                     <tr key={log.auditId}>
                       <td className="align-middle" style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                        {formatDate(log.timeStamp)}
+                        {formatDateTime(log.timeStamp)}
                       </td>
                       <td className="align-middle">
                         <div className="d-flex align-items-center gap-2">

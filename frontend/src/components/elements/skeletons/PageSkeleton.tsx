@@ -16,20 +16,30 @@ const HIGHLIGHT = '#f4f5f7'
 export const TableRowsSkeleton = ({
   rows = 5,
   cols = 4,
+  colWidths,
 }: {
   rows?: number
   cols?: number
+  colWidths?: string[]
 }) => (
   <SkeletonTheme baseColor={BASE} highlightColor={HIGHLIGHT}>
     {Array.from({ length: rows }).map((_, i) => (
       <tr key={i}>
         {Array.from({ length: cols }).map((_, j) => (
           <td key={j} style={{ padding: '10px 8px' }}>
-            <Skeleton height={14} borderRadius={4} />
+            <Skeleton height={14} borderRadius={4} width={colWidths?.[j] ?? '72%'} />
           </td>
         ))}
       </tr>
     ))}
+  </SkeletonTheme>
+)
+
+// ─── Inline single-line skeleton for field values (label-value layouts) ──────
+
+export const InlineFieldSkeleton = ({ width = '60%' }: { width?: string | number }) => (
+  <SkeletonTheme baseColor={BASE} highlightColor={HIGHLIGHT}>
+    <Skeleton height={14} width={width} borderRadius={4} />
   </SkeletonTheme>
 )
 
