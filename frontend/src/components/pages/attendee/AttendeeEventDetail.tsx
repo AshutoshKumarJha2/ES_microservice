@@ -1,10 +1,12 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Container, Row, Col, Card, Nav, Spinner, Alert, Button,
   Form, Table, Badge,
 } from 'react-bootstrap'
-import { ArrowLeft } from 'react-bootstrap-icons'
+import { ArrowLeft, StarFill, Star } from 'react-bootstrap-icons'
+import { useAppDispatch, useAppSelector } from '../../../store/hooks'
+import { fetchFeedback } from '../../../store/slices/analyticsSlice'
 import { toast } from 'react-toastify'
 import { eventService } from '../../../services/events/eventService'
 import { ticketService } from '../../../services/events/ticketService'
@@ -52,6 +54,8 @@ const REG_STATUS_COLOR: Record<string, string> = {
 export const AttendeeEventDetail = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  const { feedback } = useAppSelector((s) => s.analytics)
 
   const [tab, setTab]                   = useState<Tab>('overview')
   const [event, setEvent]               = useState<EventResponseDto | null>(null)
@@ -66,9 +70,17 @@ export const AttendeeEventDetail = () => {
   const [regError, setRegError]             = useState<string | null>(null)
   const [cancelling, setCancelling]         = useState(false)
 
+  const avgRating = useMemo(() => {
+    const rated = feedback.filter((f) => (f.rating ?? 0) > 0)
+    if (rated.length === 0) return null
+    const sum = rated.reduce((acc, f) => acc + (f.rating ?? 0), 0)
+    return { score: (sum / rated.length), count: feedback.length }
+  }, [feedback])
+
   useEffect(() => {
     if (!id) return
     setLoading(true)
+    dispatch(fetchFeedback({ eventId: id, size: 100 }))
     Promise.allSettled([
       eventService.getById(id),
       eventService.getSchedules(id),
@@ -264,6 +276,40 @@ export const AttendeeEventDetail = () => {
                 </Card.Body>
               </Card>
             </Col>
+
+            {avgRating && (
+              <Col xs={12}>
+                <Card className="es-card border shadow-sm">
+                  <Card.Body className="p-3 p-md-4 d-flex flex-wrap align-items-center gap-3">
+                    <div>
+                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Community Rating</div>
+                      <div className="d-flex align-items-center gap-2">
+                        <div className="d-flex gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span key={star} style={{ color: star <= Math.round(avgRating.score) ? 'var(--amber)' : 'var(--border-color)' }}>
+                              {star <= Math.round(avgRating.score) ? <StarFill size={16} /> : <Star size={16} />}
+                            </span>
+                          ))}
+                        </div>
+                        <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
+                          {avgRating.score.toFixed(1)}
+                        </span>
+                        <span className="small" style={{ color: 'var(--text-muted)' }}>
+                          · {avgRating.count} review{avgRating.count !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    </div>
+                    {canFeedback && (
+                      <Link to={`/attendee/feedback/${event.id}`} className="ms-auto">
+                        <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium" style={{ fontSize: '0.82rem' }}>
+                          Submit Feedback
+                        </Button>
+                      </Link>
+                    )}
+                  </Card.Body>
+                </Card>
+              </Col>
+            )}
           </Row>
         )}
 
@@ -396,23 +442,6 @@ export const AttendeeEventDetail = () => {
               </Card>
             </Col>
 
-            {canFeedback && (
-              <Col xs={12} lg={5}>
-                <Card className="es-card border shadow-sm h-100">
-                  <Card.Body className="p-3 p-md-4">
-                    <PanelHeader title="Your Engagement" />
-                    <p className="small mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      Share your experience and help improve future events.
-                    </p>
-                    <Link to={`/attendee/feedback/${event.id}`}>
-                      <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium">
-                        Submit Feedback
-                      </Button>
-                    </Link>
-                  </Card.Body>
-                </Card>
-              </Col>
-            )}
           </Row>
         )}
       </Container>

@@ -16,6 +16,7 @@ import {
 } from 'react-bootstrap-icons'
 
 const ALLOWED_STATUSES = ['CONFIRMED', 'CHECKED_IN']
+const MAX_COMMENT = 500
 
 const isAllowedStatus = (status?: string) =>
   status ? ALLOWED_STATUSES.includes(status.toUpperCase()) : false
@@ -56,6 +57,12 @@ export const SubmitFeedback = () => {
     return (sum / rated.length).toFixed(1)
   }, [feedback])
 
+  const distribution = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0]
+    feedback.forEach((f) => { const r = f.rating ?? 0; if (r >= 1 && r <= 5) counts[r - 1]++ })
+    return counts.reverse() // [5★, 4★, 3★, 2★, 1★]
+  }, [feedback])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!eventId || rating === 0) return
@@ -66,11 +73,11 @@ export const SubmitFeedback = () => {
   }
 
   const displayStar = hoverRating || rating
-
+  const isSubmitted = submitSuccess || alreadySubmitted
   const eventName = selectedEvent ? selectedEvent.eventName : eventId ?? 'Loading event…'
 
   // ── Shared banner ──────────────────────────────────────────────────────────
-  const Banner = () => (
+  const Banner = ({ title }: { title: string }) => (
     <div className="es-banner">
       <Container fluid className="px-3 px-md-4 py-3">
         <button
@@ -80,7 +87,7 @@ export const SubmitFeedback = () => {
         >
           <ArrowLeft size={13} /> My Registrations
         </button>
-        <h1 className="fw-bold fs-3 mb-1">Submit Feedback</h1>
+        <h1 className="fw-bold fs-3 mb-1">{title}</h1>
         <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>{eventName}</p>
       </Container>
     </div>
@@ -90,7 +97,7 @@ export const SubmitFeedback = () => {
   if (user && user.role !== 'ATTENDEE') {
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-        <Banner />
+        <Banner title="Submit Feedback" />
         <Container fluid className="px-3 px-md-4 py-4">
           <Card className="es-card border shadow-sm" style={{ maxWidth: 480 }}>
             <Card.Body className="p-4 text-center">
@@ -116,7 +123,7 @@ export const SubmitFeedback = () => {
   if (user?.role === 'ATTENDEE' && myRegistrationLoading) {
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-        <Banner />
+        <Banner title="Submit Feedback" />
         <Container fluid className="px-3 px-md-4 py-5 text-center">
           <Spinner animation="border" style={{ color: 'var(--blue)' }} />
           <p className="mt-3 small" style={{ color: 'var(--text-muted)' }}>Checking your registration…</p>
@@ -133,7 +140,7 @@ export const SubmitFeedback = () => {
 
     return (
       <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-        <Banner />
+        <Banner title="Submit Feedback" />
         <Container fluid className="px-3 px-md-4 py-4">
           <Card className="es-card border shadow-sm" style={{ maxWidth: 480 }}>
             <Card.Body className="p-4 text-center">
@@ -156,7 +163,7 @@ export const SubmitFeedback = () => {
   // ── Main page ──────────────────────────────────────────────────────────────
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      <Banner />
+      <Banner title={isSubmitted ? 'Feedback Submitted' : 'Submit Feedback'} />
 
       <Container fluid className="px-3 px-md-4 py-4">
         <Row className="g-3">
@@ -203,15 +210,23 @@ export const SubmitFeedback = () => {
                     {/* Star rating */}
                     <Form.Group className="mb-4">
                       <Form.Label className="es-label">Overall Rating *</Form.Label>
-                      <div className="d-flex align-items-center gap-2 mt-1">
+                      <div
+                        role="group"
+                        aria-label="Rating"
+                        className="d-flex align-items-center gap-2 mt-1"
+                      >
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
-                            role="button"
+                            role="radio"
+                            aria-checked={rating === star}
+                            aria-label={`Rate ${star} out of 5`}
+                            tabIndex={0}
                             style={{ cursor: 'pointer', color: star <= displayStar ? 'var(--amber)' : 'var(--border-color)', fontSize: '1.6rem', lineHeight: 1 }}
                             onClick={() => setRating(star)}
                             onMouseEnter={() => setHoverRating(star)}
                             onMouseLeave={() => setHoverRating(0)}
+                            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setRating(star) } }}
                           >
                             {star <= displayStar
                               ? <StarFill size={28} />
@@ -233,10 +248,19 @@ export const SubmitFeedback = () => {
                         as="textarea"
                         rows={4}
                         value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        onChange={(e) => setComment(e.target.value.slice(0, MAX_COMMENT))}
+                        maxLength={MAX_COMMENT}
                         placeholder="Share your experience about this event…"
                         className="es-form-control rounded-3"
                       />
+                      <div className="d-flex justify-content-end mt-1">
+                        <span
+                          className="small"
+                          style={{ color: comment.length >= 480 ? 'var(--red)' : 'var(--text-muted)' }}
+                        >
+                          {comment.length}/{MAX_COMMENT}
+                        </span>
+                      </div>
                     </Form.Group>
 
                     {submitError && <Alert variant="danger" className="py-2 small rounded-3 mb-3">{submitError}</Alert>}
@@ -261,6 +285,11 @@ export const SubmitFeedback = () => {
                         Cancel
                       </Button>
                     </div>
+                    {rating === 0 && (
+                      <p className="small mt-2 mb-0" style={{ color: 'var(--text-muted)' }}>
+                        Please select a star rating to submit.
+                      </p>
+                    )}
                   </Form>
                 )}
               </Card.Body>
@@ -286,7 +315,7 @@ export const SubmitFeedback = () => {
                   style={{ height: 8, background: 'var(--bg-subtle)' }}
                 />
 
-                <div className="d-flex align-items-center gap-2">
+                <div className="d-flex align-items-center gap-2 mb-3">
                   <StarFill size={14} style={{ color: 'var(--amber)' }} />
                   <span className="small" style={{ color: 'var(--text-muted)' }}>
                     {feedback.length > 0
@@ -294,6 +323,27 @@ export const SubmitFeedback = () => {
                       : 'No reviews yet'}
                   </span>
                 </div>
+
+                {/* Per-star distribution */}
+                {feedback.length > 0 && (
+                  <div className="mt-1">
+                    {[5, 4, 3, 2, 1].map((star, i) => {
+                      const count = distribution[i]
+                      const pct = Math.round((count / feedback.length) * 100)
+                      return (
+                        <div key={star} className="d-flex align-items-center gap-2 mb-1" style={{ fontSize: '0.78rem' }}>
+                          <span style={{ width: 24, color: 'var(--text-muted)', textAlign: 'right', flexShrink: 0 }}>{star}★</span>
+                          <ProgressBar
+                            now={pct}
+                            className="flex-grow-1 rounded-pill"
+                            style={{ height: 6, background: 'var(--bg-subtle)' }}
+                          />
+                          <span style={{ width: 20, color: 'var(--text-muted)', flexShrink: 0 }}>{count}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </Card.Body>
             </Card>
           </Col>
