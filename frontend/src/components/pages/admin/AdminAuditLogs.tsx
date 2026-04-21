@@ -71,11 +71,11 @@ export const AdminAuditLogs: React.FC = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <h1 className="fw-bold fs-3 mb-1">Audit Logs</h1>
-            <p className="mb-0 text-white-50 small">Full activity history across the platform</p>
+            <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Full activity history across the platform</p>
           </div>
           <Button
             variant="outline-light"

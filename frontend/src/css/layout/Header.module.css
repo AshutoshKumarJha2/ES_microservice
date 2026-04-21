@@ -1,14 +1,29 @@
-@import url('https://fonts.googleapis.com/css2?family=Playwrite+IE:wght@100..400&family=Urbanist:wght@300;400;500;600;700&display=swap');
-
 /* ── Shell ─────────────────────────────────────────────────────────────────── */
 .navbar {
   position: sticky;
   top: 0;
   z-index: 100;
   width: 100%;
-  background: linear-gradient(175deg, #001A5C 0%, #002888 100%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 16px rgba(0, 26, 92, 0.4);
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-xs);
+  transition: background 0.2s, border-color 0.2s, backdrop-filter 0.2s;
+}
+
+.navbar.scrolled {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+[data-theme="dark"] .navbar {
+  background: var(--bg-surface);
+}
+
+[data-theme="dark"] .navbar.scrolled {
+  background: rgba(22, 25, 35, 0.90);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .inner {
@@ -29,11 +44,10 @@
   line-height: 1;
   text-decoration: none;
   flex-shrink: 0;
-  color: #fff;
 }
 
-.logo-event  { color: #ffffff; }
-.logo-sphere { color: #F47920; }
+.logo-event  { color: var(--text-primary); }
+.logo-sphere { color: var(--saffron); }
 
 /* ── Nav links ─────────────────────────────────────────────────────────────── */
 .links {
@@ -46,27 +60,25 @@
 }
 
 .link {
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--text-secondary);
   text-decoration: none;
   padding: 0.45rem 0.85rem;
-  border-radius: 8px;
-  transition: background 0.15s, color 0.15s;
+  border-radius: var(--radius-sm);
+  transition: background var(--motion-fast), color var(--motion-fast);
   white-space: nowrap;
 }
 
 .link:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  background: var(--bg-hover);
+  color: var(--text-primary);
 }
 
 .link.active {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  background: var(--blue-subtle);
+  color: var(--blue);
   font-weight: 600;
-  border-bottom: 2px solid #F47920;
 }
 
 /* ── Right-side actions ────────────────────────────────────────────────────── */
@@ -79,40 +91,39 @@
 
 /* ── Auth CTA buttons ──────────────────────────────────────────────────────── */
 .btn-login {
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: #ffffff;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 8px;
-  padding: 0.4rem 0.9rem;
+  color: var(--text-body);
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 1rem;
   text-decoration: none;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast);
 }
 
 .btn-login:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--bg-hover);
+  border-color: var(--blue-border);
+  color: var(--blue);
 }
 
 .btn-register {
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 600;
   color: #ffffff;
-  background: #F47920;
-  border: 1.5px solid #F47920;
-  border-radius: 8px;
-  padding: 0.4rem 0.9rem;
+  background: var(--gradient-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.45rem 1rem;
   text-decoration: none;
-  transition: background 0.15s, box-shadow 0.15s;
+  transition: opacity var(--motion-fast), transform var(--motion-fast);
 }
 
 .btn-register:hover {
-  background: #D96000;
-  border-color: #D96000;
-  box-shadow: 0 3px 10px rgba(244, 121, 32, 0.45);
+  opacity: 0.88;
+  color: #ffffff;
+  transform: translateY(-1px);
 }
 
 /* ── Mobile hamburger ──────────────────────────────────────────────────────── */
@@ -122,7 +133,7 @@
   border: none;
   cursor: pointer;
   padding: 0.25rem;
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-secondary);
 }
 
 /* ── Mobile drawer ─────────────────────────────────────────────────────────── */
@@ -141,17 +152,17 @@
     top: 64px;
     left: 0;
     right: 0;
-    background: #001A5C;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border-color);
     padding: 0.75rem 1.25rem;
-    box-shadow: 0 8px 24px rgba(0, 26, 92, 0.5);
+    box-shadow: var(--shadow-md);
   }
 
   .links.open { display: flex; }
 
   .link {
     padding: 0.65rem 0.75rem;
-    font-size: 0.97rem;
+    font-size: 0.9375rem;
   }
 
   .inner {
@@ -167,28 +178,28 @@
 .user-menu { position: relative; }
 
 button.user-chip {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
   padding: 0.3rem 0.65rem 0.3rem 0.3rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   cursor: pointer;
-  font-family: 'Urbanist', sans-serif;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--motion-fast), border-color var(--motion-fast);
+  min-height: 44px;
 }
 
 button.user-chip:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.35);
+  background: var(--bg-hover);
+  border-color: var(--blue-border);
 }
 
 .avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: #F47920;
+  background: var(--gradient-primary);
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
@@ -200,9 +211,9 @@ button.user-chip:hover {
 }
 
 .user-name {
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-primary);
   max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -210,7 +221,7 @@ button.user-chip:hover {
 }
 
 .chevron {
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--text-muted);
   transition: transform 0.2s ease;
   flex-shrink: 0;
 }
@@ -225,17 +236,22 @@ button.user-chip:hover {
   min-width: 220px;
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   z-index: 200;
-  animation: dropdownIn 0.15s ease;
   transition: background 0.3s, border-color 0.3s;
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  .dropdown {
+    animation: dropdownIn 0.15s ease-out;
+  }
+}
+
 @keyframes dropdownIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .dropdown-header {
@@ -245,8 +261,7 @@ button.user-chip:hover {
 }
 
 .dropdown-name {
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.92rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-primary);
   white-space: nowrap;
@@ -255,8 +270,7 @@ button.user-chip:hover {
 }
 
 .dropdown-email {
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
   margin-top: 0.1rem;
   white-space: nowrap;
@@ -267,15 +281,14 @@ button.user-chip:hover {
 .dropdown-role {
   display: inline-block;
   margin-top: 0.45rem;
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.6875rem;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--blue);
   background: var(--blue-subtle);
-  border-radius: 4px;
-  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-xs);
+  padding: 0.15rem 0.5rem;
   transition: color 0.3s, background 0.3s;
 }
 
@@ -292,15 +305,15 @@ button.user-chip:hover {
   align-items: center;
   gap: 0.6rem;
   padding: 0.65rem 1rem;
-  font-family: 'Urbanist', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-body);
   background: none;
   border: none;
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s, color 0.12s;
+  min-height: 44px;
+  transition: background var(--motion-fast), color var(--motion-fast);
 }
 
 .dropdown-item:hover {
@@ -321,22 +334,22 @@ button.user-chip:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  width: 40px;
+  height: 40px;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
   border-radius: 50%;
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--text-secondary);
   cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--motion-fast), border-color var(--motion-fast), color var(--motion-fast);
   flex-shrink: 0;
   text-decoration: none;
 }
 
 .bell-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.35);
-  color: #fff;
+  background: var(--blue-subtle);
+  border-color: var(--blue-border);
+  color: var(--blue);
 }
 
 .bell-badge {
@@ -345,8 +358,8 @@ button.user-chip:hover {
   right: -4px;
   min-width: 16px;
   height: 16px;
-  border-radius: 99px;
-  background: #F47920;
+  border-radius: var(--radius-full);
+  background: var(--saffron);
   color: #fff;
   font-size: 0.6rem;
   font-weight: 700;
@@ -355,5 +368,5 @@ button.user-chip:hover {
   justify-content: center;
   padding: 0 3px;
   line-height: 1;
-  border: 1.5px solid #002888;
+  border: 1.5px solid var(--bg-surface);
 }

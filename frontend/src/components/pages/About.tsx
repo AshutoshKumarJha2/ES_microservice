@@ -81,7 +81,7 @@ export const About = () => {
     <div style={{ background: 'var(--bg-page)' }}>
 
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-5 py-5">
           <div style={{ maxWidth: 680 }}>
             <p className="text-uppercase fw-bold mb-2" style={{ fontSize: '0.75rem', letterSpacing: '0.1em', color: 'rgba(255,255,255,0.6)' }}>
