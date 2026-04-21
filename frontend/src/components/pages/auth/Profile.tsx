@@ -106,14 +106,14 @@ export const Profile = () => {
           <div className="d-flex align-items-center gap-4">
             <div
               className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
-              style={{ width: 64, height: 64, fontSize: '1.4rem', background: 'var(--gradient-primary)' }}
+              style={{ width: 64, height: 64, fontSize: '1.4rem', background: 'rgba(255,255,255,0.2)' }}
             >
               {initials}
             </div>
             <div>
               <h1 className="fw-bold fs-3 mb-1">{user.name}</h1>
               <div className="d-flex align-items-center gap-2">
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.9rem' }}>
                   {ROLE_LABELS[user.role] ?? user.role}
                 </span>
                 <Badge className={`border-0 ${ROLE_BADGE[user.role] ?? 'es-badge-draft'}`} style={{ fontSize: '0.7rem' }}>

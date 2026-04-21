@@ -75,10 +75,10 @@ export const AdminAuditLogs: React.FC = () => {
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <h1 className="fw-bold fs-3 mb-1">Audit Logs</h1>
-            <p className="mb-0 text-secondary small">Full activity history across the platform</p>
+            <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Full activity history across the platform</p>
           </div>
           <Button
-            variant="outline-primary"
+            variant="outline-light"
             size="sm"
             className="rounded-3 d-flex align-items-center gap-2"
             onClick={handleExportCSV}

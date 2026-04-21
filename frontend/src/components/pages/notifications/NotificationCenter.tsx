@@ -166,7 +166,7 @@ export const NotificationCenter = () => {
               <h1 className="fw-bold fs-3 mb-1 d-flex align-items-center gap-2">
                 <Bell size={20} /> Notifications
               </h1>
-              <p className="mb-0 small text-secondary">
+              <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
                 {unreadCount > 0
                   ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`
                   : "You're all caught up"}
@@ -175,7 +175,7 @@ export const NotificationCenter = () => {
             <div className="d-flex gap-2 flex-wrap">
               {unreadCount > 0 && (
                 <Button
-                  variant="outline-primary" size="sm" className="rounded-3 fw-semibold"
+                  variant="outline-light" size="sm" className="rounded-3 fw-semibold"
                   onClick={() => dispatch(markAllReadLocally())}
                 >
                   <CheckAll size={16} className="me-1" /> Mark All as Read
@@ -183,7 +183,7 @@ export const NotificationCenter = () => {
               )}
               {isAdmin && (
                 <Button
-                  variant="primary" size="sm" className="rounded-3 fw-semibold"
+                  variant="light" size="sm" className="rounded-3 fw-semibold"
                   onClick={() => setShowSend(true)}
                 >
                   <Send size={14} className="me-1" /> Send Notification

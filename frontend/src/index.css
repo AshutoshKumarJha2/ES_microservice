@@ -292,11 +292,10 @@ a {
 
 /* ── Page banner (dashboard sections) ────────────────────────────────────────── */
 .es-banner {
-  background: var(--bg-page);
+  background: var(--gradient-hero);
   padding: 2rem 0;
-  border-bottom: 1px solid var(--border-color);
-  color: var(--text-primary);
-  transition: background 0.3s, border-color 0.3s;
+  color: #ffffff;
+  transition: background 0.3s;
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────────────────── */

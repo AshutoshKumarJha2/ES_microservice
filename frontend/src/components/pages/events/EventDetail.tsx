@@ -67,31 +67,31 @@ export const EventDetail = () => {
             <button
               onClick={() => navigate(backPath)}
               className="btn btn-link p-0 mb-2 d-flex align-items-center gap-1"
-              style={{ color: 'var(--text-muted)', fontSize: '0.82rem', textDecoration: 'none' }}
+              style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.82rem', textDecoration: 'none' }}
             >
               <ArrowLeft size={13} /> {backLabel}
             </button>
             <h1 className="fw-bold fs-3 mb-1">{selectedEvent.eventName}</h1>
             <div className="d-flex align-items-center gap-2 flex-wrap">
-              <span className="text-secondary small">
+              <span className="small" style={{ color: 'rgba(255,255,255,0.72)' }}>
                 {selectedEvent.startAt} → {selectedEvent.endAt}
               </span>
               <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
             </div>
             {selectedEvent.organizer && (
-              <p className="mb-0 mt-1 small" style={{ color: 'var(--text-secondary)' }}>
-                Organizer: <span className="fw-semibold" style={{ color: 'var(--text-primary)' }}>{selectedEvent.organizer.name}</span>
+              <p className="mb-0 mt-1 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                Organizer: <span className="fw-semibold" style={{ color: '#fff' }}>{selectedEvent.organizer.name}</span>
                 <span className="ms-1">({selectedEvent.organizer.email})</span>
               </p>
             )}
           </div>
           <div className="d-flex gap-2">
             {isAdmin && (
-              <Button variant="outline-primary" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
+              <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
                 Edit Event
               </Button>
             )}
-            <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
+            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
               Analytics
             </Button>
           </div>

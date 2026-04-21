@@ -114,7 +114,7 @@ export const CreateEvent = () => {
       <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <h1 className="fw-bold fs-3 mb-1">{isEdit ? 'Edit Event' : 'Create New Event'}</h1>
-          <p className="mb-0 small text-secondary">
+          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
             {isEdit ? 'Update the details for your event.' : 'Fill in the details below to create your event.'}
           </p>
         </Container>
