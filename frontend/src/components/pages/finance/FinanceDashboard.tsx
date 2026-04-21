@@ -12,6 +12,7 @@ import type { FinanceExpenseDto } from '../../../types/finance'
 import { StatusBadge } from '../../elements/finance/StatusBadge'
 import { ProcessPaymentModal } from '../../elements/finance/ProcessPaymentModal'
 import styles from '../../../css/admin/AdminPanel.module.css'
+import { StatGridSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 export const FinanceDashboard: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -61,24 +62,26 @@ export const FinanceDashboard: React.FC = () => {
 
       <div className={styles.content}>
         {/* Stats */}
-        <div className={styles['stats-grid']}>
-          <div className={`${styles['stat-card']} ${styles.blue}`}>
-            <div className={styles['stat-label']}>Pending Approvals</div>
-            <div className={styles['stat-value']}>{pendingCount}</div>
+        {expensesLoading ? <StatGridSkeleton count={4} /> : (
+          <div className={styles['stats-grid']}>
+            <div className={`${styles['stat-card']} ${styles.blue}`}>
+              <div className={styles['stat-label']}>Pending Approvals</div>
+              <div className={styles['stat-value']}>{pendingCount}</div>
+            </div>
+            <div className={`${styles['stat-card']} ${styles.green}`}>
+              <div className={styles['stat-label']}>Approved</div>
+              <div className={styles['stat-value']}>{approvedCount}</div>
+            </div>
+            <div className={`${styles['stat-card']} ${styles.orange}`}>
+              <div className={styles['stat-label']}>Paid</div>
+              <div className={styles['stat-value']}>{paidCount}</div>
+            </div>
+            <div className={`${styles['stat-card']} ${styles.red}`}>
+              <div className={styles['stat-label']}>Rejected</div>
+              <div className={styles['stat-value']}>{rejectedCount}</div>
+            </div>
           </div>
-          <div className={`${styles['stat-card']} ${styles.green}`}>
-            <div className={styles['stat-label']}>Approved</div>
-            <div className={styles['stat-value']}>{approvedCount}</div>
-          </div>
-          <div className={`${styles['stat-card']} ${styles.orange}`}>
-            <div className={styles['stat-label']}>Paid</div>
-            <div className={styles['stat-value']}>{paidCount}</div>
-          </div>
-          <div className={`${styles['stat-card']} ${styles.red}`}>
-            <div className={styles['stat-label']}>Rejected</div>
-            <div className={styles['stat-value']}>{rejectedCount}</div>
-          </div>
-        </div>
+        )}
 
         {/* Two columns */}
         <div className={styles['two-col']}>
@@ -88,16 +91,13 @@ export const FinanceDashboard: React.FC = () => {
               Pending Approvals
               <button className={styles['btn-sm']} onClick={() => navigate('/finance/expenses')}>View All →</button>
             </div>
-            {expensesLoading ? (
-              <p className={styles.loading}>Loading…</p>
-            ) : (
-              <div className={styles['table-wrapper']}>
-                <table>
-                  <thead>
-                    <tr><th>Description</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
-                  </thead>
-                  <tbody>
-                    {recentPending.length === 0 ? (
+            <div className={styles['table-wrapper']}>
+              <table>
+                <thead>
+                  <tr><th>Description</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  {expensesLoading ? <TableRowsSkeleton rows={4} cols={4} /> : recentPending.length === 0 ? (
                       <tr><td colSpan={4} className={styles.empty}>No pending expenses</td></tr>
                     ) : recentPending.map((e: FinanceExpenseDto) => (
                       <tr key={e.expenseId}>
@@ -112,10 +112,9 @@ export const FinanceDashboard: React.FC = () => {
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Awaiting payment */}
@@ -124,16 +123,13 @@ export const FinanceDashboard: React.FC = () => {
               Awaiting Payment
               <button className={styles['btn-sm']} onClick={() => navigate('/finance/payments')}>View All →</button>
             </div>
-            {expensesLoading ? (
-              <p className={styles.loading}>Loading…</p>
-            ) : (
-              <div className={styles['table-wrapper']}>
-                <table>
-                  <thead>
-                    <tr><th>Description</th><th>Amount</th><th>Actions</th></tr>
-                  </thead>
-                  <tbody>
-                    {recentApproved.length === 0 ? (
+            <div className={styles['table-wrapper']}>
+              <table>
+                <thead>
+                  <tr><th>Description</th><th>Amount</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                  {expensesLoading ? <TableRowsSkeleton rows={3} cols={3} /> : recentApproved.length === 0 ? (
                       <tr><td colSpan={3} className={styles.empty}>No approved expenses awaiting payment</td></tr>
                     ) : recentApproved.map((e: FinanceExpenseDto) => (
                       <tr key={e.expenseId}>
@@ -146,10 +142,9 @@ export const FinanceDashboard: React.FC = () => {
                         </td>
                       </tr>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 

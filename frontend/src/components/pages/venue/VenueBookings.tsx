@@ -10,6 +10,7 @@ import {
 import type { BookingStatus } from '../../../types/venue'
 import styles from '../../../css/venue/Venue.module.css'
 import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -102,7 +103,12 @@ export const VenueBookings = () => {
         </div>
       ) : bookingsLoading ? (
         <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.loadingState}>Loading bookings for {selectedVenueName}…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Booking ID</th><th>Event ID</th><th>Date</th><th>Resources</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={4} cols={6} /></tbody>
+          </table>
         </div>
       ) : bookingsError ? (
         <div className={`${styles.card} ${styles.cardNoPad}`}>

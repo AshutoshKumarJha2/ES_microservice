@@ -4,6 +4,7 @@ import { registrationService } from '../../../../services/events/registrationSer
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
 import type { RegistrationDto } from '../../../../types/events'
 import { Card, Table, Button, Spinner, Form, InputGroup, Badge } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 const ATTENDEE_STATUSES = 'CONFIRMED,CHECKED_IN'
 
@@ -95,22 +96,19 @@ export const AttendeesTab = () => {
           )}
         </InputGroup>
 
-        {loading ? (
-          <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
-        ) : attendees.length === 0 ? (
-          <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No confirmed attendees found.</p>
-        ) : (
-          <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
-            <thead style={{ background: 'var(--bg-subtle)' }}>
-              <tr>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Attendee</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Ticket Type</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {attendees.map((r) => (
+        <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
+          <thead style={{ background: 'var(--bg-subtle)' }}>
+            <tr>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Attendee</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Ticket Type</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? <TableRowsSkeleton rows={5} cols={4} /> : attendees.length === 0 ? (
+              <tr><td colSpan={4} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No confirmed attendees found.</td></tr>
+            ) : attendees.map((r) => (
                 <tr key={r.registrationId}>
                   <td className="align-middle">
                     {r.attendeeDetails ? (
@@ -155,9 +153,8 @@ export const AttendeesTab = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </Table>
-        )}
+          </tbody>
+        </Table>
       </Card.Body>
     </Card>
   )

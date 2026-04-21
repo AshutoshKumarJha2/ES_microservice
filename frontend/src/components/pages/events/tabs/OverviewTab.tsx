@@ -7,6 +7,7 @@ import type { EventStatus } from '../../../../types/events'
 import {
   Card, Row, Col, Button, Spinner, Alert,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 interface Props {
   eventId: string
@@ -121,6 +122,7 @@ export const OverviewTab = ({ eventId, eventStartAt, eventEndAt }: Props) => {
         ))}
       </Row>
 
+<<<<<<< Updated upstream
       {/* Session manager */}
       <SessionManager
         eventId={eventId}
@@ -128,6 +130,124 @@ export const OverviewTab = ({ eventId, eventStartAt, eventEndAt }: Props) => {
         eventEndAt={eventEndAt}
         onCountChange={setSessionCount}
       />
+=======
+      {/* Schedule */}
+      <Card className="es-card border shadow-sm">
+        <Card.Body className="p-3 p-md-4">
+          <Card.Title className="mb-3 fw-semibold" style={{ color: 'var(--text-primary)' }}>Schedule</Card.Title>
+
+          {schedulesLoading ? (
+            <TableRowsSkeleton rows={4} cols={5} />
+          ) : sorted.length === 0 ? (
+            // Empty state: one centered + zone
+            insertAt === 0 ? insertForm : (
+              <div className="py-2">
+                <GapZone
+                  boundary
+                  hovered={hoveredGap === 0}
+                  onMouseEnter={() => setHoveredGap(0)}
+                  onMouseLeave={() => setHoveredGap(null)}
+                  onClick={() => openInsert(0)}
+                />
+                <p className="text-center mb-0 mt-1" style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                  No sessions yet — click + to add the first one.
+                </p>
+              </div>
+            )
+          ) : (
+            <div>
+              {/* Column header row */}
+              <div style={gridStyle}>
+                {['Date', 'Time Slot', 'Activity', 'Status', 'Actions'].map((h) => (
+                  <div key={h} style={headerCol}>{h}</div>
+                ))}
+              </div>
+
+              {/* Gap 0 — before first schedule */}
+              {insertAt === 0 ? insertForm : (
+                <GapZone
+                  boundary
+                  hovered={hoveredGap === 0}
+                  onMouseEnter={() => setHoveredGap(0)}
+                  onMouseLeave={() => setHoveredGap(null)}
+                  onClick={() => openInsert(0)}
+                />
+              )}
+
+              {sorted.map((s, i) => (
+                <div key={s.scheduleId}>
+                  {/* Schedule row or inline edit form */}
+                  {editingSession?.scheduleId === s.scheduleId ? (
+                    <Card className="border my-1" style={{ borderColor: 'var(--border-subtle)', background: 'var(--bg-subtle)' }}>
+                      <Card.Body className="p-3">
+                        <Form onSubmit={handleUpdateSession}>
+                          <SessionFormFields
+                            values={editingSession}
+                            onChange={(patch) => {
+                              setEditingSession((p) => p && ({ ...p, ...patch }))
+                              setEditError(null)
+                            }}
+                            minDate={evtStartDate}
+                            maxDate={evtEndDate}
+                          />
+                          {editError && (
+                            <Alert variant="danger" className="py-2 px-3 mt-2 mb-0" style={{ fontSize: '0.83rem' }}>
+                              {editError}
+                            </Alert>
+                          )}
+                          <div className="d-flex gap-2 justify-content-end mt-3">
+                            <Button type="button" variant="outline-secondary" size="sm" className="rounded-3"
+                              onClick={() => { setEditingSession(null); setEditError(null) }}>Cancel</Button>
+                            <Button type="submit" variant="primary" size="sm" className="rounded-3 fw-semibold"
+                              disabled={sessionUpdating}>
+                              {sessionUpdating ? 'Saving…' : 'Save'}
+                            </Button>
+                          </div>
+                        </Form>
+                      </Card.Body>
+                    </Card>
+                  ) : (
+                    <div style={{ ...gridStyle, background: 'transparent' }}
+                      onMouseEnter={(el) => (el.currentTarget.style.background = 'var(--bg-subtle)')}
+                      onMouseLeave={(el) => (el.currentTarget.style.background = 'transparent')}
+                    >
+                      <div style={{ ...colBase, color: 'var(--text-secondary)' }}>{s.date}</div>
+                      <div style={{ ...colBase, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>{s.timeSlot}</div>
+                      <div style={{ ...colBase, color: 'var(--text-primary)' }}>{s.activity}</div>
+                      <div style={colBase}><EventStatusBadge status={s.status} variant="schedule" /></div>
+                      <div style={colBase}>
+                        <div className="d-flex gap-1">
+                          <Button variant="outline-primary" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
+                            onClick={() => {
+                              setEditOriginalSlot(s.timeSlot)
+                              setEditingSession(s)
+                              setEditError(null)
+                              closeInsert()
+                            }}>Edit</Button>
+                          <Button variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
+                            onClick={() => handleDeleteSession(s.scheduleId)}>Delete</Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Gap after this schedule */}
+                  {insertAt === i + 1 ? insertForm : (
+                    <GapZone
+                      boundary={i === sorted.length - 1}
+                      hovered={hoveredGap === i + 1}
+                      onMouseEnter={() => setHoveredGap(i + 1)}
+                      onMouseLeave={() => setHoveredGap(null)}
+                      onClick={() => openInsert(i + 1)}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </Card.Body>
+      </Card>
+>>>>>>> Stashed changes
     </>
   )
 }

@@ -4,8 +4,9 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchUsers } from '../../../store/slices/adminSlice'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import {
-  Container, Row, Col, Card, Table, Badge, Button, Spinner,
+  Container, Row, Col, Card, Table, Badge, Button,
 } from 'react-bootstrap'
+import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const initials = (name: string) =>
   name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -74,18 +75,20 @@ export const AdminDashboard: React.FC = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                  <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        {loadingUsers ? <StatCardsSkeleton count={4} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
+                  <Card.Body className="p-3">
+                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                    <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Two columns */}
         <Row className="g-3">
@@ -100,21 +103,16 @@ export const AdminDashboard: React.FC = () => {
                   </Button>
                 </div>
 
-                {loadingUsers ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                  </div>
-                ) : (
-                  <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                  <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem', textAlign: 'left', tableLayout: 'fixed' }}>
                     <thead style={{ background: 'var(--bg-subtle)' }}>
                       <tr>
-                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Name</th>
-                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Role</th>
-                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '55%' }}>Name</th>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '25%' }}>Role</th>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '20%' }}>Status</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {recentUsers.length === 0 ? (
+                      {loadingUsers ? <TableRowsSkeleton rows={5} cols={3} /> : recentUsers.length === 0 ? (
                         <tr><td colSpan={3} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
                       ) : recentUsers.map((u) => (
                         <tr key={u.userId}>
@@ -143,7 +141,6 @@ export const AdminDashboard: React.FC = () => {
                       ))}
                     </tbody>
                   </Table>
-                )}
               </Card.Body>
             </Card>
           </Col>

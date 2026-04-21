@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Modal, Button, Form, Spinner } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -136,25 +137,22 @@ export const Deliveries = () => {
       </div>
 
       <div className={styles.card}>
-        {deliveriesLoading ? (
-          <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Delivery ID</th>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Tracking #</th>
-                <th>Delivery Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={7} className={styles.emptyCell}>No deliveries found.</td></tr>
-              ) : filtered.map(d => (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Delivery ID</th>
+              <th>Item</th>
+              <th>Qty</th>
+              <th>Tracking #</th>
+              <th>Delivery Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {deliveriesLoading ? <TableRowsSkeleton rows={5} cols={7} /> : filtered.length === 0 ? (
+              <tr><td colSpan={7} className={styles.emptyCell}>No deliveries found.</td></tr>
+            ) : filtered.map(d => (
                 <tr key={d.deliveryId}>
                   <td><span className={styles.idCell}>{d.deliveryId}</span></td>
                   <td><strong>{d.item}</strong></td>
@@ -178,9 +176,8 @@ export const Deliveries = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        )}
+          </tbody>
+        </table>
       </div>
 
       {/* ── Create / Edit Modal ──────────────────────────────────────────────── */}

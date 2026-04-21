@@ -12,6 +12,7 @@ import {
   Container, Table, Button, ButtonGroup, Badge, Spinner, Alert,
   Modal, Form,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
@@ -216,14 +217,8 @@ export const NotificationCenter = () => {
 
         {/* Table card */}
         <div className="es-card border shadow-sm rounded-3 overflow-hidden">
-          {loading ? (
-            <div className="text-center py-5"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
-          ) : error ? (
+          {error ? (
             <Alert variant="danger" className="m-3">{error}</Alert>
-          ) : visible.length === 0 ? (
-            <p className="text-center py-5 mb-0" style={{ color: 'var(--text-muted)' }}>
-              {filter === 'UNREAD' ? 'No unread notifications.' : 'No notifications found.'}
-            </p>
           ) : (
             <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
               <thead style={{ background: 'var(--bg-subtle)' }}>
@@ -237,7 +232,11 @@ export const NotificationCenter = () => {
                 </tr>
               </thead>
               <tbody>
-                {visible.map((n) => {
+                {loading ? <TableRowsSkeleton rows={5} cols={6} /> : visible.length === 0 ? (
+                  <tr><td colSpan={6} className="text-center py-5" style={{ color: 'var(--text-muted)' }}>
+                    {filter === 'UNREAD' ? 'No unread notifications.' : 'No notifications found.'}
+                  </td></tr>
+                ) : visible.map((n) => {
                   const cat    = n.category?.toUpperCase() ?? 'SYSTEM'
                   const isUnread = n.status === 'UNREAD'
                   return (

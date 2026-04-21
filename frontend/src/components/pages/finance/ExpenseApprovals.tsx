@@ -11,6 +11,7 @@ import {
 import type { ExpenseStatus } from '../../../types/finance'
 import { StatusBadge } from '../../elements/finance/StatusBadge'
 import styles from '../../../css/finance/Finance.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const FILTERS: ExpenseStatus[] = ['SUBMITTED', 'APPROVED', 'REJECTED', 'PAID']
 const FILTER_LABELS: Record<ExpenseStatus, string> = {
@@ -69,7 +70,14 @@ export const ExpenseApprovals = () => {
 
       <div className={`${styles.card} ${styles.cardNoPad}`}>
         {expensesLoading ? (
-          <div className={styles.loadingState}>Loading expenses…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Event</th><th>Description</th><th>Amount</th><th>Date</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={5} cols={6} /></tbody>
+          </table>
         ) : expensesError ? (
           <div className={styles.loadingState}>{expensesError}</div>
         ) : filtered.length === 0 ? (

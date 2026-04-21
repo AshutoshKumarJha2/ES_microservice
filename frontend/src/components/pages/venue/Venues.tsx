@@ -10,6 +10,7 @@ import {
 } from '../../../store/slices/venue/venueSlice'
 import type { AvailabilityStatus, VenueResponseDto } from '../../../types/venue'
 import styles from '../../../css/venue/Venue.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -151,7 +152,12 @@ export const Venues = () => {
 
       <div className={`${styles.card} ${styles.cardNoPad}`}>
         {venuesLoading ? (
-          <div className={styles.loadingState}>Loading venues…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Location</th><th>Capacity</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={5} cols={5} /></tbody>
+          </table>
         ) : filtered.length === 0 ? (
           <div className={styles.emptyState}>No venues found.</div>
         ) : (

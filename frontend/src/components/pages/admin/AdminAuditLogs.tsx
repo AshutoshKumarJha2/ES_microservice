@@ -5,6 +5,7 @@ import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import {
   Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Spinner, Pagination,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search, Download } from 'react-bootstrap-icons'
 
 const PAGE_SIZE = 15
@@ -149,23 +150,18 @@ export const AdminAuditLogs: React.FC = () => {
             </Row>
 
             {/* Table */}
-            {loadingLogs ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : (
-              <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
-                <thead style={{ background: 'var(--bg-subtle)' }}>
-                  <tr>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Timestamp</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>User ID</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Action</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity Name</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageLogs.length === 0 ? (
+            <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Timestamp</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>User ID</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Action</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Entity Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingLogs ? <TableRowsSkeleton rows={15} cols={5} /> : pageLogs.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No audit logs found</td></tr>
                   ) : pageLogs.map((log) => (
                     <tr key={log.auditId}>
@@ -203,9 +199,8 @@ export const AdminAuditLogs: React.FC = () => {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
-            )}
+              </tbody>
+            </Table>
 
             {/* Pagination */}
             {filtered.length > PAGE_SIZE && (

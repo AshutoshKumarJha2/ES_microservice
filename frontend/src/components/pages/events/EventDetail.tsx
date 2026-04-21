@@ -13,6 +13,7 @@ import { BudgetTab } from './tabs/BudgetTab'
 import {
   Container, Button, Nav, Spinner,
 } from 'react-bootstrap'
+import { DetailPageSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { ArrowLeft } from 'react-bootstrap-icons'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import BookingVenueAndResource from '../booking/BookingVenueAndResource'
@@ -52,8 +53,8 @@ export const EventDetail = () => {
 
   if (!selectedEvent) {
     return (
-      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
-        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+        <DetailPageSkeleton />
       </div>
     )
   }

@@ -6,6 +6,7 @@ import type { BudgetRequestDto, ExpenseRequestDto } from '../../../../types/even
 import {
   Card, Row, Col, Table, Button, Form, Spinner, Alert,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 interface Props { eventId: string }
 
@@ -157,22 +158,19 @@ export const BudgetTab = ({ eventId }: Props) => {
             </Card>
           )}
 
-          {loading ? (
-            <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
-          ) : expenses.length === 0 ? (
-            <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No expenses recorded yet.</p>
-          ) : (
-            <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-              <thead style={{ background: 'var(--bg-subtle)' }}>
-                <tr>
-                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Description</th>
-                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Amount</th>
-                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Date</th>
-                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {expenses.map((exp) => (
+          <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+            <thead style={{ background: 'var(--bg-subtle)' }}>
+              <tr>
+                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Description</th>
+                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Amount</th>
+                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Date</th>
+                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? <TableRowsSkeleton rows={4} cols={4} /> : expenses.length === 0 ? (
+                <tr><td colSpan={4} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No expenses recorded yet.</td></tr>
+              ) : expenses.map((exp) => (
                   <tr key={exp.expenseId}>
                     <td className="align-middle" style={{ color: 'var(--text-primary)' }}>{exp.description}</td>
                     <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>₹{exp.amount.toLocaleString()}</td>
@@ -182,9 +180,8 @@ export const BudgetTab = ({ eventId }: Props) => {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </Table>
-          )}
+            </tbody>
+          </Table>
         </Card.Body>
       </Card>
     </>

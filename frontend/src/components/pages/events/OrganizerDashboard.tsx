@@ -9,6 +9,7 @@ import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
+import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const EMPTY_FORM: EventRequestDto = {
   name: '', organizerId: '', startDate: '', endDate: '', venueId: '', status: 'DRAFT',
@@ -220,18 +221,20 @@ export const OrganizerDashboard = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat cards */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                  <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        {loading ? <StatCardsSkeleton count={4} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
+                  <Card.Body className="p-3">
+                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                    <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Events table */}
         <Card className="es-card border shadow-sm">
@@ -241,25 +244,18 @@ export const OrganizerDashboard = () => {
               <span className="small" style={{ color: 'var(--text-muted)' }}>{events.length} total</span>
             </div>
 
-            {loading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : events.length === 0 ? (
-              <p className="text-center py-4" style={{ color: 'var(--text-muted)' }}>
-                No events found. Create your first event!
-              </p>
-            ) : (
-              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead style={{ background: 'var(--bg-subtle)' }}>
-                  <tr>
-                    {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
-                      <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.map((event: EventResponseDto) => (
+            <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
+                    <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? <TableRowsSkeleton rows={5} cols={5} /> : events.length === 0 ? (
+                  <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found. Create your first event!</td></tr>
+                ) : events.map((event: EventResponseDto) => (
                     <tr
                       key={event.id}
                       style={{ cursor: 'pointer' }}
@@ -276,9 +272,8 @@ export const OrganizerDashboard = () => {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
-            )}
+              </tbody>
+            </Table>
           </Card.Body>
         </Card>
       </Container>

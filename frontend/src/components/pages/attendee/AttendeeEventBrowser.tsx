@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Button, Spinner, Form, Badge } from 'react-bootstrap'
+import { StatCardsSkeleton, CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
@@ -77,20 +78,22 @@ export const AttendeeEventBrowser = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                  <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
-                    {loading ? '—' : s.value}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+        {loading ? <StatCardsSkeleton count={3} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
+                  <Card.Body className="p-3">
+                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                    <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
+                      {s.value}
+                    </div>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Search & filter bar */}
         <div className="d-flex flex-wrap gap-2 align-items-center mb-4">
@@ -122,9 +125,7 @@ export const AttendeeEventBrowser = () => {
 
         {/* Event cards */}
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-          </div>
+          <CardGridSkeleton count={6} cardHeight={180} />
         ) : filtered.length === 0 ? (
           <div className="text-center py-5" style={{ color: 'var(--text-muted)' }}>
             <p className="mb-0">No events found.</p>

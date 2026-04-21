@@ -4,6 +4,7 @@ import {
   Container, Row, Col, Card, Nav, Spinner, Alert, Button,
   Form, Table, Badge,
 } from 'react-bootstrap'
+import { DetailPageSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { eventService } from '../../../services/events/eventService'
 import { ticketService } from '../../../services/events/ticketService'
@@ -113,8 +114,8 @@ export const AttendeeEventDetail = () => {
 
   if (loading) {
     return (
-      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }} className="d-flex align-items-center justify-content-center">
-        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+        <DetailPageSkeleton />
       </div>
     )
   }

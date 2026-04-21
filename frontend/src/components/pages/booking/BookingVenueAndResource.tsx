@@ -7,6 +7,7 @@ import type {
 import { useEffect, useState } from "react";
 import styles from '../../../css/events/EventsPanel.module.css';
 import { PanelHeader } from "../../elements/events/PanelHeader";
+import { BlockSkeleton } from "../../elements/skeletons/PageSkeleton";
 import { eventService } from "../../../services/events/eventService";
 import { resourceSource } from "../../../services/resource/resourceService";
 import { bookingService } from "../../../services/booking/bookingService";
@@ -92,7 +93,7 @@ const BookingVenueAndResource: React.FC<BookingVenueAndResourceProps> = ({ event
     <div className={styles.card}>
       <PanelHeader title="Venue & Resource Request" />
 
-      {loading && <p className={styles.loading}>Loading resources…</p>}
+      {loading && <BlockSkeleton rows={4} />}
 
       {!loading && error && <p className={styles['error-msg']}>{error}</p>}
 
