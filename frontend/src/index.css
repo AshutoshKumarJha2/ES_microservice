@@ -5,11 +5,11 @@
 :root {
   color-scheme: light;
 
-  /* ── Brand — Violet primary + Amber accent ───────────────────────────── */
-  --blue:        #7c3aed;
-  --blue-hover:  #6d28d9;
-  --blue-subtle: #f5f3ff;
-  --blue-border: #ddd6fe;
+  /* ── Brand — Blue primary + Amber accent ────────────────────────────── */
+  --blue:        #2563eb;
+  --blue-hover:  #1d4ed8;
+  --blue-subtle: #eff6ff;
+  --blue-border: #bfdbfe;
 
   --saffron:        #ea580c;
   --saffron-hover:  #c2410c;
@@ -47,17 +47,17 @@
   --border-color:  #e2e8f0;
   --border-subtle: #f1f5f9;
 
-  /* ── Shadow scale (Violet-tinted) ────────────────────────────────────── */
-  --shadow-xs: 0 1px 2px rgba(124,58,237,0.04), 0 0 0 1px rgba(124,58,237,0.03);
-  --shadow-sm: 0 2px 6px rgba(124,58,237,0.06), 0 0 0 1px rgba(124,58,237,0.04);
-  --shadow-md: 0 4px 16px rgba(124,58,237,0.10), 0 0 0 1px rgba(124,58,237,0.06);
-  --shadow-lg: 0 8px 30px rgba(124,58,237,0.14), 0 0 0 1px rgba(124,58,237,0.08);
+  /* ── Shadow scale (Blue-tinted) ──────────────────────────────────────── */
+  --shadow-xs: 0 1px 2px rgba(37,99,235,0.04), 0 0 0 1px rgba(37,99,235,0.03);
+  --shadow-sm: 0 2px 6px rgba(37,99,235,0.06), 0 0 0 1px rgba(37,99,235,0.04);
+  --shadow-md: 0 4px 16px rgba(37,99,235,0.10), 0 0 0 1px rgba(37,99,235,0.06);
+  --shadow-lg: 0 8px 30px rgba(37,99,235,0.14), 0 0 0 1px rgba(37,99,235,0.08);
 
   /* ── Gradient tokens ─────────────────────────────────────────────────── */
-  --gradient-primary: linear-gradient(135deg, #6d28d9 0%, #7c3aed 100%);
-  --gradient-hero:    linear-gradient(135deg, #2e1065 0%, #5b21b6 40%, #7c3aed 100%);
+  --gradient-primary: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+  --gradient-hero:    linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 40%, #2563eb 100%);
   --gradient-accent:  linear-gradient(135deg, #ea580c 0%, #f97316 100%);
-  --gradient-subtle:  linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  --gradient-subtle:  linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
 
   /* ── Border radius scale ─────────────────────────────────────────────── */
   --radius-xs:   4px;
@@ -78,7 +78,7 @@
 
   /* ── Bootstrap variable overrides ────────────────────────────────────── */
   --bs-primary:          var(--blue);
-  --bs-primary-rgb:      124, 58, 237;
+  --bs-primary-rgb:      37, 99, 235;
   --bs-secondary:        var(--text-secondary);
   --bs-secondary-rgb:    100, 116, 139;
   --bs-success:          var(--green);
@@ -103,10 +103,10 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --blue:        #a78bfa;
-  --blue-hover:  #c4b5fd;
-  --blue-subtle: rgba(124, 58, 237, 0.12);
-  --blue-border: rgba(124, 58, 237, 0.30);
+  --blue:        #60a5fa;
+  --blue-hover:  #93c5fd;
+  --blue-subtle: rgba(37, 99, 235, 0.12);
+  --blue-border: rgba(37, 99, 235, 0.30);
 
   --saffron:        #fb923c;
   --saffron-hover:  #f97316;
@@ -146,7 +146,7 @@
   --shadow-lg: none;
 
   /* RGB overrides can't use var() — must be plain numbers */
-  --bs-primary-rgb: 167, 139, 250;
+  --bs-primary-rgb: 96, 165, 250;
 }
 
 /* ── Global resets ───────────────────────────────────────────────────────────── */
@@ -374,8 +374,8 @@ a {
 }
 
 /* ── Role / status badge colours ─────────────────────────────────────────────── */
-.badge.es-badge-admin    { background: #f5f3ff !important; color: #7c3aed !important; }
-.badge.es-badge-organizer{ background: #f3e8ff !important; color: #7c3aed !important; }
+.badge.es-badge-admin    { background: #eff6ff !important; color: #2563eb !important; }
+.badge.es-badge-organizer{ background: #eff6ff !important; color: #2563eb !important; }
 .badge.es-badge-attendee { background: #ecfdf5 !important; color: #10b981 !important; }
 .badge.es-badge-vendor   { background: #fffbeb !important; color: #d97706 !important; }
 .badge.es-badge-venue    { background: #fff7ed !important; color: #ea580c !important; }
@@ -390,10 +390,10 @@ a {
 .badge.es-badge-approved { background: #ecfdf5 !important; color: #10b981 !important; }
 .badge.es-badge-rejected { background: #fef2f2 !important; color: #dc2626 !important; }
 .badge.es-badge-paid     { background: #ecfdf5 !important; color: #10b981 !important; }
-.badge.es-badge-submitted{ background: #f5f3ff !important; color: #7c3aed !important; }
+.badge.es-badge-submitted{ background: #eff6ff !important; color: #2563eb !important; }
 
-[data-theme="dark"] .badge.es-badge-admin    { background: rgba(124,58,237,0.15)  !important; color: #c4b5fd !important; }
-[data-theme="dark"] .badge.es-badge-organizer{ background: rgba(124,58,237,0.15) !important; color: #c4b5fd !important; }
+[data-theme="dark"] .badge.es-badge-admin    { background: rgba(37,99,235,0.15)  !important; color: #93c5fd !important; }
+[data-theme="dark"] .badge.es-badge-organizer{ background: rgba(37,99,235,0.15) !important; color: #93c5fd !important; }
 [data-theme="dark"] .badge.es-badge-attendee { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
 [data-theme="dark"] .badge.es-badge-vendor   { background: rgba(217,119,6,0.15)   !important; color: #fde68a !important; }
 [data-theme="dark"] .badge.es-badge-venue    { background: rgba(234,88,12,0.15)   !important; color: #fdba74 !important; }
@@ -408,7 +408,7 @@ a {
 [data-theme="dark"] .badge.es-badge-approved { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
 [data-theme="dark"] .badge.es-badge-rejected { background: rgba(220,38,38,0.15)   !important; color: #fca5a5 !important; }
 [data-theme="dark"] .badge.es-badge-paid     { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
-[data-theme="dark"] .badge.es-badge-submitted{ background: rgba(124,58,237,0.15)  !important; color: #c4b5fd !important; }
+[data-theme="dark"] .badge.es-badge-submitted{ background: rgba(37,99,235,0.15)  !important; color: #93c5fd !important; }
 
 /* ── Dark mode Bootstrap component overrides ──────────────────────────────────── */
 [data-theme="dark"] .modal-content,
@@ -473,8 +473,8 @@ a {
 }
 @media (prefers-reduced-motion: no-preference) {
   [data-theme="dark"] .es-card:hover {
-    border-color: rgba(124, 58, 237, 0.40) !important;
-    box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.20) !important;
+    border-color: rgba(37, 99, 235, 0.40) !important;
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.20) !important;
   }
 }
 
