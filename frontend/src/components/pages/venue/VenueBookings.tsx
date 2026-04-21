@@ -12,6 +12,7 @@ import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
 import {
   Container, Card, Table, Button, Alert, Badge, Spinner, Form, InputGroup,
 } from 'react-bootstrap'
+import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
@@ -73,13 +74,7 @@ export const VenueBookings = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">Bookings</h1>
-          <p className="mb-0 text-white-50 small">View and manage booking requests for your venues</p>
-        </Container>
-      </div>
+      <PageBanner title="Bookings" subtitle="View and manage booking requests for your venues" />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {actionError && (

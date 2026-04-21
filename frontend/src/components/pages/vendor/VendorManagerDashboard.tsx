@@ -11,6 +11,7 @@ import { Container, Row, Col, Card, Table, Badge, Alert, Button } from 'react-bo
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { PageBanner } from '../../elements/common/PageBanner'
 
 const contractBadgeClass = (status: string): string => {
   if (status === 'ACTIVE')     return 'es-badge-active'
@@ -93,27 +94,20 @@ export const VendorManagerDashboard = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Welcome back, {firstName}</h1>
-            <p className="mb-0 text-white-50 small">
-              {hasProfile
-                ? `${draftContracts} contract${draftContracts !== 1 ? 's' : ''} to sign · ${scheduledDeliveries + inTransitDeliveries} active deliveries · ${pendingInvoices + overdueInvoices} unpaid invoices`
-                : 'Get started by registering your vendor profile below.'}
-            </p>
-          </div>
-          <div className="d-flex gap-2">
-            <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/vendor/contracts')}>
-              View Contracts
-            </Button>
-            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/vendor/profile')}>
-              My Profile
-            </Button>
-          </div>
-        </Container>
-      </div>
+      <PageBanner
+        title={`Welcome back, ${firstName}`}
+        subtitle={hasProfile
+          ? `${draftContracts} contract${draftContracts !== 1 ? 's' : ''} to sign · ${scheduledDeliveries + inTransitDeliveries} active deliveries · ${pendingInvoices + overdueInvoices} unpaid invoices`
+          : 'Get started by registering your vendor profile below.'}
+        actions={<>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/vendor/contracts')}>
+            View Contracts
+          </Button>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/vendor/profile')}>
+            My Profile
+          </Button>
+        </>}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Alert banners */}

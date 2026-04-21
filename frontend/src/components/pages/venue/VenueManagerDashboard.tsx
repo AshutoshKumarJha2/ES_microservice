@@ -6,6 +6,7 @@ import { Container, Row, Col, Card, Table, Badge, Button } from 'react-bootstrap
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { PageBanner } from '../../elements/common/PageBanner'
 
 const venueBadgeClass = (status: string): string => {
   if (status === 'AVAILABLE')   return 'es-badge-active'
@@ -68,25 +69,18 @@ export const VenueManagerDashboard = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Welcome back, {firstName}</h1>
-            <p className="mb-0 text-white-50 small">
-              Venue Manager Portal — {counts.available} available · {counts.unavailable} unavailable · {counts.maintenance} in maintenance
-            </p>
-          </div>
-          <div className="d-flex gap-2">
-            <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/venue-manager/venue/bookings')}>
-              View Bookings
-            </Button>
-            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/venue-manager/venues')}>
-              Manage Venues
-            </Button>
-          </div>
-        </Container>
-      </div>
+      <PageBanner
+        title={`Welcome back, ${firstName}`}
+        subtitle={`Venue Manager Portal — ${counts.available} available · ${counts.unavailable} unavailable · ${counts.maintenance} in maintenance`}
+        actions={<>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/venue-manager/venue/bookings')}>
+            View Bookings
+          </Button>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/venue-manager/venues')}>
+            Manage Venues
+          </Button>
+        </>}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat Cards */}

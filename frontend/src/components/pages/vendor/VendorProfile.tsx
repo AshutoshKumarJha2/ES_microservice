@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Card, Form, Button, Spinner, Badge, Modal } from 'react-bootstrap'
 import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { PageBanner } from '../../elements/common/PageBanner'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -107,12 +108,7 @@ export const VendorProfile = () => {
   if (!profile || registering) {
     return (
       <div>
-        <div className="es-banner text-white">
-          <Container fluid className="px-3 px-md-4 py-3">
-            <h1 className="fw-bold fs-3 mb-1">Register as Vendor</h1>
-            <p className="mb-0 text-white-50 small">Create your vendor profile to start receiving contracts</p>
-          </Container>
-        </div>
+        <PageBanner title="Register as Vendor" subtitle="Create your vendor profile to start receiving contracts" />
 
         <Container fluid className="px-3 px-md-4 py-4">
           <Card className="es-card border shadow-sm" style={{ maxWidth: 520 }}>
@@ -169,24 +165,18 @@ export const VendorProfile = () => {
   // ── Profile exists — show details ──────────────────────────────────────────
   return (
     <div>
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">My Vendor Profile</h1>
-            <p className="mb-0 text-white-50 small">Your registered vendor details</p>
-          </div>
-          {!editing && (
-            <div className="d-flex gap-2">
-              <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => setShowDelete(true)}>
-                Delete Profile
-              </Button>
-              <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => setEditing(true)}>
-                Edit Profile
-              </Button>
-            </div>
-          )}
-        </Container>
-      </div>
+      <PageBanner
+        title="My Vendor Profile"
+        subtitle="Your registered vendor details"
+        actions={!editing ? <>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => setShowDelete(true)}>
+            Delete Profile
+          </Button>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => setEditing(true)}>
+            Edit Profile
+          </Button>
+        </> : undefined}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         <Card className="es-card border shadow-sm" style={{ maxWidth: 520 }}>
@@ -235,11 +225,11 @@ export const VendorProfile = () => {
                 {/* Avatar / header */}
                 <div className="d-flex align-items-center gap-3 mb-4">
                   <div
-                    className="d-flex align-items-center justify-content-center rounded-circle fw-bold"
+                    className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white"
                     style={{
                       width: 56, height: 56, flexShrink: 0,
-                      background: 'linear-gradient(135deg, #1a1a2e, #0f3460)',
-                      color: '#e8a838', fontSize: 20,
+                      background: 'var(--blue)',
+                      fontSize: 20,
                     }}
                   >
                     {profile.name.slice(0, 2).toUpperCase()}

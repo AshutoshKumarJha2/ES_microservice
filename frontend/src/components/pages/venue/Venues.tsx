@@ -13,6 +13,7 @@ import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
+import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
@@ -127,18 +128,11 @@ export const Venues = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Venues</h1>
-            <p className="mb-0 text-white-50 small">Manage venue listings, capacity and availability</p>
-          </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openAddModal}>
-            + Add Venue
-          </Button>
-        </Container>
-      </div>
+      <PageBanner
+        title="Venues"
+        subtitle="Manage venue listings, capacity and availability"
+        actions={<Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openAddModal}>+ Add Venue</Button>}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {(actionError || venuesError) && (

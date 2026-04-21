@@ -3,6 +3,7 @@ import {
   Container, Card, Table, Button,
   Spinner, Alert, Badge, InputGroup, Form,
 } from 'react-bootstrap'
+import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
@@ -71,13 +72,7 @@ export const Invoices = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">Invoices</h1>
-          <p className="mb-0 text-white-50 small">Billing records — auto-generated on contract signing</p>
-        </Container>
-      </div>
+      <PageBanner title="Invoices" subtitle="Billing records — auto-generated on contract signing" />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {invoicesError && (

@@ -3,6 +3,7 @@ import {
   Container, Card, Table, Button, Modal, Form,
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
+import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
@@ -122,18 +123,11 @@ export const Deliveries = () => {
 
   return (
     <div>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
-          <div>
-            <h1 className="fw-bold fs-3 mb-1">Deliveries</h1>
-            <p className="mb-0 text-white-50 small">Log and track goods & equipment deliveries</p>
-          </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
-            + Log Delivery
-          </Button>
-        </Container>
-      </div>
+      <PageBanner
+        title="Deliveries"
+        subtitle="Log and track goods & equipment deliveries"
+        actions={<Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>+ Log Delivery</Button>}
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {deliveriesError && (
