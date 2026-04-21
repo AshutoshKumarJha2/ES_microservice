@@ -329,7 +329,6 @@ export const FinanceInvoices = () => {
                   </option>
                 ))}
               </Form.Select>
-              )}
             </Col>
             <Col xs={12} md={6}>
               <Form.Label className="es-label">Total Amount ($)</Form.Label>
