@@ -13,6 +13,7 @@ import {
   Container, Card, Table, Button, Alert, Badge, Spinner, Form, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -139,13 +140,9 @@ export const VenueBookings = () => {
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
                 Select a venue above to view its bookings.
               </p>
-            ) : bookingsLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
             ) : bookingsError ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>{bookingsError}</p>
-            ) : filteredBookings.length === 0 ? (
+            ) : (!bookingsLoading && filteredBookings.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
                 {bookings.length === 0
                   ? `No bookings found for ${selectedVenueName}.`
@@ -161,7 +158,7 @@ export const VenueBookings = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBookings.map((b) => (
+                  {bookingsLoading ? <TableRowsSkeleton rows={5} cols={6} /> : filteredBookings.map((b) => (
                     <tr key={b.bookingId}>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {b.bookingId.slice(0, 8)}…

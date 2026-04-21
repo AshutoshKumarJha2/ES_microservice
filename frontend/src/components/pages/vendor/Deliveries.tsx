@@ -4,6 +4,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -179,11 +180,7 @@ export const Deliveries = () => {
               <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Deliveries</span>
               <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
             </div>
-            {deliveriesLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : filtered.length === 0 ? (
+            {(!deliveriesLoading && filtered.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No deliveries found.</p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -195,7 +192,7 @@ export const Deliveries = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(d => (
+                  {deliveriesLoading ? <TableRowsSkeleton rows={5} cols={7} /> : filtered.map(d => (
                     <tr key={d.deliveryId}>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {d.deliveryId.slice(0, 8)}…

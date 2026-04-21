@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Card, Form, Button, Spinner, Badge, Modal } from 'react-bootstrap'
+import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -96,8 +97,8 @@ export const VendorProfile = () => {
 
   if (vendorsLoading) {
     return (
-      <div className="text-center py-5">
-        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      <div className="px-3 px-md-4 py-4">
+        <BlockSkeleton rows={6} />
       </div>
     )
   }

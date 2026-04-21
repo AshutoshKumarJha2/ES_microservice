@@ -7,9 +7,10 @@ import {
   fetchAllDeliveries,
   fetchAllInvoices,
 } from '../../../store/slices/vendor/vendorSlice'
-import { Container, Row, Col, Card, Table, Badge, Alert, Button, Spinner } from 'react-bootstrap'
+import { Container, Row, Col, Card, Table, Badge, Alert, Button } from 'react-bootstrap'
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const contractBadgeClass = (status: string): string => {
   if (status === 'ACTIVE')     return 'es-badge-active'
@@ -156,11 +157,7 @@ export const VendorManagerDashboard = () => {
                     View All →
                   </Button>
                 </div>
-                {contractsLoading ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                  </div>
-                ) : recentContracts.length === 0 ? (
+                {(!contractsLoading && recentContracts.length === 0) ? (
                   <p className="text-center py-3 mb-0 small" style={{ color: 'var(--text-muted)' }}>No contracts yet.</p>
                 ) : (
                   <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -172,7 +169,7 @@ export const VendorManagerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentContracts.map(c => (
+                      {contractsLoading ? <TableRowsSkeleton rows={5} cols={5} /> : recentContracts.map(c => (
                         <tr key={c.contractId}>
                           <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                             {c.contractId.slice(0, 8)}…

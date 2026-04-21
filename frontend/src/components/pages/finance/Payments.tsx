@@ -4,6 +4,7 @@ import { fetchAllExpenses, openProcessPaymentModal } from '../../../store/slices
 import { StatusBadge } from '../../elements/finance/StatusBadge'
 import { ProcessPaymentModal } from '../../elements/finance/ProcessPaymentModal'
 import styles from '../../../css/finance/Finance.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const METHOD_LABELS: Record<string, string> = {
   CREDIT_CARD: 'Credit Card', DEBIT_CARD: 'Debit Card', BANK_TRANSFER: 'Bank Transfer',
@@ -33,7 +34,14 @@ export const Payments = () => {
 
       <div className={`${styles.card} ${styles.cardNoPad}`}>
         {expensesLoading ? (
-          <div className={styles.loadingState}>Loading payments…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Expense</th><th>Amount</th><th>Method</th><th>Transaction ID</th><th>Status</th><th>Actions</th>
+              </tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={4} cols={6} /></tbody>
+          </table>
         ) : expensesError ? (
           <div className={styles.loadingState}>{expensesError}</div>
         ) : paymentRows.length === 0 ? (

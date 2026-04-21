@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEngagements, fetchFeedback } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import styles from '../../../css/events/EventsPanel.module.css'
+import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
   `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`
@@ -110,7 +111,7 @@ export const Analytics = () => {
         </div>
 
         {loading ? (
-          <p className={styles.loading}>Loading analytics…</p>
+          <BlockSkeleton rows={6} />
         ) : (
           <>
             <div className={styles['grid-2']}>

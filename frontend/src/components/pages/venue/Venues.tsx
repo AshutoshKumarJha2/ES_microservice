@@ -14,6 +14,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -181,11 +182,7 @@ export const Venues = () => {
               <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Venues</span>
               <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
             </div>
-            {venuesLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : filtered.length === 0 ? (
+            {(!venuesLoading && filtered.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No venues found.</p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -197,7 +194,7 @@ export const Venues = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((venue) => (
+                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => (
                     <tr key={venue.id}>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{venue.name}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.location}</td>

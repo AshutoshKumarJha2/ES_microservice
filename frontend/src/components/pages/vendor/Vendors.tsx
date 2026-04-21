@@ -4,6 +4,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -151,11 +152,7 @@ export const Vendors = () => {
               <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Vendors</span>
               <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
             </div>
-            {vendorsLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : filtered.length === 0 ? (
+            {(!vendorsLoading && filtered.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No vendors found.</p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -167,7 +164,7 @@ export const Vendors = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(v => (
+                  {vendorsLoading ? <TableRowsSkeleton rows={5} cols={6} /> : filtered.map(v => (
                     <tr key={v.vendorId}>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {v.vendorId.slice(0, 8)}…

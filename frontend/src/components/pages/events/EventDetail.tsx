@@ -11,8 +11,10 @@ import { RegistrationsTab } from './tabs/RegistrationsTab'
 import { AttendeesTab } from './tabs/AttendeesTab'
 import { BudgetTab } from './tabs/BudgetTab'
 import {
-  Container, Button, Nav, Spinner,
+  Container, Button, Nav,
 } from 'react-bootstrap'
+import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
 import { ArrowLeft } from 'react-bootstrap-icons'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import BookingVenueAndResource from '../booking/BookingVenueAndResource'
@@ -33,7 +35,7 @@ export const EventDetail = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const dispatch = useAppDispatch()
-  const { selectedEvent } = useAppSelector((s) => s.events)
+  const { selectedEvent, loading } = useAppSelector((s) => s.events)
 
   const isAdmin    = location.pathname.startsWith('/admin')
   const backPath   = isAdmin ? '/admin/events' : '/organizer/dashboard'
@@ -50,18 +52,10 @@ export const EventDetail = () => {
     dispatch(fetchExpenses({ eventId: id }))
   }, [id, dispatch])
 
-  if (!selectedEvent) {
-    return (
-      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '50vh' }}>
-        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-      </div>
-    )
-  }
-
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <button
@@ -71,30 +65,41 @@ export const EventDetail = () => {
             >
               <ArrowLeft size={13} /> {backLabel}
             </button>
-            <h1 className="fw-bold fs-3 mb-1">{selectedEvent.eventName}</h1>
-            <div className="d-flex align-items-center gap-2 flex-wrap">
-              <span className="text-white-50 small">
-                {selectedEvent.startAt} → {selectedEvent.endAt}
-              </span>
-              <EventStatusBadge status={selectedEvent.status?.toLowerCase()} variant="event" />
-            </div>
-            {selectedEvent.organizer && (
-              <p className="mb-0 mt-1 small" style={{ color: 'rgba(255,255,255,0.65)' }}>
-                Organizer: <span className="fw-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>{selectedEvent.organizer.name}</span>
-                <span className="ms-1">({selectedEvent.organizer.email})</span>
-              </p>
+            {loading ? (
+              <SkeletonTheme baseColor="rgba(255,255,255,0.15)" highlightColor="rgba(255,255,255,0.28)">
+                <Skeleton width="52%" height={26} borderRadius={6} style={{ marginBottom: 8, display: 'block' }} />
+                <Skeleton width="32%" height={13} borderRadius={4} style={{ display: 'block' }} />
+              </SkeletonTheme>
+            ) : (
+              <>
+                <h1 className="fw-bold fs-3 mb-1">{selectedEvent?.eventName}</h1>
+                <div className="d-flex align-items-center gap-2 flex-wrap">
+                  <span className="small" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    {selectedEvent?.startAt} → {selectedEvent?.endAt}
+                  </span>
+                  <EventStatusBadge status={selectedEvent?.status?.toLowerCase() ?? ''} variant="event" />
+                </div>
+                {selectedEvent?.organizer && (
+                  <p className="mb-0 mt-1 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                    Organizer: <span className="fw-semibold" style={{ color: '#fff' }}>{selectedEvent.organizer.name}</span>
+                    <span className="ms-1">({selectedEvent.organizer.email})</span>
+                  </p>
+                )}
+              </>
             )}
           </div>
-          <div className="d-flex gap-2">
-            {isAdmin && (
-              <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
-                Edit Event
+          {!loading && (
+            <div className="d-flex gap-2">
+              {isAdmin && (
+                <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/admin/events/${id}/edit`)}>
+                  Edit Event
+                </Button>
+              )}
+              <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
+                Analytics
               </Button>
-            )}
-            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate(`/organizer/analytics/${id}`)}>
-              Analytics
-            </Button>
-          </div>
+            </div>
+          )}
         </Container>
       </div>
 
@@ -128,12 +133,16 @@ export const EventDetail = () => {
       </div>
 
       <Container fluid className="px-3 px-md-4 py-4">
-        {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} eventEndAt={selectedEvent.endAt} />}
-        {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
-        {activeTab === 'registrations' && <RegistrationsTab />}
-        {activeTab === 'attendees'     && <AttendeesTab />}
-        {activeTab === 'venue-and-resource' && <BookingVenueAndResource eventId={id!} />}
-        {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
+        {!loading && selectedEvent && (
+          <>
+            {activeTab === 'overview'      && <OverviewTab eventId={id!} eventStartAt={selectedEvent.startAt} eventEndAt={selectedEvent.endAt} />}
+            {activeTab === 'tickets'       && <TicketsTab eventId={id!} />}
+            {activeTab === 'registrations' && <RegistrationsTab />}
+            {activeTab === 'attendees'     && <AttendeesTab />}
+            {activeTab === 'venue-and-resource' && <BookingVenueAndResource eventId={id!} />}
+            {activeTab === 'budget'        && <BudgetTab eventId={id!} />}
+          </>
+        )}
       </Container>
     </div>
   )

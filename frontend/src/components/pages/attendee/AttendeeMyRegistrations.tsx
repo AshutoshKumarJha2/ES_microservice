@@ -1,10 +1,18 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Badge, Button, Spinner } from 'react-bootstrap'
+import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
+import {
+  CalendarCheckFill, CheckCircleFill, XCircleFill, BookmarkCheckFill, GeoAltFill,
+} from 'react-bootstrap-icons'
 import { toast } from 'react-toastify'
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import { StatCard } from '../../elements/common/StatCard'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { fmtDate } from '../../../utils/dateHelpers'
+import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
 interface RegWithEvent {
@@ -12,27 +20,14 @@ interface RegWithEvent {
   event: EventResponseDto
 }
 
-const EVENT_LABEL: Record<string, string> = {
-  PUBLISHED: 'Upcoming',
-  COMPLETED: 'Ended',
-  CANCELLED: 'Cancelled',
-}
-
-const REG_STATUS_COLOR: Record<string, string> = {
-  PENDING:    'warning',
-  CONFIRMED:  'success',
-  CHECKED_IN: 'primary',
-  CANCELLED:  'secondary',
-}
-
 const ACTIVE_STATUSES = new Set(['PENDING', 'CONFIRMED', 'CHECKED_IN'])
 
 export const AttendeeMyRegistrations = () => {
   const navigate = useNavigate()
 
-  const [loading, setLoading]               = useState(true)
-  const [items, setItems]                   = useState<RegWithEvent[]>([])
-  const [cancellingId, setCancellingId]     = useState<string | null>(null)
+  const [loading, setLoading]           = useState(true)
+  const [items, setItems]               = useState<RegWithEvent[]>([])
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.allSettled([
@@ -71,11 +66,21 @@ export const AttendeeMyRegistrations = () => {
     }
   }
 
-  const activeItems = items.filter((i) => ACTIVE_STATUSES.has(i.registration.status))
-  const pastItems   = items.filter((i) => !ACTIVE_STATUSES.has(i.registration.status) || i.event.status === 'COMPLETED')
-  // Avoid double-counting completed event registrations in active
-  const trueActive  = activeItems.filter((i) => i.event.status !== 'COMPLETED')
-  const truePast    = items.filter((i) => !trueActive.includes(i))
+  const activeItems   = items.filter((i) => ACTIVE_STATUSES.has(i.registration.status))
+  const trueActive    = activeItems.filter((i) => i.event.status !== 'COMPLETED')
+  const truePast      = items.filter((i) => !trueActive.includes(i))
+  const cancelledCount = items.filter((i) => i.registration.status === 'CANCELLED').length
+
+  const STATS = [
+    { label: 'Total',     value: items.length,        accent: 'es-stat-card-orange',
+      icon: <BookmarkCheckFill size={18} />, iconBg: 'var(--saffron-subtle)', iconColor: 'var(--saffron)' },
+    { label: 'Active',    value: trueActive.length,    accent: 'es-stat-card-blue',
+      icon: <CalendarCheckFill size={18} />, iconBg: 'var(--blue-subtle)', iconColor: 'var(--blue)' },
+    { label: 'Completed', value: truePast.length - cancelledCount, accent: 'es-stat-card-green',
+      icon: <CheckCircleFill size={18} />, iconBg: 'var(--green-subtle)', iconColor: 'var(--green)' },
+    { label: 'Cancelled', value: cancelledCount,       accent: 'es-stat-card-red',
+      icon: <XCircleFill size={18} />, iconBg: 'var(--red-subtle)', iconColor: 'var(--red)' },
+  ]
 
   const RegCard = ({ item, dimmed }: { item: RegWithEvent; dimmed?: boolean }) => {
     const { registration: reg, event } = item
@@ -84,18 +89,22 @@ export const AttendeeMyRegistrations = () => {
       <Card className={`es-card border shadow-sm h-100${dimmed ? ' opacity-75' : ''}`}>
         <Card.Body className="p-3 d-flex flex-column gap-2">
           <div className="d-flex justify-content-between align-items-start">
-            <div
-              className="fw-semibold"
-              style={{ color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.3 }}
-            >
+            <div className="fw-semibold" style={{ color: 'var(--text-primary)', fontSize: '0.9rem', lineHeight: 1.3 }}>
               {event.eventName}
             </div>
             <EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} />
           </div>
 
           <div className="small" style={{ color: 'var(--text-secondary)' }}>
-            {event.startAt} — {event.endAt}
+            {fmtDate(event.startAt)} — {fmtDate(event.endAt)}
           </div>
+
+          {event.venue && (
+            <div className="small d-flex align-items-center gap-1" style={{ color: 'var(--text-muted)' }}>
+              <GeoAltFill size={11} />
+              {event.venue.name}, {event.venue.location}
+            </div>
+          )}
 
           <div className="d-flex align-items-center gap-2 flex-wrap" style={{ fontSize: '0.82rem' }}>
             <span style={{ color: 'var(--text-muted)' }}>
@@ -103,7 +112,7 @@ export const AttendeeMyRegistrations = () => {
               {reg.ticketPrice != null ? ` · ₹${reg.ticketPrice.toLocaleString()}` : ''}
             </span>
             <Badge bg={REG_STATUS_COLOR[reg.status] ?? 'secondary'} className="rounded-2">
-              {reg.status}
+              {REG_STATUS_LABEL[reg.status] ?? reg.status}
             </Badge>
           </div>
 
@@ -111,8 +120,8 @@ export const AttendeeMyRegistrations = () => {
             <Button
               variant="outline-primary"
               size="sm"
-              className="rounded-3"
-              style={{ fontSize: '0.78rem' }}
+              className="rounded-3 flex-grow-1"
+              style={{ fontSize: '0.85rem' }}
               onClick={() => navigate(`/attendee/events/${event.id}`)}
             >
               View Event
@@ -122,7 +131,7 @@ export const AttendeeMyRegistrations = () => {
                 variant="outline-danger"
                 size="sm"
                 className="rounded-3"
-                style={{ fontSize: '0.78rem' }}
+                style={{ fontSize: '0.85rem' }}
                 onClick={() => handleCancel(item)}
                 disabled={cancellingId === reg.registrationId}
               >
@@ -139,19 +148,20 @@ export const AttendeeMyRegistrations = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner text-white">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">My Registrations</h1>
-          <p className="mb-0 text-white-50 small">Track your event registrations</p>
-        </Container>
-      </div>
+      <PageBanner title="My Registrations" subtitle="Track your event registrations" />
 
       <Container fluid className="px-3 px-md-4 py-4">
+        {/* Stats */}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => (
+            <Col key={s.label} xs={6} lg={3}>
+              <StatCard {...s} loading={loading} />
+            </Col>
+          ))}
+        </Row>
+
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-          </div>
+          <CardGridSkeleton count={6} cardHeight={160} />
         ) : (
           <>
             {/* Active section */}
@@ -162,15 +172,11 @@ export const AttendeeMyRegistrations = () => {
               </div>
               {trueActive.length === 0 ? (
                 <Card className="es-card border shadow-sm">
-                  <Card.Body className="text-center py-4 small" style={{ color: 'var(--text-muted)' }}>
-                    No active registrations.{' '}
-                    <span
-                      className="text-primary"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => navigate('/events')}
-                    >
-                      Browse events →
-                    </span>
+                  <Card.Body className="text-center py-4 d-flex flex-column align-items-center gap-2">
+                    <span className="small" style={{ color: 'var(--text-muted)' }}>No active registrations.</span>
+                    <Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={() => navigate('/events')}>
+                      Browse Events
+                    </Button>
                   </Card.Body>
                 </Card>
               ) : (

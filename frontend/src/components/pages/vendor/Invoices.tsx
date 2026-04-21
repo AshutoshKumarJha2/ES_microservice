@@ -4,6 +4,7 @@ import {
   Spinner, Alert, Badge, InputGroup, Form,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -123,11 +124,7 @@ export const Invoices = () => {
               <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Invoices</span>
               <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
             </div>
-            {invoicesLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : filtered.length === 0 ? (
+            {(!invoicesLoading && filtered.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No invoices found.</p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -139,7 +136,7 @@ export const Invoices = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(i => (
+                  {invoicesLoading ? <TableRowsSkeleton rows={5} cols={7} /> : filtered.map(i => (
                     <tr key={i.invoiceId}>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {i.invoiceId.slice(0, 8)}…

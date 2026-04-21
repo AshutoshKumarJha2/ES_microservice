@@ -4,6 +4,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -205,11 +206,7 @@ export const Contracts = () => {
               <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Contracts</span>
               <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
             </div>
-            {contractsLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : filtered.length === 0 ? (
+            {(!contractsLoading && filtered.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No contracts found.</p>
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -221,7 +218,7 @@ export const Contracts = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map(c => (
+                  {contractsLoading ? <TableRowsSkeleton rows={5} cols={8} /> : filtered.map(c => (
                     <tr key={c.contractId}>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {c.contractId.slice(0, 8)}…

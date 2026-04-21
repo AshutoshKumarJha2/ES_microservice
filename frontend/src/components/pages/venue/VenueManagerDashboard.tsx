@@ -2,9 +2,10 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllVenues } from '../../../store/slices/venue/venueSlice'
-import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from 'react-bootstrap'
+import { Container, Row, Col, Card, Table, Badge, Button } from 'react-bootstrap'
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const venueBadgeClass = (status: string): string => {
   if (status === 'AVAILABLE')   return 'es-badge-active'
@@ -115,11 +116,7 @@ export const VenueManagerDashboard = () => {
                     View All →
                   </Button>
                 </div>
-                {venuesLoading ? (
-                  <div className="text-center py-4">
-                    <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                  </div>
-                ) : recentVenues.length === 0 ? (
+                {(!venuesLoading && recentVenues.length === 0) ? (
                   <p className="text-center py-3 mb-0 small" style={{ color: 'var(--text-muted)' }}>No venues registered yet.</p>
                 ) : (
                   <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
@@ -131,7 +128,7 @@ export const VenueManagerDashboard = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {recentVenues.map(v => (
+                      {venuesLoading ? <TableRowsSkeleton rows={5} cols={4} /> : recentVenues.map(v => (
                         <tr key={v.id}>
                           <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{v.name}</td>
                           <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{v.location}</td>

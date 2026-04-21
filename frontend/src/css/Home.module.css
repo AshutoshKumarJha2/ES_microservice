@@ -1,14 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:wght@300;400;500;600;700&display=swap');
-
 .page {
-  font-family: 'Urbanist', sans-serif;
   background: var(--bg-page);
   transition: background 0.3s;
 }
 
 /* ── Hero ─────────────────────────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, #001A5C 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 5rem 2rem 4rem;
   text-align: center;
 }
@@ -30,9 +27,9 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #F47920;
-  background: rgba(244, 121, 32, 0.15);
-  border: 1px solid rgba(244, 121, 32, 0.35);
+  color: var(--saffron);
+  background: var(--saffron-subtle);
+  border: 1px solid var(--saffron-border);
   border-radius: 100px;
   padding: 0.3rem 0.85rem;
 }
@@ -46,7 +43,7 @@
 }
 
 .hero-accent {
-  color: #F47920;
+  color: var(--saffron);
 }
 
 .hero-sub {
@@ -69,9 +66,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #F47920;
+  background: var(--saffron);
   color: #ffffff;
-  font-family: 'Urbanist', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   padding: 0.7rem 1.5rem;
@@ -83,7 +80,7 @@
 }
 
 .btn-primary:hover {
-  background: #ea6c0a;
+  background: var(--saffron-hover);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -383,7 +380,7 @@
 
 /* ── CTA band ────────────────────────────────────────────────────────────── */
 .cta-band {
-  background: linear-gradient(135deg, #001A5C 0%, #002888 60%, #003fbc 100%);
+  background: var(--gradient-hero);
   padding: 4rem 2rem;
   text-align: center;
 }
@@ -423,9 +420,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #F47920;
+  background: var(--saffron);
   color: #ffffff;
-  font-family: 'Urbanist', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   padding: 0.7rem 1.5rem;
@@ -435,7 +432,7 @@
 }
 
 .btn-primary-light:hover {
-  background: #ea6c0a;
+  background: var(--saffron-hover);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -459,6 +456,75 @@
 .btn-ghost-light:hover {
   background: rgba(255, 255, 255, 0.18);
   color: #ffffff;
+}
+
+/* ── Feature card hover ──────────────────────────────────────────────────── */
+.featureCard {
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .featureCard {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .featureCard:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md) !important;
+  }
+}
+
+/* ── Role card hover ─────────────────────────────────────────────────────── */
+.roleCard {
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .roleCard {
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .roleCard:hover {
+    transform: translateY(-2px);
+    border-color: var(--blue-border) !important;
+  }
+}
+
+/* ── Testimonial card ────────────────────────────────────────────────────── */
+.testimonialCard {
+  border-left: 3px solid var(--blue) !important;
+}
+
+.testimonialAvatar {
+  width: 40px;
+  height: 40px;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+/* ── Scroll entrance animation ───────────────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animateReady {
+  opacity: 0;
+}
+
+.animateIn {
+  animation: fadeSlideUp 0.38s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animateReady { opacity: 1; }
+  .animateIn    { animation: none; opacity: 1; }
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */

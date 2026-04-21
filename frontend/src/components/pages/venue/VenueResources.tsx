@@ -15,6 +15,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -192,13 +193,9 @@ export const VenueResources = () => {
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
                 Select a venue above to view its resources.
               </p>
-            ) : resourcesLoading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
             ) : resourcesError ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>{resourcesError}</p>
-            ) : filteredResources.length === 0 ? (
+            ) : (!resourcesLoading && filteredResources.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
                 {resources.length === 0
                   ? `No resources for ${selectedVenueName}. Click "+ Add Resource" to create one.`
@@ -214,7 +211,7 @@ export const VenueResources = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredResources.map((r) => (
+                  {resourcesLoading ? <TableRowsSkeleton rows={5} cols={6} /> : filteredResources.map((r) => (
                     <tr key={r.resourceId}>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{r.name}</td>
                       <td className="align-middle px-3">
