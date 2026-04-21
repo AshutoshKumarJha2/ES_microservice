@@ -1,10 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Button, Spinner, Form, Badge } from 'react-bootstrap'
+import { CalendarEventFill, CalendarCheckFill, CheckCircleFill } from 'react-bootstrap-icons'
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
+
+function fmtDate(iso: string) {
+  try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }
+  catch { return iso }
+}
 
 type StatusFilter = 'ALL' | 'PUBLISHED' | 'COMPLETED'
 
@@ -24,11 +30,11 @@ const REG_STATUS_COLOR: Record<string, string> = {
 export const AttendeeEventBrowser = () => {
   const navigate = useNavigate()
 
-  const [events, setEvents]       = useState<EventResponseDto[]>([])
-  const [regMap, setRegMap]       = useState<Map<string, RegistrationDto>>(new Map())
-  const [loading, setLoading]     = useState(true)
-  const [search, setSearch]       = useState('')
-  const [filter, setFilter]       = useState<StatusFilter>('PUBLISHED')
+  const [events, setEvents]   = useState<EventResponseDto[]>([])
+  const [regMap, setRegMap]   = useState<Map<string, RegistrationDto>>(new Map())
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch]   = useState('')
+  const [filter, setFilter]   = useState<StatusFilter>('PUBLISHED')
 
   useEffect(() => {
     Promise.allSettled([
@@ -50,13 +56,16 @@ export const AttendeeEventBrowser = () => {
     return matchSearch && matchStatus
   })
 
-  const published  = events.filter((e) => e.status === 'PUBLISHED').length
-  const completed  = events.filter((e) => e.status === 'COMPLETED').length
+  const published = events.filter((e) => e.status === 'PUBLISHED').length
+  const completed = events.filter((e) => e.status === 'COMPLETED').length
 
   const STATS = [
-    { label: 'Total Events',  value: events.length,   accent: 'es-stat-card-orange' },
-    { label: 'Upcoming',      value: published,        accent: 'es-stat-card-blue'   },
-    { label: 'Completed',     value: completed,        accent: 'es-stat-card-green'  },
+    { label: 'Total Events', value: events.length, accent: 'es-stat-card-orange',
+      icon: <CalendarEventFill size={18} />, iconBg: 'var(--saffron-subtle)', iconColor: 'var(--saffron)' },
+    { label: 'Upcoming',     value: published,      accent: 'es-stat-card-blue',
+      icon: <CalendarCheckFill size={18} />, iconBg: 'var(--blue-subtle)', iconColor: 'var(--blue)' },
+    { label: 'Completed',    value: completed,      accent: 'es-stat-card-green',
+      icon: <CheckCircleFill size={18} />, iconBg: 'var(--green-subtle)', iconColor: 'var(--green)' },
   ]
 
   const FILTERS: { label: string; value: StatusFilter }[] = [
@@ -68,10 +77,10 @@ export const AttendeeEventBrowser = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <h1 className="fw-bold fs-3 mb-1">Browse Events</h1>
-          <p className="mb-0 text-white-50 small">Discover and register for upcoming events</p>
+          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Discover and register for upcoming events</p>
         </Container>
       </div>
 
@@ -82,9 +91,22 @@ export const AttendeeEventBrowser = () => {
             <Col key={s.label} xs={6} lg={3}>
               <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
                 <Card.Body className="p-3">
-                  <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                  <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
-                    {loading ? '—' : s.value}
+                  <div className="d-flex justify-content-between align-items-start">
+                    <div>
+                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                      <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
+                        {loading ? '—' : s.value}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: s.iconBg, color: s.iconColor,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}
+                    >
+                      {s.icon}
+                    </div>
                   </div>
                 </Card.Body>
               </Card>
@@ -126,8 +148,20 @@ export const AttendeeEventBrowser = () => {
             <Spinner animation="border" style={{ color: 'var(--blue)' }} />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-5" style={{ color: 'var(--text-muted)' }}>
-            <p className="mb-0">No events found.</p>
+          <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
+            <div
+              style={{
+                width: 56, height: 56, borderRadius: 16,
+                background: 'var(--blue-subtle)', color: 'var(--blue)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}
+            >
+              <CalendarEventFill size={24} />
+            </div>
+            <div>
+              <div className="fw-semibold mb-1" style={{ color: 'var(--text-primary)' }}>No events found</div>
+              <div className="small" style={{ color: 'var(--text-muted)' }}>Try a different search or filter.</div>
+            </div>
           </div>
         ) : (
           <Row className="g-3">
@@ -149,7 +183,7 @@ export const AttendeeEventBrowser = () => {
                       </div>
 
                       <div className="small mb-1" style={{ color: 'var(--text-secondary)' }}>
-                        {event.startAt} — {event.endAt}
+                        {fmtDate(event.startAt)} — {fmtDate(event.endAt)}
                       </div>
 
                       {venue ? (

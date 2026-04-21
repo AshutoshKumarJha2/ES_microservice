@@ -77,10 +77,10 @@ export const AdminUsers: React.FC = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <h1 className="fw-bold fs-3 mb-1">User Management</h1>
-          <p className="mb-0 text-white-50 small">View, update roles, suspend accounts</p>
+          <p className="mb-0 text-secondary small">View, update roles, suspend accounts</p>
         </Container>
       </div>
 

@@ -159,14 +159,14 @@ export const NotificationCenter = () => {
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
 
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
             <div>
               <h1 className="fw-bold fs-3 mb-1 d-flex align-items-center gap-2">
                 <Bell size={20} /> Notifications
               </h1>
-              <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.75)' }}>
+              <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
                 {unreadCount > 0
                   ? `You have ${unreadCount} unread notification${unreadCount !== 1 ? 's' : ''}`
                   : "You're all caught up"}
