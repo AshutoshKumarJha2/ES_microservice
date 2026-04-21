@@ -66,9 +66,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #F47920;
+  background: var(--saffron);
   color: #ffffff;
-  font-family: 'Urbanist', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   padding: 0.7rem 1.5rem;
@@ -80,7 +80,7 @@
 }
 
 .btn-primary:hover {
-  background: #ea6c0a;
+  background: var(--saffron-hover);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -420,9 +420,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  background: #F47920;
+  background: var(--saffron);
   color: #ffffff;
-  font-family: 'Urbanist', sans-serif;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 0.9rem;
   font-weight: 700;
   padding: 0.7rem 1.5rem;
@@ -432,7 +432,7 @@
 }
 
 .btn-primary-light:hover {
-  background: #ea6c0a;
+  background: var(--saffron-hover);
   color: #ffffff;
   transform: translateY(-1px);
 }
