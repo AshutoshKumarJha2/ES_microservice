@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
-import { StatCardsSkeleton, CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
   BookmarkCheckFill, GeoAltFill,
@@ -78,15 +78,13 @@ export const AttendeeEventBrowser = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        {loading ? <StatCardsSkeleton count={4} /> : (
-          <Row className="g-3 mb-4">
-            {STATS.map((s) => (
-              <Col key={s.label} xs={6} lg={3}>
-                <StatCard {...s} />
-              </Col>
-            ))}
-          </Row>
-        )}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => (
+            <Col key={s.label} xs={6} lg={3}>
+              <StatCard {...s} loading={loading} />
+            </Col>
+          ))}
+        </Row>
 
         {/* Search & filter bar */}
         <div className="d-flex flex-wrap gap-2 align-items-center mb-4">

@@ -151,7 +151,7 @@ export const AdminAuditLogs: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loadingLogs ? <TableRowsSkeleton rows={15} cols={5} /> : pageLogs.length === 0 ? (
+                {loadingLogs ? <TableRowsSkeleton rows={15} cols={5} colWidths={['52%','58%','42%','32%','68%']} /> : pageLogs.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No audit logs found</td></tr>
                   ) : pageLogs.map((log) => (
                     <tr key={log.auditId}>

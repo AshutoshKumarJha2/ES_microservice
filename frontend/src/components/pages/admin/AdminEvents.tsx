@@ -112,7 +112,7 @@ export const AdminEvents: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? <TableRowsSkeleton rows={10} cols={6} /> : pageEvents.length === 0 ? (
+                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : pageEvents.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
                   ) : pageEvents.map((ev) => (
                     <tr key={ev.id}>

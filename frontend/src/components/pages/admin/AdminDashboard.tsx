@@ -9,7 +9,7 @@ import { roleBadgeClass, userStatusBadgeClass, userInitials } from '../../../uti
 import {
   Container, Row, Col, Card, Table, Badge, Button,
 } from 'react-bootstrap'
-import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   People, PersonCheckFill, PersonXFill, ShieldFillCheck,
   CalendarEventFill, ClockHistory,
@@ -56,15 +56,13 @@ export const AdminDashboard: React.FC = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        {loadingUsers ? <StatCardsSkeleton count={4} /> : (
-          <Row className="g-3 mb-4">
-            {STATS.map((s) => (
-              <Col key={s.label} xs={6} lg={3}>
-                <StatCard {...s} />
-              </Col>
-            ))}
-          </Row>
-        )}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => (
+            <Col key={s.label} xs={6} lg={3}>
+              <StatCard {...s} loading={loadingUsers} />
+            </Col>
+          ))}
+        </Row>
 
         {/* Two columns */}
         <Row className="g-3">
@@ -88,7 +86,7 @@ export const AdminDashboard: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {loadingUsers ? <TableRowsSkeleton rows={5} cols={3} /> : recentUsers.length === 0 ? (
+                      {loadingUsers ? <TableRowsSkeleton rows={5} cols={3} colWidths={['65%','40%','38%']} /> : recentUsers.length === 0 ? (
                         <tr><td colSpan={3} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
                       ) : recentUsers.map((u) => (
                         <tr key={u.userId}>

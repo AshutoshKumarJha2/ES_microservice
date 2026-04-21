@@ -121,7 +121,7 @@ export const AdminUsers: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loadingUsers ? <TableRowsSkeleton rows={10} cols={5} /> : pageUsers.length === 0 ? (
+                {loadingUsers ? <TableRowsSkeleton rows={10} cols={5} colWidths={['55%','78%','38%','34%','58%']} /> : pageUsers.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
                   ) : pageUsers.map((u) => (
                     <tr key={u.userId}>
