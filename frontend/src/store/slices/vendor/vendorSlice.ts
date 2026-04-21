@@ -96,6 +96,22 @@ export const deleteContract = createAsyncThunk(
   }
 )
 
+export const createInvoiceViaContract = createAsyncThunk(
+  'vendor/contracts/createInvoice',
+  async ({ contractId, payload }: { contractId: string; payload: InvoiceRequestDto }, { rejectWithValue }) => {
+    try { return await contractService.createInvoiceForContract(contractId, payload) }
+    catch (err) { return rejectWithValue((err as Error).message) }
+  }
+)
+
+export const addDeliveryViaContract = createAsyncThunk(
+  'vendor/contracts/addDelivery',
+  async ({ contractId, payload }: { contractId: string; payload: DeliveryRequestDto }, { rejectWithValue }) => {
+    try { return await contractService.addDeliveryToContract(contractId, payload) }
+    catch (err) { return rejectWithValue((err as Error).message) }
+  }
+)
+
 // ── Delivery Thunks ────────────────────────────────────────────────────────────
 
 export const fetchAllDeliveries = createAsyncThunk(
@@ -254,6 +270,8 @@ const vendorSlice = createSlice({
       .addCase(deleteContract.fulfilled, (s, a) => {
         s.contracts = s.contracts.filter(c => c.contractId !== a.payload)
       })
+      .addCase(createInvoiceViaContract.fulfilled, (s, a) => { s.invoices.push(a.payload) })
+      .addCase(addDeliveryViaContract.fulfilled, (s, a) => { s.deliveries.push(a.payload) })
 
     // Deliveries
     builder

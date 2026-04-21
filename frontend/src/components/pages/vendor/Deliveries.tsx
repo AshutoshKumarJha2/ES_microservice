@@ -1,26 +1,30 @@
-import { useEffect, useState } from 'react'
-import { Modal, Button, Form, Spinner } from 'react-bootstrap'
+import { useEffect, useState, useMemo } from 'react'
+import {
+  Container, Card, Table, Button, Modal, Form,
+  Spinner, Alert, Badge, InputGroup,
+} from 'react-bootstrap'
+import { Search } from 'react-bootstrap-icons'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
   fetchAllDeliveries,
+  fetchAllInvoices,
   createDelivery,
   updateDelivery,
   updateDeliveryStatus,
   deleteDelivery,
 } from '../../../store/slices/vendor/vendorSlice'
 import type { DeliveryResponseDto, DeliveryRequestDto, DeliveryStatus } from '../../../types/vendor'
-import styles from '../../../css/vendor/Vendor.module.css'
 
 const STATUSES: DeliveryStatus[] = ['SCHEDULED', 'IN_TRANSIT', 'DELIVERED', 'FAILED', 'CANCELLED']
 
-const statusBadgeClass = (s: DeliveryStatus) => {
-  if (s === 'SCHEDULED')  return styles.badgePurple
-  if (s === 'IN_TRANSIT') return styles.badgeYellow
-  if (s === 'DELIVERED')  return styles.badgeGreen
-  if (s === 'FAILED')     return styles.badgeRed
-  if (s === 'CANCELLED')  return styles.badgeGray
-  return styles.badgeGray
+const statusBadgeClass = (s: DeliveryStatus): string => {
+  if (s === 'SCHEDULED')  return 'es-badge-pending'
+  if (s === 'IN_TRANSIT') return 'es-badge-submitted'
+  if (s === 'DELIVERED')  return 'es-badge-approved'
+  if (s === 'FAILED')     return 'es-badge-suspended'
+  if (s === 'CANCELLED')  return 'es-badge-cancelled'
+  return 'es-badge-draft'
 }
 
 const toDatetimeLocal = (iso: string) => iso ? iso.slice(0, 16) : ''
@@ -32,8 +36,9 @@ const EMPTY_FORM: DeliveryRequestDto = {
 
 export const Deliveries = () => {
   const dispatch = useAppDispatch()
-  const { deliveries, deliveriesLoading, deliveriesError } = useAppSelector((s) => s.vendor)
+  const { deliveries, deliveriesLoading, deliveriesError, invoices } = useAppSelector((s) => s.vendor)
 
+  const [search, setSearch]         = useState('')
   const [filter, setFilter]         = useState<DeliveryStatus | 'ALL'>('ALL')
   const [showModal, setShowModal]   = useState(false)
   const [showDelete, setShowDelete] = useState(false)
@@ -42,9 +47,19 @@ export const Deliveries = () => {
   const [form, setForm]             = useState<DeliveryRequestDto>(EMPTY_FORM)
   const [saving, setSaving]         = useState(false)
 
-  useEffect(() => { dispatch(fetchAllDeliveries()) }, [dispatch])
+  useEffect(() => {
+    dispatch(fetchAllDeliveries())
+    dispatch(fetchAllInvoices())
+  }, [dispatch])
 
-  const filtered = filter === 'ALL' ? deliveries : deliveries.filter(d => d.status === filter)
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase()
+    return deliveries.filter(d => {
+      const matchStatus = filter === 'ALL' || d.status === filter
+      const matchSearch = !q || d.item.toLowerCase().includes(q) || d.trackingNumber.toLowerCase().includes(q)
+      return matchStatus && matchSearch
+    })
+  }, [deliveries, search, filter])
 
   const openCreate = () => { setEditing(null); setForm(EMPTY_FORM); setShowModal(true) }
   const openEdit   = (d: DeliveryResponseDto) => {
@@ -106,109 +121,162 @@ export const Deliveries = () => {
 
   return (
     <div>
-      <div className={styles.pageHeader}>
-        <div>
-          <div className={styles.pageTitle}>Deliveries</div>
-          <div className={styles.pageSubtitle}>Log and track goods & equipment deliveries</div>
-        </div>
-        <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={openCreate}>
-          + Log Delivery
-        </button>
+      {/* Banner */}
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h1 className="fw-bold fs-3 mb-1">Deliveries</h1>
+            <p className="mb-0 text-white-50 small">Log and track goods & equipment deliveries</p>
+          </div>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
+            + Log Delivery
+          </Button>
+        </Container>
       </div>
 
-      {deliveriesError && (
-        <div className={styles.errorBanner}>
-          <span>{deliveriesError}</span>
-          <button onClick={() => dispatch(fetchAllDeliveries())} style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Retry</button>
-        </div>
-      )}
-
-      <div className={styles.filterRow}>
-        {(['ALL', ...STATUSES] as const).map(s => (
-          <button
-            key={s}
-            className={`${styles.filterChip} ${filter === s ? styles.filterChipActive : ''}`}
-            onClick={() => setFilter(s)}
-          >
-            {s === 'ALL' ? 'All' : s.replace('_', ' ')}
-          </button>
-        ))}
-      </div>
-
-      <div className={styles.card}>
-        {deliveriesLoading ? (
-          <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Delivery ID</th>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Tracking #</th>
-                <th>Delivery Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={7} className={styles.emptyCell}>No deliveries found.</td></tr>
-              ) : filtered.map(d => (
-                <tr key={d.deliveryId}>
-                  <td><span className={styles.idCell}>{d.deliveryId}</span></td>
-                  <td><strong>{d.item}</strong></td>
-                  <td>{d.quantity}</td>
-                  <td><code style={{ fontSize: 11 }}>{d.trackingNumber}</code></td>
-                  <td>{new Date(d.deliveryDate).toLocaleDateString()}</td>
-                  <td>
-                    <select
-                      className={styles.statusSelect}
-                      value={d.status}
-                      onChange={e => handleStatusChange(d.deliveryId, e.target.value as DeliveryStatus)}
-                    >
-                      {STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
-                    </select>
-                  </td>
-                  <td>
-                    <div className={styles.actionRow}>
-                      <button className={`${styles.btn} ${styles.btnSmall}`} onClick={() => openEdit(d)}>Edit</button>
-                      <button className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`} onClick={() => openDelete(d)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      <Container fluid className="px-3 px-md-4 py-4">
+        {deliveriesError && (
+          <Alert variant="danger" className="py-2 mb-3">
+            {deliveriesError}{' '}
+            <Button variant="link" size="sm" className="p-0 align-baseline" onClick={() => dispatch(fetchAllDeliveries())}>
+              Retry
+            </Button>
+          </Alert>
         )}
-      </div>
 
-      {/* ── Create / Edit Modal ──────────────────────────────────────────────── */}
+        {/* Search */}
+        <InputGroup className="mb-3" style={{ maxWidth: 360 }}>
+          <InputGroup.Text className="es-form-control border-end-0 rounded-start-3">
+            <Search size={14} style={{ color: 'var(--text-secondary)' }} />
+          </InputGroup.Text>
+          <Form.Control
+            className="es-form-control border-start-0 rounded-end-3"
+            placeholder="Search by item or tracking number…"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+        </InputGroup>
+
+        {/* Filter chips */}
+        <div className="d-flex flex-wrap gap-2 mb-3">
+          {(['ALL', ...STATUSES] as const).map(s => (
+            <Button
+              key={s}
+              size="sm"
+              variant={filter === s ? 'primary' : 'outline-secondary'}
+              className="rounded-pill"
+              onClick={() => setFilter(s)}
+            >
+              {s === 'ALL' ? 'All' : s.replace('_', ' ')}
+            </Button>
+          ))}
+        </div>
+
+        {/* Deliveries Table */}
+        <Card className="es-card border shadow-sm">
+          <Card.Body className="p-0">
+            <div className="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+              <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>Deliveries</span>
+              <span className="small" style={{ color: 'var(--text-muted)' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
+            </div>
+            {deliveriesLoading ? (
+              <div className="text-center py-5">
+                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+              </div>
+            ) : filtered.length === 0 ? (
+              <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>No deliveries found.</p>
+            ) : (
+              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    {['Delivery ID', 'Item', 'Qty', 'Tracking #', 'Delivery Date', 'Status', 'Actions'].map(h => (
+                      <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filtered.map(d => (
+                    <tr key={d.deliveryId}>
+                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                        {d.deliveryId.slice(0, 8)}…
+                      </td>
+                      <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{d.item}</td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{d.quantity}</td>
+                      <td className="align-middle px-3">
+                        <code style={{ fontSize: 11 }}>{d.trackingNumber}</code>
+                      </td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
+                        {new Date(d.deliveryDate).toLocaleDateString()}
+                      </td>
+                      <td className="align-middle px-3">
+                        <div className="d-flex align-items-center gap-2">
+                          <Badge className={`${statusBadgeClass(d.status)} border-0`} style={{ fontSize: '0.7rem' }}>
+                            {d.status.replace('_', ' ')}
+                          </Badge>
+                          <Form.Select
+                            size="sm"
+                            className="es-form-control rounded-2"
+                            style={{ width: 'auto', fontSize: '0.78rem' }}
+                            value={d.status}
+                            onChange={e => handleStatusChange(d.deliveryId, e.target.value as DeliveryStatus)}
+                          >
+                            {STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                          </Form.Select>
+                        </div>
+                      </td>
+                      <td className="align-middle px-3">
+                        <div className="d-flex gap-2">
+                          <Button size="sm" variant="outline-secondary" className="rounded-2" onClick={() => openEdit(d)}>Edit</Button>
+                          <Button size="sm" variant="outline-danger" className="rounded-2" onClick={() => openDelete(d)}>Delete</Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Card.Body>
+        </Card>
+      </Container>
+
+      {/* Create / Edit Modal */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{editing ? 'Edit Delivery' : 'Log Delivery'}</Modal.Title>
+        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>
+            {editing ? 'Edit Delivery' : 'Log Delivery'}
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body>
+        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
           <Form>
             <Form.Group className="mb-3">
-              <Form.Label className={styles.formLabel}>Invoice ID *</Form.Label>
-              <Form.Control
+              <Form.Label className="es-label">Invoice *</Form.Label>
+              <Form.Select
+                className="es-form-control rounded-3"
                 value={form.invoiceId}
                 onChange={e => setForm(p => ({ ...p, invoiceId: e.target.value }))}
-                placeholder="Paste the Invoice UUID from your Invoices tab"
-              />
+                disabled={invoices.length === 0}
+              >
+                <option value="">{invoices.length === 0 ? 'No invoices available' : '— Select invoice —'}</option>
+                {invoices.map(i => (
+                  <option key={i.invoiceId} value={i.invoiceId}>
+                    ${Number(i.totalAmount).toLocaleString()} — Due {new Date(i.dueDate).toLocaleDateString()} ({i.status})
+                  </option>
+                ))}
+              </Form.Select>
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className={styles.formLabel}>Item Description *</Form.Label>
+              <Form.Label className="es-label">Item Description *</Form.Label>
               <Form.Control
+                className="es-form-control rounded-3"
                 value={form.item}
                 onChange={e => setForm(p => ({ ...p, item: e.target.value }))}
                 placeholder="e.g. Chairs, Sound System"
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className={styles.formLabel}>Quantity *</Form.Label>
+              <Form.Label className="es-label">Quantity *</Form.Label>
               <Form.Control
+                className="es-form-control rounded-3"
                 type="number"
                 min={1}
                 value={form.quantity}
@@ -216,24 +284,27 @@ export const Deliveries = () => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className={styles.formLabel}>Tracking Number *</Form.Label>
+              <Form.Label className="es-label">Tracking Number *</Form.Label>
               <Form.Control
+                className="es-form-control rounded-3"
                 value={form.trackingNumber}
                 onChange={e => setForm(p => ({ ...p, trackingNumber: e.target.value }))}
                 placeholder="e.g. TRK-20260420-001"
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label className={styles.formLabel}>Delivery Date *</Form.Label>
+              <Form.Label className="es-label">Delivery Date *</Form.Label>
               <Form.Control
+                className="es-form-control rounded-3"
                 type="datetime-local"
                 value={form.deliveryDate}
                 onChange={e => setForm(p => ({ ...p, deliveryDate: e.target.value }))}
               />
             </Form.Group>
             <Form.Group>
-              <Form.Label className={styles.formLabel}>Status</Form.Label>
+              <Form.Label className="es-label">Status</Form.Label>
               <Form.Select
+                className="es-form-control rounded-3"
                 value={form.status}
                 onChange={e => setForm(p => ({ ...p, status: e.target.value as DeliveryStatus }))}
               >
@@ -242,21 +313,27 @@ export const Deliveries = () => {
             </Form.Group>
           </Form>
         </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleSave} disabled={saving}>
+        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowModal(false)}>Cancel</Button>
+          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleSave} disabled={saving}>
             {saving ? <Spinner animation="border" size="sm" /> : editing ? 'Save Changes' : 'Log Delivery'}
           </Button>
         </Modal.Footer>
       </Modal>
 
-      {/* ── Delete Confirm ───────────────────────────────────────────────────── */}
-      <Modal show={showDelete} onHide={() => setShowDelete(false)} centered size="sm">
-        <Modal.Header closeButton><Modal.Title>Delete Delivery</Modal.Title></Modal.Header>
-        <Modal.Body>Delete delivery for <strong>{target?.item}</strong>? This cannot be undone.</Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowDelete(false)}>Cancel</Button>
-          <Button variant="danger" onClick={handleDelete}>Delete</Button>
+      {/* Delete Confirm Modal */}
+      <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
+        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Delete Delivery</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
+          <p className="mb-0" style={{ color: 'var(--text-body)' }}>
+            Delete delivery for <strong>{target?.item}</strong>? This cannot be undone.
+          </p>
+        </Modal.Body>
+        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowDelete(false)}>Cancel</Button>
+          <Button variant="danger" size="sm" className="fw-semibold rounded-3" onClick={handleDelete}>Delete</Button>
         </Modal.Footer>
       </Modal>
     </div>

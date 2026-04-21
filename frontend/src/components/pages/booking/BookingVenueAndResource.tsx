@@ -5,7 +5,7 @@ import type {
   ResourceResponseDto,
 } from "../../../types/venue";
 import { useEffect, useState } from "react";
-import styles from '../../../css/events/EventsPanel.module.css';
+import { Alert, Badge, Button, Card, Spinner, Table } from "react-bootstrap";
 import { PanelHeader } from "../../elements/events/PanelHeader";
 import { eventService } from "../../../services/events/eventService";
 import { resourceSource } from "../../../services/resource/resourceService";
@@ -89,47 +89,51 @@ const BookingVenueAndResource: React.FC<BookingVenueAndResourceProps> = ({ event
   };
 
   return (
-    <div className={styles.card}>
-      <PanelHeader title="Venue & Resource Request" />
+    <Card className="es-card border shadow-sm">
+      <Card.Body className="p-3">
+        <PanelHeader title="Venue & Resource Request" />
 
-      {loading && <p className={styles.loading}>Loading resources…</p>}
+        {loading && (
+          <div className="text-center py-5">
+            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+          </div>
+        )}
 
-      {!loading && error && <p className={styles['error-msg']}>{error}</p>}
+        {!loading && error && (
+          <Alert variant="danger" className="py-2 mb-3">{error}</Alert>
+        )}
 
-      {!loading && success && (
-        <p
-          style={{
-            color: 'var(--green)',
-            background: 'var(--green-subtle)',
-            border: '1px solid var(--green)',
-            borderRadius: 8,
-            padding: '0.65rem 1rem',
-            fontSize: '0.88rem',
-          }}
-        >
-          {success}
-        </p>
-      )}
+        {!loading && success && (
+          <Alert variant="success" className="py-2 mb-3">{success}</Alert>
+        )}
 
-      {!loading && !error && resources.length === 0 && (
-        <p className={styles.empty}>No resources available for this venue.</p>
-      )}
+        {!loading && !error && resources.length === 0 && (
+          <p className="text-center py-5 mb-0" style={{ color: 'var(--text-muted)' }}>
+            No resources available for this venue.
+          </p>
+        )}
 
-      {!loading && resources.length > 0 && (
-        <>
-          <p className={styles['section-heading']}>Select Resources</p>
+        {!loading && resources.length > 0 && (
+          <>
+            <div
+              className="text-uppercase fw-bold mb-3"
+              style={{ fontSize: '0.7rem', letterSpacing: '.08em', color: 'var(--text-secondary)' }}
+            >
+              Select Resources
+            </div>
 
-          <div className={styles['table-wrapper']}>
-            <table>
-              <thead>
+            <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
                 <tr>
-                  <th style={{ width: '2.5rem' }}></th>
-                  <th>Resource</th>
-                  <th>Type</th>
-                  <th>Availability</th>
-                  <th>Units</th>
-                  <th>Cost / Unit</th>
-                  <th>Quantity</th>
+                  {['', 'Resource', 'Type', 'Availability', 'Units', 'Cost / Unit', 'Quantity'].map((h, i) => (
+                    <th
+                      key={i}
+                      className="fw-semibold border-0 pb-2 px-3 pt-3"
+                      style={{ color: 'var(--text-primary)' }}
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -138,41 +142,45 @@ const BookingVenueAndResource: React.FC<BookingVenueAndResourceProps> = ({ event
                   const unavailable = r.availability !== 'AVAILABLE';
                   return (
                     <tr key={r.resourceId} style={{ opacity: unavailable ? 0.5 : 1 }}>
-                      <td>
+                      <td className="align-middle px-3">
                         <input
                           type="checkbox"
+                          className="form-check-input"
                           checked={checked}
                           onChange={() => toggleResource(r.resourceId)}
                           disabled={unavailable}
-                          style={{ cursor: unavailable ? 'not-allowed' : 'pointer', width: 16, height: 16 }}
                         />
                       </td>
-                      <td style={{ fontWeight: 600 }}>{r.name}</td>
-                      <td>
-                        <span
-                          className={`${styles.badge} ${
-                            r.type === 'EQUIPMENT' ? styles['badge-draft'] : styles['badge-published']
-                          }`}
-                        >
-                          {r.type}
-                        </span>
+                      <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>
+                        {r.name}
                       </td>
-                      <td>
-                        <span
-                          className={`${styles.badge} ${
+                      <td className="align-middle px-3">
+                        <Badge bg={r.type === 'EQUIPMENT' ? 'primary' : 'secondary'} className="fw-normal">
+                          {r.type.charAt(0) + r.type.slice(1).toLowerCase()}
+                        </Badge>
+                      </td>
+                      <td className="align-middle px-3">
+                        <Badge
+                          bg={
                             r.availability === 'AVAILABLE'
-                              ? styles['badge-active']
+                              ? 'success'
                               : r.availability === 'IN_USE'
-                              ? styles['badge-pending']
-                              : styles['badge-inactive']
-                          }`}
+                              ? 'warning'
+                              : 'secondary'
+                          }
+                          text={r.availability === 'IN_USE' ? 'dark' : undefined}
+                          className="fw-normal"
                         >
-                          {r.availability}
-                        </span>
+                          {r.availability === 'IN_USE' ? 'In Use' : r.availability.charAt(0) + r.availability.slice(1).toLowerCase()}
+                        </Badge>
                       </td>
-                      <td>{r.unit}</td>
-                      <td>₹{r.costRate}</td>
-                      <td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
+                        {r.unit}
+                      </td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
+                        ₹{Number(r.costRate).toFixed(2)}/unit
+                      </td>
+                      <td className="align-middle px-3">
                         {checked ? (
                           <input
                             type="number"
@@ -180,32 +188,38 @@ const BookingVenueAndResource: React.FC<BookingVenueAndResourceProps> = ({ event
                             max={r.unit}
                             value={selected[r.resourceId]}
                             onChange={(e) => setQuantity(r.resourceId, Number(e.target.value))}
-                            className={styles['form-input']}
-                            style={{ width: '5rem', padding: '0.3rem 0.5rem' }}
+                            className="es-form-control form-control form-control-sm rounded-3"
+                            style={{ width: '5rem' }}
                           />
                         ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>—</span>
+                          <span style={{ color: 'var(--text-muted)' }}>—</span>
                         )}
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
-            </table>
-          </div>
+            </Table>
 
-          <div className={styles['form-footer']}>
-            <button
-              className={styles['btn-submit']}
-              onClick={handleSubmit}
-              disabled={submitting || Object.keys(selected).length === 0}
-            >
-              {submitting ? "Submitting…" : "Submit Booking & Allocation"}
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+            <div className="d-flex gap-2 mt-3 px-3 pb-1">
+              <Button
+                variant="primary"
+                size="sm"
+                className="fw-semibold rounded-3"
+                onClick={handleSubmit}
+                disabled={submitting || Object.keys(selected).length === 0}
+              >
+                {submitting ? (
+                  <><Spinner animation="border" size="sm" className="me-1" />Submitting…</>
+                ) : (
+                  'Submit Booking & Allocation'
+                )}
+              </Button>
+            </div>
+          </>
+        )}
+      </Card.Body>
+    </Card>
   );
 };
 

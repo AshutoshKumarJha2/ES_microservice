@@ -212,9 +212,14 @@ export const OrganizerDashboard = () => {
             <h1 className="fw-bold fs-3 mb-1">Organizer Portal</h1>
             <p className="mb-0 text-white-50 small">Manage your events, tickets, registrations and budget</p>
           </div>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
-            + New Event
-          </Button>
+          <div className="d-flex gap-2 flex-wrap">
+            <Button variant="outline-light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/organizer/contracts')}>
+              Contracts
+            </Button>
+            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
+              + New Event
+            </Button>
+          </div>
         </Container>
       </div>
 

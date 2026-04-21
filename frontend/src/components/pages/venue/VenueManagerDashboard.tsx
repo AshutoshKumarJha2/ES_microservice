@@ -2,171 +2,191 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllVenues } from '../../../store/slices/venue/venueSlice'
-import styles from '../../../css/venue/Venue.module.css'
+import { Container, Row, Col, Card, Table, Badge, Button, Spinner } from 'react-bootstrap'
+import { StatCard } from '../../elements/shared/StatCard'
+import { ActionCard } from '../../elements/shared/ActionCard'
 
-/* ── Stat Card ──────────────────────────────────────────────────────────────── */
-
-const ACCENT: Record<string, { color: string; bg: string }> = {
-  blue:   { color: 'var(--blue)',    bg: 'var(--blue-subtle)' },
-  green:  { color: 'var(--green)',   bg: 'var(--green-subtle)' },
-  red:    { color: 'var(--red)',     bg: 'var(--red-subtle)' },
-  yellow: { color: 'var(--saffron)', bg: 'var(--saffron-subtle)' },
+const venueBadgeClass = (status: string): string => {
+  if (status === 'AVAILABLE')   return 'es-badge-active'
+  if (status === 'UNAVAILABLE') return 'es-badge-suspended'
+  return 'es-badge-pending'
 }
 
-const StatCard = ({
-  label, value, accent,
-}: {
-  label: string; value: string; accent: keyof typeof ACCENT
-}) => (
-  <div className={styles.card} style={{ padding: '20px 24px' }}>
-    <div style={{
-      fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-      letterSpacing: '.08em', color: ACCENT[accent].color,
-      fontFamily: 'Urbanist, sans-serif', marginBottom: 8,
-    }}>
-      {label}
-    </div>
-    <div style={{
-      fontSize: 34, fontWeight: 800, fontFamily: 'Urbanist, sans-serif',
-      color: 'var(--text-primary)', lineHeight: 1,
-    }}>
-      {value}
-    </div>
-  </div>
-)
-
-/* ── Action Card ────────────────────────────────────────────────────────────── */
-
-const ActionCard = ({
-  title, desc, linkLabel, onClick, accentColor,
-}: {
-  title: string; desc: string; linkLabel: string
-  onClick: () => void; accentColor: string
-}) => (
-  <div
-    className={styles.card}
-    onClick={onClick}
-    style={{
-      padding: '20px 24px', cursor: 'pointer',
-      borderTop: `3px solid ${accentColor}`,
-      transition: 'box-shadow .18s, transform .15s',
-    }}
-    onMouseEnter={(e) => {
-      const el = e.currentTarget as HTMLDivElement
-      el.style.boxShadow = 'var(--shadow-md)'
-      el.style.transform = 'translateY(-2px)'
-    }}
-    onMouseLeave={(e) => {
-      const el = e.currentTarget as HTMLDivElement
-      el.style.boxShadow = ''
-      el.style.transform = ''
-    }}
-  >
-    <div style={{
-      fontSize: 14, fontWeight: 700, fontFamily: 'Urbanist, sans-serif',
-      color: 'var(--text-primary)', marginBottom: 6,
-    }}>
-      {title}
-    </div>
-    <div style={{
-      fontSize: 12, color: 'var(--text-secondary)',
-      fontFamily: 'Noto Sans, sans-serif', lineHeight: 1.55,
-    }}>
-      {desc}
-    </div>
-    <div style={{
-      marginTop: 14, fontSize: 11, fontWeight: 700,
-      fontFamily: 'Urbanist, sans-serif', color: accentColor,
-    }}>
-      {linkLabel} →
-    </div>
-  </div>
-)
-
-/* ── Dashboard ──────────────────────────────────────────────────────────────── */
+const venueStatusLabel = (status: string) =>
+  status === 'MAINTENENCE' ? 'Maintenance' : status.charAt(0) + status.slice(1).toLowerCase()
 
 export const VenueManagerDashboard = () => {
-  const dispatch = useAppDispatch()
-  const navigate = useNavigate()
+  const dispatch    = useAppDispatch()
+  const navigate    = useNavigate()
   const { venues, venuesLoading } = useAppSelector((s) => s.venue)
-  const { user } = useAppSelector((s) => s.auth)
+  const { user }    = useAppSelector((s) => s.auth)
 
   useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
 
-  const val = (n: number) => (venuesLoading ? '…' : String(n))
-
   const counts = {
     total:       venues.length,
-    available:   venues.filter((v) => v.availabilityStatus === 'AVAILABLE').length,
-    unavailable: venues.filter((v) => v.availabilityStatus === 'UNAVAILABLE').length,
-    maintenance: venues.filter((v) => v.availabilityStatus === 'MAINTENENCE').length,
+    available:   venues.filter(v => v.availabilityStatus === 'AVAILABLE').length,
+    unavailable: venues.filter(v => v.availabilityStatus === 'UNAVAILABLE').length,
+    maintenance: venues.filter(v => v.availabilityStatus === 'MAINTENENCE').length,
   }
 
   const firstName = user?.name?.split(' ')[0] ?? 'Manager'
 
+  const STATS = [
+    { label: 'Total Venues',  value: counts.total,       accent: 'es-stat-card-blue',  loading: venuesLoading },
+    { label: 'Available',     value: counts.available,   accent: 'es-stat-card-green', loading: venuesLoading },
+    { label: 'Unavailable',   value: counts.unavailable, accent: 'es-stat-card-red',   loading: venuesLoading },
+    { label: 'Maintenance',   value: counts.maintenance, accent: 'es-stat-card-amber', loading: venuesLoading },
+  ]
+
+  const ACTIONS = [
+    {
+      to:        '/venue-manager/venues',
+      title:     'Venues',
+      desc:      'Add, edit and update venue listings. Set capacity and toggle availability status.',
+      accent:    'es-stat-card-blue',
+      linkLabel: 'Manage Venues →',
+    },
+    {
+      to:        '/venue-manager/venue/bookings',
+      title:     'Bookings',
+      desc:      'Review incoming booking requests. Confirm or cancel bookings per venue.',
+      accent:    'es-stat-card-green',
+      linkLabel: 'View Bookings →',
+    },
+    {
+      to:        '/venue-manager/venue/resources',
+      title:     'Resources',
+      desc:      'Manage equipment and staff resources assigned to each venue.',
+      accent:    'es-stat-card-amber',
+      linkLabel: 'Manage Resources →',
+    },
+  ]
+
+  const recentVenues = venues.slice(0, 5)
+
   return (
-    <>
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <div className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.pageTitle}>Welcome back, {firstName}</h1>
-          <p className={styles.pageSubtitle}>
-            Venue Manager Portal — overview of your venues, bookings and resources
-          </p>
+    <div>
+      {/* Banner */}
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+          <div>
+            <h1 className="fw-bold fs-3 mb-1">Welcome back, {firstName}</h1>
+            <p className="mb-0 text-white-50 small">
+              Venue Manager Portal — {counts.available} available · {counts.unavailable} unavailable · {counts.maintenance} in maintenance
+            </p>
+          </div>
+          <div className="d-flex gap-2">
+            <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/venue-manager/venue/bookings')}>
+              View Bookings
+            </Button>
+            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/venue-manager/venues')}>
+              Manage Venues
+            </Button>
+          </div>
+        </Container>
+      </div>
+
+      <Container fluid className="px-3 px-md-4 py-4">
+        {/* Stat Cards */}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => <StatCard key={s.label} {...s} />)}
+        </Row>
+
+        {/* Quick Access */}
+        <div className="text-uppercase fw-bold mb-3" style={{ fontSize: '0.7rem', letterSpacing: '.08em', color: 'var(--text-secondary)' }}>
+          Quick Access
         </div>
-      </div>
+        <Row className="g-3 mb-4">
+          {ACTIONS.map((a) => <ActionCard key={a.title} {...a} />)}
+        </Row>
 
-      {/* ── Stat Cards ─────────────────────────────────────────────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 16, marginBottom: 28,
-      }}>
-        <StatCard label="Total Venues"  value={val(counts.total)}       accent="blue" />
-        <StatCard label="Available"     value={val(counts.available)}   accent="green" />
-        <StatCard label="Unavailable"   value={val(counts.unavailable)} accent="red" />
-        <StatCard label="Maintenance"   value={val(counts.maintenance)} accent="yellow" />
-      </div>
+        {/* Secondary Panel */}
+        <Row className="g-3">
+          {/* Venue Overview */}
+          <Col xs={12} lg={8}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <Card.Title className="mb-0 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>
+                    Venue Overview
+                  </Card.Title>
+                  <Button variant="link" size="sm" className="p-0 text-decoration-none" style={{ color: 'var(--blue)', fontSize: '0.82rem' }} onClick={() => navigate('/venue-manager/venues')}>
+                    View All →
+                  </Button>
+                </div>
+                {venuesLoading ? (
+                  <div className="text-center py-4">
+                    <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
+                  </div>
+                ) : recentVenues.length === 0 ? (
+                  <p className="text-center py-3 mb-0 small" style={{ color: 'var(--text-muted)' }}>No venues registered yet.</p>
+                ) : (
+                  <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                    <thead style={{ background: 'var(--bg-subtle)' }}>
+                      <tr>
+                        {['Name', 'Location', 'Capacity', 'Status'].map(h => (
+                          <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentVenues.map(v => (
+                        <tr key={v.id}>
+                          <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{v.name}</td>
+                          <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{v.location}</td>
+                          <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{v.capacity.toLocaleString()}</td>
+                          <td className="align-middle">
+                            <Badge className={`${venueBadgeClass(v.availabilityStatus)} border-0`} style={{ fontSize: '0.7rem' }}>
+                              {venueStatusLabel(v.availabilityStatus)}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
 
-      {/* ── Section label ──────────────────────────────────────────────────── */}
-      <div style={{
-        fontSize: 10, fontWeight: 700, textTransform: 'uppercase',
-        letterSpacing: '.08em', color: 'var(--text-secondary)',
-        fontFamily: 'Urbanist, sans-serif', marginBottom: 12,
-      }}>
-        Quick Access
-      </div>
-
-      {/* ── Action Cards ───────────────────────────────────────────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-        gap: 16,
-      }}>
-        <ActionCard
-          title="Venues"
-          desc="Add, edit and update venue listings. Set capacity and toggle availability status."
-          linkLabel="Manage Venues"
-          onClick={() => navigate('/venue-manager/venues')}
-          accentColor="#004AD4"
-        />
-        <ActionCard
-          title="Bookings"
-          desc="Review incoming booking requests. Confirm or cancel bookings per venue."
-          linkLabel="View Bookings"
-          onClick={() => navigate('/venue-manager/venue/bookings')}
-          accentColor="#16a34a"
-        />
-
-        
-        <ActionCard
-          title="Resources"
-          desc="Manage equipment and staff resources assigned to each venue."
-          linkLabel="Manage Resources"
-          onClick={() => navigate('/venue-manager/venue/resources')}
-          accentColor="#F47920"
-        />
-      </div>
-    </>
+          {/* Status Breakdown */}
+          <Col xs={12} lg={4}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <Card.Title className="mb-3 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>
+                  Status Breakdown
+                </Card.Title>
+                <div className="d-flex flex-column gap-3">
+                  {[
+                    { label: 'Available',   value: counts.available,   bar: 'var(--green)',  badge: 'es-badge-active'    },
+                    { label: 'Unavailable', value: counts.unavailable, bar: 'var(--red)',    badge: 'es-badge-suspended' },
+                    { label: 'Maintenance', value: counts.maintenance, bar: 'var(--amber)',  badge: 'es-badge-pending'   },
+                  ].map(row => {
+                    const pct = counts.total > 0 ? Math.round((row.value / counts.total) * 100) : 0
+                    return (
+                      <div key={row.label}>
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="small fw-medium" style={{ color: 'var(--text-secondary)' }}>{row.label}</span>
+                          <Badge className={`${row.badge} border-0`} style={{ fontSize: '0.7rem' }}>
+                            {row.value}
+                          </Badge>
+                        </div>
+                        <div className="rounded-pill" style={{ height: 6, background: 'var(--border-color)' }}>
+                          <div
+                            className="rounded-pill"
+                            style={{ height: 6, width: `${pct}%`, background: row.bar, transition: 'width 0.4s ease' }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
+    </div>
   )
 }

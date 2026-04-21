@@ -177,6 +177,9 @@ export const FinanceLayout = () => {
             <NavLink to="/finance/budget" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
               Budget Overview
             </NavLink>
+            <NavLink to="/finance/invoices" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Invoices
+            </NavLink>
           </nav>
         </div>
       </div>

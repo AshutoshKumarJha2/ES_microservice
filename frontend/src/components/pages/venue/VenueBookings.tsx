@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
   fetchAllVenues,
@@ -8,15 +8,18 @@ import {
   clearBookings,
 } from '../../../store/slices/venue/venueSlice'
 import type { BookingStatus } from '../../../types/venue'
-import styles from '../../../css/venue/Venue.module.css'
 import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
+import {
+  Container, Card, Table, Button, Alert, Badge, Spinner, Form, InputGroup,
+} from 'react-bootstrap'
+import { Search } from 'react-bootstrap-icons'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
-const bookingBadgeClass = (status: BookingStatus) => {
-  if (status === 'CONFIRMED') return styles.badgeGreen
-  if (status === 'CANCELLED') return styles.badgeRed
-  return styles.badgeYellow
+const bookingBadgeClass = (status: BookingStatus): string => {
+  if (status === 'CONFIRMED') return 'es-badge-approved'
+  if (status === 'CANCELLED') return 'es-badge-cancelled'
+  return 'es-badge-pending'
 }
 
 const formatDate = (d: string) => {
@@ -37,22 +40,29 @@ export const VenueBookings = () => {
   } = useAppSelector((s) => s.venue)
 
   const [selectedVenueId, setSelectedVenueId] = useState<string>('')
-  
+  const [search, setSearch]                   = useState('')
 
-  /* load venues once on mount */
   useEffect(() => {
     dispatch(fetchAllVenues())
     return () => { dispatch(clearBookings()) }
   }, [dispatch])
 
-  /* fetch bookings whenever venue selection changes */
   useEffect(() => {
     if (selectedVenueId) dispatch(fetchBookingsByVenue(selectedVenueId))
     else dispatch(clearBookings())
+    setSearch('')
   }, [selectedVenueId, dispatch])
 
+  const filteredBookings = useMemo(() => {
+    const q = search.toLowerCase()
+    if (!q) return bookings
+    return bookings.filter(b =>
+      b.bookingId.toLowerCase().includes(q) || b.eventId.toLowerCase().includes(q)
+    )
+  }, [bookings, search])
+
   const handleStatusChange = (bookingId: string, status: BookingStatus, eventId?: string) => {
-    dispatch(updateBookingStatus({ bookingId, status }));
+    dispatch(updateBookingStatus({ bookingId, status }))
     if (status === 'CONFIRMED' && eventId) {
       dispatch(approveRequestedAllocation(eventId))
     }
@@ -61,120 +71,157 @@ export const VenueBookings = () => {
   const selectedVenueName = venues.find((v) => v.id === selectedVenueId)?.name ?? ''
 
   return (
-    <>
-      <div className={styles.pageHeader}>
-        <div>
-          <h1 className={styles.pageTitle}>Bookings</h1>
-          <p className={styles.pageSubtitle}>View and manage booking requests for your venues</p>
-        </div>
+    <div>
+      {/* Banner */}
+      <div className="es-banner text-white">
+        <Container fluid className="px-3 px-md-4 py-3">
+          <h1 className="fw-bold fs-3 mb-1">Bookings</h1>
+          <p className="mb-0 text-white-50 small">View and manage booking requests for your venues</p>
+        </Container>
       </div>
 
-      {actionError && (
-        <div className={styles.errorBanner}>
-          <span>{actionError}</span>
-          <button className={styles.errorDismiss} onClick={() => dispatch(clearActionError())}>✕</button>
-        </div>
-      )}
-
-      {/* ── Venue Selector ─────────────────────────────────────────────────── */}
-      <div className={styles.selectorRow}>
-        <span className={styles.selectorLabel}>Venue</span>
-        {venuesLoading ? (
-          <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Loading venues…</span>
-        ) : (
-          <select
-            className={styles.selectorSelect}
-            value={selectedVenueId}
-            onChange={(e) => setSelectedVenueId(e.target.value)}
-          >
-            <option value="">— Select a venue —</option>
-            {venues.map((v) => (
-              <option key={v.id} value={v.id}>{v.name} ({v.location})</option>
-            ))}
-          </select>
+      <Container fluid className="px-3 px-md-4 py-4">
+        {actionError && (
+          <Alert variant="danger" className="py-2 mb-3" onClose={() => dispatch(clearActionError())} dismissible>
+            {actionError}
+          </Alert>
         )}
-      </div>
 
-      {/* ── Bookings Table ─────────────────────────────────────────────────── */}
-      {!selectedVenueId ? (
-        <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.emptyState}>Select a venue above to view its bookings.</div>
-        </div>
-      ) : bookingsLoading ? (
-        <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.loadingState}>Loading bookings for {selectedVenueName}…</div>
-        </div>
-      ) : bookingsError ? (
-        <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.loadingState}>{bookingsError}</div>
-        </div>
-      ) : bookings.length === 0 ? (
-        <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.emptyState}>No bookings found for {selectedVenueName}.</div>
-        </div>
-      ) : (
-        <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Booking ID</th>
-                <th>Event ID</th>
-                <th>Date</th>
-                <th>Resources</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {bookings.map((b) => (
-                <tr key={b.bookingId}>
-                  <td style={{ fontFamily: 'monospace', fontSize: 11 }}>{b.bookingId.slice(0, 8)}…</td>
-                  <td style={{ fontFamily: 'monospace', fontSize: 11 }}>{b.eventId.slice(0, 8)}…</td>
-                  <td>{formatDate(b.date)}</td>
-                  <td>
-                    {b.resourceList && b.resourceList.length > 0 ? (
-                      b.resourceList.map((r, i) => (
-                        <span key={i} className={styles.resourceTag}>
-                          {r.resourceName} ×{r.requestedQuantity}
-                        </span>
-                      ))
-                    ) : (
-                      <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>—</span>
-                    )}
-                  </td>
-                  <td>
-                    <span className={`${styles.badge} ${bookingBadgeClass(b.status)}`}>
-                      {b.status.charAt(0) + b.status.slice(1).toLowerCase()}
-                    </span>
-                  </td>
-                  <td>
-                    {b.status === 'PENDING' ? (
-                      <div className={styles.btnGroup}>
-                        <button
-                          className={`${styles.btn} ${styles.btnSm} ${styles.btnPrimary}`}
-                          disabled={actionLoading}
-                          onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED', b.eventId)}
-                        >
-                          Confirm
-                        </button>
-                        <button
-                          className={`${styles.btn} ${styles.btnSm} ${styles.btnDanger}`}
-                          disabled={actionLoading}
-                          onClick={() => handleStatusChange(b.bookingId, 'CANCELLED')}
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>—</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </>
+        {/* Venue Selector */}
+        <Card className="es-card border shadow-sm mb-3">
+          <Card.Body className="p-3 d-flex align-items-center gap-3 flex-wrap">
+            <span className="fw-semibold small" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Select Venue</span>
+            {venuesLoading ? (
+              <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
+            ) : (
+              <Form.Select
+                className="es-form-control rounded-3"
+                style={{ maxWidth: 360 }}
+                value={selectedVenueId}
+                onChange={(e) => setSelectedVenueId(e.target.value)}
+              >
+                <option value="">— Select a venue —</option>
+                {venues.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name} ({v.location})</option>
+                ))}
+              </Form.Select>
+            )}
+          </Card.Body>
+        </Card>
+
+        {/* Search (shown only when a venue is selected and has bookings) */}
+        {selectedVenueId && bookings.length > 0 && (
+          <InputGroup className="mb-3" style={{ maxWidth: 360 }}>
+            <InputGroup.Text className="es-form-control border-end-0 rounded-start-3">
+              <Search size={14} style={{ color: 'var(--text-secondary)' }} />
+            </InputGroup.Text>
+            <Form.Control
+              className="es-form-control border-start-0 rounded-end-3"
+              placeholder="Search by booking or event ID…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </InputGroup>
+        )}
+
+        {/* Bookings Table */}
+        <Card className="es-card border shadow-sm">
+          <Card.Body className="p-0">
+            {selectedVenueId && bookings.length > 0 && (
+              <div className="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
+                <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>{selectedVenueName}</span>
+                <span className="small" style={{ color: 'var(--text-muted)' }}>
+                  {filteredBookings.length} booking{filteredBookings.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+            )}
+            {!selectedVenueId ? (
+              <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
+                Select a venue above to view its bookings.
+              </p>
+            ) : bookingsLoading ? (
+              <div className="text-center py-5">
+                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+              </div>
+            ) : bookingsError ? (
+              <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>{bookingsError}</p>
+            ) : filteredBookings.length === 0 ? (
+              <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
+                {bookings.length === 0
+                  ? `No bookings found for ${selectedVenueName}.`
+                  : 'No bookings match your search.'}
+              </p>
+            ) : (
+              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    {['Booking ID', 'Event ID', 'Date', 'Resources', 'Status', 'Actions'].map((h) => (
+                      <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBookings.map((b) => (
+                    <tr key={b.bookingId}>
+                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                        {b.bookingId.slice(0, 8)}…
+                      </td>
+                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                        {b.eventId.slice(0, 8)}…
+                      </td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{formatDate(b.date)}</td>
+                      <td className="align-middle px-3">
+                        {b.resourceList && b.resourceList.length > 0 ? (
+                          <div className="d-flex flex-wrap gap-1">
+                            {b.resourceList.map((r, i) => (
+                              <Badge key={i} className="es-badge-draft border-0 fw-normal" style={{ fontSize: '0.7rem' }}>
+                                {r.resourceName} ×{r.requestedQuantity}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>—</span>
+                        )}
+                      </td>
+                      <td className="align-middle px-3">
+                        <Badge className={`${bookingBadgeClass(b.status)} border-0`} style={{ fontSize: '0.7rem' }}>
+                          {b.status.charAt(0) + b.status.slice(1).toLowerCase()}
+                        </Badge>
+                      </td>
+                      <td className="align-middle px-3">
+                        {b.status === 'PENDING' ? (
+                          <div className="d-flex gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline-success"
+                              className="rounded-2 fw-medium"
+                              disabled={actionLoading}
+                              onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED', b.eventId)}
+                            >
+                              Confirm
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline-danger"
+                              className="rounded-2 fw-medium"
+                              disabled={actionLoading}
+                              onClick={() => handleStatusChange(b.bookingId, 'CANCELLED')}
+                            >
+                              Cancel
+                            </Button>
+                          </div>
+                        ) : (
+                          <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            )}
+          </Card.Body>
+        </Card>
+      </Container>
+    </div>
   )
 }
