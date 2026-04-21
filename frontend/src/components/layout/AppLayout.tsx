@@ -22,8 +22,11 @@ export const AppLayout = () => {
 
   return (
     <>
+      <a href="#main-content" className="es-skip-link">Skip to main content</a>
       <Header />
-      <Outlet />
+      <main id="main-content">
+        <Outlet />
+      </main>
       <Footer />
     </>
   )

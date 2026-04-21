@@ -5,6 +5,7 @@ import {
   Form, Table, Badge,
 } from 'react-bootstrap'
 import { DetailPageSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { ArrowLeft } from 'react-bootstrap-icons'
 import { toast } from 'react-toastify'
 import { eventService } from '../../../services/events/eventService'
 import { ticketService } from '../../../services/events/ticketService'
@@ -14,6 +15,11 @@ import { PanelHeader } from '../../elements/events/PanelHeader'
 import type {
   EventResponseDto, ScheduleResponseDto, TicketResponseDto, RegistrationDto,
 } from '../../../types/events'
+
+function fmtDate(iso: string) {
+  try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }
+  catch { return iso }
+}
 
 const EVENT_LABEL: Record<string, string> = {
   PUBLISHED: 'Upcoming',
@@ -56,7 +62,6 @@ export const AttendeeEventDetail = () => {
   const [loading, setLoading]           = useState(true)
   const [error, setError]               = useState<string | null>(null)
 
-  // Registration form state
   const [selectedTicket, setSelectedTicket] = useState('')
   const [registering, setRegistering]       = useState(false)
   const [regError, setRegError]             = useState<string | null>(null)
@@ -129,28 +134,29 @@ export const AttendeeEventDetail = () => {
     )
   }
 
-  const canRegister    = event.status === 'PUBLISHED' && !registration
-  const canCancel      = registration && (registration.status === 'PENDING' || registration.status === 'CONFIRMED')
-  const isCompleted    = event.status === 'COMPLETED'
-  const activeTickets  = tickets.filter((t) => t.status === 'ACTIVE')
+  const canRegister   = event.status === 'PUBLISHED' && !registration
+  const canCancel     = registration && (registration.status === 'PENDING' || registration.status === 'CONFIRMED')
+  const canFeedback   = registration?.status === 'CONFIRMED' || registration?.status === 'CHECKED_IN'
+  const activeTickets = tickets.filter((t) => t.status === 'ACTIVE')
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
-          <Button
-            variant="link"
-            className="text-white-50 p-0 mb-2 small"
-            style={{ textDecoration: 'none' }}
+          <button
             onClick={() => navigate('/events')}
+            className="btn btn-link p-0 mb-2 d-flex align-items-center gap-1"
+            style={{ color: 'rgba(255,255,255,0.65)', fontSize: '0.82rem', textDecoration: 'none' }}
           >
-            ← Browse Events
-          </Button>
+            <ArrowLeft size={13} /> Browse Events
+          </button>
           <div className="d-flex flex-wrap align-items-center gap-3">
             <div>
               <h1 className="fw-bold fs-3 mb-1">{event.eventName}</h1>
-              <p className="mb-0 text-white-50 small">{event.startAt} — {event.endAt}</p>
+              <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>
+                {fmtDate(event.startAt)} — {fmtDate(event.endAt)}
+              </p>
             </div>
             <EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} />
             {registration && (
@@ -185,9 +191,9 @@ export const AttendeeEventDetail = () => {
                 key={key}
                 onClick={() => setTab(key)}
                 style={{
-                  color:        tab === key ? 'var(--blue)' : 'var(--text-secondary)',
-                  fontWeight:   tab === key ? 600 : 400,
-                  borderBottom: tab === key ? '2px solid var(--blue)' : '2px solid transparent',
+                  color:         tab === key ? 'var(--blue)' : 'var(--text-secondary)',
+                  fontWeight:    tab === key ? 600 : 400,
+                  borderBottom:  tab === key ? '2px solid var(--blue)' : '2px solid transparent',
                   paddingBottom: '0.6rem',
                   paddingTop:    '0.6rem',
                   fontSize:      '0.9rem',
@@ -216,9 +222,9 @@ export const AttendeeEventDetail = () => {
                       <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Name</Col>
                       <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.eventName}</Col>
                       <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Start Date</Col>
-                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.startAt}</Col>
+                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{fmtDate(event.startAt)}</Col>
                       <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>End Date</Col>
-                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{event.endAt}</Col>
+                      <Col xs={7} style={{ color: 'var(--text-primary)' }}>{fmtDate(event.endAt)}</Col>
                       <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
                       <Col xs={7}><EventStatusBadge status={event.status?.toLowerCase()} variant="event" label={EVENT_LABEL[event.status] ?? event.status} /></Col>
                       {event.organizer && (
@@ -286,7 +292,7 @@ export const AttendeeEventDetail = () => {
                   <tbody>
                     {schedules.map((s) => (
                       <tr key={s.scheduleId}>
-                        <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{s.date}</td>
+                        <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{fmtDate(s.date)}</td>
                         <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>{s.timeSlot}</td>
                         <td className="align-middle fw-medium" style={{ color: 'var(--text-primary)' }}>{s.activity}</td>
                         <td className="align-middle">
@@ -310,7 +316,6 @@ export const AttendeeEventDetail = () => {
                   <PanelHeader title="My Registration" />
 
                   {registration && registration.status !== 'CANCELLED' ? (
-                    /* Already registered */
                     <>
                       <dl className="mb-3" style={{ fontSize: '0.88rem' }}>
                         <Row as="div" className="g-2">
@@ -350,7 +355,6 @@ export const AttendeeEventDetail = () => {
                       Your registration was cancelled.
                     </Alert>
                   ) : canRegister ? (
-                    /* Not registered — show registration form */
                     <>
                       {regError && <Alert variant="danger" className="py-2 mb-3 small">{regError}</Alert>}
                       <Form.Group className="mb-3">
@@ -393,14 +397,13 @@ export const AttendeeEventDetail = () => {
               </Card>
             </Col>
 
-            {/* Engagement / feedback card */}
-            {isCompleted && (
+            {canFeedback && (
               <Col xs={12} lg={5}>
                 <Card className="es-card border shadow-sm h-100">
                   <Card.Body className="p-3 p-md-4">
                     <PanelHeader title="Your Engagement" />
                     <p className="small mb-3" style={{ color: 'var(--text-secondary)' }}>
-                      This event has concluded. Share your experience and help improve future events.
+                      Share your experience and help improve future events.
                     </p>
                     <Link to={`/attendee/feedback/${event.id}`}>
                       <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium">

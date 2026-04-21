@@ -8,6 +8,11 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
+function fmtDate(iso: string) {
+  try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }
+  catch { return iso }
+}
+
 interface RegWithEvent {
   registration: RegistrationDto
   event: EventResponseDto
@@ -31,9 +36,9 @@ const ACTIVE_STATUSES = new Set(['PENDING', 'CONFIRMED', 'CHECKED_IN'])
 export const AttendeeMyRegistrations = () => {
   const navigate = useNavigate()
 
-  const [loading, setLoading]               = useState(true)
-  const [items, setItems]                   = useState<RegWithEvent[]>([])
-  const [cancellingId, setCancellingId]     = useState<string | null>(null)
+  const [loading, setLoading]           = useState(true)
+  const [items, setItems]               = useState<RegWithEvent[]>([])
+  const [cancellingId, setCancellingId] = useState<string | null>(null)
 
   useEffect(() => {
     Promise.allSettled([
@@ -73,8 +78,6 @@ export const AttendeeMyRegistrations = () => {
   }
 
   const activeItems = items.filter((i) => ACTIVE_STATUSES.has(i.registration.status))
-  const pastItems   = items.filter((i) => !ACTIVE_STATUSES.has(i.registration.status) || i.event.status === 'COMPLETED')
-  // Avoid double-counting completed event registrations in active
   const trueActive  = activeItems.filter((i) => i.event.status !== 'COMPLETED')
   const truePast    = items.filter((i) => !trueActive.includes(i))
 
@@ -95,7 +98,7 @@ export const AttendeeMyRegistrations = () => {
           </div>
 
           <div className="small" style={{ color: 'var(--text-secondary)' }}>
-            {event.startAt} — {event.endAt}
+            {fmtDate(event.startAt)} — {fmtDate(event.endAt)}
           </div>
 
           <div className="d-flex align-items-center gap-2 flex-wrap" style={{ fontSize: '0.82rem' }}>
@@ -141,10 +144,10 @@ export const AttendeeMyRegistrations = () => {
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3">
           <h1 className="fw-bold fs-3 mb-1">My Registrations</h1>
-          <p className="mb-0 text-white-50 small">Track your event registrations</p>
+          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Track your event registrations</p>
         </Container>
       </div>
 
@@ -161,15 +164,11 @@ export const AttendeeMyRegistrations = () => {
               </div>
               {trueActive.length === 0 ? (
                 <Card className="es-card border shadow-sm">
-                  <Card.Body className="text-center py-4 small" style={{ color: 'var(--text-muted)' }}>
-                    No active registrations.{' '}
-                    <span
-                      className="text-primary"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => navigate('/events')}
-                    >
-                      Browse events →
-                    </span>
+                  <Card.Body className="text-center py-4 d-flex flex-column align-items-center gap-2">
+                    <span className="small" style={{ color: 'var(--text-muted)' }}>No active registrations.</span>
+                    <Button variant="primary" size="sm" className="rounded-3 fw-semibold" onClick={() => navigate('/events')}>
+                      Browse Events
+                    </Button>
                   </Card.Body>
                 </Card>
               ) : (

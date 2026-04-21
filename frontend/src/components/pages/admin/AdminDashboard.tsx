@@ -7,6 +7,10 @@ import {
   Container, Row, Col, Card, Table, Badge, Button,
 } from 'react-bootstrap'
 import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import {
+  People, PersonCheckFill, PersonXFill, ShieldFillCheck,
+  CalendarEventFill, ClockHistory,
+} from 'react-bootstrap-icons'
 
 const initials = (name: string) =>
   name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
@@ -23,12 +27,6 @@ const roleBadgeClass = (role: string) => {
 const statusBadgeClass = (status: string) =>
   status === 'ACTIVE' ? 'es-badge-active' : 'es-badge-suspended'
 
-const ACTIVITY = [
-  { dot: '#16a34a', text: 'Admin panel loaded — user management ready',    time: 'Just now' },
-  { dot: '#1d4ed8', text: <>Navigate to <strong>Audit Logs</strong> for full activity history</>, time: '—' },
-  { dot: '#f97316', text: <>Use <strong>Users</strong> to edit roles &amp; suspend accounts</>,    time: '—' },
-]
-
 export const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
@@ -44,20 +42,20 @@ export const AdminDashboard: React.FC = () => {
   const adminCount     = allUsers.filter((u) => u.role === 'ADMIN').length
 
   const STATS = [
-    { label: 'Total Users',   value: allUsers.length, accent: 'es-stat-card-blue' },
-    { label: 'Active Users',  value: activeCount,     accent: 'es-stat-card-green' },
-    { label: 'Suspended',     value: suspendedCount,  accent: 'es-stat-card-red' },
-    { label: 'Admins',        value: adminCount,      accent: 'es-stat-card-orange' },
+    { label: 'Total Users',  value: allUsers.length, accent: 'es-stat-card-blue',   icon: <People size={18} />,          iconBg: 'var(--blue-subtle)',    iconColor: 'var(--blue)'    },
+    { label: 'Active Users', value: activeCount,     accent: 'es-stat-card-green',  icon: <PersonCheckFill size={18} />, iconBg: 'var(--green-subtle)',   iconColor: 'var(--green)'   },
+    { label: 'Suspended',    value: suspendedCount,  accent: 'es-stat-card-red',    icon: <PersonXFill size={18} />,     iconBg: 'var(--red-subtle)',     iconColor: 'var(--red)'     },
+    { label: 'Admins',       value: adminCount,      accent: 'es-stat-card-orange', icon: <ShieldFillCheck size={18} />, iconBg: 'var(--saffron-subtle)', iconColor: 'var(--saffron)' },
   ]
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
           <div>
             <h1 className="fw-bold fs-3 mb-1">Admin Dashboard</h1>
-            <p className="mb-0 text-white-50 small">Platform overview &amp; controls</p>
+            <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Platform overview &amp; controls</p>
           </div>
           <div className="d-flex gap-2">
             <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/admin/audit-logs')}>
@@ -81,8 +79,15 @@ export const AdminDashboard: React.FC = () => {
               <Col key={s.label} xs={6} lg={3}>
                 <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
                   <Card.Body className="p-3">
-                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                    <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                        <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+                      </div>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: s.iconBg, color: s.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {s.icon}
+                      </div>
+                    </div>
                   </Card.Body>
                 </Card>
               </Col>
@@ -145,29 +150,33 @@ export const AdminDashboard: React.FC = () => {
             </Card>
           </Col>
 
-          {/* System Activity */}
+          {/* Quick Actions */}
           <Col xs={12} lg={5}>
             <Card className="es-card border shadow-sm h-100">
               <Card.Body className="p-3">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <Card.Title className="mb-0 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>System Activity</Card.Title>
-                  <Button variant="link" size="sm" className="p-0 text-decoration-none" style={{ color: 'var(--blue)', fontSize: '0.82rem' }} onClick={() => navigate('/admin/audit-logs')}>
-                    View Logs →
+                <Card.Title className="mb-3 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>Quick Actions</Card.Title>
+                <div className="d-flex flex-column gap-2">
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/users')}
+                  >
+                    <People size={15} /> Manage Users
                   </Button>
-                </div>
-                <div className="d-flex flex-column gap-3">
-                  {ACTIVITY.map((item, i) => (
-                    <div key={i} className="d-flex gap-3 align-items-start">
-                      <div
-                        className="rounded-circle flex-shrink-0 mt-1"
-                        style={{ width: 10, height: 10, background: item.dot }}
-                      />
-                      <div>
-                        <div style={{ fontSize: '0.88rem', color: 'var(--text-body)' }}>{item.text}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 2 }}>{item.time}</div>
-                      </div>
-                    </div>
-                  ))}
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/events')}
+                  >
+                    <CalendarEventFill size={15} /> Browse Events
+                  </Button>
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/audit-logs')}
+                  >
+                    <ClockHistory size={15} /> View Audit Logs
+                  </Button>
                 </div>
               </Card.Body>
             </Card>

@@ -101,7 +101,7 @@ export const Profile = () => {
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
 
       {/* Banner */}
-      <div className="es-banner text-white">
+      <div className="es-banner">
         <Container fluid className="px-3 px-md-5 py-4">
           <div className="d-flex align-items-center gap-4">
             <div
@@ -113,7 +113,7 @@ export const Profile = () => {
             <div>
               <h1 className="fw-bold fs-3 mb-1">{user.name}</h1>
               <div className="d-flex align-items-center gap-2">
-                <span style={{ color: 'rgba(255,255,255,0.75)', fontSize: '0.9rem' }}>
+                <span style={{ color: 'rgba(255,255,255,0.72)', fontSize: '0.9rem' }}>
                   {ROLE_LABELS[user.role] ?? user.role}
                 </span>
                 <Badge className={`border-0 ${ROLE_BADGE[user.role] ?? 'es-badge-draft'}`} style={{ fontSize: '0.7rem' }}>
