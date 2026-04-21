@@ -7,6 +7,8 @@ import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { TabBar } from '../../elements/TabBar'
+import { SUB_TABS } from '../../layout/VenueLayout'
 
 const venueBadgeClass = (status: string): string => {
   if (status === 'AVAILABLE')   return 'es-badge-active'
@@ -81,6 +83,9 @@ export const VenueManagerDashboard = () => {
           </Button>
         </>}
       />
+
+            <TabBar SUB_TABS={SUB_TABS} />
+
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat Cards */}
