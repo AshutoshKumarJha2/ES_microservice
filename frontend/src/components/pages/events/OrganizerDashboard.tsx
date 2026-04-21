@@ -9,6 +9,7 @@ import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
+import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarFill, CheckCircleFill, PencilFill,
 } from 'react-bootstrap-icons'
@@ -229,25 +230,27 @@ export const OrganizerDashboard = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat cards */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                      <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+        {loading ? <StatCardsSkeleton count={4} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
+                  <Card.Body className="p-3">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                        <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>{s.value}</div>
+                      </div>
+                      <div style={{ width: 36, height: 36, borderRadius: 10, background: s.iconBg, color: s.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        {s.icon}
+                      </div>
                     </div>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: s.iconBg, color: s.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      {s.icon}
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Events table */}
         <Card className="es-card border shadow-sm">
@@ -258,9 +261,18 @@ export const OrganizerDashboard = () => {
             </div>
 
             {loading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
+              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
+                      <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRowsSkeleton rows={5} cols={5} />
+                </tbody>
+              </Table>
             ) : events.length === 0 ? (
               <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
                 <div style={{ width: 56, height: 56, borderRadius: 16, background: 'var(--blue-subtle)', color: 'var(--blue)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

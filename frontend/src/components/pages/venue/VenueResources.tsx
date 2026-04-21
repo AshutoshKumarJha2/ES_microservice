@@ -11,6 +11,7 @@ import {
 } from '../../../store/slices/venue/venueSlice'
 import type { ResourceResponseDto, ResourceType, Availability } from '../../../types/venue'
 import styles from '../../../css/venue/Venue.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Helpers ────────────────────────────────────────────────────────────────── */
 
@@ -157,7 +158,12 @@ export const VenueResources = () => {
         </div>
       ) : resourcesLoading ? (
         <div className={`${styles.card} ${styles.cardNoPad}`}>
-          <div className={styles.loadingState}>Loading resources for {selectedVenueName}…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr><th>Name</th><th>Type</th><th>Cost Rate</th><th>Units</th><th>Availability</th><th>Actions</th></tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={4} cols={6} /></tbody>
+          </table>
         </div>
       ) : resourcesError ? (
         <div className={`${styles.card} ${styles.cardNoPad}`}>

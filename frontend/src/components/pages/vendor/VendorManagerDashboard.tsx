@@ -8,11 +8,12 @@ import {
   fetchAllInvoices,
 } from '../../../store/slices/vendor/vendorSlice'
 import styles from '../../../css/vendor/Vendor.module.css'
+import { StatGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 export const VendorManagerDashboard = () => {
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((s) => s.auth)
-  const { vendors, contracts, deliveries, invoices } = useAppSelector((s) => s.vendor)
+  const { vendors, contracts, deliveries, invoices, vendorsLoading, contractsLoading } = useAppSelector((s) => s.vendor)
 
   useEffect(() => {
     dispatch(fetchAllVendors())
@@ -118,17 +119,19 @@ export const VendorManagerDashboard = () => {
       )}
 
       {/* Stats */}
-      <div className={styles.statsGrid}>
-        {stats.map((s) => (
-          <div key={s.label} className={styles.statCard} style={{ borderLeftColor: s.borderColor }}>
-            <span className={styles.statIcon}>{s.icon}</span>
-            <div>
-              <div className={styles.statValue} style={{ color: s.color }}>{s.value}</div>
-              <div className={styles.statLabel}>{s.label}</div>
+      {(vendorsLoading || contractsLoading) ? <StatGridSkeleton count={6} /> : (
+        <div className={styles.statsGrid}>
+          {stats.map((s) => (
+            <div key={s.label} className={styles.statCard} style={{ borderLeftColor: s.borderColor }}>
+              <span className={styles.statIcon}>{s.icon}</span>
+              <div>
+                <div className={styles.statValue} style={{ color: s.color }}>{s.value}</div>
+                <div className={styles.statLabel}>{s.label}</div>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Quick actions */}
       <div style={{ marginBottom: 10 }}>

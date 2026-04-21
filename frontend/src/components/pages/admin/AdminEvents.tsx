@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../api/axiosInstance'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import {
-  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Spinner, Pagination,
+  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Pagination,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
 import type { EventResponseDto } from '../../../types/events'
 
@@ -116,24 +117,19 @@ export const AdminEvents: React.FC = () => {
             </Row>
 
             {/* Table */}
-            {loading ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
-            ) : (
-              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead style={{ background: 'var(--bg-subtle)' }}>
-                  <tr>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Dates</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Venue</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageEvents.length === 0 ? (
+            <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Event</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Organizer</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Dates</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Venue</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? <TableRowsSkeleton rows={10} cols={6} /> : pageEvents.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
                   ) : pageEvents.map((ev) => (
                     <tr key={ev.id}>
@@ -170,9 +166,8 @@ export const AdminEvents: React.FC = () => {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
-            )}
+              </tbody>
+            </Table>
 
             {/* Pagination */}
             {filtered.length > PAGE_SIZE && (

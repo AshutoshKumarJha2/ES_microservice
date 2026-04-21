@@ -9,6 +9,7 @@ import {
 } from '../../../store/slices/vendor/vendorSlice'
 import type { ContractResponseDto, ContractStatus } from '../../../types/vendor'
 import styles from '../../../css/vendor/Vendor.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const FILTER_STATUSES: ContractStatus[] = ['DRAFT', 'ACTIVE', 'COMPLETED', 'TERMINATED']
 
@@ -83,26 +84,23 @@ export const Contracts = () => {
       </div>
 
       <div className={styles.card}>
-        {contractsLoading ? (
-          <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Contract ID</th>
-                <th>Vendor</th>
-                <th>Event ID</th>
-                <th>Value</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={8} className={styles.emptyCell}>No contracts found.</td></tr>
-              ) : filtered.map(c => (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Contract ID</th>
+              <th>Vendor</th>
+              <th>Event ID</th>
+              <th>Value</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {contractsLoading ? <TableRowsSkeleton rows={5} cols={8} /> : filtered.length === 0 ? (
+              <tr><td colSpan={8} className={styles.emptyCell}>No contracts found.</td></tr>
+            ) : filtered.map(c => (
                 <tr key={c.contractId}>
                   <td><span className={styles.idCell}>{c.contractId}</span></td>
                   <td><strong>{vendorName(c.vendorId)}</strong></td>
@@ -125,9 +123,8 @@ export const Contracts = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        )}
+          </tbody>
+        </table>
       </div>
 
       {/* ── Sign Confirm Modal ──────────────────────────────────────────────── */}

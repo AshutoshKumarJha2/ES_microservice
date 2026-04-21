@@ -10,6 +10,7 @@ import {
 } from '../../../store/slices/vendor/vendorSlice'
 import type { VendorResponseDto, VendorRequestDto, VendorStatus } from '../../../types/vendor'
 import styles from '../../../css/vendor/Vendor.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const STATUSES: VendorStatus[] = ['ACTIVE', 'INACTIVE', 'BLACKLISTED']
 
@@ -111,24 +112,21 @@ export const Vendors = () => {
       </div>
 
       <div className={styles.card}>
-        {vendorsLoading ? (
-          <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Vendor ID</th>
-                <th>Name</th>
-                <th>Contact Info</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={6} className={styles.emptyCell}>No vendors found.</td></tr>
-              ) : filtered.map(v => (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Vendor ID</th>
+              <th>Name</th>
+              <th>Contact Info</th>
+              <th>Status</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {vendorsLoading ? <TableRowsSkeleton rows={8} cols={6} /> : filtered.length === 0 ? (
+              <tr><td colSpan={6} className={styles.emptyCell}>No vendors found.</td></tr>
+            ) : filtered.map(v => (
                 <tr key={v.vendorId}>
                   <td><span className={styles.idCell}>{v.vendorId}</span></td>
                   <td><strong>{v.name}</strong></td>
@@ -143,9 +141,8 @@ export const Vendors = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        )}
+          </tbody>
+        </table>
       </div>
 
       {/* ── Create / Edit Modal ──────────────────────────────────────────────── */}

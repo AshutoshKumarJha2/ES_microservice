@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Button, Spinner, Form, Badge } from 'react-bootstrap'
+import { StatCardsSkeleton, CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { CalendarEventFill, CalendarCheckFill, CheckCircleFill } from 'react-bootstrap-icons'
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
@@ -86,33 +87,35 @@ export const AttendeeEventBrowser = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                      <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
-                        {loading ? '—' : s.value}
+        {loading ? <StatCardsSkeleton count={3} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
+                  <Card.Body className="p-3">
+                    <div className="d-flex justify-content-between align-items-start">
+                      <div>
+                        <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
+                        <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
+                          {s.value}
+                        </div>
+                      </div>
+                      <div
+                        style={{
+                          width: 36, height: 36, borderRadius: 10,
+                          background: s.iconBg, color: s.iconColor,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        }}
+                      >
+                        {s.icon}
                       </div>
                     </div>
-                    <div
-                      style={{
-                        width: 36, height: 36, borderRadius: 10,
-                        background: s.iconBg, color: s.iconColor,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}
-                    >
-                      {s.icon}
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          ))}
-        </Row>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Search & filter bar */}
         <div className="d-flex flex-wrap gap-2 align-items-center mb-4">
@@ -144,9 +147,7 @@ export const AttendeeEventBrowser = () => {
 
         {/* Event cards */}
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-          </div>
+          <CardGridSkeleton count={6} cardHeight={180} />
         ) : filtered.length === 0 ? (
           <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
             <div

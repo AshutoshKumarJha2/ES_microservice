@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Badge, Button, Spinner } from 'react-bootstrap'
+import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
@@ -152,9 +153,7 @@ export const AttendeeMyRegistrations = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-          </div>
+          <CardGridSkeleton count={6} cardHeight={160} />
         ) : (
           <>
             {/* Active section */}
