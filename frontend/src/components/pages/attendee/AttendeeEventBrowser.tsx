@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
+import { StatCardsSkeleton, CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
   BookmarkCheckFill, GeoAltFill,
@@ -10,7 +11,6 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
-import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
 import { fmtDate } from '../../../utils/dateHelpers'
 import { EVENT_LABEL, REG_STATUS_COLOR } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
@@ -78,13 +78,15 @@ export const AttendeeEventBrowser = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <StatCard {...s} loading={loading} />
-            </Col>
-          ))}
-        </Row>
+        {loading ? <StatCardsSkeleton count={4} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <StatCard {...s} />
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Search & filter bar */}
         <div className="d-flex flex-wrap gap-2 align-items-center mb-4">
@@ -116,7 +118,7 @@ export const AttendeeEventBrowser = () => {
 
         {/* Event cards */}
         {loading ? (
-          <LoadingSpinner />
+          <CardGridSkeleton count={6} cardHeight={180} />
         ) : filtered.length === 0 ? (
           <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
             <div

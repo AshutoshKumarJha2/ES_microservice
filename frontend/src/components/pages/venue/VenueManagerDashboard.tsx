@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllVenues } from '../../../store/slices/venue/venueSlice'
 import styles from '../../../css/venue/Venue.module.css'
+import { StatGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 /* ── Stat Card ──────────────────────────────────────────────────────────────── */
 
@@ -93,7 +94,6 @@ export const VenueManagerDashboard = () => {
 
   useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
 
-  const val = (n: number) => (venuesLoading ? '…' : String(n))
 
   const counts = {
     total:       venues.length,
@@ -117,16 +117,18 @@ export const VenueManagerDashboard = () => {
       </div>
 
       {/* ── Stat Cards ─────────────────────────────────────────────────────── */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-        gap: 16, marginBottom: 28,
-      }}>
-        <StatCard label="Total Venues"  value={val(counts.total)}       accent="blue" />
-        <StatCard label="Available"     value={val(counts.available)}   accent="green" />
-        <StatCard label="Unavailable"   value={val(counts.unavailable)} accent="red" />
-        <StatCard label="Maintenance"   value={val(counts.maintenance)} accent="yellow" />
-      </div>
+      {venuesLoading ? <StatGridSkeleton count={4} /> : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 16, marginBottom: 28,
+        }}>
+          <StatCard label="Total Venues"  value={String(counts.total)}       accent="blue" />
+          <StatCard label="Available"     value={String(counts.available)}   accent="green" />
+          <StatCard label="Unavailable"   value={String(counts.unavailable)} accent="red" />
+          <StatCard label="Maintenance"   value={String(counts.maintenance)} accent="yellow" />
+        </div>
+      )}
 
       {/* ── Section label ──────────────────────────────────────────────────── */}
       <div style={{

@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import { approveRegistration, rejectRegistration, fetchRegistrationsByEvent } from '../../../../store/slices/registrationsSlice'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
 import { Card, Table, Button, ButtonGroup, Spinner, Form, InputGroup } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
 
@@ -125,23 +126,20 @@ export const RegistrationsTab = () => {
           </div>
         )}
 
-        {loading ? (
-          <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
-        ) : registrations.length === 0 ? (
-          <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No registrations found.</p>
-        ) : (
-          <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
-            <thead style={{ background: 'var(--bg-subtle)' }}>
-              <tr>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Registration ID</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Attendee</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Ticket Type</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {registrations.map((r) => (
+        <Table hover responsive className="mb-0" style={{ fontSize: '0.85rem' }}>
+          <thead style={{ background: 'var(--bg-subtle)' }}>
+            <tr>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Registration ID</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Attendee</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Ticket Type</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? <TableRowsSkeleton rows={5} cols={5} /> : registrations.length === 0 ? (
+              <tr><td colSpan={5} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No registrations found.</td></tr>
+            ) : registrations.map((r) => (
                 <tr key={r.registrationId}>
                   <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
                     {r.registrationId}
@@ -193,9 +191,8 @@ export const RegistrationsTab = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </Table>
-        )}
+          </tbody>
+        </Table>
       </Card.Body>
     </Card>
   )

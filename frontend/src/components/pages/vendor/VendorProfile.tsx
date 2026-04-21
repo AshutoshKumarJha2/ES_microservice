@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Form, Button, Spinner } from 'react-bootstrap'
+import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -76,7 +77,7 @@ export const VendorProfile = () => {
   }
 
   if (vendorsLoading) {
-    return <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
+    return <div style={{ padding: 24 }}><BlockSkeleton rows={6} /></div>
   }
 
   // ── No profile yet — show registration form ────────────────────────────────

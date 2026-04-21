@@ -4,12 +4,12 @@ import { fetchUsers, updateUserRole, updateUserStatus } from '../../../store/sli
 import type { UserResponseDto } from '../../../types/events'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import { PageBanner } from '../../elements/common/PageBanner'
-import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
 import { roleBadgeClass, userStatusBadgeClass, userInitials } from '../../../utils/badgeHelpers'
 import {
   Container, Card, Table, Badge, Button, Modal, Form,
   InputGroup, ButtonGroup, Spinner, Pagination,
 } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
 
 const ROLES: UserResponseDto['role'][] = ['ADMIN', 'ORGANIZER', 'ATTENDEE', 'VENDOR', 'VENUE_MANAGER', 'FINANCE_OFFICER']
@@ -110,21 +110,18 @@ export const AdminUsers: React.FC = () => {
             </ButtonGroup>
 
             {/* Table */}
-            {loadingUsers ? (
-              <LoadingSpinner />
-            ) : (
-              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-                <thead style={{ background: 'var(--bg-subtle)' }}>
-                  <tr>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>User</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Email</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Role</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                    <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pageUsers.length === 0 ? (
+            <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem', tableLayout: 'fixed', textAlign: 'left' }}>
+              <thead style={{ background: 'var(--bg-subtle)' }}>
+                <tr>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', width: '20%' }}>User</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', width: '28%' }}>Email</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', width: '18%' }}>Role</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', width: '14%' }}>Status</th>
+                  <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', width: '20%' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {loadingUsers ? <TableRowsSkeleton rows={10} cols={5} /> : pageUsers.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
                   ) : pageUsers.map((u) => (
                     <tr key={u.userId}>
@@ -164,9 +161,8 @@ export const AdminUsers: React.FC = () => {
                       </td>
                     </tr>
                   ))}
-                </tbody>
-              </Table>
-            )}
+              </tbody>
+            </Table>
 
             {/* Pagination */}
             {filtered.length > PAGE_SIZE && (

@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchBudgets, toggleBudgetSort } from '../../../store/slices/Finance/financeSlice'
 import styles from '../../../css/finance/Finance.module.css'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const formatCurrency = (n: number) =>
   new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(n)
@@ -38,7 +39,14 @@ export const BudgetOverview = () => {
 
       <div className={`${styles.card} ${styles.cardNoPad}`}>
         {budgetsLoading ? (
-          <div className={styles.loadingState}>Loading budgets…</div>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Event</th><th>Planned</th><th>Expenses</th><th>Remaining</th><th>Utilization</th>
+              </tr>
+            </thead>
+            <tbody><TableRowsSkeleton rows={5} cols={5} /></tbody>
+          </table>
         ) : budgetsError ? (
           <div className={styles.loadingState}>{budgetsError}</div>
         ) : sorted.length === 0 ? (

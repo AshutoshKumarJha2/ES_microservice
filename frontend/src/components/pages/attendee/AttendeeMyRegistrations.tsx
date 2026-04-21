@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Row, Col, Card, Badge, Button, Spinner } from 'react-bootstrap'
+import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarCheckFill, CheckCircleFill, XCircleFill, BookmarkCheckFill, GeoAltFill,
 } from 'react-bootstrap-icons'
@@ -10,7 +11,6 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
-import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
 import { fmtDate } from '../../../utils/dateHelpers'
 import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
@@ -161,7 +161,7 @@ export const AttendeeMyRegistrations = () => {
         </Row>
 
         {loading ? (
-          <LoadingSpinner />
+          <CardGridSkeleton count={6} cardHeight={160} />
         ) : (
           <>
             {/* Active section */}

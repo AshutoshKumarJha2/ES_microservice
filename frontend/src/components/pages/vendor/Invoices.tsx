@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Spinner } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -86,25 +87,22 @@ export const Invoices = () => {
       </div>
 
       <div className={styles.card}>
-        {invoicesLoading ? (
-          <div className={styles.spinnerWrap}><Spinner animation="border" /></div>
-        ) : (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Invoice ID</th>
-                <th>Contract</th>
-                <th>Amount</th>
-                <th>Issue Date</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>PDF</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr><td colSpan={7} className={styles.emptyCell}>No invoices found.</td></tr>
-              ) : filtered.map(i => (
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Invoice ID</th>
+              <th>Contract</th>
+              <th>Amount</th>
+              <th>Issue Date</th>
+              <th>Due Date</th>
+              <th>Status</th>
+              <th>PDF</th>
+            </tr>
+          </thead>
+          <tbody>
+            {invoicesLoading ? <TableRowsSkeleton rows={5} cols={7} /> : filtered.length === 0 ? (
+              <tr><td colSpan={7} className={styles.emptyCell}>No invoices found.</td></tr>
+            ) : filtered.map(i => (
                 <tr key={i.invoiceId}>
                   <td><span className={styles.idCell}>{i.invoiceId}</span></td>
                   <td><span className={styles.idCell}>{contractLabel(i.contractId)}</span></td>
@@ -124,9 +122,8 @@ export const Invoices = () => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </table>
-        )}
+          </tbody>
+        </table>
       </div>
     </div>
   )

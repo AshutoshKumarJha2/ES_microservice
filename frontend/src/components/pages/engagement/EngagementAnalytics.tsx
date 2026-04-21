@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEngagements, fetchFeedback, fetchEventSummary, fetchSchedules } from '../../../store/slices/analyticsSlice'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import styles from '../../../css/engagement/EngagementAnalytics.module.css'
+import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const ORGANIZER_ROLES = ['ORGANIZER', 'ADMIN']
 
@@ -253,7 +254,7 @@ export const EngagementAnalytics = () => {
         </div>
 
         {loading ? (
-          <p className={styles.loading}>Loading analytics…</p>
+          <BlockSkeleton rows={8} />
         ) : (
           <>
             {/* ── Two-column: Activity Breakdown + Rating Distribution ── */}

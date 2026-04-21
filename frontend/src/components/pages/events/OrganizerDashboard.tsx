@@ -7,12 +7,12 @@ import type { EventResponseDto, EventRequestDto, VenueResponseDto, EventStatus }
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
-import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
 import { EmptyState } from '../../elements/common/EmptyState'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
+import { StatCardsSkeleton, TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarFill, CheckCircleFill, PencilFill,
 } from 'react-bootstrap-icons'
@@ -226,13 +226,15 @@ export const OrganizerDashboard = () => {
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stat cards */}
-        <Row className="g-3 mb-4">
-          {STATS.map((s) => (
-            <Col key={s.label} xs={6} lg={3}>
-              <StatCard {...s} loading={loading} />
-            </Col>
-          ))}
-        </Row>
+        {loading ? <StatCardsSkeleton count={4} /> : (
+          <Row className="g-3 mb-4">
+            {STATS.map((s) => (
+              <Col key={s.label} xs={6} lg={3}>
+                <StatCard {...s} />
+              </Col>
+            ))}
+          </Row>
+        )}
 
         {/* Events table */}
         <Card className="es-card border shadow-sm">
@@ -243,7 +245,18 @@ export const OrganizerDashboard = () => {
             </div>
 
             {loading ? (
-              <LoadingSpinner />
+              <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                <thead style={{ background: 'var(--bg-subtle)' }}>
+                  <tr>
+                    {['Event Name', 'Start Date', 'End Date', 'Status', ''].map((h) => (
+                      <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  <TableRowsSkeleton rows={5} cols={5} />
+                </tbody>
+              </Table>
             ) : events.length === 0 ? (
               <EmptyState
                 icon={<CalendarEventFill size={24} />}

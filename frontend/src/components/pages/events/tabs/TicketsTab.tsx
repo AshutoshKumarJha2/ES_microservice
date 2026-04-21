@@ -5,6 +5,7 @@ import { TicketModal } from '../../../elements/events/TicketModal'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
 import type { CreateTicketRequest, TicketResponseDto } from '../../../../types/events'
 import { Card, Table, Button, Spinner } from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 interface Props { eventId: string }
 
@@ -40,22 +41,19 @@ export const TicketsTab = ({ eventId }: Props) => {
           </Button>
         </div>
 
-        {loading ? (
-          <div className="text-center py-4"><Spinner animation="border" style={{ color: 'var(--blue)' }} /></div>
-        ) : tickets.length === 0 ? (
-          <p className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No tickets yet. Add one to get started.</p>
-        ) : (
-          <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
-            <thead style={{ background: 'var(--bg-subtle)' }}>
-              <tr>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Type</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Price</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
-                <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {tickets.map((t) => (
+        <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+          <thead style={{ background: 'var(--bg-subtle)' }}>
+            <tr>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Type</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Price</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Status</th>
+              <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? <TableRowsSkeleton rows={4} cols={4} /> : tickets.length === 0 ? (
+              <tr><td colSpan={4} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No tickets yet. Add one to get started.</td></tr>
+            ) : tickets.map((t) => (
                 <tr key={t.ticketId}>
                   <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{t.type}</td>
                   <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>₹{t.price.toFixed(2)}</td>
@@ -70,9 +68,8 @@ export const TicketsTab = ({ eventId }: Props) => {
                   </td>
                 </tr>
               ))}
-            </tbody>
-          </Table>
-        )}
+          </tbody>
+        </Table>
       </Card.Body>
 
       {modalOpen && (

@@ -4,6 +4,7 @@ import {
   Container, Row, Col, Card, Nav, Spinner, Alert, Button,
   Form, Table, Badge,
 } from 'react-bootstrap'
+import { DetailPageSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { ArrowLeft, StarFill, Star } from 'react-bootstrap-icons'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchFeedback } from '../../../store/slices/analyticsSlice'
@@ -107,8 +108,8 @@ export const AttendeeEventDetail = () => {
 
   if (loading) {
     return (
-      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }} className="d-flex align-items-center justify-content-center">
-        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+      <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+        <DetailPageSkeleton />
       </div>
     )
   }
