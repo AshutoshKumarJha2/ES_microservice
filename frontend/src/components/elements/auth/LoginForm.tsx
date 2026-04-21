@@ -75,7 +75,7 @@ export const LoginForm: React.FC = () => {
         ORGANIZER:       '/organizer/dashboard',
         VENUE_MANAGER:   '/venue-manager/dashboard',
         FINANCE_OFFICER: '/finance/dashboard',
-        VENDOR:          '/dashboard',
+        VENDOR:          '/vendor/dashboard',
         ATTENDEE:        '/events',
       }
       navigate(roleRoutes[payload.user.role] ?? '/dashboard', { replace: true })

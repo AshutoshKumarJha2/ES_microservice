@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
   fetchAllVendors,
@@ -7,13 +7,29 @@ import {
   fetchAllDeliveries,
   fetchAllInvoices,
 } from '../../../store/slices/vendor/vendorSlice'
-import styles from '../../../css/vendor/Vendor.module.css'
-import { StatGridSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { Container, Row, Col, Card, Table, Badge, Alert, Button } from 'react-bootstrap'
+import { StatCard } from '../../elements/shared/StatCard'
+import { ActionCard } from '../../elements/shared/ActionCard'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { PageBanner } from '../../elements/common/PageBanner'
+
+const contractBadgeClass = (status: string): string => {
+  if (status === 'ACTIVE')     return 'es-badge-active'
+  if (status === 'COMPLETED')  return 'es-badge-completed'
+  if (status === 'TERMINATED') return 'es-badge-cancelled'
+  return 'es-badge-draft'
+}
 
 export const VendorManagerDashboard = () => {
-  const dispatch = useAppDispatch()
-  const { user } = useAppSelector((s) => s.auth)
-  const { vendors, contracts, deliveries, invoices, vendorsLoading, contractsLoading } = useAppSelector((s) => s.vendor)
+  const dispatch   = useAppDispatch()
+  const navigate   = useNavigate()
+  const { user }   = useAppSelector((s) => s.auth)
+  const {
+    vendors, vendorsLoading,
+    contracts, contractsLoading,
+    deliveries, deliveriesLoading,
+    invoices, invoicesLoading,
+  } = useAppSelector((s) => s.vendor)
 
   useEffect(() => {
     dispatch(fetchAllVendors())
@@ -23,164 +39,193 @@ export const VendorManagerDashboard = () => {
   }, [dispatch])
 
   const firstName = user?.name?.split(' ')[0] ?? 'Vendor'
-
-  // Vendor profile exists if any vendor record is registered
   const hasProfile = vendors.length > 0
 
-  // Contract stats
-  const draftContracts    = contracts.filter(c => c.status === 'DRAFT').length
-  const activeContracts   = contracts.filter(c => c.status === 'ACTIVE').length
-  const completedContracts = contracts.filter(c => c.status === 'COMPLETED').length
-
-  // Delivery stats
+  const draftContracts      = contracts.filter(c => c.status === 'DRAFT').length
+  const activeContracts     = contracts.filter(c => c.status === 'ACTIVE').length
   const scheduledDeliveries = deliveries.filter(d => d.status === 'SCHEDULED').length
   const inTransitDeliveries = deliveries.filter(d => d.status === 'IN_TRANSIT').length
-  const deliveredCount      = deliveries.filter(d => d.status === 'DELIVERED').length
+  const pendingInvoices     = invoices.filter(i => i.status === 'ISSUED').length
+  const overdueInvoices     = invoices.filter(i => i.status === 'OVERDUE').length
 
-  // Invoice stats
-  const pendingInvoices  = invoices.filter(i => i.status === 'ISSUED').length
-  const overdueInvoices  = invoices.filter(i => i.status === 'OVERDUE').length
-  const paidInvoices     = invoices.filter(i => i.status === 'PAID').length
+  const activeVendors      = vendors.filter(v => v.status === 'ACTIVE').length
+  const inactiveVendors    = vendors.filter(v => v.status === 'INACTIVE').length
+  const blacklistedVendors = vendors.filter(v => v.status === 'BLACKLISTED').length
 
-  const stats = [
-    { label: 'Contracts to Sign', value: draftContracts,     icon: '✍️',  color: '#3730a3', borderColor: '#3730a3' },
-    { label: 'Active Contracts',  value: activeContracts,    icon: '📄',  color: '#065f46', borderColor: '#065f46' },
-    { label: 'Pending Deliveries',value: scheduledDeliveries + inTransitDeliveries, icon: '🚚', color: '#92400e', borderColor: '#92400e' },
-    { label: 'Delivered',         value: deliveredCount,     icon: '✅',  color: '#065f46', borderColor: '#1d4ed8' },
-    { label: 'Unpaid Invoices',   value: pendingInvoices + overdueInvoices, icon: '💰', color: '#991b1b', borderColor: '#991b1b' },
-    { label: 'Paid Invoices',     value: paidInvoices,       icon: '🧾',  color: '#1e40af', borderColor: '#1e40af' },
+  const STATS = [
+    { label: 'Contracts to Sign', value: draftContracts,                           accent: 'es-stat-card-blue',  loading: contractsLoading },
+    { label: 'Active Contracts',  value: activeContracts,                           accent: 'es-stat-card-green', loading: contractsLoading },
+    { label: 'Active Deliveries', value: scheduledDeliveries + inTransitDeliveries, accent: 'es-stat-card-amber', loading: deliveriesLoading },
+    { label: 'Unpaid Invoices',   value: pendingInvoices + overdueInvoices,         accent: 'es-stat-card-red',   loading: invoicesLoading   },
   ]
 
-  const actions = [
+  const ACTIONS = [
     {
-      to: '/vendor/profile',
-      icon: hasProfile ? '🏢' : '➕',
-      title: hasProfile ? 'My Profile' : 'Register as Vendor',
-      desc: hasProfile ? 'View and update your vendor profile' : 'Create your vendor profile to start',
+      to:     '/vendor/profile',
+      title:  hasProfile ? 'My Profile' : 'Register as Vendor',
+      desc:   hasProfile ? 'View and update your vendor profile' : 'Create your vendor profile to start',
+      accent: 'es-stat-card-blue',
     },
     {
-      to: '/vendor/contracts',
-      icon: '📄',
-      title: 'My Contracts',
-      desc: draftContracts > 0
+      to:     '/vendor/contracts',
+      title:  'My Contracts',
+      desc:   draftContracts > 0
         ? `${draftContracts} contract${draftContracts > 1 ? 's' : ''} waiting to be signed`
         : 'View all your vendor agreements',
+      accent: 'es-stat-card-green',
     },
     {
-      to: '/vendor/deliveries',
-      icon: '🚚',
-      title: 'Log Delivery',
-      desc: 'Confirm and track goods & equipment delivered',
+      to:     '/vendor/deliveries',
+      title:  'Log Delivery',
+      desc:   'Confirm and track goods & equipment delivered',
+      accent: 'es-stat-card-amber',
     },
     {
-      to: '/vendor/invoices',
-      icon: '🧾',
-      title: 'Invoices',
-      desc: overdueInvoices > 0
+      to:     '/vendor/invoices',
+      title:  'Invoices',
+      desc:   overdueInvoices > 0
         ? `${overdueInvoices} overdue invoice${overdueInvoices > 1 ? 's' : ''} — action needed`
         : 'View billing records and download PDFs',
+      accent: 'es-stat-card-red',
     },
   ]
+
+  const recentContracts = contracts.slice(0, 5)
 
   return (
     <div>
-      {/* Welcome */}
-      <div className={styles.welcomeCard}>
-        <h2>Welcome back, {firstName}!</h2>
-        <p>
-          {hasProfile
-            ? `You have ${draftContracts} contract${draftContracts !== 1 ? 's' : ''} to sign, ${scheduledDeliveries + inTransitDeliveries} active deliveries, and ${pendingInvoices + overdueInvoices} unpaid invoices.`
-            : 'Get started by registering your vendor profile below.'}
-        </p>
-      </div>
+      <PageBanner
+        title={`Welcome back, ${firstName}`}
+        subtitle={hasProfile
+          ? `${draftContracts} contract${draftContracts !== 1 ? 's' : ''} to sign · ${scheduledDeliveries + inTransitDeliveries} active deliveries · ${pendingInvoices + overdueInvoices} unpaid invoices`
+          : 'Get started by registering your vendor profile below.'}
+        actions={<>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/vendor/contracts')}>
+            View Contracts
+          </Button>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/vendor/profile')}>
+            My Profile
+          </Button>
+        </>}
+      />
 
-      {/* Flow hint banner when there are contracts to sign */}
-      {draftContracts > 0 && (
-        <div style={{
-          background: 'rgba(55,48,163,0.08)', border: '1.5px solid #a5b4fc',
-          borderRadius: 8, padding: '10px 16px', marginBottom: 20,
-          fontSize: 12, color: '#3730a3', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span>📋 <strong>{draftContracts}</strong> contract{draftContracts !== 1 ? 's' : ''} in DRAFT — review and sign to activate.</span>
-          <Link to="/vendor/contracts" style={{ color: '#3730a3', fontWeight: 700, fontSize: 11 }}>View Contracts →</Link>
+      <Container fluid className="px-3 px-md-4 py-4">
+        {/* Alert banners */}
+        {draftContracts > 0 && (
+          <Alert variant="primary" className="py-2 mb-3 d-flex justify-content-between align-items-center">
+            <span><strong>{draftContracts}</strong> contract{draftContracts !== 1 ? 's' : ''} in DRAFT — review and sign to activate.</span>
+            <Link to="/vendor/contracts" className="fw-bold small text-decoration-none">View Contracts →</Link>
+          </Alert>
+        )}
+        {overdueInvoices > 0 && (
+          <Alert variant="danger" className="py-2 mb-3 d-flex justify-content-between align-items-center">
+            <span><strong>{overdueInvoices}</strong> overdue invoice{overdueInvoices !== 1 ? 's' : ''} — follow up with the finance team.</span>
+            <Link to="/vendor/invoices" className="fw-bold small text-decoration-none text-danger">View Invoices →</Link>
+          </Alert>
+        )}
+
+        {/* Stat Cards */}
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => <StatCard key={s.label} {...s} />)}
+        </Row>
+
+        {/* Quick Actions */}
+        <div className="text-uppercase fw-bold mb-3" style={{ fontSize: '0.7rem', letterSpacing: '.08em', color: 'var(--text-secondary)' }}>
+          Quick Actions
         </div>
-      )}
+        <Row className="g-3 mb-4">
+          {ACTIONS.map((a) => <ActionCard key={a.title} {...a} />)}
+        </Row>
 
-      {/* Overdue invoice alert */}
-      {overdueInvoices > 0 && (
-        <div style={{
-          background: 'rgba(153,27,27,0.07)', border: '1.5px solid #fca5a5',
-          borderRadius: 8, padding: '10px 16px', marginBottom: 20,
-          fontSize: 12, color: '#991b1b', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        }}>
-          <span>⚠️ <strong>{overdueInvoices}</strong> overdue invoice{overdueInvoices !== 1 ? 's' : ''} — follow up with the finance team.</span>
-          <Link to="/vendor/invoices" style={{ color: '#991b1b', fontWeight: 700, fontSize: 11 }}>View Invoices →</Link>
-        </div>
-      )}
-
-      {/* Stats */}
-      {(vendorsLoading || contractsLoading) ? <StatGridSkeleton count={6} /> : (
-        <div className={styles.statsGrid}>
-          {stats.map((s) => (
-            <div key={s.label} className={styles.statCard} style={{ borderLeftColor: s.borderColor }}>
-              <span className={styles.statIcon}>{s.icon}</span>
-              <div>
-                <div className={styles.statValue} style={{ color: s.color }}>{s.value}</div>
-                <div className={styles.statLabel}>{s.label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Quick actions */}
-      <div style={{ marginBottom: 10 }}>
-        <div className={styles.pageTitle} style={{ marginBottom: 14 }}>Quick Actions</div>
-        <div className={styles.actionsGrid}>
-          {actions.map((a) => (
-            <Link key={a.to} to={a.to} className={styles.actionCard}>
-              <div className={styles.actionCardIcon}>{a.icon}</div>
-              <div className={styles.actionCardTitle}>{a.title}</div>
-              <div className={styles.actionCardDesc}>{a.desc}</div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Vendor flow guide */}
-      <div className={styles.card} style={{ padding: '20px 24px', marginTop: 24 }}>
-        <div className={styles.pageTitle} style={{ marginBottom: 12, fontSize: 14 }}>Vendor Flow Guide</div>
-        <div style={{ display: 'flex', gap: 0, flexWrap: 'wrap' }}>
-          {[
-            { step: '1', label: 'Register Profile', sub: '/vendor/profile', color: '#1a1a2e' },
-            { step: '2', label: 'Sign Contract',    sub: '/vendor/contracts', color: '#3730a3' },
-            { step: '3', label: 'Log Delivery',     sub: '/vendor/deliveries', color: '#92400e' },
-            { step: '4', label: 'Check Invoice',    sub: '/vendor/invoices', color: '#065f46' },
-          ].map((f, i, arr) => (
-            <div key={f.step} style={{ display: 'flex', alignItems: 'center' }}>
-              <Link to={f.sub} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  display: 'flex', alignItems: 'center', gap: 8,
-                  padding: '8px 14px', borderRadius: 8,
-                  background: 'var(--bg-hover)', transition: 'background 0.15s',
-                }}>
-                  <div style={{
-                    width: 24, height: 24, borderRadius: '50%',
-                    background: f.color, color: '#fff',
-                    fontSize: 11, fontWeight: 700,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    flexShrink: 0,
-                  }}>{f.step}</div>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)', fontFamily: 'Urbanist, sans-serif' }}>{f.label}</span>
+        {/* Secondary Panel */}
+        <Row className="g-3">
+          {/* Recent Contracts */}
+          <Col xs={12} lg={8}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <Card.Title className="mb-0 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>
+                    Recent Contracts
+                  </Card.Title>
+                  <Button variant="link" size="sm" className="p-0 text-decoration-none" style={{ color: 'var(--blue)', fontSize: '0.82rem' }} onClick={() => navigate('/vendor/contracts')}>
+                    View All →
+                  </Button>
                 </div>
-              </Link>
-              {i < arr.length - 1 && (
-                <span style={{ color: 'var(--text-muted)', fontSize: 16, padding: '0 4px' }}>→</span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
+                {(!contractsLoading && recentContracts.length === 0) ? (
+                  <p className="text-center py-3 mb-0 small" style={{ color: 'var(--text-muted)' }}>No contracts yet.</p>
+                ) : (
+                  <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
+                    <thead style={{ background: 'var(--bg-subtle)' }}>
+                      <tr>
+                        {['Contract ID', 'Value', 'Start Date', 'End Date', 'Status'].map(h => (
+                          <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {contractsLoading ? <TableRowsSkeleton rows={5} cols={5} /> : recentContracts.map(c => (
+                        <tr key={c.contractId}>
+                          <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
+                            {c.contractId.slice(0, 8)}…
+                          </td>
+                          <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>
+                            ${Number(c.value).toLocaleString()}
+                          </td>
+                          <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>
+                            {new Date(c.startDate).toLocaleDateString()}
+                          </td>
+                          <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>
+                            {new Date(c.endDate).toLocaleDateString()}
+                          </td>
+                          <td className="align-middle">
+                            <Badge className={`${contractBadgeClass(c.status)} border-0`} style={{ fontSize: '0.7rem' }}>
+                              {c.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* Vendor Status Breakdown */}
+          <Col xs={12} lg={4}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <Card.Title className="mb-3 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>
+                  Vendor Status Breakdown
+                </Card.Title>
+                <div className="d-flex flex-column gap-3">
+                  {[
+                    { label: 'Active',      value: activeVendors,      bar: 'var(--green)',      badge: 'es-badge-active'    },
+                    { label: 'Inactive',    value: inactiveVendors,    bar: 'var(--text-muted)', badge: 'es-badge-draft'     },
+                    { label: 'Blacklisted', value: blacklistedVendors, bar: 'var(--red)',        badge: 'es-badge-suspended' },
+                  ].map(row => {
+                    const pct = vendors.length > 0 ? Math.round((row.value / vendors.length) * 100) : 0
+                    return (
+                      <div key={row.label}>
+                        <div className="d-flex justify-content-between align-items-center mb-1">
+                          <span className="small fw-medium" style={{ color: 'var(--text-secondary)' }}>{row.label}</span>
+                          <Badge className={`${row.badge} border-0`} style={{ fontSize: '0.7rem' }}>{row.value}</Badge>
+                        </div>
+                        <div className="rounded-pill" style={{ height: 6, background: 'var(--border-color)' }}>
+                          <div
+                            className="rounded-pill"
+                            style={{ height: 6, width: `${pct}%`, background: row.bar, transition: 'width 0.4s ease' }}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </div>
   )
 }

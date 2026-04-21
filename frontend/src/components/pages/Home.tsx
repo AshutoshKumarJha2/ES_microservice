@@ -80,7 +80,9 @@ export const Home = () => {
   const getDashboardPath = () => {
     if (!user) return '/dashboard'
     if (user.role === 'ORGANIZER') return '/organizer/dashboard'
+    if (user.role === 'VENUE_MANAGER') return '/venue-manager/dashboard'
     if (user.role === 'ADMIN') return '/admin/dashboard'
+    if (user.role === 'VENDOR') return '/vendor/dashboard'
     return '/dashboard'
   }
 
@@ -138,6 +140,7 @@ export const Home = () => {
                   >
                     Go to Dashboard <ArrowRight size={15} className="ms-1" />
                   </Button>
+                  
                 ) : (
                   <>
                     <Button

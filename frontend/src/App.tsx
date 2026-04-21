@@ -41,6 +41,8 @@ import { VendorProfile } from './components/pages/vendor/VendorProfile'
 import { Contracts } from './components/pages/vendor/Contracts'
 import { Deliveries } from './components/pages/vendor/Deliveries'
 import { Invoices } from './components/pages/vendor/Invoices'
+import { OrganizerContracts } from './components/pages/events/OrganizerContracts'
+import { FinanceInvoices } from './components/pages/finance/FinanceInvoices'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -87,6 +89,7 @@ export const App = () => {
           element: <AppLayout />,
           children: [
             { path: '/organizer/dashboard',         element: <OrganizerDashboard /> },
+            { path: '/organizer/contracts',          element: <OrganizerContracts /> },
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
@@ -107,6 +110,7 @@ export const App = () => {
         { path: 'expenses', element: <ExpenseApprovals /> },
         { path: 'payments', element: <Payments /> },
         { path: 'budget', element: <BudgetOverview /> },
+        { path: 'invoices', element: <FinanceInvoices /> },
       ],
     },
     // ── Admin pages (AppLayout + ADMIN role guard) ─────────────────────────────
