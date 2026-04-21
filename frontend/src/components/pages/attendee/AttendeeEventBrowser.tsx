@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Card, Button, Spinner, Form, Badge } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
   BookmarkCheckFill, GeoAltFill,
@@ -8,27 +8,14 @@ import {
 import { eventService } from '../../../services/events/eventService'
 import { registrationService } from '../../../services/events/registrationService'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
+import { StatCard } from '../../elements/common/StatCard'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
+import { fmtDate } from '../../../utils/dateHelpers'
+import { EVENT_LABEL, REG_STATUS_COLOR } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
-function fmtDate(iso: string) {
-  try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }
-  catch { return iso }
-}
-
 type StatusFilter = 'ALL' | 'PUBLISHED' | 'COMPLETED' | 'REGISTERED'
-
-const EVENT_LABEL: Record<string, string> = {
-  PUBLISHED: 'Upcoming',
-  COMPLETED: 'Ended',
-  CANCELLED: 'Cancelled',
-}
-
-const REG_STATUS_COLOR: Record<string, string> = {
-  PENDING:    'warning',
-  CONFIRMED:  'success',
-  CHECKED_IN: 'primary',
-  CANCELLED:  'secondary',
-}
 
 export const AttendeeEventBrowser = () => {
   const navigate = useNavigate()
@@ -87,40 +74,14 @@ export const AttendeeEventBrowser = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">Browse Events</h1>
-          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Discover and register for upcoming events</p>
-        </Container>
-      </div>
+      <PageBanner title="Browse Events" subtitle="Discover and register for upcoming events" />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
         <Row className="g-3 mb-4">
           {STATS.map((s) => (
             <Col key={s.label} xs={6} lg={3}>
-              <Card className={`es-card border shadow-sm h-100 ${s.accent}`}>
-                <Card.Body className="p-3">
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{s.label}</div>
-                      <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
-                        {loading ? '—' : s.value}
-                      </div>
-                    </div>
-                    <div
-                      style={{
-                        width: 36, height: 36, borderRadius: 10,
-                        background: s.iconBg, color: s.iconColor,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-                      }}
-                    >
-                      {s.icon}
-                    </div>
-                  </div>
-                </Card.Body>
-              </Card>
+              <StatCard {...s} loading={loading} />
             </Col>
           ))}
         </Row>
@@ -155,9 +116,7 @@ export const AttendeeEventBrowser = () => {
 
         {/* Event cards */}
         {loading ? (
-          <div className="text-center py-5">
-            <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-          </div>
+          <LoadingSpinner />
         ) : filtered.length === 0 ? (
           <div className="text-center py-5 d-flex flex-column align-items-center gap-3">
             <div

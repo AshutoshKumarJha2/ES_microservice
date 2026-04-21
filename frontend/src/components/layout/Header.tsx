@@ -5,20 +5,12 @@ import { logout } from '../../store/slices/authSlice'
 import { clearAuthHeader } from '../../api/axiosInstance'
 import { Bell, BoxArrowRight, Person } from 'react-bootstrap-icons'
 import { DarkModeToggle } from '../elements/DarkModeToggle'
+import { userInitials, roleBadgeClass } from '../../utils/badgeHelpers'
 import {
   Navbar, Nav, Container, NavDropdown, Badge,
 } from 'react-bootstrap'
 
 const NAV_LINK_STYLE = { fontSize: '0.9rem', color: 'var(--text-primary)' }
-
-const ROLE_BADGE: Record<string, string> = {
-  ADMIN:           'es-badge-admin',
-  ORGANIZER:       'es-badge-organizer',
-  ATTENDEE:        'es-badge-attendee',
-  VENDOR:          'es-badge-vendor',
-  FINANCE_OFFICER: 'es-badge-finance',
-  VENUE_MANAGER:   'es-badge-venue',
-}
 
 export const Header = () => {
   const dispatch = useAppDispatch()
@@ -36,9 +28,7 @@ export const Header = () => {
     navigate('/login', { replace: true })
   }
 
-  const initials = user?.name
-    ? user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
-    : '?'
+  const initials = userInitials(user?.name)
 
   return (
     <Navbar
@@ -137,7 +127,7 @@ export const Header = () => {
                   <div className="fw-semibold small" style={{ color: 'var(--text-primary)' }}>{user?.name}</div>
                   <div className="small" style={{ color: 'var(--text-muted)' }}>{user?.email}</div>
                   <Badge
-                    className={`mt-1 border-0 ${ROLE_BADGE[user?.role ?? ''] ?? 'es-badge-draft'}`}
+                    className={`mt-1 border-0 ${roleBadgeClass(user?.role ?? '')}`}
                     style={{ fontSize: '0.7rem' }}
                   >
                     {user?.role}

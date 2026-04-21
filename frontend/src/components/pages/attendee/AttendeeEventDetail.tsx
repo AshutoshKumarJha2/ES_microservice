@@ -13,27 +13,11 @@ import { ticketService } from '../../../services/events/ticketService'
 import { registrationService } from '../../../services/events/registrationService'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { PanelHeader } from '../../elements/events/PanelHeader'
+import { fmtDate } from '../../../utils/dateHelpers'
+import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type {
   EventResponseDto, ScheduleResponseDto, TicketResponseDto, RegistrationDto,
 } from '../../../types/events'
-
-function fmtDate(iso: string) {
-  try { return new Date(iso).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) }
-  catch { return iso }
-}
-
-const EVENT_LABEL: Record<string, string> = {
-  PUBLISHED: 'Upcoming',
-  COMPLETED: 'Ended',
-  CANCELLED: 'Cancelled',
-}
-
-const REG_BADGE_LABEL: Record<string, string> = {
-  PENDING:    'Registered',
-  CONFIRMED:  'Confirmed',
-  CHECKED_IN: 'Checked In',
-  CANCELLED:  'Cancelled',
-}
 
 const REG_BADGE_COLOR: Record<string, string> = {
   PENDING:    '#f59e0b',
@@ -43,13 +27,6 @@ const REG_BADGE_COLOR: Record<string, string> = {
 }
 
 type Tab = 'overview' | 'schedule' | 'registration'
-
-const REG_STATUS_COLOR: Record<string, string> = {
-  PENDING:    'warning',
-  CONFIRMED:  'success',
-  CHECKED_IN: 'primary',
-  CANCELLED:  'secondary',
-}
 
 export const AttendeeEventDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -179,7 +156,7 @@ export const AttendeeEventDetail = () => {
                   color: '#fff',
                 }}
               >
-                {REG_BADGE_LABEL[registration.status] ?? registration.status}
+                {REG_STATUS_LABEL[registration.status] ?? registration.status}
               </span>
             )}
           </div>

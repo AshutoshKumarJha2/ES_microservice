@@ -3,29 +3,17 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchUsers, updateUserRole, updateUserStatus } from '../../../store/slices/adminSlice'
 import type { UserResponseDto } from '../../../types/events'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { LoadingSpinner } from '../../elements/common/LoadingSpinner'
+import { roleBadgeClass, userStatusBadgeClass, userInitials } from '../../../utils/badgeHelpers'
 import {
-  Container, Row, Col, Card, Table, Badge, Button, Modal, Form,
+  Container, Card, Table, Badge, Button, Modal, Form,
   InputGroup, ButtonGroup, Spinner, Pagination,
 } from 'react-bootstrap'
 import { Search } from 'react-bootstrap-icons'
 
 const ROLES: UserResponseDto['role'][] = ['ADMIN', 'ORGANIZER', 'ATTENDEE', 'VENDOR', 'VENUE_MANAGER', 'FINANCE_OFFICER']
 const PAGE_SIZE = 10
-
-const roleBadgeClass = (role: string) => {
-  const map: Record<string, string> = {
-    ADMIN: 'es-badge-admin', ORGANIZER: 'es-badge-organizer',
-    ATTENDEE: 'es-badge-attendee', VENDOR: 'es-badge-vendor',
-    FINANCE_OFFICER: 'es-badge-finance', VENUE_MANAGER: 'es-badge-venue',
-  }
-  return map[role] ?? 'es-badge-draft'
-}
-
-const statusBadgeClass = (status: string) =>
-  status === 'ACTIVE' ? 'es-badge-active' : 'es-badge-suspended'
-
-const initials = (name: string) =>
-  name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
 
 interface EditRoleModal { userId: string; name: string }
 
@@ -76,13 +64,7 @@ export const AdminUsers: React.FC = () => {
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      {/* Banner */}
-      <div className="es-banner">
-        <Container fluid className="px-3 px-md-4 py-3">
-          <h1 className="fw-bold fs-3 mb-1">User Management</h1>
-          <p className="mb-0 text-secondary small">View, update roles, suspend accounts</p>
-        </Container>
-      </div>
+      <PageBanner title="User Management" subtitle="View, update roles, suspend accounts" />
 
       <AdminSubNav />
 
@@ -129,9 +111,7 @@ export const AdminUsers: React.FC = () => {
 
             {/* Table */}
             {loadingUsers ? (
-              <div className="text-center py-5">
-                <Spinner animation="border" style={{ color: 'var(--blue)' }} />
-              </div>
+              <LoadingSpinner />
             ) : (
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
@@ -154,7 +134,7 @@ export const AdminUsers: React.FC = () => {
                             className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
                             style={{ width: 28, height: 28, fontSize: '0.65rem', background: 'var(--blue)' }}
                           >
-                            {initials(u.name || u.email)}
+                            {userInitials(u.name || u.email)}
                           </div>
                           <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{u.name || '—'}</span>
                         </div>
@@ -164,7 +144,7 @@ export const AdminUsers: React.FC = () => {
                         <Badge className={`${roleBadgeClass(u.role)} border-0`} style={{ fontSize: '0.7rem' }}>{u.role}</Badge>
                       </td>
                       <td className="align-middle">
-                        <Badge className={`${statusBadgeClass(u.status)} border-0`} style={{ fontSize: '0.7rem' }}>{u.status}</Badge>
+                        <Badge className={`${userStatusBadgeClass(u.status)} border-0`} style={{ fontSize: '0.7rem' }}>{u.status}</Badge>
                       </td>
                       <td className="align-middle">
                         <div className="d-flex gap-1 flex-wrap">
