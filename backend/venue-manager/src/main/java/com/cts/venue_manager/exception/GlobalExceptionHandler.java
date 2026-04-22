@@ -1,6 +1,7 @@
 package com.cts.venue_manager.exception;
 
 import com.cts.venue_manager.exception.booking.BookingNotFoundException;
+import com.cts.venue_manager.exception.event.EventNotFoundException;
 import com.cts.venue_manager.exception.resource.InsufficientResourceException;
 import com.cts.venue_manager.exception.resource.ResourceAlreadyExistsException;
 import com.cts.venue_manager.exception.resource.ResourceDuplicateAllocationException;
@@ -37,6 +38,11 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(VenueNotFoundException.class)
     public ResponseEntity<String> handleVenueNotFoundException(VenueNotFoundException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EventNotFoundException.class)
+    public ResponseEntity<String> handleEventNotFoundException(EventNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 

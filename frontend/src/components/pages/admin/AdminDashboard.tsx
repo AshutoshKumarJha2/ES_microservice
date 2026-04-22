@@ -1,26 +1,19 @@
 import { useEffect } from 'react'
-import { useNavigate, NavLink } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchUsers } from '../../../store/slices/adminSlice'
-import styles from '../../../css/admin/AdminPanel.module.css'
-
-const ROLE_BADGE: Record<string, string> = {
-  ADMIN:           styles['badge-admin'],
-  ORGANIZER:       styles['badge-organizer'],
-  ATTENDEE:        styles['badge-attendee'],
-  VENDOR:          styles['badge-vendor'],
-  FINANCE_OFFICER: styles['badge-finance'],
-  VENUE_MANAGER:   styles['badge-venue'],
-}
-
-const STATUS_BADGE: Record<string, string> = {
-  ACTIVE:    styles['badge-active'],
-  INACTIVE:  styles['badge-inactive'],
-  SUSPENDED: styles['badge-suspended'],
-}
-
-const initials = (name: string) =>
-  name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
+import { AdminSubNav } from '../../elements/admin/AdminSubNav'
+import { StatCard } from '../../elements/common/StatCard'
+import { PageBanner } from '../../elements/common/PageBanner'
+import { roleBadgeClass, userStatusBadgeClass, userInitials } from '../../../utils/badgeHelpers'
+import {
+  Container, Row, Col, Card, Table, Badge, Button,
+} from 'react-bootstrap'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import {
+  People, PersonCheckFill, PersonXFill, ShieldFillCheck,
+  CalendarEventFill, ClockHistory,
+} from 'react-bootstrap-icons'
 
 export const AdminDashboard: React.FC = () => {
   const dispatch = useAppDispatch()
@@ -31,125 +24,134 @@ export const AdminDashboard: React.FC = () => {
     if (allUsers.length === 0) dispatch(fetchUsers())
   }, [dispatch]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const recentUsers = allUsers.slice(0, 5)
-  const activeCount = allUsers.filter((u) => u.status === 'ACTIVE').length
+  const recentUsers    = allUsers.slice(0, 5)
+  const activeCount    = allUsers.filter((u) => u.status === 'ACTIVE').length
+  const suspendedCount = allUsers.filter((u) => u.status === 'SUSPENDED').length
+  const adminCount     = allUsers.filter((u) => u.role === 'ADMIN').length
+
+  const STATS = [
+    { label: 'Total Users',  value: allUsers.length, accent: 'es-stat-card-blue',   icon: <People size={18} />,          iconBg: 'var(--blue-subtle)',    iconColor: 'var(--blue)'    },
+    { label: 'Active Users', value: activeCount,     accent: 'es-stat-card-green',  icon: <PersonCheckFill size={18} />, iconBg: 'var(--green-subtle)',   iconColor: 'var(--green)'   },
+    { label: 'Suspended',    value: suspendedCount,  accent: 'es-stat-card-red',    icon: <PersonXFill size={18} />,     iconBg: 'var(--red-subtle)',     iconColor: 'var(--red)'     },
+    { label: 'Admins',       value: adminCount,      accent: 'es-stat-card-orange', icon: <ShieldFillCheck size={18} />, iconBg: 'var(--saffron-subtle)', iconColor: 'var(--saffron)' },
+  ]
 
   return (
-    <div className={styles.page}>
-      {/* Banner */}
-      <div className={styles.banner}>
-        <div className={styles['banner-inner']}>
-          <div className={styles['banner-text']}>
-            <h1>Admin Dashboard</h1>
-            <p>Platform overview &amp; controls</p>
-          </div>
-          <div className={styles['banner-actions']}>
-            <button className={styles['btn-secondary']} onClick={() => navigate('/admin/audit-logs')}>View Audit Logs</button>
-            <button className={styles['btn-primary']} onClick={() => navigate('/admin/users')}>Manage Users</button>
-          </div>
-        </div>
-      </div>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      <PageBanner
+        title="Admin Dashboard"
+        subtitle="Platform overview &amp; controls"
+        actions={<>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/admin/audit-logs')}>
+            View Audit Logs
+          </Button>
+          <Button variant="light" size="sm" className="rounded-3 fw-semibold" onClick={() => navigate('/admin/users')}>
+            Manage Users
+          </Button>
+        </>}
+      />
 
       {/* Sub-nav */}
-      <div className={styles.subnav}>
-        <div className={styles['subnav-inner']}>
-          <NavLink to="/admin/dashboard" className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Dashboard</NavLink>
-          <NavLink to="/admin/users"     className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Users</NavLink>
-          <NavLink to="/admin/events"    className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Events</NavLink>
-          <NavLink to="/admin/audit-logs" className={({ isActive }) => `${styles['subnav-link']}${isActive ? ` ${styles.active}` : ''}`}>Audit Logs</NavLink>
-        </div>
-      </div>
+      <AdminSubNav />
 
-      <div className={styles.content}>
+      <Container fluid className="px-3 px-md-4 py-4">
         {/* Stats */}
-        <div className={styles['stats-grid']}>
-          <div className={`${styles['stat-card']} ${styles.blue}`}>
-            <div className={styles['stat-label']}>Total Users</div>
-            <div className={styles['stat-value']}>{allUsers.length}</div>
-          </div>
-          <div className={`${styles['stat-card']} ${styles.green}`}>
-            <div className={styles['stat-label']}>Active Users</div>
-            <div className={styles['stat-value']}>{activeCount}</div>
-          </div>
-          <div className={`${styles['stat-card']} ${styles.red}`}>
-            <div className={styles['stat-label']}>Suspended</div>
-            <div className={styles['stat-value']}>{allUsers.filter((u) => u.status === 'SUSPENDED').length}</div>
-          </div>
-          <div className={`${styles['stat-card']} ${styles.orange}`}>
-            <div className={styles['stat-label']}>Admins</div>
-            <div className={styles['stat-value']}>{allUsers.filter((u) => u.role === 'ADMIN').length}</div>
-          </div>
-        </div>
+        <Row className="g-3 mb-4">
+          {STATS.map((s) => (
+            <Col key={s.label} xs={6} lg={3}>
+              <StatCard {...s} loading={loadingUsers} />
+            </Col>
+          ))}
+        </Row>
 
         {/* Two columns */}
-        <div className={styles['two-col']}>
-          {/* Recent users */}
-          <div className={styles.card}>
-            <div className={styles['card-title']}>
-              Recent Users
-              <button className={styles['btn-sm']} onClick={() => navigate('/admin/users')}>View All →</button>
-            </div>
-            {loadingUsers ? (
-              <p className={styles.loading}>Loading…</p>
-            ) : (
-              <div className={styles['table-wrapper']}>
-                <table>
-                  <thead>
-                    <tr><th>Name</th><th>Role</th><th>Status</th></tr>
-                  </thead>
-                  <tbody>
-                    {recentUsers.length === 0 ? (
-                      <tr><td colSpan={3} className={styles.empty}>No users found</td></tr>
-                    ) : recentUsers.map((u) => (
-                      <tr key={u.userId}>
-                        <td>
-                          <div className={styles['user-cell']}>
-                            <div className={styles.avatar}>{initials(u.name || u.email)}</div>
-                            <span className={styles['user-name-cell']}>{u.name || u.email}</span>
-                          </div>
-                        </td>
-                        <td><span className={`${styles.badge} ${ROLE_BADGE[u.role] ?? ''}`}>{u.role}</span></td>
-                        <td><span className={`${styles.badge} ${STATUS_BADGE[u.status] ?? styles['badge-inactive']}`}>{u.status}</span></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+        <Row className="g-3">
+          {/* Recent Users */}
+          <Col xs={12} lg={7}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <Card.Title className="mb-0 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>Recent Users</Card.Title>
+                  <Button variant="link" size="sm" className="p-0 text-decoration-none" style={{ color: 'var(--blue)', fontSize: '0.82rem' }} onClick={() => navigate('/admin/users')}>
+                    View All →
+                  </Button>
+                </div>
 
-          {/* Activity */}
-          <div className={styles.card}>
-            <div className={styles['card-title']}>
-              System Activity
-              <button className={styles['btn-sm']} onClick={() => navigate('/admin/audit-logs')}>View Logs →</button>
-            </div>
-            <ul className={styles.timeline}>
-              <li className={styles['timeline-item']}>
-                <div className={`${styles['timeline-dot']} ${styles['dot-green']}`} />
-                <div>
-                  <div className={styles['timeline-text']}>Admin panel loaded — user management ready</div>
-                  <div className={styles['timeline-time']}>Just now</div>
+                  <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem', textAlign: 'left', tableLayout: 'fixed' }}>
+                    <thead style={{ background: 'var(--bg-subtle)' }}>
+                      <tr>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '55%' }}>Name</th>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '25%' }}>Role</th>
+                        <th className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)', textAlign: 'left', width: '20%' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {loadingUsers ? <TableRowsSkeleton rows={5} cols={3} colWidths={['65%','40%','38%']} /> : recentUsers.length === 0 ? (
+                        <tr><td colSpan={3} className="text-center py-3" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
+                      ) : recentUsers.map((u) => (
+                        <tr key={u.userId}>
+                          <td className="align-middle">
+                            <div className="d-flex align-items-center gap-2">
+                              <div
+                                className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+                                style={{ width: 28, height: 28, fontSize: '0.65rem', background: 'var(--blue)' }}
+                              >
+                                {userInitials(u.name || u.email)}
+                              </div>
+                              <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{u.name || u.email}</span>
+                            </div>
+                          </td>
+                          <td className="align-middle">
+                            <Badge className={`${roleBadgeClass(u.role)} border-0`} style={{ fontSize: '0.7rem' }}>
+                              {u.role}
+                            </Badge>
+                          </td>
+                          <td className="align-middle">
+                            <Badge className={`${userStatusBadgeClass(u.status)} border-0`} style={{ fontSize: '0.7rem' }}>
+                              {u.status}
+                            </Badge>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+              </Card.Body>
+            </Card>
+          </Col>
+
+          {/* Quick Actions */}
+          <Col xs={12} lg={5}>
+            <Card className="es-card border shadow-sm h-100">
+              <Card.Body className="p-3">
+                <Card.Title className="mb-3 fw-semibold fs-6" style={{ color: 'var(--text-primary)' }}>Quick Actions</Card.Title>
+                <div className="d-flex flex-column gap-2">
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/users')}
+                  >
+                    <People size={15} /> Manage Users
+                  </Button>
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/events')}
+                  >
+                    <CalendarEventFill size={15} /> Browse Events
+                  </Button>
+                  <Button
+                    variant="outline-primary" size="sm"
+                    className="w-100 text-start rounded-3 d-flex align-items-center gap-2 fw-medium"
+                    onClick={() => navigate('/admin/audit-logs')}
+                  >
+                    <ClockHistory size={15} /> View Audit Logs
+                  </Button>
                 </div>
-              </li>
-              <li className={styles['timeline-item']}>
-                <div className={`${styles['timeline-dot']} ${styles['dot-blue']}`} />
-                <div>
-                  <div className={styles['timeline-text']}>Navigate to <strong>Audit Logs</strong> for full activity history</div>
-                  <div className={styles['timeline-time']}>—</div>
-                </div>
-              </li>
-              <li className={styles['timeline-item']}>
-                <div className={`${styles['timeline-dot']} ${styles['dot-orange']}`} />
-                <div>
-                  <div className={styles['timeline-text']}>Use <strong>Users</strong> to edit roles &amp; suspend accounts</div>
-                  <div className={styles['timeline-time']}>—</div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
     </div>
   )
 }

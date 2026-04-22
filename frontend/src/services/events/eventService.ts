@@ -37,11 +37,11 @@ export const eventService = {
   },
 
   async updateSchedule(eventId: string, scheduleId: string, payload: ScheduleRequestDto): Promise<ScheduleResponseDto> {
-    const { data } = await axiosInstance.post(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`, payload)
+    const { data } = await axiosInstance.put(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`, payload)
     return data
   },
 
-  async deleteSchedule(scheduleId: string): Promise<void> {
-    await axiosInstance.delete(`/api/v1/event-manager/events/schedules/${scheduleId}`)
+  async deleteSchedule(eventId: string, scheduleId: string): Promise<void> {
+    await axiosInstance.delete(`/api/v1/event-manager/events/${eventId}/schedules/${scheduleId}`)
   },
 }

@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.dto.registration;
 
+import com.cts.eventsphere.eventmanager.dto.user.UserDetailsDto;
 import lombok.Builder;
 
 /**
@@ -15,7 +16,10 @@ public record RegistrationDto(
         String registrationId,
         String eventId,
         String ticketId,
+        String ticketType,
+        Double ticketPrice,
         String attendeeId,
-        String status
+        String status,
+        UserDetailsDto attendeeDetails
 ) {
 }

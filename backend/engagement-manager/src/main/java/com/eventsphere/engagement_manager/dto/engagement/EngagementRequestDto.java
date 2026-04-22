@@ -35,7 +35,10 @@ public record EngagementRequestDto(
 
         @NotNull(message = "Activity timestamp is required")
         @PastOrPresent(message = "Activity cannot happen in the future")
-        LocalDateTime activityTimestamp
+        LocalDateTime activityTimestamp,
+
+        /** Optional — set for session-level activities (SESSION_JOIN, SESSION_LEAVE, etc.) */
+        String scheduleId
 
 ) {
 }

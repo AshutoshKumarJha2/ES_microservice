@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Base64;
 
 /**
  * Servlet filter that intercepts every incoming HTTP request to extract and validate a JWT.
@@ -39,6 +40,7 @@ import java.io.IOException;
 @Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
+    private final ServiceTokenUtil serviceTokenUtil;
 
     /**
      * Extracts the JWT from the {@code Authorization} header and populates the
@@ -57,20 +59,33 @@ public class JwtFilter extends OncePerRequestFilter {
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 String token = authHeader.substring(7);
                 UserPrincipal principal;
-                if (request.getServletPath().equals("/auth/refresh")) {
+                if (isServiceToken(token)) {
+                    principal = serviceTokenUtil.validate(token);
+                } else if (request.getServletPath().equals("/auth/refresh")) {
                     principal = jwtUtil.extractUserPrincipal(token, TokenType.REFRESH);
                 } else {
                     principal = jwtUtil.extractUserPrincipal(token, TokenType.ACCESS);
                 }
                 log.info("Extracted jwt for user {} with role {}", principal.userId(), principal.authorities());
                 var authToken = new UsernamePasswordAuthenticationToken(
-                        principal, null,principal.authorities());
+                        principal, null, principal.authorities());
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         } catch (Exception e){
             logger.error(e.getMessage());
             SecurityContextHolder.clearContext();
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
+    }
+
+    private boolean isServiceToken(String token) {
+        try {
+            String[] parts = token.split("\\.");
+            if (parts.length != 3) return false;
+            String payload = new String(Base64.getUrlDecoder().decode(parts[1]));
+            return payload.contains("\"type\":\"SERVICE\"");
+        } catch (Exception e) {
+            return false;
+        }
     }
 }

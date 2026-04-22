@@ -8,15 +8,26 @@ interface AuthState {
   refreshToken: string | null
   isAuthenticated: boolean
   loading: boolean
+  userLoading: boolean
   error: string | null
 }
 
+function loadUser(): UserResponseDto | null {
+  try {
+    const raw = localStorage.getItem('user')
+    return raw ? (JSON.parse(raw) as UserResponseDto) : null
+  } catch {
+    return null
+  }
+}
+
 const initialState: AuthState = {
-  user: null,
+  user: loadUser(),
   accessToken: localStorage.getItem('accessToken'),
   refreshToken: localStorage.getItem('refreshToken'),
   isAuthenticated: !!localStorage.getItem('accessToken'),
   loading: false,
+  userLoading: false,
   error: null,
 }
 
@@ -33,9 +44,9 @@ export const loginUser = createAsyncThunk(
       const { data: user } = await axiosInstance.get('/api/v1/auth-manager/me')
       return { tokens, user }
     } catch (err: unknown) {
-      const error = err as { response?: { data?: { message?: string } }; message?: string }
+      const error = err as { response?: { data?: { message?: string; error?: string } }; message?: string }
       return rejectWithValue(
-        error.response?.data?.message || error.message || 'Login failed'
+        error.response?.data?.message || error.response?.data?.error || error.message || 'Login failed'
       )
     }
   }
@@ -88,6 +99,12 @@ const authSlice = createSlice({
       state.isAuthenticated = false
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+    },
+    setTokens: (state, action: { payload: { accessToken: string; refreshToken: string } }) => {
+      state.accessToken = action.payload.accessToken
+      state.refreshToken = action.payload.refreshToken
+      state.isAuthenticated = true
     },
     clearAuthError: (state) => {
       state.error = null
@@ -105,19 +122,26 @@ const authSlice = createSlice({
         state.refreshToken = action.payload.tokens.refreshToken
         state.user = action.payload.user
         state.isAuthenticated = true
+        localStorage.setItem('user', JSON.stringify(action.payload.user))
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload as string
       })
+      .addCase(fetchCurrentUser.pending, (state) => {
+        state.userLoading = true
+      })
       .addCase(fetchCurrentUser.fulfilled, (state, action) => {
+        state.userLoading = false
         state.user = action.payload
         state.isAuthenticated = true
+        localStorage.setItem('user', JSON.stringify(action.payload))
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.user = action.payload
         state.loading = false
         state.error = null
+        localStorage.setItem('user', JSON.stringify(action.payload))
       })
       .addCase(updateProfile.pending, (state) => {
         state.loading = true
@@ -128,13 +152,11 @@ const authSlice = createSlice({
         state.error = action.payload as string
       })
       .addCase(fetchCurrentUser.rejected, (state) => {
-        state.isAuthenticated = false
-        state.user = null
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
+        state.userLoading = false
+        if (!state.isAuthenticated) state.user = null
       })
   },
 })
 
-export const { logout, clearAuthError } = authSlice.actions
+export const { logout, setTokens, clearAuthError } = authSlice.actions
 export default authSlice.reducer

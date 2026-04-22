@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.controller;
 
+import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleBulkRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.model.Schedule;
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 /**
  * Rest Controller for Schedule Entity.
@@ -25,6 +28,42 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/events/{eventId}/schedules")
 public class ScheduleController {
     private final ScheduleService scheduleService;
+
+    /**
+     * Retrieves a schedule by its unique identifier within a specific event.
+     *
+     * @param eventId the unique identifier of the event to which the schedule belongs
+     * @param id the unique identifier of the schedule to retrieve
+     * @return ResponseEntity containing the schedule DTO and HTTP status 200 (OK)
+     */
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'VENUE_MANAGER', 'SYS_ENGAGEMENT_MGR')")
+    public ResponseEntity<ScheduleResponseDto> getById(@PathVariable String eventId,
+                                                       @PathVariable String id) {
+        log.info("Received request to get schedule with ID: {} for event ID: {}", id, eventId);
+        ScheduleResponseDto response = scheduleService.getById(eventId, id);
+        log.info("Successfully retrieved schedule with ID: {}", id);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Retrieves multiple schedules by their unique identifiers within a specific event.
+     * Maximum of 100 IDs per request.
+     *
+     * @param eventId the unique identifier of the event to which the schedules belong
+     * @param request the request body containing the list of schedule IDs (max 100)
+     * @return ResponseEntity containing the list of found schedule DTOs and HTTP status 200 (OK)
+     */
+    @GetMapping("/bulk")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'VENUE_MANAGER', 'SYS_ENGAGEMENT_MGR')")
+    public ResponseEntity<List<ScheduleResponseDto>> getBulkByIds(
+            @PathVariable String eventId,
+            @Valid @RequestBody ScheduleBulkRequestDto request) {
+        log.info("Received bulk schedule request for {} ID(s) for event ID: {}", request.ids().size(), eventId);
+        List<ScheduleResponseDto> response = scheduleService.getBulkByIds(eventId, request);
+        log.info("Returning {} schedule(s) for event ID: {}", response.size(), eventId);
+        return ResponseEntity.ok(response);
+    }
 
     /**
      * Updates an existing schedule by its unique identifier within a specific event.

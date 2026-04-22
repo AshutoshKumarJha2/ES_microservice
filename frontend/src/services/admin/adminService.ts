@@ -29,16 +29,12 @@ export const adminService = {
   },
 
   async getAuditLogs(params?: {
-    search?: string
-    module?: string
-    from?: string
-    to?: string
     page?: number
     size?: number
   }): Promise<AuditLogsPageDto> {
-    const { data } = await axiosInstance.get('/api/v1/log-manager/logs', { params })
+    const { data } = await axiosInstance.get('/api/v1/log-manager/audits', { params })
     if (Array.isArray(data)) {
-      return { content: data, totalElements: data.length, totalPages: 1, number: 0 }
+      return { audits: data, totalElements: data.length, totalPages: 1, page: 0, size: data.length }
     }
     return data
   },

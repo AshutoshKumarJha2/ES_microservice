@@ -10,7 +10,10 @@ import com.eventsphere.engagement_manager.dto.feedback.FeedbackRequestDto;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackResponseDto;
 import com.eventsphere.engagement_manager.dto.mapper.feedback.FeedbackRequestDtoMapper;
 import com.eventsphere.engagement_manager.dto.mapper.feedback.FeedbackResponseDtoMapper;
+import com.eventsphere.engagement_manager.model.Engagement;
 import com.eventsphere.engagement_manager.model.Feedback;
+import com.eventsphere.engagement_manager.model.data.EngagementType;
+import com.eventsphere.engagement_manager.repository.EngagementRepository;
 import com.eventsphere.engagement_manager.repository.FeedbackRepository;
 import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.FeedbackService;
@@ -41,6 +44,7 @@ import java.time.LocalDateTime;
 public class FeedbackServiceImpl implements FeedbackService {
 
     private final FeedbackRepository feedbackRepository;
+    private final EngagementRepository engagementRepository;
     private final EventServiceClient registrationServiceClient;
     private final AuditService auditService;
     private final LogServiceClient logServiceClient;
@@ -58,6 +62,8 @@ public class FeedbackServiceImpl implements FeedbackService {
         Feedback entity = FeedbackRequestDtoMapper.toEntity(request);
         Feedback saved = feedbackRepository.save(entity);
         log.info("Feedback saved with ID: {}", saved.getFeedbackId());
+
+        autoLogEngagement(request.eventId(), request.attendeeId());
 
         auditService.logAudit(request.attendeeId(), AuditAction.CREATE, Feedback.class, saved.getFeedbackId());
         notifyUser(request.attendeeId(),
@@ -134,6 +140,20 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         if (exists) {
             throw new EntityExistsException("Feedback already submitted for this event.");
+        }
+    }
+
+    private void autoLogEngagement(String eventId, String attendeeId) {
+        try {
+            engagementRepository.save(Engagement.builder()
+                    .eventId(eventId)
+                    .attendeeId(attendeeId)
+                    .activity(EngagementType.EVENT_FEEDBACK_SUBMIT)
+                    .build());
+            log.info("Auto-logged EVENT_FEEDBACK_SUBMIT for attendee={} event={}", attendeeId, eventId);
+        } catch (Exception e) {
+            // Non-critical — never let engagement logging break the feedback flow
+            log.warn("Failed to auto-log engagement for feedback: {}", e.getMessage());
         }
     }
 

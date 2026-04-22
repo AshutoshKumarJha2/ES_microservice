@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.eventsphere.engagement_manager.Exception.FeedbackNotFoundException;
 import com.eventsphere.engagement_manager.Exception.GlobalExceptionHandler;
 import com.eventsphere.engagement_manager.dto.feedback.FeedbackResponseDto;
+import com.eventsphere.engagement_manager.service.AuditService;
 import com.eventsphere.engagement_manager.service.FeedbackService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class FeedbackControllerTest {
 
     @Mock private FeedbackService feedbackService;
+    @Mock private AuditService auditService;
     @InjectMocks private FeedbackController feedbackController;
 
     private MockMvc mockMvc;
@@ -60,7 +62,7 @@ class FeedbackControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(feedbackController)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new GlobalExceptionHandler(auditService))
                 .setCustomArgumentResolvers(new PageableHandlerMethodArgumentResolver())
                 .build();
 

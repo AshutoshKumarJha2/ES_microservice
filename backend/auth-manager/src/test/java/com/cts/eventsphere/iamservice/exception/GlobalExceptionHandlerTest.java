@@ -8,13 +8,18 @@ import com.cts.eventsphere.iamservice.exception.user.UserAlreadyExistsException;
 import com.cts.eventsphere.iamservice.exception.user.UserNotActiveException;
 import com.cts.eventsphere.iamservice.exception.user.UserNotFoundException;
 import com.cts.eventsphere.iamservice.exception.user.UserSuspendedException;
+import com.cts.eventsphere.iamservice.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 
 /**
  * Unit tests for {@link GlobalExceptionHandler}.
@@ -26,13 +31,22 @@ import static org.mockito.ArgumentMatchers.any;
  * @version 1.0
  * @since 25-03-2026
  */
+@ExtendWith(MockitoExtension.class)
 class GlobalExceptionHandlerTest {
 
+    @Mock
+    private AuditService auditService;
+
+    @InjectMocks
     private GlobalExceptionHandler handler;
+
+    private MockHttpServletRequest request;
 
     @BeforeEach
     void setUp() {
-        handler = new GlobalExceptionHandler(any());
+        request = new MockHttpServletRequest();
+        request.setRequestURI("/test");
+        request.setMethod("GET");
     }
 
     // ─── EmailAlreadyExistsException → 409 ────────────────────────────────────
@@ -40,7 +54,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void emailAlreadyExistsException_ShouldReturn409WithEmailAlreadyExistsMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.emailAlreadyExistsException(new EmailAlreadyExistsException("test@example.com"), any());
+                handler.emailAlreadyExistsException(new EmailAlreadyExistsException("test@example.com"), request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
@@ -52,7 +66,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void invalidPasswordException_ShouldReturn400WithInvalidPasswordMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.invalidPasswordException(new InvalidPasswordException("bad password"),any());
+                handler.invalidPasswordException(new InvalidPasswordException("bad password"), request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(response.getBody()).isNotNull();
@@ -65,7 +79,7 @@ class GlobalExceptionHandlerTest {
     void handleRefreshFailedException_ShouldReturn401WithExceptionMessage() {
         RefreshFailedException ex = new RefreshFailedException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleRefreshFailedException(ex,any());
+                handler.handleRefreshFailedException(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
@@ -77,7 +91,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void userAlreadyExistsException_ShouldReturn409WithUserAlreadyExistsMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.userAlreadyExistsException(new UserAlreadyExistsException("alice@example.com"),any());
+                handler.userAlreadyExistsException(new UserAlreadyExistsException("alice@example.com"), request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         assertThat(response.getBody()).isNotNull();
@@ -90,7 +104,7 @@ class GlobalExceptionHandlerTest {
     void handleUserNotActiveException_ShouldReturn401WithExceptionMessage() {
         UserNotActiveException ex = new UserNotActiveException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleUserNotActiveException(ex,any());
+                handler.handleUserNotActiveException(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();
@@ -102,7 +116,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void userNotFoundException_ShouldReturn404WithUserNotFoundMessage() {
         ResponseEntity<GenericErrorResponse> response =
-                handler.userNotFoundException(new UserNotFoundException("user-001"),any());
+                handler.userNotFoundException(new UserNotFoundException("user-001"), request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(response.getBody()).isNotNull();
@@ -115,7 +129,7 @@ class GlobalExceptionHandlerTest {
     void handleUserSuspendedException_ShouldReturn401WithExceptionMessage() {
         UserSuspendedException ex = new UserSuspendedException("user-001");
         ResponseEntity<GenericErrorResponse> response =
-                handler.handleUserSuspendedException(ex,any());
+                handler.handleUserSuspendedException(ex, request);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         assertThat(response.getBody()).isNotNull();

@@ -11,19 +11,18 @@ export interface UsersPageDto {
 }
 
 export interface AuditLogDto {
-  id: string
-  timestamp: string
-  actorName: string
-  actorRole: string
+  auditId: string
+  userId: string
   action: string
-  module: string
   entityId: string
-  details: string
+  entityName: string
+  timeStamp: string
 }
 
 export interface AuditLogsPageDto {
-  content: AuditLogDto[]
+  audits: AuditLogDto[]
   totalElements: number
   totalPages: number
-  number: number
+  page: number
+  size: number
 }

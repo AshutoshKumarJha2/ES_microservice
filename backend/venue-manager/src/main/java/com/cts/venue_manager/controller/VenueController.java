@@ -6,12 +6,14 @@ import com.cts.venue_manager.model.data.AvailabilityStatus;
 import com.cts.venue_manager.auth.dto.UserPrincipal;
 import com.cts.venue_manager.service.VenueService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,7 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/venues")
 @RequiredArgsConstructor
+@Validated
 public class VenueController {
 
     private final VenueService venueService;
@@ -199,5 +202,20 @@ public class VenueController {
         log.info("Checking venue availability for date: {} by actor: {}", date, actorId);
         List<VenueResponseDto> venues = venueService.findByDate(actorId, date);
         return ResponseEntity.ok(venues);
+    }
+
+    /**
+     * Retrieves venue details for a batch of venue IDs in a single request.
+     * Restricted to service accounts (SYS_EVENT_MGR) to support service-to-service lookups.
+     *
+     * @param ids the list of venue UUIDs to look up (max 100)
+     * @return a list of VenueResponseDto for the matched venues
+     */
+    @PostMapping("/bulk")
+    @PreAuthorize("hasRole('SYS_EVENT_MGR')")
+    public ResponseEntity<List<VenueResponseDto>> getVenuesByIds(
+            @RequestBody @Size(min = 1, max = 50, message = "Batch size must be between 1 and 50") List<String> ids) {
+        log.info("Bulk venue lookup for {} id(s)", ids.size());
+        return ResponseEntity.ok(venueService.findAllByIds(ids));
     }
 }

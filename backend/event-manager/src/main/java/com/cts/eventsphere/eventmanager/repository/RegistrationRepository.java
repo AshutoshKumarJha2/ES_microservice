@@ -4,7 +4,9 @@ import com.cts.eventsphere.eventmanager.model.Registration;
 import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -17,26 +19,18 @@ import java.util.Optional;
  * @since 2026-03-26
  */
 @Repository
-public interface RegistrationRepository extends JpaRepository<Registration, String> {
+public interface RegistrationRepository extends JpaRepository<Registration, String>, JpaSpecificationExecutor<Registration> {
 
     /**
-     * Retrieves a paginated list of all registrations for the given event.
+     * Fetches a page of registrations matching the given Specification, eagerly joining
+     * the associated {@code ticket} and {@code event} in a single query to avoid N+1 selects.
      *
-     * @param eventId  the ID of the event
+     * @param spec     the filtering specification (eventId, status, ticketType, etc.)
      * @param pageable pagination and sorting information
-     * @return page of registrations for the event
+     * @return page of registrations with ticket and event pre-loaded
      */
-    Page<Registration> findByEventEventId(String eventId, Pageable pageable);
-
-    /**
-     * Retrieves a paginated list of registrations for the given event filtered by status.
-     *
-     * @param eventId  the ID of the event
-     * @param status   the registration status to filter by
-     * @param pageable pagination and sorting information
-     * @return page of registrations matching the event and status
-     */
-    Page<Registration> findByEventEventIdAndStatus(String eventId, RegistrationStatus status, Pageable pageable);
+    @EntityGraph(attributePaths = {"ticket", "event"})
+    Page<Registration> findAll(org.springframework.data.jpa.domain.Specification<Registration> spec, Pageable pageable);
 
     /**
      * Retrieves a paginated list of registrations made by the given attendee.
@@ -64,4 +58,21 @@ public interface RegistrationRepository extends JpaRepository<Registration, Stri
      * @return an {@link Optional} containing the matching registration, or empty if not found
      */
     Optional<Registration> findByAttendeeIdAndEventEventId(String attendeeId, String eventId);
+
+    /**
+     * Counts all registrations for the given event.
+     *
+     * @param eventId the ID of the event
+     * @return total number of registrations for the event
+     */
+    long countByEventEventId(String eventId);
+
+    /**
+     * Counts registrations for the given event filtered by status.
+     *
+     * @param eventId the ID of the event
+     * @param status  the registration status to filter by
+     * @return number of registrations matching the event and status
+     */
+    long countByEventEventIdAndStatus(String eventId, RegistrationStatus status);
 }

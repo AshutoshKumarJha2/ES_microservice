@@ -1,5 +1,6 @@
 package com.cts.eventsphere.eventmanager.service;
 
+import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -20,26 +21,35 @@ public interface EventService {
     /**
      * Creates a new event in the system.
      *
-     * @param event the request DTO containing event details
+     * @param userId the ID of the authenticated caller (used for audit)
+     * @param role   the role of the authenticated caller (ADMIN may set a custom organizerId)
+     * @param event  the request DTO containing event details
      * @return the response DTO representing the created event
      */
-    EventResponseDto create(String userId, EventRequestDto event);
+    EventResponseDto create(String userId, String role, EventRequestDto event);
 
     /**
      * Retrieves all events available in the system.
+     * DRAFT events are excluded when the caller's role is {@code ATTENDEE}.
      *
-     * @return a list of response DTOs representing all events
+     * @param userId the ID of the requesting user (for audit)
+     * @param role   the role of the requesting user
+     * @return a list of response DTOs representing all visible events
      */
-    List<EventResponseDto> findAllEvents(String userId);
+    List<EventResponseDto> findAllEvents(String userId, String role);
 
     /**
      * Finds an event by its unique identifier.
+     * DRAFT events are treated as not found when the caller's role is {@code ATTENDEE}.
      *
      * @param eventId the unique identifier of the event
+     * @param userId  the ID of the requesting user (for audit)
+     * @param role    the role of the requesting user
      * @return the response DTO representing the event
-     * @throws EventNotFoundException if no event exists with the given ID
+     * @throws EventNotFoundException if no event exists with the given ID, or the event
+     *                                is a DRAFT and the caller is an ATTENDEE
      */
-    EventResponseDto findById(String eventId, String userId) throws EventNotFoundException;
+    EventResponseDto findById(String eventId, String userId, String role) throws EventNotFoundException;
 
     /**
      * Updates an existing event by its unique identifier.
@@ -76,4 +86,13 @@ public interface EventService {
      * @return a list of response DTOs representing all schedules for the event
      */
     List<ScheduleResponseDto> findAllSchedules(String eventId, String userId);
+
+    /**
+     * Retrieves registration analytics for a specific event.
+     *
+     * @param eventId the unique identifier of the event
+     * @return DTO containing registration counts broken down by status
+     * @throws EventNotFoundException if no event exists with the given ID
+     */
+    EventAnalyticsResponseDto getAnalytics(String eventId) throws EventNotFoundException;
 }

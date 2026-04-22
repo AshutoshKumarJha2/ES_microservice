@@ -105,4 +105,13 @@ public interface VenueService {
      * @return a list of venues currently in the specified status
      */
     List<VenueResponseDto> findByAvailabilityStatus(String actorId, AvailabilityStatus status);
+
+    /**
+     * Retrieves venue details for a batch of venue IDs.
+     * Venues whose IDs are not found are silently omitted from the result.
+     *
+     * @param ids the list of venue UUIDs to look up (max 100)
+     * @return a list of VenueResponseDto for the matched venues
+     */
+    List<VenueResponseDto> findAllByIds(List<String> ids);
 }

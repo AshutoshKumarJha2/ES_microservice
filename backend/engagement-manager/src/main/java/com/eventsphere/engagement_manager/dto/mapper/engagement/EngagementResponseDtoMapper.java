@@ -26,6 +26,7 @@ public  class EngagementResponseDtoMapper {
                 .attendeeId(entity.getAttendeeId())
                 .activity(entity.getActivity())
                 .activityTimestamp(entity.getCreatedAt())
+                .scheduleId(entity.getScheduleId())
                 .build();
     }
 }

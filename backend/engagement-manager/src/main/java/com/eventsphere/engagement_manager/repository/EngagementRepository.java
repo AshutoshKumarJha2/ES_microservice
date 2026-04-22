@@ -31,4 +31,9 @@ public interface EngagementRepository extends JpaRepository<Engagement, String> 
     // Filter 4: Granular filtering
     List<Engagement> findByEventIdAndActivityAndCreatedAtBetween(
             String eventId, EngagementType activityId, LocalDateTime start, LocalDateTime end);
+
+    // Filter 5: Session-level queries
+    List<Engagement> findByScheduleId(String scheduleId);
+
+    long countByScheduleIdAndActivity(String scheduleId, EngagementType activity);
 }

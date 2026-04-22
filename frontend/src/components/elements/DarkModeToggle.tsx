@@ -1,21 +1,24 @@
 import { useTheme } from '../../hooks/useTheme'
-import styles from '../../css/DarkModeToggle.module.css'
+import { SunFill, MoonFill } from 'react-bootstrap-icons'
+import { Button } from 'react-bootstrap'
 
 export const DarkModeToggle = () => {
   const { isDark, toggleTheme } = useTheme()
 
   return (
-    <div
-      className={styles['theme-toggle']}
+    <Button
+      variant="link"
+      size="sm"
       onClick={toggleTheme}
-      title="Toggle dark mode"
-      role="button"
+      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
       aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="d-inline-flex align-items-center gap-1 text-decoration-none px-2 rounded-3"
+      style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500, height: 34 }}
     >
-      <div className={styles['toggle-track']}>
-        <div className={styles['toggle-knob']} />
-      </div>
-      <span className={styles['toggle-label']}>{isDark ? 'Light' : 'Dark'}</span>
-    </div>
+      {isDark
+        ? <><SunFill size={14} /> Light</>
+        : <><MoonFill size={14} /> Dark</>
+      }
+    </Button>
   )
 }

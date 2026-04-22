@@ -1,5 +1,7 @@
 package com.cts.eventsphere.eventmanager.dto.event;
 
+import com.cts.eventsphere.eventmanager.dto.user.OrganizerDto;
+import com.cts.eventsphere.eventmanager.dto.venue.VenueDetailsDto;
 import com.cts.eventsphere.eventmanager.model.data.EventStatus;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -32,7 +34,10 @@ public record EventResponseDto(
         @NotNull(message = "Event status must not be null")
         EventStatus status,
 
-        @NotBlank(message = "Venue ID must not be blank")
-        String venueId
+        String venueId,
+
+        VenueDetailsDto venue,
+
+        OrganizerDto organizer
 ) {
 }

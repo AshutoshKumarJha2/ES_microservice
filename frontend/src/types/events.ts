@@ -58,6 +58,12 @@ export interface EventRequestDto {
   status?: EventStatus
 }
 
+export interface OrganizerDto {
+  id: string
+  name: string
+  email: string
+}
+
 export interface EventResponseDto {
   id: string
   eventName: string
@@ -66,6 +72,8 @@ export interface EventResponseDto {
   endAt: string
   status: EventStatus
   venueId: string
+  venue?: VenueResponseDto
+  organizer?: OrganizerDto
 }
 
 // ── Schedules ─────────────────────────────────────────────────────────────────
@@ -119,12 +127,24 @@ export interface RegistrationRequestDto {
   ticketId: string
 }
 
+export interface UserDetailsDto {
+  userId: string
+  name: string
+  email: string
+  phone: string
+  role: string
+  status: string
+}
+
 export interface RegistrationDto {
   registrationId: string
   eventId: string
   ticketId: string
+  ticketType: string | null
+  ticketPrice: number | null
   attendeeId: string
   status: string
+  attendeeDetails: UserDetailsDto | null
 }
 
 export interface RegistrationListResponseDto {
@@ -175,20 +195,47 @@ export interface PageExpenseResponseDto {
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 
+export type EngagementActivity =
+  | 'REGISTRATION' | 'REGISTRATION_CONFIRMATION' | 'CHECK_IN' | 'SESSION_BOOKMARK'
+  | 'SESSION_JOIN' | 'SESSION_LEAVE' | 'SESSION_QA_SUBMIT' | 'SESSION_FEEDBACK_SUBMIT'
+  | 'POLL_VIEW' | 'POLL_VOTE' | 'SURVEY_SUBMIT'
+  | 'CHAT_MESSAGE' | 'DIRECT_MESSAGE'
+  | 'BOOTH_VISIT' | 'RESOURCE_DOWNLOAD' | 'CTA_BUTTON_CLICK'
+  | 'EVENT_FEEDBACK_SUBMIT' | 'CERTIFICATE_DOWNLOAD' | 'RECORDING_PLAY'
+
+export interface EngagementRequestDto {
+  eventId: string
+  attendeeId: string
+  activity: EngagementActivity
+  activityTimestamp: string   // LocalDateTime — "YYYY-MM-DDTHH:mm:ss"
+}
+
 export interface EngagementResponseDto {
   engagementId?: string
   eventId: string
-  userId?: string
+  attendeeId?: string
   activity: string
-  createdAt?: string
+  activityTimestamp?: string
+  scheduleId?: string
+}
+
+// ── Event Analytics (from event-manager via engagement-manager proxy) ─────────
+
+export interface EventAnalyticsDto {
+  eventId: string
+  totalRegistrations: number
+  pending: number
+  confirmed: number
+  checkedIn: number
+  cancelled: number
 }
 
 export interface FeedbackResponseDto {
   feedbackId?: string
   eventId: string
-  userId?: string
+  attendeeId?: string
   rating?: number
-  comment?: string
+  comments?: string
   createdAt?: string
 }
 
@@ -198,4 +245,12 @@ export interface PageFeedbackResponseDto {
   totalPages: number
   number: number
   size: number
+}
+
+export interface FeedbackRequestDto {
+  eventId: string
+  attendeeId: string
+  rating: number
+  comments: string
+  createdAt: string
 }

@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.controller;
 
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -44,7 +45,7 @@ public class EventController {
     public ResponseEntity<EventResponseDto> create(@Valid @RequestBody EventRequestDto event, @AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to create a new event: {}", event.name());
-        EventResponseDto createdEvent = eventService.create(userId,event);
+        EventResponseDto createdEvent = eventService.create(userId, userDetails.role(), event);
         log.info("Successfully created event with ID: {}", createdEvent.id());
         return new ResponseEntity<>(createdEvent, HttpStatus.CREATED);
     }
@@ -57,7 +58,7 @@ public class EventController {
     public ResponseEntity<List<EventResponseDto>> readAll(@AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to fetch all events");
-        List<EventResponseDto> events = eventService.findAllEvents(userId);
+        List<EventResponseDto> events = eventService.findAllEvents(userId, userDetails.role());
         log.info("Successfully retrieved {} events", events.size());
         return ResponseEntity.ok(events);
     }
@@ -84,7 +85,7 @@ public class EventController {
     public ResponseEntity<EventResponseDto> getById(@PathVariable String id, @AuthenticationPrincipal UserPrincipal userDetails) {
         var userId = userDetails.userId();
         log.info("Received request to get event with ID: {}", id);
-        return ResponseEntity.ok(eventService.findById(id,userId));
+        return ResponseEntity.ok(eventService.findById(id, userId, userDetails.role()));
 
     }
 
@@ -118,6 +119,21 @@ public class EventController {
         ScheduleResponseDto response = eventService.addActivity(id, scheduleRequest, userId);
         log.info("Successfully added activity with ID: {} to event ID: {}", response.eventId(), id);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    /**
+     * Retrieves registration analytics for a specific event.
+     *
+     * @param id the unique identifier of the event
+     * @return ResponseEntity containing analytics DTO and HTTP status 200 (OK)
+     */
+    @GetMapping("/{id}/analytics")
+    @PreAuthorize("hasAnyRole('ADMIN', 'ORGANIZER', 'SYS_ENGAGEMENT_MGR')")
+    public ResponseEntity<EventAnalyticsResponseDto> getAnalytics(@PathVariable String id) {
+        log.info("Received request for analytics for event ID: {}", id);
+        EventAnalyticsResponseDto analytics = eventService.getAnalytics(id);
+        log.info("Successfully retrieved analytics for event ID: {}", id);
+        return ResponseEntity.ok(analytics);
     }
 
     /**

@@ -165,6 +165,9 @@ export const FinanceLayout = () => {
         <div className={styles.subNavbarInner}>
           <span className={styles.subNavbarLabel}>Finance Officer Portal</span>
           <nav className={styles.subNavTabs}>
+            <NavLink to="/finance/dashboard" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Dashboard
+            </NavLink>
             <NavLink to="/finance/expenses" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
               Expense Approvals
             </NavLink>
@@ -173,6 +176,9 @@ export const FinanceLayout = () => {
             </NavLink>
             <NavLink to="/finance/budget" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
               Budget Overview
+            </NavLink>
+            <NavLink to="/finance/invoices" className={({ isActive }) => `${styles.subNavTab} ${isActive ? styles.subNavTabActive : ''}`}>
+              Invoices
             </NavLink>
           </nav>
         </div>

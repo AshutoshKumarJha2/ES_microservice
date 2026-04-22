@@ -1,6 +1,14 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import styles from '../../css/Dashboard.module.css'
+
+const ROLE_HOME: Record<string, string> = {
+  ADMIN:           '/admin/dashboard',
+  ORGANIZER:       '/organizer/dashboard',
+  FINANCE_OFFICER: '/finance/expenses',
+  ATTENDEE:        '/events',
+}
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: 'Administrator',
@@ -22,13 +30,29 @@ const getQuickActions = (role: string): QuickAction[] => {
   switch (role) {
     case 'ORGANIZER':
       return [
-        { label: 'Organizer Portal', desc: 'Manage your events & tickets', path: '/organizer/dashboard', color: 'blue' },
-        { label: 'Create Event', desc: 'Start planning a new event', path: '/organizer/events/create', color: 'orange' },
+        { label: 'Organizer Portal', desc: 'Access your organizer dashboard', path: '/organizer/dashboard', color: 'blue' },
+        { label: 'Create Event', desc: 'Start planning and publishing a new event', path: '/organizer/events/create', color: 'orange' },
+        { label: 'Book Venue & Resources', desc: 'Reserve venues and required resources for your event', path: '/organizer/booking', color: 'green' },
       ]
     case 'ADMIN':
       return [
         { label: 'Admin Panel', desc: 'System-wide administration', path: '/admin/dashboard', color: 'red' },
         { label: 'Browse Events', desc: 'View all events', path: '/', color: 'blue' },
+      ]
+    case 'VENUE_MANAGER':
+      return [
+          {label:'Venue Manager Portal',desc: 'Manage your venue & resource', path: '/venue-manager/dashboard', color: 'blue'},
+        { label: 'Manage Venues',    desc: 'Add, edit and update venue listings',       path: '/venue-manager/venues',    color: 'orange' },
+        { label: 'View Bookings',    desc: 'Confirm or cancel venue booking requests',  path: '/venue-manager/venue/bookings',  color: 'green' },
+        { label: 'Manage Resources', desc: 'Equipment and staff resources per venue',   path: '/venue-manager/venue/resources', color: 'red' },
+      ]
+    case 'VENDOR':
+      return [
+        { label: 'Vendor Portal',  desc: 'Go to your vendor management dashboard',  path: '/vendor/dashboard',  color: 'blue' },
+        { label: 'My Profile',     desc: 'Register or update your vendor profile',   path: '/vendor/profile',    color: 'orange' },
+        { label: 'Contracts',      desc: 'View and sign vendor agreements',          path: '/vendor/contracts',  color: 'green' },
+        { label: 'Deliveries',     desc: 'Log and track goods & equipment',          path: '/vendor/deliveries', color: 'red' },
+        { label: 'Invoices',       desc: 'View billing records and download PDFs',   path: '/vendor/invoices',   color: 'blue' },
       ]
     default:
       return [
@@ -41,7 +65,13 @@ export const Dashboard = () => {
   const navigate = useNavigate()
   const { user } = useAppSelector((state) => state.auth)
 
-  if (!user) return null
+  useEffect(() => {
+    if (user && ROLE_HOME[user.role]) {
+      navigate(ROLE_HOME[user.role], { replace: true })
+    }
+  }, [user, navigate])
+
+  if (!user || ROLE_HOME[user.role]) return null
 
   const quickActions = getQuickActions(user.role)
   const initials = user.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
