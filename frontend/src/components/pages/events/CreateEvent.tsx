@@ -15,7 +15,7 @@ const EMPTY_SESSION: Omit<SessionRow, 'localId'> = {
   date: '',
   timeSlot: '',
   activity: '',
-  status: 'draft',
+  status: 'DRAFT',
 }
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
@@ -28,6 +28,7 @@ export const CreateEvent = () => {
   const isEdit = Boolean(id)
 
   const { loading, error } = useAppSelector((state) => state.events)
+  const currentUserId = useAppSelector((state) => state.auth.user?.userId ?? '')
 
   const [venues, setVenues]     = useState<VenueResponseDto[]>([])
   const [sessions, setSessions] = useState<SessionRow[]>([])
@@ -38,14 +39,13 @@ export const CreateEvent = () => {
     startDate: '',
     endDate: '',
     venueId: '',
-    status: 'draft',
+    status: 'DRAFT',
   })
 
   useEffect(() => {
     venueService.getAll().then(setVenues).catch(console.error)
-    const userId = localStorage.getItem('userId') ?? ''
-    setForm((prev) => ({ ...prev, organizerId: userId }))
-  }, [])
+    setForm((prev) => ({ ...prev, organizerId: currentUserId }))
+  }, [currentUserId])
 
   useEffect(() => {
     if (isEdit && id) {
@@ -181,10 +181,10 @@ export const CreateEvent = () => {
               <div className={styles.field}>
                 <label>Status</label>
                 <select name="status" value={form.status} onChange={handleChange}>
-                  <option value="draft">Draft</option>
-                  <option value="published">Published</option>
-                  <option value="completed">Completed</option>
-                  <option value="cancelled">Cancelled</option>
+                  <option value="DRAFT">Draft</option>
+                  <option value="PUBLISHED">Published</option>
+                  <option value="COMPLETED">Completed</option>
+                  <option value="CANCELLED">Cancelled</option>
                 </select>
               </div>
             </div>
@@ -232,10 +232,10 @@ export const CreateEvent = () => {
                     value={session.status}
                     onChange={(e) => handleSessionChange(session.localId, 'status', e.target.value)}
                   >
-                    <option value="draft">Draft</option>
-                    <option value="active">Active</option>
-                    <option value="completed">Completed</option>
-                    <option value="terminated">Terminated</option>
+                    <option value="DRAFT">Draft</option>
+                    <option value="ACTIVE">Active</option>
+                    <option value="COMPLETED">Completed</option>
+                    <option value="TERMINATED">Terminated</option>
                   </select>
                 </div>
                 <button type="button" className={styles['btn-remove']} onClick={() => removeSession(session.localId)}>

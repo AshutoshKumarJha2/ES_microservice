@@ -26,7 +26,6 @@ import java.util.List;
  * @since 05-03-2026
  */
 @RestController
-@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 @Slf4j
 @Validated // Required to enable validation for method parameters like @PathVariable

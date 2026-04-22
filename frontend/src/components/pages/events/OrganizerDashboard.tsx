@@ -6,10 +6,10 @@ import type { EventResponseDto } from '../../../types/events'
 import styles from '../../../css/events/EventsPanel.module.css'
 
 const STATUS_BADGE: Record<string, string> = {
-  draft:     styles['badge-draft'],
-  published: styles['badge-published'],
-  completed: styles['badge-completed'],
-  cancelled: styles['badge-cancelled'],
+  DRAFT:     styles['badge-draft'],
+  PUBLISHED: styles['badge-published'],
+  COMPLETED: styles['badge-completed'],
+  CANCELLED: styles['badge-cancelled'],
 }
 
 const navLink = ({ isActive }: { isActive: boolean }) =>
@@ -24,9 +24,9 @@ export const OrganizerDashboard = () => {
     dispatch(fetchAllEvents())
   }, [dispatch])
 
-  const activeEvents    = events.filter((e) => e.status === 'published').length
-  const completedEvents = events.filter((e) => e.status === 'completed').length
-  const pendingEvents   = events.filter((e) => e.status === 'draft').length
+  const activeEvents    = events.filter((e) => e.status === 'PUBLISHED').length
+  const completedEvents = events.filter((e) => e.status === 'COMPLETED').length
+  const pendingEvents   = events.filter((e) => e.status === 'DRAFT').length
 
   const handleDelete = (id: string) => {
     if (!window.confirm('Delete this event?')) return

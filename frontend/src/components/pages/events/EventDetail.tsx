@@ -14,10 +14,17 @@ type Tab = 'overview' | 'tickets' | 'registrations' | 'budget'
 type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
 
 const STATUS_BADGE: Record<string, string> = {
-  draft:     styles['badge-draft'],
-  published: styles['badge-published'],
-  completed: styles['badge-completed'],
-  cancelled: styles['badge-cancelled'],
+  DRAFT:     styles['badge-draft'],
+  PUBLISHED: styles['badge-published'],
+  COMPLETED: styles['badge-completed'],
+  CANCELLED: styles['badge-cancelled'],
+}
+
+const SCHEDULE_BADGE: Record<string, string> = {
+  DRAFT:      styles['badge-draft'],
+  ACTIVE:     styles['badge-active'],
+  COMPLETED:  styles['badge-completed'],
+  TERMINATED: styles['badge-cancelled'],
 }
 
 const REG_BADGE: Record<string, string> = {
@@ -204,7 +211,7 @@ export const EventDetail = () => {
                           <td>{s.timeSlot}</td>
                           <td>{s.activity}</td>
                           <td>
-                            <span className={`${styles.badge} ${STATUS_BADGE[s.status] ?? styles['badge-draft']}`}>
+                            <span className={`${styles.badge} ${SCHEDULE_BADGE[s.status] ?? styles['badge-draft']}`}>
                               {s.status}
                             </span>
                           </td>
