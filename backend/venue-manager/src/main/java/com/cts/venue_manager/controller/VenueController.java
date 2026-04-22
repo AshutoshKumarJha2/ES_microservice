@@ -29,7 +29,7 @@ import java.util.List;
  */
 @RestController
 @Slf4j
-@RequestMapping("/api/v1/venues")
+@RequestMapping("/venues")
 @RequiredArgsConstructor
 @Validated
 public class VenueController {

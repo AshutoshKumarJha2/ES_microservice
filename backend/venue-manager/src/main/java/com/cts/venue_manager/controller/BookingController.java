@@ -31,7 +31,6 @@ import java.util.List;
  * @since 2026-03-26
  */
 @RestController
-@RequestMapping("/api/v1")
 @Slf4j
 @RequiredArgsConstructor
 @Validated
