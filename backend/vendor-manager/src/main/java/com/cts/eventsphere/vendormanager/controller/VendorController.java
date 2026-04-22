@@ -28,7 +28,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/api/v1/vendors")
+@RequestMapping("/vendors")
 @Slf4j
 @RequiredArgsConstructor
 @Validated

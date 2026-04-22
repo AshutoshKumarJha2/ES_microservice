@@ -29,7 +29,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/api/v1/deliveries")
+@RequestMapping("/deliveries")
 @RequiredArgsConstructor
 @Slf4j
 @Validated
