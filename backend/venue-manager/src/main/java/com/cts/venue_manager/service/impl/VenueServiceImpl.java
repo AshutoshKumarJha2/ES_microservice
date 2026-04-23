@@ -74,7 +74,7 @@ public class VenueServiceImpl implements VenueService {
      * Registers a new venue in the system.
      *
      * @param actorId The unique identifier of the user performing the creation.
-     * @param dto     The venue request data transfer object.
+     * @param dto HYYHYHBNYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY   The venue request data transfer object.
      * @return The saved venue as a response DTO.
      */
     @Override
