@@ -305,7 +305,7 @@ export const SubmitFeedback = () => {
                 <div className="d-flex justify-content-between align-items-baseline mb-2">
                   <span className="small fw-medium" style={{ color: 'var(--text-secondary)' }}>Average Rating</span>
                   <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1.1rem' }}>
-                    {avgRating ? `${avgRating} / 5` : '— / 5'}
+                    {avgRating ? `${avgRating} / 5` : '0.0 / 5'}
                   </span>
                 </div>
 
