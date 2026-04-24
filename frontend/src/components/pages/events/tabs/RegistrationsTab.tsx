@@ -159,7 +159,7 @@ export const RegistrationsTab = () => {
                       <div>
                         <div style={{ fontWeight: 500, color: 'var(--text-primary)', textTransform: 'capitalize' }}>{r.ticketType}</div>
                         {r.ticketPrice != null && (
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>${r.ticketPrice.toFixed(2)}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>₹{r.ticketPrice.toFixed(2)}</div>
                         )}
                       </div>
                     ) : (
