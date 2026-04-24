@@ -8,7 +8,7 @@ import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const ORGANIZER_ROLES = ['ORGANIZER', 'ADMIN']
 
-const FILTER_CHIPS = ['All', 'View', 'Register', 'Check In', 'Rate', 'Comment']
+const FILTER_CHIPS = ['All', 'Register', 'Check In', 'Session Join', 'Feedback']
 
 const normaliseActivity = (activity: string) => activity.replace(/_/g, ' ').toLowerCase()
 
@@ -16,22 +16,35 @@ const matchesFilter = (activity: string, filter: string): boolean => {
   if (filter === 'All') return true
   const a = normaliseActivity(activity)
   const f = filter.toLowerCase()
-  if (f === 'check in') return a === 'check in' || a === 'checkin' || a === 'check_in'
-  if (f === 'register') return a === 'register' || a === 'registration'
+  if (f === 'check in')    return a === 'check in' || a === 'check_in'
+  if (f === 'register')    return a === 'registration' || a === 'registration confirmation'
+  if (f === 'session join') return a === 'session join'
+  if (f === 'feedback')    return a === 'event feedback submit'
   return a === f
 }
 
 const getDotClass = (activity: string): string => {
   const a = normaliseActivity(activity)
-  if (a === 'check in' || a === 'checkin' || a === 'rate') return styles['dot-green']
-  if (a === 'view' || a === 'register' || a === 'registration') return styles['dot-blue']
+  if (a === 'check in' || a === 'check_in')          return styles['dot-green']
+  if (a === 'registration' || a === 'registration confirmation') return styles['dot-blue']
+  if (a === 'session join')                           return styles['dot-purple']
+  if (a === 'event feedback submit')                  return styles['dot-orange']
   return styles['dot-default']
 }
 
-const formatTime = (ts?: string) => {
+const formatTime = (ts?: string | number[]) => {
   if (!ts) return ''
-  const iso = ts.includes('Z') || ts.includes('+') ? ts : ts + 'Z'
-  return new Date(iso).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
+  let date: Date
+  // Backend may return LocalDateTime as array [y,m,d,h,min,s] or ISO string
+  if (Array.isArray(ts)) {
+    const [y, mo, d, h = 0, mi = 0, s = 0] = ts as number[]
+    date = new Date(y, mo - 1, d, h, mi, s)   // month is 0-indexed in JS
+  } else {
+    // ISO string "2026-04-25T17:30:00" — replace 'T' separator but no Z (server is local time)
+    date = new Date((ts as string).replace('T', ' '))
+  }
+  if (isNaN(date.getTime())) return ts as string
+  return date.toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })
 }
 
 const formatSessionDateTime = (date: string, timeSlot: string) => {
@@ -65,6 +78,8 @@ export const EngagementAnalytics = () => {
   const isOrganizerOrAdmin = ORGANIZER_ROLES.includes(user?.role ?? '')
 
   const [activeFilter, setActiveFilter] = useState('All')
+  const [feedbackPage, setFeedbackPage] = useState(0)
+  const FEEDBACK_PAGE_SIZE = 3
 
   // ── CSV Export ───────────────────────────────────────────────────────────────
   const handleExport = () => {
@@ -125,17 +140,18 @@ export const EngagementAnalytics = () => {
     return (sum / rated.length).toFixed(1)
   }, [feedback])
 
-  // ── Activity breakdown table ─────────────────────────────────────────────────
-  const activityBreakdown = useMemo(() => {
-    const map: Record<string, number> = {}
-    for (const eng of engagements) {
-      const key = eng.activity.replace(/_/g, ' ')
-      map[key] = (map[key] ?? 0) + 1
-    }
-    return Object.entries(map).sort((a, b) => b[1] - a[1])
-  }, [engagements])
-
-  const maxCount = activityBreakdown[0]?.[1] ?? 1
+  // ── Registration funnel ─────────────────────────────────────────────────────
+  const funnelStages = useMemo(() => {
+    const total = eventSummary?.totalRegistrations ?? 0
+    const confirmed = eventSummary?.confirmed ?? 0
+    const checkedIn = eventSummary?.checkedIn ?? 0
+    const pct = (n: number) => total > 0 ? Math.round((n / total) * 100) : 0
+    return [
+      { label: 'Registered',  count: total,     pct: 100,        color: '#3366FF' },
+      { label: 'Confirmed',   count: confirmed,  pct: pct(confirmed),  color: '#16A34A' },
+      { label: 'Checked In',  count: checkedIn,  pct: pct(checkedIn),  color: '#F47920' },
+    ]
+  }, [eventSummary])
 
   // ── Rating distribution ──────────────────────────────────────────────────────
   const ratingDist = useMemo(() => {
@@ -257,47 +273,46 @@ export const EngagementAnalytics = () => {
           <BlockSkeleton rows={8} />
         ) : (
           <>
-            {/* ── Two-column: Activity Breakdown + Rating Distribution ── */}
+            {/* ── Two-column: Registration Funnel + Rating Distribution ── */}
             <div className={styles['two-col']}>
 
-              {/* Activity Breakdown */}
+              {/* Registration Funnel */}
               <div className={styles.card}>
-                <h2 className={styles['card-title']}>Activity Breakdown</h2>
-                {activityBreakdown.length === 0 ? (
-                  <p className={styles.empty}>No engagement data yet.</p>
+                <h2 className={styles['card-title']}>Registration Funnel</h2>
+                {(eventSummary?.totalRegistrations ?? 0) === 0 ? (
+                  <p className={styles.empty}>No registration data yet.</p>
                 ) : (
-                  <div className={styles['table-wrapper']}>
-                    <table className={styles.table}>
-                      <thead>
-                        <tr>
-                          <th>Activity Type</th>
-                          <th>Count</th>
-                          <th>Share</th>
-                          <th></th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activityBreakdown.map(([activity, count]) => {
-                          const pct = Math.round((count / maxCount) * 100)
-                          const share = Math.round((count / engagements.length) * 100)
-                          return (
-                            <tr key={activity}>
-                              <td className={styles['td-activity']}>{activity}</td>
-                              <td className={styles['td-count']}>{count.toLocaleString()}</td>
-                              <td>
-                                <div className={styles['progress-bar']}>
-                                  <div
-                                    className={styles['progress-fill']}
-                                    style={{ width: `${pct}%` }}
-                                  />
-                                </div>
-                              </td>
-                              <td className={styles['td-pct']}>{share}%</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
+                  <div className={styles['funnel-wrap']}>
+                    {funnelStages.map((stage, i) => (
+                      <div key={stage.label} className={styles['funnel-stage']}>
+                        <div className={styles['funnel-row']}>
+                          <span className={styles['funnel-label']}>{stage.label}</span>
+                          <span className={styles['funnel-count']} style={{ color: stage.color }}>
+                            {stage.count.toLocaleString()}
+                          </span>
+                          <span className={styles['funnel-pct']}>{stage.pct}%</span>
+                        </div>
+                        <div className={styles['funnel-bar-bg']}>
+                          <div
+                            className={styles['funnel-bar-fill']}
+                            style={{ width: `${stage.pct}%`, background: stage.color }}
+                          />
+                        </div>
+                        {i < funnelStages.length - 1 && (
+                          <div className={styles['funnel-drop']}>
+                            ↓ {funnelStages[i + 1].pct}% progressed to {funnelStages[i + 1].label.toLowerCase()}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                    <div className={styles['funnel-footer']}>
+                      <span className={styles['funnel-tag-pending']}>
+                        {eventSummary?.pending ?? 0} pending
+                      </span>
+                      <span className={styles['funnel-tag-cancelled']}>
+                        {eventSummary?.cancelled ?? 0} cancelled
+                      </span>
+                    </div>
                   </div>
                 )}
               </div>
@@ -320,9 +335,7 @@ export const EngagementAnalytics = () => {
                         <div className={styles['progress-bar']}>
                           <div
                             className={styles['progress-fill']}
-                            style={{
-                              width: `${totalRatings ? (ratingDist[star] / totalRatings) * 100 : 0}%`,
-                            }}
+                            style={{ width: `${totalRatings ? (ratingDist[star] / totalRatings) * 100 : 0}%` }}
                           />
                         </div>
                       </div>
@@ -331,6 +344,66 @@ export const EngagementAnalytics = () => {
                 )}
               </div>
             </div>
+
+            {/* ── Attendee Comments ── */}
+            {(() => {
+              const commented = feedback.filter((f) => f.comments?.trim())
+              if (commented.length === 0) return null
+              const totalPages = Math.ceil(commented.length / FEEDBACK_PAGE_SIZE)
+              const paginated = commented.slice(
+                feedbackPage * FEEDBACK_PAGE_SIZE,
+                feedbackPage * FEEDBACK_PAGE_SIZE + FEEDBACK_PAGE_SIZE
+              )
+              return (
+                <div className={styles.card}>
+                  <div className={styles['feedback-card-header']}>
+                    <h2 className={styles['card-title']}>Attendee Comments</h2>
+                    <div className={styles['feedback-nav']}>
+                      <button
+                        className={styles['nav-btn']}
+                        onClick={() => setFeedbackPage((p) => p - 1)}
+                        disabled={feedbackPage === 0}
+                        aria-label="Previous"
+                      >‹</button>
+                      <span className={styles['nav-indicator']}>
+                        {feedbackPage + 1} / {totalPages}
+                      </span>
+                      <button
+                        className={styles['nav-btn']}
+                        onClick={() => setFeedbackPage((p) => p + 1)}
+                        disabled={feedbackPage >= totalPages - 1}
+                        aria-label="Next"
+                      >›</button>
+                    </div>
+                  </div>
+                  <div className={styles['feedback-list']}>
+                    {paginated.map((f, i) => (
+                      <div key={f.feedbackId ?? i} className={styles['feedback-item']}>
+                        <div className={styles['feedback-header']}>
+                          <div className={styles['feedback-stars']}>
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <span key={s} className={s <= (f.rating ?? 0) ? styles['star-filled'] : styles['star-empty']}>
+                                {s <= (f.rating ?? 0) ? '★' : '☆'}
+                              </span>
+                            ))}
+                            <span className={styles['feedback-rating-num']}>{f.rating ?? '—'}/5</span>
+                          </div>
+                          <div className={styles['feedback-meta']}>
+                            <span className={styles['feedback-attendee']}>
+                              Attendee #{(f.attendeeId ?? '').slice(-4).toUpperCase()}
+                            </span>
+                            {f.createdAt && (
+                              <span className={styles['feedback-date']}>{formatTime(f.createdAt)}</span>
+                            )}
+                          </div>
+                        </div>
+                        <p className={styles['feedback-comment']}>{f.comments}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* ── Session-wise Attendance ── */}
             <div className={styles.card}>
@@ -439,7 +512,7 @@ export const EngagementAnalytics = () => {
                           <strong>{eng.activity.replace(/_/g, ' ')}</strong>
                           {eng.attendeeId && (
                             <span className={styles['timeline-user']}>
-                              {' '}by {eng.attendeeId.slice(0, 8)}…
+                              {' '}by Attendee #{eng.attendeeId.slice(-4).toUpperCase()}
                             </span>
                           )}
                         </div>
