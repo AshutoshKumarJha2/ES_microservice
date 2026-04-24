@@ -11,11 +11,15 @@ export const adminService = {
     size?: number
   }): Promise<UsersPageDto> {
     const { data } = await axiosInstance.get('/api/v1/auth-manager/users', { params })
-    // Handle both paginated and plain-array responses
     if (Array.isArray(data)) {
       return { content: data, totalElements: data.length, totalPages: 1, number: 0, size: data.length }
     }
     return data
+  },
+
+  async searchUsers(params: { search?: string; role?: string; status?: string }): Promise<UserResponseDto[]> {
+    const { data } = await axiosInstance.get('/api/v1/auth-manager/users/search', { params })
+    return Array.isArray(data) ? data : (data.content ?? [])
   },
 
   async updateUserRole(userId: string, role: UserResponseDto['role']): Promise<UserResponseDto> {

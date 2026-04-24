@@ -12,6 +12,8 @@ import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.UserService;
+import com.cts.eventsphere.iamservice.specification.UserSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,6 +61,14 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public List<UserResponseDto> searchUsers(String actorId, String search, String role, String status) {
+        Specification<User> spec = UserSpecification.build(search, role, status);
+        return userRepo.findAll(spec).stream()
+                .map(UserResponseDtoMapper::toDTO)
+                .toList();
+    }
+
     @Override
     public List<UserResponseDto> getUsers(List<String> userIds) {
         return userRepo.findAllById(userIds).stream()
