@@ -74,7 +74,7 @@ public class VenueServiceImpl implements VenueService {
      * Registers a new venue in the system.
      *
      * @param actorId The unique identifier of the user performing the creation.
-     * @param dto HYYHYHBNYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY   The venue request data transfer object.
+     * @param dto HYYHYHBNY  The venue request data transfer object.
      * @return The saved venue as a response DTO.
      */
     @Override
@@ -150,7 +150,9 @@ public class VenueServiceImpl implements VenueService {
                 .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + venueId));
 
         Venue updatedVenue = venueRequestDtoMapper.toEntity(dto);
-        updatedVenue.setVenueId(existingVenue.getVenueId());
+        existingVenue.setName(updatedVenue.getName());
+        existingVenue.setLocation(updatedVenue.getLocation());
+        existingVenue.setCapacity(updatedVenue.getCapacity());
         Venue saved = venueRepository.save(updatedVenue);
 
         log.info("Venue updated with id: {} by actor: {}", venueId, actorId);
