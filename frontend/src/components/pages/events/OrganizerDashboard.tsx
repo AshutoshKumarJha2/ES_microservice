@@ -4,6 +4,8 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllEvents, deleteEvent, createEvent, updateEvent } from '../../../store/slices/eventsSlice'
 import { venueService } from '../../../services/events/venueService'
 import type { EventResponseDto, EventRequestDto, VenueResponseDto, EventStatus } from '../../../types/events'
+import { useConfirm } from '../../../hooks/useConfirm'
+import type { ConfirmVariant } from '../../elements/common/ConfirmModal'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
@@ -41,6 +43,7 @@ export const OrganizerDashboard = () => {
   const [formError, setFormError]         = useState<string | null>(null)
   const [fieldErrors, setFieldErrors]     = useState<{ startDate?: string; endDate?: string }>({})
   const [actionLoading, setActionLoading] = useState<string | null>(null)   // event ID being status-mutated
+  const { confirm, ConfirmDialog } = useConfirm()
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -124,17 +127,24 @@ export const OrganizerDashboard = () => {
 
   // ── Table actions ──────────────────────────────────────────────────────────
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Delete this event? This cannot be undone.')) return
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Delete Event',
+      message: 'Delete this event? This cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
     dispatch(deleteEvent(id))
   }
 
   const handleStatusChange = async (event: EventResponseDto, newStatus: EventStatus) => {
-    const confirmMsgs: Partial<Record<EventStatus, string>> = {
-      CANCELLED: 'Cancel this event? Attendees will be notified.',
-      COMPLETED: 'Mark this event as Completed?',
+    const confirmMsgs: Partial<Record<EventStatus, { title: string; message: string; variant: ConfirmVariant }>> = {
+      CANCELLED: { title: 'Cancel Event',   message: 'Cancel this event? Attendees will be notified.', variant: 'warning' },
+      COMPLETED: { title: 'Mark Complete',  message: 'Mark this event as Completed?',                  variant: 'primary' },
     }
-    if (confirmMsgs[newStatus] && !window.confirm(confirmMsgs[newStatus])) return
+    const opts = confirmMsgs[newStatus]
+    if (opts && !(await confirm(opts))) return
 
     setActionLoading(event.id)
     try {
@@ -284,6 +294,8 @@ export const OrganizerDashboard = () => {
           </Card.Body>
         </Card>
       </Container>
+
+      {ConfirmDialog}
 
       {/* Create / Edit Modal */}
       <Modal show={showModal} onHide={closeModal} centered size="lg">

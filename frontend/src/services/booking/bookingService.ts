@@ -8,7 +8,7 @@ import type {
     
 } from '../../types/venue'
 
-const BASE = '/api/v1/venue-manager/api/v1'
+const BASE = '/api/v1/venue-manager'
 
 export const bookingService = {
 

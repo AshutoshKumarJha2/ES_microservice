@@ -15,6 +15,7 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { ConfirmModal } from '../../elements/common/ConfirmModal'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
@@ -215,7 +216,7 @@ export const VenueResources = () => {
                         </Badge>
                       </td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
-                        ${Number(r.costRate).toFixed(2)}/unit
+                        ₹{Number(r.costRate).toFixed(2)}/unit
                       </td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{r.unit}</td>
                       <td className="align-middle px-3">
@@ -326,32 +327,16 @@ export const VenueResources = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirm Modal */}
-      <Modal show={!!confirmDeleteId} onHide={() => setConfirmDeleteId(null)} centered>
-        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Delete Resource</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          {actionError && (
-            <Alert variant="danger" className="py-2 mb-3" onClose={() => dispatch(clearActionError())} dismissible>
-              {actionError}
-            </Alert>
-          )}
-          <p className="mb-0" style={{ color: 'var(--text-body)' }}>
-            Are you sure you want to delete{' '}
-            <strong>{resources.find((r) => r.resourceId === confirmDeleteId)?.name}</strong>?
-            This action cannot be undone.
-          </p>
-        </Modal.Body>
-        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setConfirmDeleteId(null)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button variant="danger" size="sm" className="fw-semibold rounded-3" onClick={handleDelete} disabled={actionLoading}>
-            {actionLoading ? <><Spinner animation="border" size="sm" className="me-1" />Deleting…</> : 'Delete'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ConfirmModal
+        show={!!confirmDeleteId}
+        title={`Delete "${resources.find((r) => r.resourceId === confirmDeleteId)?.name ?? 'Resource'}"`}
+        message="This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={actionLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   )
 }
