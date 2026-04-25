@@ -4,6 +4,7 @@ import com.cts.venue_manager.dto.mapper.venue.VenueRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.venue.VenueResponseDtoMapper;
 import com.cts.venue_manager.dto.venue.VenueRequestDto;
 import com.cts.venue_manager.dto.venue.VenueResponseDto;
+import com.cts.venue_manager.exception.venue.VenueInUseException;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
 import com.cts.venue_manager.model.Venue;
 //import com.cts.venue_manager.model.data.AuditAction;
@@ -14,6 +15,7 @@ import com.cts.venue_manager.repository.VenueRepository;
 import com.cts.venue_manager.service.VenueService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -196,20 +198,37 @@ public class VenueServiceImpl implements VenueService {
      * @param venueId The ID of the venue to be removed.
      * @throws VenueNotFoundException if no venue exists with the given ID.
      */
+    /**
+     * Deletes a venue by its ID.
+     * * @param actorId the ID of the user performing the deletion
+     * @param venueId the unique identifier of the venue
+     * @throws VenueNotFoundException if no venue exists with the given ID
+     * @throws VenueInUseException    if the venue is referenced by other entities (e.g., allocations)
+     */
     @Override
     @Transactional
     public void deleteVenue(String actorId, String venueId) {
         Venue venue = venueRepository.findById(venueId)
                 .orElseThrow(() -> new VenueNotFoundException("Venue not found with id: " + venueId));
 
-        String venueName = venue.getName();
-        venueRepository.deleteById(venueId);
+        try {
 
-        log.info("Venue deleted with id: {} by actor: {}", venueId, actorId);
+            venueRepository.delete(venue);
+
+            venueRepository.flush();
+
+            log.info("Venue '{}' (ID: {}) deleted by actor: {}", venue.getName(), venueId, actorId);
+
+        } catch (DataIntegrityViolationException e) {
+            log.error("Failed to delete venue {}: it is currently in use.", venueId);
+            throw new VenueInUseException("Cannot delete venue because it is linked to active resources or allocations.");
+        }
+    }
+
 //        auditService.logAudit(actorId, AuditAction.DELETE, Venue.class, venueId);
 //
 //        sendSafeNotification(actorId, String.format("Venue '%s' has been removed from the system.", venueName), "VENUE_DELETE");
-    }
+
 
     /**
      * Finds venues that are free on a specific date.
