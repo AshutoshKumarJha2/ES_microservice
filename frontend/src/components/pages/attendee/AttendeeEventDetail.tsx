@@ -296,40 +296,38 @@ export const AttendeeEventDetail = () => {
               </Card>
             </Col>
 
-            {/* Community Rating — only when avgRating has loaded */}
-            {avgRating && (
-              <Col xs={12}>
-                <Card className="es-card border shadow-sm">
-                  <Card.Body className="p-3 p-md-4 d-flex flex-wrap align-items-center gap-3">
-                    <div>
-                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Community Rating</div>
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="d-flex gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span key={star} style={{ color: star <= Math.round(avgRating.score) ? 'var(--amber)' : 'var(--border-color)' }}>
-                              {star <= Math.round(avgRating.score) ? <StarFill size={16} /> : <Star size={16} />}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
-                          {avgRating.score.toFixed(1)}
-                        </span>
-                        <span className="small" style={{ color: 'var(--text-muted)' }}>
-                          · {avgRating.count} review{avgRating.count !== 1 ? 's' : ''}
-                        </span>
+            {/* Community Rating — always visible */}
+            <Col xs={12}>
+              <Card className="es-card border shadow-sm">
+                <Card.Body className="p-3 p-md-4 d-flex flex-wrap align-items-center gap-3">
+                  <div>
+                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Community Rating</div>
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} style={{ color: avgRating && star <= Math.round(avgRating.score) ? 'var(--amber)' : 'var(--border-color)' }}>
+                            {avgRating && star <= Math.round(avgRating.score) ? <StarFill size={16} /> : <Star size={16} />}
+                          </span>
+                        ))}
                       </div>
+                      <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
+                        {avgRating ? avgRating.score.toFixed(1) : '0.0'}
+                      </span>
+                      <span className="small" style={{ color: 'var(--text-muted)' }}>
+                        {avgRating ? `· ${avgRating.count} review${avgRating.count !== 1 ? 's' : ''}` : '· No reviews yet'}
+                      </span>
                     </div>
-                    {canFeedback && (
-                      <Link to={`/attendee/feedback/${event!.id}`} className="ms-auto">
-                        <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium" style={{ fontSize: '0.82rem' }}>
-                          Submit Feedback
-                        </Button>
-                      </Link>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Col>
-            )}
+                  </div>
+                  {canFeedback && (
+                    <Link to={`/attendee/feedback/${event!.id}`} className="ms-auto">
+                      <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium" style={{ fontSize: '0.82rem' }}>
+                        Submit Feedback
+                      </Button>
+                    </Link>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
         )}
 

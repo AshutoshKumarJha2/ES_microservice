@@ -22,10 +22,9 @@ const initialState: AdminState = {
 
 export const fetchUsers = createAsyncThunk(
   'admin/fetchUsers',
-  async (_, { rejectWithValue }) => {
+  async (params: { search?: string; role?: string; status?: string } = {}, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.get('/api/v1/auth-manager/users')
-      return Array.isArray(data) ? data : (data.content ?? [])
+      return await adminService.searchUsers(params)
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string }
       return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch users')

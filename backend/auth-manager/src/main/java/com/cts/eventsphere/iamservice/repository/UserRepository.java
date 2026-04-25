@@ -2,6 +2,7 @@ package com.cts.eventsphere.iamservice.repository;
 
 import com.cts.eventsphere.iamservice.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -18,7 +19,7 @@ import java.util.Optional;
  * @since 25-03-2026
  */
 @Repository
-public interface UserRepository extends JpaRepository<User,String> {
+public interface UserRepository extends JpaRepository<User, String>, JpaSpecificationExecutor<User> {
 
     /**
      * Finds a user by their email address.
