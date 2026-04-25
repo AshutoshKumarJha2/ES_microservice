@@ -67,6 +67,12 @@ export const Header = () => {
             {user?.role === 'ADMIN' && (
               <Nav.Link as={Link} to="/admin/dashboard" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
             )}
+            {user?.role === 'VENDOR' && (
+              <Nav.Link as={Link} to="/vendor" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+            )}
+            {user?.role === 'VENUE_MANAGER' && (
+              <Nav.Link as={Link} to="/venue-manager/dashboard" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+            )}
             {user?.role === 'FINANCE_OFFICER' && (
               <>
                 <Nav.Link as={Link} to="/finance/expenses" onClick={() => setExpanded(false)} style={NAV_LINK_STYLE}>Expenses</Nav.Link>

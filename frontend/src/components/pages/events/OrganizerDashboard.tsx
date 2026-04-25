@@ -221,7 +221,14 @@ export const OrganizerDashboard = () => {
       <PageBanner
         title="Organizer Portal"
         subtitle="Manage your events, tickets, registrations and budget"
-        actions={<Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>+ New Event</Button>}
+        actions={<>
+          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/organizer/contracts')}>
+            View Contracts
+          </Button>
+          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>
+            + New Event
+          </Button>
+        </>}
       />
 
       <Container fluid className="px-3 px-md-4 py-4">

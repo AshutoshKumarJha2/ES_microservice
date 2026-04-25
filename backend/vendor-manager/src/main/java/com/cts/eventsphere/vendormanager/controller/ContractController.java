@@ -69,7 +69,7 @@ public class ContractController {
      * @return the generated invoice details [cite: 55]
      */
     @PostMapping("/{contractId}/invoice")
-    @PreAuthorize("hasAnyRole('FINANCE_OFFICER','VENDOR')")
+    @PreAuthorize("hasAnyRole('FINANCE_OFFICER')")
     public ResponseEntity<InvoiceResponseDto> createInvoice(@AuthenticationPrincipal UserPrincipal user, @PathVariable String contractId, @Valid @RequestBody InvoiceRequestDto dto) {
         var actorId = user.userId();
         log.info("REST request to create invoice for contract with ID: {} by actorId={}",contractId,actorId);

@@ -38,6 +38,7 @@ import BookingVenueAndResource from './components/pages/booking/BookingVenueAndR
 import { VendorLayout } from './components/layout/VendorLayout'
 import { VendorManagerDashboard } from './components/pages/vendor/VendorManagerDashboard'
 import { VendorProfile } from './components/pages/vendor/VendorProfile'
+import { Vendors } from './components/pages/vendor/Vendors'
 import { Contracts } from './components/pages/vendor/Contracts'
 import { Deliveries } from './components/pages/vendor/Deliveries'
 import { Invoices } from './components/pages/vendor/Invoices'
@@ -148,7 +149,9 @@ export const App = () => {
     {
       element: <VendorLayout />,
       children: [
+        { path: '/vendor',            element: <VendorManagerDashboard /> },
         { path: '/vendor/dashboard',  element: <VendorManagerDashboard /> },
+        { path: '/vendor/vendors',    element: <Vendors /> },
         { path: '/vendor/profile',    element: <VendorProfile /> },
         { path: '/vendor/contracts',  element: <Contracts /> },
         { path: '/vendor/deliveries', element: <Deliveries /> },

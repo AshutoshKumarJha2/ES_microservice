@@ -5,12 +5,15 @@ import com.cts.eventsphere.vendormanager.dto.mapper.vendor.VendorRequestDtoMappe
 import com.cts.eventsphere.vendormanager.dto.mapper.vendor.VendorResponseDtoMapper;
 import com.cts.eventsphere.vendormanager.dto.vendor.VendorRequestDto;
 import com.cts.eventsphere.vendormanager.dto.vendor.VendorResponseDto;
+import com.cts.eventsphere.vendormanager.exception.vendor.VendorAlreadyExistsException;
+import com.cts.eventsphere.vendormanager.exception.vendor.VendorInUseException;
 import com.cts.eventsphere.vendormanager.exception.vendor.VendorNotFoundException;
 import com.cts.eventsphere.vendormanager.model.Vendor;
 import com.cts.eventsphere.vendormanager.repository.VendorRepository;
 import com.cts.eventsphere.vendormanager.service.VendorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +49,9 @@ public class VendorServiceImpl implements VendorService {
     @Transactional
     public VendorResponseDto createVendor(String actorId, VendorRequestDto request){
         log.info("Creating vendor by actorId={}", actorId);
+        if (vendorRepository.count() > 0) {
+            throw new VendorAlreadyExistsException("A vendor is already registered. Only one vendor company is allowed.");
+        }
         Vendor vendor = requestDtoMapper.toEntity(request);
         Vendor saved = vendorRepository.save(vendor);
 
@@ -142,21 +148,30 @@ public class VendorServiceImpl implements VendorService {
      */
     @Override
     @Transactional
-    public void deleteVendor(String actorId, String vendorId){
-        log.info("Attempting to Delete vendor with ID={} by actorId={}", vendorId, actorId);
+    public void deleteVendor(String actorId, String vendorId) {
+        log.info("Attempting to delete vendor with ID={} by actorId={}", vendorId, actorId);
 
-        if(!vendorRepository.existsById(vendorId)){
-            throw new VendorNotFoundException("Vendor not found with ID: "+vendorId);
+        // 1. Check existence first
+        if (!vendorRepository.existsById(vendorId)) {
+            throw new VendorNotFoundException("Vendor not found with ID: " + vendorId);
         }
 
-        vendorRepository.deleteById(vendorId);
-        log.info("Vendor ID={} deleted successfully by actorId={}", vendorId, actorId);
-//        auditService.logAudit(actorId, AuditAction.DELETE, Vendor.class, vendorId);
-//
-//        notificationService.sendNotification(
-//                actorId,
-//                "Vendor account removed.",
-//                "VENDOR_DELETED"
-//        );
+        try {
+            // 2. Attempt deletion
+            vendorRepository.deleteById(vendorId);
+
+            vendorRepository.flush();
+
+            log.info("Vendor ID={} deleted successfully by actorId={}", vendorId, actorId);
+
+            // auditService.logAudit(actorId, AuditAction.DELETE, Vendor.class, vendorId);
+            // ... notification logic
+
+        } catch (DataIntegrityViolationException e) {
+            log.warn("Failed to delete vendor ID={} due to existing dependencies: {}", vendorId, e.getMessage());
+
+            // 3. Throw your custom exception to be caught by the GlobalExceptionHandler
+            throw new VendorInUseException("Vendor cannot be deleted because it is still linked to active contracts.");
+        }
     }
 }

@@ -48,7 +48,14 @@ export const deleteVendor = createAsyncThunk(
     try {
       await vendorService.deleteVendor(vendorId)
       return vendorId
-    } catch (err) { return rejectWithValue((err as Error).message) }
+    } catch (err: any) {
+      const status = err.response?.status;
+      const message = err.response?.data?.error || err.message;
+      return rejectWithValue({
+        status: status,
+        message: message
+      });
+    }
   }
 )
 

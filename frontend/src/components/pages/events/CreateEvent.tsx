@@ -3,7 +3,6 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { createEvent, updateEvent, fetchEventById } from '../../../store/slices/eventsSlice'
 import { fetchUsers } from '../../../store/slices/adminSlice'
-import { venueService } from '../../../services/events/venueService'
 import { eventService } from '../../../services/events/eventService'
 import { SessionManager } from '../../elements/events/SessionManager'
 import type { SessionRow } from '../../elements/events/SessionManager'
@@ -11,6 +10,7 @@ import type { EventRequestDto, VenueResponseDto, UserResponseDto } from '../../.
 import {
   Container, Row, Col, Card, Form, Button, Spinner, Alert,
 } from 'react-bootstrap'
+import { venueService } from '../../../services/events/venueService'
 
 export const CreateEvent = () => {
   const navigate  = useNavigate()

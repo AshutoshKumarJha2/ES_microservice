@@ -8,6 +8,8 @@ import com.cts.eventsphere.vendormanager.exception.event.EventNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoiceNotFoundException;
 import com.cts.eventsphere.vendormanager.exception.invoice.InvoicePdfGenerationException;
 import com.cts.eventsphere.vendormanager.exception.invoice.PaymentNotApprovedException;
+import com.cts.eventsphere.vendormanager.exception.vendor.VendorAlreadyExistsException;
+import com.cts.eventsphere.vendormanager.exception.vendor.VendorInUseException;
 import com.cts.eventsphere.vendormanager.exception.vendor.VendorNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -35,15 +37,35 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(VendorInUseException.class)
+    public ResponseEntity<GenericErrorResponse> handleVendorInUse(VendorInUseException e) {
+        log.warn("Deletion failed: Vendor is still referenced by active contracts. Message: {}", e.getMessage());
+
+        GenericErrorResponse errorResponse = new GenericErrorResponse(
+                e.getMessage()
+        );
+
+        // HttpStatus.CONFLICT (409) is the standard for Foreign Key/Constraint violations
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(InvoicePdfGenerationException.class)
     public ResponseEntity<GenericErrorResponse> handleInvoicePdfError(InvoicePdfGenerationException e) {
         log.error("PDF System Failure: {}", e.getMessage());
         return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
+
+
+
     @ExceptionHandler(VendorNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleVendorNotFound(VendorNotFoundException e) {
         return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(VendorAlreadyExistsException.class)
+    public ResponseEntity<GenericErrorResponse> handleVendorAlreadyExists(VendorAlreadyExistsException e) {
+        return new ResponseEntity<>(new GenericErrorResponse(e.getMessage()), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(DeliveryNotFoundException.class)

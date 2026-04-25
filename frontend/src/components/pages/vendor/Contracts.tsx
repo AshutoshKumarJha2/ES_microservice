@@ -5,24 +5,31 @@ import {
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
-import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
   fetchAllContracts,
   fetchAllVendors,
-  fetchAllInvoices,
+  createContract,
   updateContractStatus,
   createInvoiceViaContract,
-  addDeliveryViaContract,
 } from '../../../store/slices/vendor/vendorSlice'
+import { fetchAllEvents } from '../../../store/slices/eventsSlice'
 import type {
-  ContractResponseDto, ContractStatus,
-  InvoiceRequestDto, DeliveryRequestDto, DeliveryStatus,
+  ContractResponseDto, ContractRequestDto, ContractStatus,
+  InvoiceRequestDto,
 } from '../../../types/vendor'
 
+// Role helpers — mirrors backend @PreAuthorize annotations:
+// POST  /contracts        → ORGANIZER
+// PATCH /{id}/status      → ORGANIZER | VENDOR
+// POST  /{id}/invoice     → FINANCE_OFFICER
+
 const FILTER_STATUSES: ContractStatus[] = ['DRAFT', 'ACTIVE', 'COMPLETED', 'TERMINATED']
-const DELIVERY_STATUSES: DeliveryStatus[] = ['SCHEDULED', 'IN_TRANSIT', 'DELIVERED', 'FAILED', 'CANCELLED']
+
+// datetime-local inputs return "yyyy-MM-ddTHH:mm" (no seconds).
+// Spring Boot's LocalDateTime requires seconds; never send a Z-offset string.
+const toLocalDT = (s: string) => s.length === 16 ? s + ':00' : s
 
 const statusBadgeClass = (s: ContractStatus): string => {
   if (s === 'DRAFT')      return 'es-badge-draft'
@@ -32,45 +39,51 @@ const statusBadgeClass = (s: ContractStatus): string => {
   return 'es-badge-draft'
 }
 
+const EMPTY_CONTRACT: ContractRequestDto = {
+  vendorId: '', eventId: '', startDate: '', endDate: '', value: 0, status: 'DRAFT',
+}
+
 const EMPTY_INVOICE: Omit<InvoiceRequestDto, 'contractId'> = {
   totalAmount: 0, dueDate: '', status: 'ISSUED',
 }
 
-const EMPTY_DELIVERY: Omit<DeliveryRequestDto, 'invoiceId'> = {
-  item: '', quantity: 1, deliveryDate: '', status: 'SCHEDULED', trackingNumber: '',
-}
-
 export const Contracts = () => {
   const dispatch = useAppDispatch()
-  const { contracts, contractsLoading, contractsError, vendors, invoices } =
+  const { contracts, contractsLoading, contractsError, vendors } =
     useAppSelector((s) => s.vendor)
+  const events = useAppSelector((s) => s.events.events)
+  const { user } = useAppSelector((s) => s.auth)
+
+  // Role gates — kept in sync with ContractController @PreAuthorize rules
+  const isOrganizer = user?.role === 'ORGANIZER'
+  const canSign     = user?.role === 'ORGANIZER' || user?.role === 'VENDOR'
+  const canInvoice  = user?.role === 'FINANCE_OFFICER'
 
   const [search, setSearch]         = useState('')
   const [filter, setFilter]         = useState<ContractStatus | 'ALL'>('ALL')
   const [target, setTarget]         = useState<ContractResponseDto | null>(null)
 
-  // Sign modal
-  const [showSign, setShowSign]     = useState(false)
-  const [signing, setSigning]       = useState(false)
+  // Create contract modal (ORGANIZER only)
+  const [showCreate, setShowCreate]       = useState(false)
+  const [contractForm, setContractForm]   = useState<ContractRequestDto>(EMPTY_CONTRACT)
+  const [savingContract, setSavingContract] = useState(false)
+
 
   // Invoice modal
   const [showInvoice, setShowInvoice] = useState(false)
   const [invoiceForm, setInvoiceForm] = useState(EMPTY_INVOICE)
   const [savingInvoice, setSavingInvoice] = useState(false)
 
-  // Delivery modal
-  const [showDelivery, setShowDelivery]   = useState(false)
-  const [deliveryInvoiceId, setDeliveryInvoiceId] = useState('')
-  const [deliveryForm, setDeliveryForm]   = useState(EMPTY_DELIVERY)
-  const [savingDelivery, setSavingDelivery] = useState(false)
-
   useEffect(() => {
     dispatch(fetchAllContracts())
     dispatch(fetchAllVendors())
-    dispatch(fetchAllInvoices())
+    dispatch(fetchAllEvents())
   }, [dispatch])
 
-  const vendorName = (id: string) => vendors.find(v => v.vendorId === id)?.name ?? id.slice(0, 8) + '…'
+  const vendorName = (id: string) => vendors.find(v => v.vendorId === id)?.name ?? '—'
+  const eventName  = (id: string) => events.find(e => e.id === id)?.eventName ?? '—'
+  const contractLabel = (c: typeof target) =>
+    c ? `${vendorName(c.vendorId)} / ${eventName(c.eventId)}` : '—'
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -83,21 +96,38 @@ export const Contracts = () => {
     })
   }, [contracts, search, filter, vendors])
 
-  // Invoices linked to the selected contract (for delivery invoice select)
-  const contractInvoices = invoices.filter(i => i.contractId === target?.contractId)
-
-  /* ── Sign ── */
-  const openSign = (c: ContractResponseDto) => { setTarget(c); setShowSign(true) }
-  const handleSign = async () => {
-    if (!target) return
-    setSigning(true)
+  /* ── Create Contract (ORGANIZER) ── */
+  const handleCreateContract = async () => {
+    if (!contractForm.vendorId.trim() || !contractForm.eventId.trim()) {
+      toast.error('Vendor ID and Event ID are required.')
+      return
+    }
+    if (!contractForm.startDate || !contractForm.endDate) {
+      toast.error('Start and end dates are required.')
+      return
+    }
+    if (contractForm.value <= 0) {
+      toast.error('Contract value must be positive.')
+      return
+    }
+    setSavingContract(true)
     try {
-      await dispatch(updateContractStatus({ contractId: target.contractId, status: 'ACTIVE' })).unwrap()
-      toast.success('Contract signed — status set to ACTIVE.')
-      setShowSign(false)
+      await dispatch(createContract({
+        ...contractForm,
+        startDate: toLocalDT(contractForm.startDate),
+        endDate: toLocalDT(contractForm.endDate),
+      })).unwrap()
+      toast.success('Contract created.')
+      setShowCreate(false)
+      setContractForm(EMPTY_CONTRACT)
     } catch {
-      toast.error('Failed to sign contract.')
-    } finally { setSigning(false) }
+      toast.error('Failed to create contract.')
+    } finally { setSavingContract(false) }
+  }
+
+  /* ── Update Status (ORGANIZER | VENDOR) ── */
+  const handleStatusChange = (contractId: string, status: ContractStatus) => {
+    dispatch(updateContractStatus({ contractId, status }))
   }
 
   /* ── Create Invoice via Contract ── */
@@ -114,7 +144,7 @@ export const Contracts = () => {
     try {
       await dispatch(createInvoiceViaContract({
         contractId: target.contractId,
-        payload: { ...invoiceForm, contractId: target.contractId },
+        payload: { ...invoiceForm, contractId: target.contractId, dueDate: toLocalDT(invoiceForm.dueDate) },
       })).unwrap()
       toast.success('Invoice created successfully.')
       setShowInvoice(false)
@@ -123,40 +153,19 @@ export const Contracts = () => {
     } finally { setSavingInvoice(false) }
   }
 
-  /* ── Add Delivery via Contract ── */
-  const openDelivery = (c: ContractResponseDto) => {
-    setTarget(c)
-    setDeliveryInvoiceId('')
-    setDeliveryForm(EMPTY_DELIVERY)
-    setShowDelivery(true)
-  }
-  const handleAddDelivery = async () => {
-    if (!target) return
-    if (!deliveryInvoiceId.trim()) { toast.error('Invoice ID is required.'); return }
-    if (!deliveryForm.item.trim() || !deliveryForm.deliveryDate || !deliveryForm.trackingNumber.trim()) {
-      toast.error('All fields are required.')
-      return
-    }
-    setSavingDelivery(true)
-    try {
-      await dispatch(addDeliveryViaContract({
-        contractId: target.contractId,
-        payload: {
-          ...deliveryForm,
-          invoiceId: deliveryInvoiceId,
-          deliveryDate: new Date(deliveryForm.deliveryDate).toISOString(),
-        },
-      })).unwrap()
-      toast.success('Delivery logged successfully.')
-      setShowDelivery(false)
-    } catch {
-      toast.error('Failed to add delivery.')
-    } finally { setSavingDelivery(false) }
-  }
-
   return (
-    <div>
-      <PageBanner title="My Contracts" subtitle="View and manage vendor agreements" />
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
+      <PageBanner
+        title="Contracts"
+        subtitle="View and manage vendor agreements"
+        actions={
+          isOrganizer
+            ? <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => { setContractForm(EMPTY_CONTRACT); setShowCreate(true) }}>
+                + New Contract
+              </Button>
+            : undefined
+        }
+      />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {contractsError && (
@@ -207,21 +216,25 @@ export const Contracts = () => {
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
-                    {['Contract ID', 'Vendor', 'Event ID', 'Value', 'Start', 'End', 'Status', 'Actions'].map(h => (
+                    {['Contract ID', 'Vendor', 'Event', 'Value', 'Start', 'End', 'Status', 'Actions'].map(h => (
                       <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {contractsLoading ? <TableRowsSkeleton rows={5} cols={8} /> : filtered.map(c => (
+                  {contractsLoading ? (
+                    <tr>
+                      <td colSpan={8} className="text-center py-4">
+                        <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
+                      </td>
+                    </tr>
+                  ) : filtered.map(c => (
                     <tr key={c.contractId}>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {c.contractId.slice(0, 8)}…
+                      <td className="align-middle px-3 fw-semibold" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                        CON-{c.contractId.slice(0, 8).toUpperCase()}
                       </td>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{vendorName(c.vendorId)}</td>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {c.eventId.slice(0, 8)}…
-                      </td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{eventName(c.eventId)}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
                         ${Number(c.value).toLocaleString()}
                       </td>
@@ -237,21 +250,22 @@ export const Contracts = () => {
                         </Badge>
                       </td>
                       <td className="align-middle px-3">
-                        <div className="d-flex gap-1 flex-wrap">
-                          {c.status === 'DRAFT' && (
-                            <Button size="sm" variant="outline-primary" className="rounded-2" onClick={() => openSign(c)}>
-                              ✍ Sign
-                            </Button>
+                        <div className="d-flex gap-1 flex-wrap align-items-center">
+                          {canSign && (
+                            <Form.Select
+                              size="sm"
+                              className="es-form-control rounded-2"
+                              style={{ width: 'auto' }}
+                              value={c.status}
+                              onChange={e => handleStatusChange(c.contractId, e.target.value as ContractStatus)}
+                            >
+                              {FILTER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                            </Form.Select>
                           )}
-                          {c.status === 'ACTIVE' && (
-                            <>
-                              <Button size="sm" variant="outline-success" className="rounded-2" onClick={() => openInvoice(c)}>
-                                + Invoice
-                              </Button>
-                              <Button size="sm" variant="outline-secondary" className="rounded-2" onClick={() => openDelivery(c)}>
-                                + Delivery
-                              </Button>
-                            </>
+                          {c.status === 'ACTIVE' && canInvoice && (
+                            <Button size="sm" variant="outline-success" className="rounded-2" onClick={() => openInvoice(c)}>
+                              + Invoice
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -264,23 +278,93 @@ export const Contracts = () => {
         </Card>
       </Container>
 
-      {/* Sign Modal */}
-      <Modal show={showSign} onHide={() => setShowSign(false)} centered>
+      {/* Create Contract Modal (ORGANIZER only) */}
+      <Modal show={showCreate} onHide={() => setShowCreate(false)} centered>
         <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Sign Contract</Modal.Title>
+          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>New Contract</Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          <p className="mb-2" style={{ color: 'var(--text-body)' }}>
-            Sign contract <strong>{target?.contractId?.slice(0, 8)}…</strong>?
-          </p>
-          <p className="mb-0 small" style={{ color: 'var(--text-muted)' }}>
-            Status will be set to <strong>ACTIVE</strong>.
-          </p>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label className="es-label">Vendor *</Form.Label>
+              <Form.Select
+                className="es-form-control rounded-3"
+                value={contractForm.vendorId}
+                onChange={e => setContractForm(p => ({ ...p, vendorId: e.target.value }))}
+                disabled={vendors.length === 0}
+              >
+                <option value="">{vendors.length === 0 ? 'No vendors available' : '— Select vendor —'}</option>
+                {vendors.map(v => (
+                  <option key={v.vendorId} value={v.vendorId}>{v.name}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label className="es-label">Event *</Form.Label>
+              <Form.Select
+                className="es-form-control rounded-3"
+                value={contractForm.eventId}
+                onChange={e => setContractForm(p => ({ ...p, eventId: e.target.value }))}
+                disabled={events.length === 0}
+              >
+                <option value="">{events.length === 0 ? 'No events available' : '— Select event —'}</option>
+                {events.map(ev => (
+                  <option key={ev.id} value={ev.id}>{ev.eventName}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+            <Row className="g-3 mb-3">
+              <Col xs={6}>
+                <Form.Group>
+                  <Form.Label className="es-label">Start Date *</Form.Label>
+                  <Form.Control
+                    className="es-form-control rounded-3"
+                    type="datetime-local"
+                    value={contractForm.startDate}
+                    onChange={e => setContractForm(p => ({ ...p, startDate: e.target.value }))}
+                  />
+                </Form.Group>
+              </Col>
+              <Col xs={6}>
+                <Form.Group>
+                  <Form.Label className="es-label">End Date *</Form.Label>
+                  <Form.Control
+                    className="es-form-control rounded-3"
+                    type="datetime-local"
+                    value={contractForm.endDate}
+                    onChange={e => setContractForm(p => ({ ...p, endDate: e.target.value }))}
+                  />
+                </Form.Group>
+              </Col>
+            </Row>
+            <Form.Group className="mb-3">
+              <Form.Label className="es-label">Contract Value *</Form.Label>
+              <Form.Control
+                className="es-form-control rounded-3"
+                type="number"
+                min={0}
+                step="0.01"
+                placeholder="e.g. 50000"
+                value={contractForm.value}
+                onChange={e => setContractForm(p => ({ ...p, value: Number(e.target.value) }))}
+              />
+            </Form.Group>
+            <Form.Group>
+              <Form.Label className="es-label">Initial Status</Form.Label>
+              <Form.Select
+                className="es-form-control rounded-3"
+                value={contractForm.status}
+                onChange={e => setContractForm(p => ({ ...p, status: e.target.value as ContractStatus }))}
+              >
+                {FILTER_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+              </Form.Select>
+            </Form.Group>
+          </Form>
         </Modal.Body>
         <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowSign(false)}>Cancel</Button>
-          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleSign} disabled={signing}>
-            {signing ? <Spinner animation="border" size="sm" /> : 'Confirm & Sign'}
+          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowCreate(false)}>Cancel</Button>
+          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleCreateContract} disabled={savingContract}>
+            {savingContract ? <Spinner animation="border" size="sm" /> : 'Create Contract'}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -289,7 +373,7 @@ export const Contracts = () => {
       <Modal show={showInvoice} onHide={() => setShowInvoice(false)} centered>
         <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
           <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>
-            Create Invoice — {target?.contractId?.slice(0, 8)}…
+            Create Invoice — {contractLabel(target)}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body style={{ background: 'var(--bg-surface)' }}>
@@ -341,93 +425,6 @@ export const Contracts = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Add Delivery Modal */}
-      <Modal show={showDelivery} onHide={() => setShowDelivery(false)} centered>
-        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>
-            Add Delivery — {target?.contractId?.slice(0, 8)}…
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          <Form>
-            <Form.Group className="mb-3">
-              <Form.Label className="es-label">Invoice ID *</Form.Label>
-              <Form.Select
-                className="es-form-control rounded-3"
-                value={deliveryInvoiceId}
-                onChange={e => setDeliveryInvoiceId(e.target.value)}
-                disabled={contractInvoices.length === 0}
-              >
-                <option value="">{contractInvoices.length === 0 ? 'No invoices for this contract' : '— Select invoice —'}</option>
-                {contractInvoices.map(i => (
-                  <option key={i.invoiceId} value={i.invoiceId}>
-                    ${Number(i.totalAmount).toLocaleString()} — Due {new Date(i.dueDate).toLocaleDateString()} ({i.status})
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label className="es-label">Item Description *</Form.Label>
-              <Form.Control
-                className="es-form-control rounded-3"
-                placeholder="e.g. AV Equipment Setup"
-                value={deliveryForm.item}
-                onChange={e => setDeliveryForm(p => ({ ...p, item: e.target.value }))}
-              />
-            </Form.Group>
-            <Row className="g-3 mb-3">
-              <Col xs={6}>
-                <Form.Group>
-                  <Form.Label className="es-label">Quantity *</Form.Label>
-                  <Form.Control
-                    className="es-form-control rounded-3"
-                    type="number"
-                    min={1}
-                    value={deliveryForm.quantity}
-                    onChange={e => setDeliveryForm(p => ({ ...p, quantity: Number(e.target.value) }))}
-                  />
-                </Form.Group>
-              </Col>
-              <Col xs={6}>
-                <Form.Group>
-                  <Form.Label className="es-label">Status</Form.Label>
-                  <Form.Select
-                    className="es-form-control rounded-3"
-                    value={deliveryForm.status}
-                    onChange={e => setDeliveryForm(p => ({ ...p, status: e.target.value as DeliveryStatus }))}
-                  >
-                    {DELIVERY_STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
-                  </Form.Select>
-                </Form.Group>
-              </Col>
-            </Row>
-            <Form.Group className="mb-3">
-              <Form.Label className="es-label">Tracking Number *</Form.Label>
-              <Form.Control
-                className="es-form-control rounded-3"
-                placeholder="e.g. TRK-20260420-001"
-                value={deliveryForm.trackingNumber}
-                onChange={e => setDeliveryForm(p => ({ ...p, trackingNumber: e.target.value }))}
-              />
-            </Form.Group>
-            <Form.Group>
-              <Form.Label className="es-label">Delivery Date *</Form.Label>
-              <Form.Control
-                className="es-form-control rounded-3"
-                type="datetime-local"
-                value={deliveryForm.deliveryDate}
-                onChange={e => setDeliveryForm(p => ({ ...p, deliveryDate: e.target.value }))}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowDelivery(false)}>Cancel</Button>
-          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleAddDelivery} disabled={savingDelivery}>
-            {savingDelivery ? <Spinner animation="border" size="sm" /> : 'Log Delivery'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </div>
   )
 }
