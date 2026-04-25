@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap'
 import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
@@ -12,7 +12,7 @@ import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { fmtDate } from '../../../utils/dateHelpers'
-import { EVENT_LABEL, REG_STATUS_COLOR } from '../../../constants/eventConstants'
+import { EVENT_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
 type StatusFilter = 'ALL' | 'PUBLISHED' | 'COMPLETED' | 'REGISTERED'
@@ -168,9 +168,11 @@ export const AttendeeEventBrowser = () => {
 
                       {reg && reg.status !== 'CANCELLED' && (
                         <div className="mb-2">
-                          <Badge bg={REG_STATUS_COLOR[reg.status] ?? 'secondary'} className="rounded-2" style={{ fontSize: '0.75rem' }}>
-                            {reg.status === 'CHECKED_IN' ? 'Checked In' : reg.status === 'CONFIRMED' ? 'Confirmed' : reg.status === 'PENDING' ? 'Registered' : reg.status}
-                          </Badge>
+                          <EventStatusBadge
+                            variant="registration"
+                            status={reg.status}
+                            label={reg.status === 'CHECKED_IN' ? 'Checked In' : reg.status === 'CONFIRMED' ? 'Confirmed' : 'Registered'}
+                          />
                         </div>
                       )}
 
