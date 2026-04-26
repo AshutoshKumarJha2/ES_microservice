@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { FinanceSubNav } from '../../elements/finance/FinanceSubNav'
 import {
   Container, Card, Table, Button, Modal,
   Spinner, Alert, Badge, InputGroup, Form, Row, Col,
@@ -183,6 +184,8 @@ export const FinanceInvoices = () => {
           )}
         </Container>
       </div>
+
+      <FinanceSubNav />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {invoicesError && (

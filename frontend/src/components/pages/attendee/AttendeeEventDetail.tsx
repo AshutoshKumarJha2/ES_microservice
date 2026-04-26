@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Container, Row, Col, Card, Nav, Spinner, Alert, Button,
-  Form, Table, Badge,
+  Form, Table,
 } from 'react-bootstrap'
 import { TableRowsSkeleton, InlineFieldSkeleton } from '../../elements/skeletons/PageSkeleton'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
@@ -17,17 +17,11 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { PanelHeader } from '../../elements/events/PanelHeader'
 import { fmtDate } from '../../../utils/dateHelpers'
-import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
+import { EVENT_LABEL, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type {
   EventResponseDto, ScheduleResponseDto, TicketResponseDto, RegistrationDto,
 } from '../../../types/events'
 
-const REG_BADGE_COLOR: Record<string, string> = {
-  PENDING:    '#f59e0b',
-  CONFIRMED:  '#22c55e',
-  CHECKED_IN: '#3b82f6',
-  CANCELLED:  '#6b7280',
-}
 
 type Tab = 'overview' | 'schedule' | 'registration'
 
@@ -159,16 +153,11 @@ export const AttendeeEventDetail = () => {
               />
             )}
             {!loading && registration && (
-              <span
-                className="rounded-2 px-2 py-1 fw-semibold"
-                style={{
-                  fontSize: '0.75rem',
-                  background: REG_BADGE_COLOR[registration.status] ?? '#6b7280',
-                  color: '#fff',
-                }}
-              >
-                {REG_STATUS_LABEL[registration.status] ?? registration.status}
-              </span>
+              <EventStatusBadge
+                variant="registration"
+                status={registration.status}
+                label={REG_STATUS_LABEL[registration.status] ?? registration.status}
+              />
             )}
           </div>
         </Container>
@@ -411,9 +400,7 @@ export const AttendeeEventDetail = () => {
                           </Col>
                           <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
                           <Col xs={7}>
-                            <Badge bg={REG_STATUS_COLOR[registration.status] ?? 'secondary'} className="rounded-2">
-                              {registration.status}
-                            </Badge>
+                            <EventStatusBadge variant="registration" status={registration.status} />
                           </Col>
                         </Row>
                       </dl>

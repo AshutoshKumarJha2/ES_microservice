@@ -72,10 +72,10 @@ export const AttendeesTab = () => {
         <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>Attendees</Card.Title>
           <div className="d-flex gap-2">
-            <Badge bg="success" className="rounded-pill px-3 py-2" style={{ fontSize: '0.78rem' }}>
+            <Badge className="es-badge-approved rounded-pill border-0 px-3 py-2" style={{ fontSize: '0.78rem' }}>
               Checked In: {checkedInCount}
             </Badge>
-            <Badge bg="primary" className="rounded-pill px-3 py-2" style={{ fontSize: '0.78rem' }}>
+            <Badge className="es-badge-submitted rounded-pill border-0 px-3 py-2" style={{ fontSize: '0.78rem' }}>
               Confirmed: {confirmedCount}
             </Badge>
           </div>
