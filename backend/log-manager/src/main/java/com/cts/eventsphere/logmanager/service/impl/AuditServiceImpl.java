@@ -6,6 +6,7 @@ import com.cts.eventsphere.logmanager.dto.mapper.auditlog.AuditLogMapper;
 import com.cts.eventsphere.logmanager.model.AuditLog;
 import com.cts.eventsphere.logmanager.model.data.AuditAction;
 import com.cts.eventsphere.logmanager.repository.AuditLogRepository;
+import com.cts.eventsphere.logmanager.repository.AuditLogSpecification;
 import com.cts.eventsphere.logmanager.service.AuditService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -58,9 +59,10 @@ public class AuditServiceImpl implements AuditService {
      * @return A {@link AuditListResponseDTO} containing paginated audit data and metadata.
      */
     @Override
-    public AuditListResponseDTO getAudits(int size, int page) {
+    public AuditListResponseDTO getAudits(int size, int page, String search, String action) {
         var pageable = PageRequest.of(page, size, Sort.by("timeStamp").descending());
-        var pages = auditRepo.findAll(pageable);
+        var spec = AuditLogSpecification.builder().search(search).action(action).build();
+        var pages = auditRepo.findAll(spec, pageable);
         var audits = pages.stream().map(AuditLogMapper::toDTO).toList();
 
         var pageNo = pages.getNumber();
@@ -68,7 +70,7 @@ public class AuditServiceImpl implements AuditService {
         var totalElements = pages.getTotalElements();
         var totalPages = pages.getTotalPages();
 
-        log.info("Fetched {} audits, page: {}, size: {}", audits.size(), page, size);
+        log.info("Fetched {} audits, page: {}, size: {}, search: '{}', action: '{}'", audits.size(), page, size, search, action);
         return new AuditListResponseDTO(
                 audits,
                 pageNo,

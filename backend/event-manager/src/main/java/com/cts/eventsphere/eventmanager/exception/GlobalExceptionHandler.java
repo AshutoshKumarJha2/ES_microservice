@@ -107,7 +107,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidRegistrationStatusException.class)
     public ResponseEntity<GenericErrorResponse> handleInvalidRegistrationStatus(InvalidRegistrationStatusException e,
                                                                                 HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", "N/A");
         return ResponseEntity.badRequest().body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<GenericErrorResponse> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", "N/A");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new GenericErrorResponse("Access denied"));
     }
 
@@ -128,25 +128,25 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(EventNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleEventNotFound(EventNotFoundException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", "N/A");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleScheduleNotFound(ScheduleNotFoundException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Schedule", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Schedule", "N/A");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse("Schedule not found"));
     }
 
     @ExceptionHandler(TicketNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleTicketNotFound(TicketNotFoundException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Ticket", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Ticket", "N/A");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(RegistrationNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> handleRegistrationNotFound(RegistrationNotFoundException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Registration", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Registration", "N/A");
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -161,20 +161,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TicketAlreadyExistsException.class)
     public ResponseEntity<GenericErrorResponse> handleTicketAlreadyExists(TicketAlreadyExistsException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Ticket", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Ticket", "N/A");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(DuplicateRegistrationException.class)
     public ResponseEntity<GenericErrorResponse> handleDuplicateRegistration(DuplicateRegistrationException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Registration", "N/A");
         return ResponseEntity.status(HttpStatus.CONFLICT).body(new GenericErrorResponse(e.getMessage()));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<GenericErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex,
                                                                               HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Entity", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Entity", "N/A");
         String message = switch (request.getMethod().toUpperCase()) {
             case "DELETE"       -> "Cannot delete: this record is still referenced by other data";
             case "POST", "PUT", "PATCH" -> "A record with conflicting data already exists";
@@ -187,7 +187,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TicketUnavailableException.class)
     public ResponseEntity<GenericErrorResponse> handleTicketUnavailable(TicketUnavailableException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Ticket", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.REGISTRATON_FAILURE, "Ticket", "N/A");
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -198,7 +198,7 @@ public class GlobalExceptionHandler {
         String traceId = MDC.get("traceId");
         if (traceId == null) traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", "N/A");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new GenericErrorResponse("An unexpected error occurred. Please contact support with traceId: " + traceId));
     }
