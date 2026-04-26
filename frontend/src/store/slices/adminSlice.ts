@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { adminService } from '../../services/admin/adminService'
 import type { UserResponseDto } from '../../types/events'
 import type { AuditLogsPageDto } from '../../types/admin'
-import axiosInstance from '../../api/axiosInstance'
 
 interface AdminState {
   allUsers: UserResponseDto[]
