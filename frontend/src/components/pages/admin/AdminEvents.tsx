@@ -6,7 +6,7 @@ import { PageBanner } from '../../elements/common/PageBanner'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { fmtDate } from '../../../utils/dateHelpers'
 import {
-  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Pagination,
+  Container, Card, Table, Button, Form, InputGroup, Row, Col, Pagination,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
