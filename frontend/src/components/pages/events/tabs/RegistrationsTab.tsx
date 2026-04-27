@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
 import { approveRegistration, rejectRegistration, fetchRegistrationsByEvent } from '../../../../store/slices/registrationsSlice'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
-import { Card, Table, Button, ButtonGroup, Spinner, Form, InputGroup } from 'react-bootstrap'
+import { Card, Table, Button, ButtonGroup, Spinner, Form, InputGroup, Pagination } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
@@ -11,42 +11,53 @@ type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
 export const RegistrationsTab = () => {
   const { id: eventId } = useParams<{ id: string }>()
   const dispatch = useAppDispatch()
-  const { registrations, loading, actionLoading } = useAppSelector((s) => s.registrations)
+  const { registrations, loading, actionLoading, totalPages } = useAppSelector((s) => s.registrations)
 
   const [regFilter, setRegFilter] = useState<RegFilter>('ALL')
   const [ticketTypeFilter, setTicketTypeFilter] = useState<string>('ALL')
   const [attendeeSearch, setAttendeeSearch] = useState<string>('')
+  const [page, setPage] = useState(0)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const uniqueTicketTypes = [...new Set(registrations.map((r) => r.ticketType).filter(Boolean))] as string[]
 
-  const dispatchFetch = (status: RegFilter, ticketType: string, search: string) => {
+  const dispatchFetch = (status: RegFilter, ticketType: string, search: string, p: number) => {
     if (!eventId) return
     dispatch(fetchRegistrationsByEvent({
       eventId,
       status: status === 'ALL' ? undefined : status,
       ticketType: ticketType === 'ALL' ? undefined : ticketType,
       attendeeName: search.trim() || undefined,
+      page: p,
+      size: 10,
     }))
   }
 
   const handleStatusFilter = (f: RegFilter) => {
     setRegFilter(f)
-    dispatchFetch(f, ticketTypeFilter, attendeeSearch)
+    setPage(0)
+    dispatchFetch(f, ticketTypeFilter, attendeeSearch, 0)
   }
 
   const handleTicketTypeFilter = (t: string) => {
     setTicketTypeFilter(t)
-    dispatchFetch(regFilter, t, attendeeSearch)
+    setPage(0)
+    dispatchFetch(regFilter, t, attendeeSearch, 0)
   }
 
   const handleSearchChange = (value: string) => {
     setAttendeeSearch(value)
+    setPage(0)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      dispatchFetch(regFilter, ticketTypeFilter, value)
+      dispatchFetch(regFilter, ticketTypeFilter, value, 0)
     }, 300)
+  }
+
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    dispatchFetch(regFilter, ticketTypeFilter, attendeeSearch, p)
   }
 
   useEffect(() => {
@@ -193,6 +204,18 @@ export const RegistrationsTab = () => {
               ))}
           </tbody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-3">
+            <Pagination size="sm" className="mb-0">
+              <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
+              ))}
+              <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
+            </Pagination>
+          </div>
+        )}
       </Card.Body>
     </Card>
   )

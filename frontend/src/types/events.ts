@@ -76,6 +76,14 @@ export interface EventResponseDto {
   organizer?: OrganizerDto
 }
 
+export interface EventPageDto {
+  events: EventResponseDto[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
 export type ScheduleStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED'

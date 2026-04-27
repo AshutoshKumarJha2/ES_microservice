@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form, Pagination } from 'react-bootstrap'
 import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
@@ -17,21 +17,37 @@ import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
 type StatusFilter = 'ALL' | 'PUBLISHED' | 'COMPLETED' | 'REGISTERED'
 
+const PAGE_SIZE = 12
+
 export const AttendeeEventBrowser = () => {
   const navigate = useNavigate()
 
-  const [events, setEvents]   = useState<EventResponseDto[]>([])
-  const [regMap, setRegMap]   = useState<Map<string, RegistrationDto>>(new Map())
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch]   = useState('')
-  const [filter, setFilter]   = useState<StatusFilter>('PUBLISHED')
+  const [events, setEvents]       = useState<EventResponseDto[]>([])
+  const [totalPages, setTotalPages] = useState(1)
+  const [regMap, setRegMap]       = useState<Map<string, RegistrationDto>>(new Map())
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState('')
+  const [filter, setFilter]       = useState<StatusFilter>('PUBLISHED')
+  const [page, setPage]           = useState(0)
+  const isFirstRender = useRef(true)
+
+  const loadEvents = (searchTerm: string, p: number) => {
+    setLoading(true)
+    eventService.getAll(searchTerm ? { search: searchTerm, page: p, size: PAGE_SIZE } : { page: p, size: PAGE_SIZE })
+      .then((data) => { setEvents(data.events ?? []); setTotalPages(data.totalPages ?? 1) })
+      .catch(() => { setEvents([]); setTotalPages(1) })
+      .finally(() => setLoading(false))
+  }
 
   useEffect(() => {
     Promise.allSettled([
-      eventService.getAll(),
+      eventService.getAll({ page: 0, size: PAGE_SIZE }),
       registrationService.getMyRegistrations(),
     ]).then(([eventsR, regsR]) => {
-      if (eventsR.status === 'fulfilled') setEvents(eventsR.value)
+      if (eventsR.status === 'fulfilled') {
+        setEvents(eventsR.value.events ?? [])
+        setTotalPages(eventsR.value.totalPages ?? 1)
+      }
       if (regsR.status === 'fulfilled') {
         const map = new Map<string, RegistrationDto>()
         regsR.value.registrations.forEach((r) => map.set(r.eventId, r))
@@ -40,18 +56,27 @@ export const AttendeeEventBrowser = () => {
     }).finally(() => setLoading(false))
   }, [])
 
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    setPage(0)
+    const timer = setTimeout(() => loadEvents(search, 0), 300)
+    return () => clearTimeout(timer)
+  }, [search])
+
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    loadEvents(search, p)
+  }
+
   const visibleEvents  = events.filter((e) => e.status !== 'CANCELLED')
   const published      = visibleEvents.filter((e) => e.status === 'PUBLISHED').length
   const completed      = visibleEvents.filter((e) => e.status === 'COMPLETED').length
   const myEventCount   = [...regMap.values()].filter((r) => r.status !== 'CANCELLED').length
 
   const filtered = visibleEvents.filter((e) => {
-    const matchSearch = e.eventName.toLowerCase().includes(search.toLowerCase())
-    const matchStatus =
-      filter === 'ALL'        ? true :
-      filter === 'REGISTERED' ? (regMap.has(e.id) && regMap.get(e.id)?.status !== 'CANCELLED') :
-      e.status === filter
-    return matchSearch && matchStatus
+    return filter === 'ALL'        ? true :
+           filter === 'REGISTERED' ? (regMap.has(e.id) && regMap.get(e.id)?.status !== 'CANCELLED') :
+           e.status === filter
   })
 
   const STATS = [
@@ -193,6 +218,19 @@ export const AttendeeEventBrowser = () => {
               )
             })}
           </Row>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-4">
+            <Pagination size="sm" className="mb-0">
+              <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
+              ))}
+              <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
+            </Pagination>
+          </div>
         )}
       </Container>
     </div>

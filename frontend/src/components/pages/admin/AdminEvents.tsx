@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import axiosInstance from '../../../api/axiosInstance'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
@@ -10,40 +10,50 @@ import {
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
-import type { EventResponseDto } from '../../../types/events'
+import type { EventResponseDto, EventPageDto } from '../../../types/events'
 
 const STATUSES = ['ALL', 'PUBLISHED', 'DRAFT', 'COMPLETED', 'CANCELLED']
 const PAGE_SIZE = 10
 
 export const AdminEvents: React.FC = () => {
   const navigate = useNavigate()
-  const [allEvents, setAllEvents] = useState<EventResponseDto[]>([])
-  const [loading, setLoading]     = useState(false)
-  const [search, setSearch]       = useState('')
-  const [status, setStatus]       = useState('ALL')
-  const [page, setPage]           = useState(0)
+  const [events, setEvents]         = useState<EventResponseDto[]>([])
+  const [totalElements, setTotal]   = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
+  const [loading, setLoading]       = useState(false)
+  const [search, setSearch]         = useState('')
+  const [status, setStatus]         = useState('ALL')
+  const [page, setPage]             = useState(0)
+  const isFirstRender = useRef(true)
+
+  const fetchEvents = (q: string, s: string, p: number) => {
+    setLoading(true)
+    const params: Record<string, string | number> = { page: p, size: PAGE_SIZE }
+    if (q) params.search = q
+    if (s !== 'ALL') params.status = s
+    axiosInstance.get<EventPageDto>('/api/v1/event-manager/events', { params })
+      .then(({ data }) => {
+        setEvents(data.events ?? [])
+        setTotal(data.totalElements ?? 0)
+        setTotalPages(data.totalPages ?? 1)
+      })
+      .catch(() => { setEvents([]); setTotal(0); setTotalPages(1) })
+      .finally(() => setLoading(false))
+  }
+
+  useEffect(() => { fetchEvents('', 'ALL', 0) }, [])
 
   useEffect(() => {
-    setLoading(true)
-    axiosInstance.get('/api/v1/event-manager/events')
-      .then(({ data }) => setAllEvents(Array.isArray(data) ? data : (data.content ?? [])))
-      .catch(() => setAllEvents([]))
-      .finally(() => setLoading(false))
-  }, [])
+    if (isFirstRender.current) { isFirstRender.current = false; return }
+    setPage(0)
+    const timer = setTimeout(() => fetchEvents(search, status, 0), 300)
+    return () => clearTimeout(timer)
+  }, [search, status])
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return allEvents.filter((ev) => {
-      const matchStatus = status === 'ALL' || ev.status === status
-      const matchSearch = !q || ev.eventName.toLowerCase().includes(q)
-      return matchStatus && matchSearch
-    })
-  }, [allEvents, search, status])
-
-  useEffect(() => { setPage(0) }, [search, status])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageEvents = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    fetchEvents(search, status, p)
+  }
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
@@ -58,7 +68,7 @@ export const AdminEvents: React.FC = () => {
               <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>All Events</Card.Title>
               <div className="d-flex align-items-center gap-3">
                 <span className="small" style={{ color: 'var(--text-muted)' }}>
-                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                  {totalElements} result{totalElements !== 1 ? 's' : ''}
                 </span>
                 <Button
                   variant="primary"
@@ -112,9 +122,9 @@ export const AdminEvents: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : pageEvents.length === 0 ? (
+                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : events.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
-                  ) : pageEvents.map((ev) => (
+                  ) : events.map((ev) => (
                     <tr key={ev.id}>
                       <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{ev.eventName}</td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>
@@ -153,17 +163,17 @@ export const AdminEvents: React.FC = () => {
             </Table>
 
             {/* Pagination */}
-            {filtered.length > PAGE_SIZE && (
+            {totalPages > 1 && (
               <div className="d-flex justify-content-between align-items-center mt-3">
                 <small style={{ color: 'var(--text-muted)' }}>
-                  Page {page + 1} of {totalPages} · {filtered.length} events
+                  Page {page + 1} of {totalPages} · {totalElements} events
                 </small>
                 <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={page === 0} onClick={() => setPage((p) => p - 1)} />
+                  <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
                   {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => setPage(i)}>{i + 1}</Pagination.Item>
+                    <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
                   ))}
-                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)} />
+                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
                 </Pagination>
               </div>
             )}

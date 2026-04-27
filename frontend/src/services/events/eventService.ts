@@ -1,9 +1,9 @@
 import axiosInstance from '../../api/axiosInstance'
-import type { EventRequestDto, EventResponseDto, ScheduleRequestDto, ScheduleResponseDto } from '../../types/events'
+import type { EventPageDto, EventRequestDto, EventResponseDto, ScheduleRequestDto, ScheduleResponseDto } from '../../types/events'
 
 export const eventService = {
-  async getAll(): Promise<EventResponseDto[]> {
-    const { data } = await axiosInstance.get('/api/v1/event-manager/events')
+  async getAll(params?: { search?: string; status?: string; page?: number; size?: number }): Promise<EventPageDto> {
+    const { data } = await axiosInstance.get('/api/v1/event-manager/events', { params })
     return data
   },
 

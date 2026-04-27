@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { registrationService } from '../../../../services/events/registrationService'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
 import type { RegistrationDto } from '../../../../types/events'
-import { Card, Table, Button, Spinner, Form, InputGroup, Badge } from 'react-bootstrap'
+import { Card, Table, Button, Spinner, Form, InputGroup, Badge, Pagination } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 const ATTENDEE_STATUSES = 'CONFIRMED,CHECKED_IN'
@@ -15,10 +15,12 @@ export const AttendeesTab = () => {
   const [loading, setLoading] = useState(false)
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [page, setPage] = useState(0)
+  const [totalPages, setTotalPages] = useState(1)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const load = useCallback(async (nameSearch?: string) => {
+  const load = useCallback(async (nameSearch?: string, p = 0) => {
     if (!eventId) return
     setLoading(true)
     try {
@@ -28,10 +30,11 @@ export const AttendeesTab = () => {
         ATTENDEE_STATUSES,    // multi-status: CONFIRMED or CHECKED_IN
         undefined,            // ticketType
         nameSearch || undefined,
-        0,
-        100
+        p,
+        20
       )
       setAttendees(res.registrations ?? [])
+      setTotalPages(res.totalPages ?? 1)
     } finally {
       setLoading(false)
     }
@@ -43,8 +46,14 @@ export const AttendeesTab = () => {
 
   const handleSearchChange = (value: string) => {
     setSearch(value)
+    setPage(0)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => load(value), 300)
+    debounceRef.current = setTimeout(() => load(value, 0), 300)
+  }
+
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    load(search, p)
   }
 
   useEffect(() => {
@@ -155,6 +164,18 @@ export const AttendeesTab = () => {
               ))}
           </tbody>
         </Table>
+
+        {totalPages > 1 && (
+          <div className="d-flex justify-content-center mt-3">
+            <Pagination size="sm" className="mb-0">
+              <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
+                <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
+              ))}
+              <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
+            </Pagination>
+          </div>
+        )}
       </Card.Body>
     </Card>
   )
