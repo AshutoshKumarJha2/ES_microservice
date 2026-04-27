@@ -195,8 +195,16 @@ export const Venues = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => (
-                    <tr key={venue.id}>
+                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => {
+                    const isUnavailable = venue.availabilityStatus === 'UNAVAILABLE'
+                    return (
+                    <tr
+                      key={venue.id}
+                      style={{
+                        opacity: isUnavailable ? 0.45 : 1,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                    >
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{venue.name}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.location}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.capacity.toLocaleString()}</td>
@@ -221,18 +229,30 @@ export const Venues = () => {
                               <option key={s} value={s}>{statusLabel(s)}</option>
                             ))}
                           </Form.Select>
-                          <Button size="sm" variant="outline-secondary" className="rounded-2"
-                            onClick={() => openEditModal(venue)}>
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            className="rounded-2"
+                            onClick={() => openEditModal(venue)}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Edit
                           </Button>
-                          <Button size="sm" variant="outline-danger" className="rounded-2"
-                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            className="rounded-2"
+                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Delete
                           </Button>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </Table>
             )}
