@@ -6,6 +6,7 @@ import com.cts.venue_manager.exception.resource.InsufficientResourceException;
 import com.cts.venue_manager.exception.resource.ResourceAlreadyExistsException;
 import com.cts.venue_manager.exception.resource.ResourceDuplicateAllocationException;
 import com.cts.venue_manager.exception.resource.ResourceNotFoundException;
+import com.cts.venue_manager.exception.venue.VenueInUseException;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -99,6 +100,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BookingNotFoundException.class)
     public ResponseEntity<String> handleBookingNotFound(BookingNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(VenueInUseException.class)
+    public ResponseEntity<String> handleVenueInUse(VenueInUseException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -58,7 +58,7 @@ export const CreateEvent = () => {
 
   // Pre-load organizer list when admin opens the form
   useEffect(() => {
-    if (isAdmin) dispatch(fetchUsers())
+    if (isAdmin) dispatch(fetchUsers({}))
   }, [isAdmin, dispatch])
 
   useEffect(() => {

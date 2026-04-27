@@ -13,6 +13,7 @@ import {
   Container, Card, Table, Button, Alert, Badge, Spinner, Form, InputGroup,
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { ConfirmModal } from '../../elements/common/ConfirmModal'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
@@ -41,8 +42,10 @@ export const VenueBookings = () => {
     actionError, actionLoading,
   } = useAppSelector((s) => s.venue)
 
-  const [selectedVenueId, setSelectedVenueId] = useState<string>('')
-  const [search, setSearch]                   = useState('')
+  const [selectedVenueId, setSelectedVenueId]     = useState<string>('')
+  const [search, setSearch]                       = useState('')
+  const [confirmCancelId, setConfirmCancelId]     = useState<string | null>(null)
+  const [confirmApproveId, setConfirmApproveId]   = useState<{ bookingId: string; eventId?: string } | null>(null)
 
   useEffect(() => {
     dispatch(fetchAllVenues())
@@ -68,6 +71,18 @@ export const VenueBookings = () => {
     if (status === 'CONFIRMED' && eventId) {
       dispatch(approveRequestedAllocation(eventId))
     }
+  }
+
+  const handleConfirmApprove = () => {
+    if (!confirmApproveId) return
+    handleStatusChange(confirmApproveId.bookingId, 'CONFIRMED', confirmApproveId.eventId)
+    setConfirmApproveId(null)
+  }
+
+  const handleConfirmCancel = () => {
+    if (!confirmCancelId) return
+    handleStatusChange(confirmCancelId, 'CANCELLED')
+    setConfirmCancelId(null)
   }
 
   const selectedVenueName = venues.find((v) => v.id === selectedVenueId)?.name ?? ''
@@ -188,7 +203,7 @@ export const VenueBookings = () => {
                               variant="outline-success"
                               className="rounded-2 fw-medium"
                               disabled={actionLoading}
-                              onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED', b.eventId)}
+                              onClick={() => setConfirmApproveId({ bookingId: b.bookingId, eventId: b.eventId })}
                             >
                               Confirm
                             </Button>
@@ -197,7 +212,7 @@ export const VenueBookings = () => {
                               variant="outline-danger"
                               className="rounded-2 fw-medium"
                               disabled={actionLoading}
-                              onClick={() => handleStatusChange(b.bookingId, 'CANCELLED')}
+                              onClick={() => setConfirmCancelId(b.bookingId)}
                             >
                               Cancel
                             </Button>
@@ -214,6 +229,28 @@ export const VenueBookings = () => {
           </Card.Body>
         </Card>
       </Container>
+
+      <ConfirmModal
+        show={!!confirmApproveId}
+        title="Confirm Booking"
+        message="Approve this booking request? The organizer will be notified."
+        confirmLabel="Approve"
+        variant="primary"
+        loading={actionLoading}
+        onConfirm={handleConfirmApprove}
+        onCancel={() => setConfirmApproveId(null)}
+      />
+
+      <ConfirmModal
+        show={!!confirmCancelId}
+        title="Cancel Booking"
+        message="Cancel this booking request? This action cannot be undone."
+        confirmLabel="Cancel Booking"
+        variant="danger"
+        loading={actionLoading}
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setConfirmCancelId(null)}
+      />
     </div>
   )
 }

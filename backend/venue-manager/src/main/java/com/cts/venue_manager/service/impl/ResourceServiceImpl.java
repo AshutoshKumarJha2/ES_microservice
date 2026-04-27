@@ -205,6 +205,10 @@ public class ResourceServiceImpl implements ResourceService {
         existingResource.setCostRate(dto.costRate());
         existingResource.setUnit(dto.unit());
 
+        existingResource.setAvailability(
+                existingResource.getUnit() > 0 ? Availability.AVAILABLE : Availability.UNAVAILABLE
+        );
+
         Resource updatedResource = resourceRepository.save(existingResource);
 
 //        auditService.logAudit(actorId, AuditAction.UPDATE, Resource.class, resourceId);
