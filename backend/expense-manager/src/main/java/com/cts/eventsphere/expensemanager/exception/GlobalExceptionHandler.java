@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BudgetNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleBudgetNotFound(BudgetNotFoundException ex, HttpServletRequest request) {
         log.warn("Budget not found: {}", ex.getMessage());
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Budget", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Budget", "N/A");
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
@@ -84,7 +84,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ExpenseNotFoundException.class)
     public ResponseEntity<Map<String, Object>> handleExpenseNotFound(ExpenseNotFoundException ex, HttpServletRequest request) {
         log.warn("Expense not found: {}", ex.getMessage());
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Expense", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Expense", "N/A");
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
@@ -94,14 +94,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidExpenseStateException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidExpenseState(InvalidExpenseStateException ex, HttpServletRequest request) {
         log.warn("Invalid expense state transition: {}", ex.getMessage());
-        auditService.logAudit(resolveUserId(), AuditAction.UPDATE, "Expense", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.UPDATE, "Expense", "N/A");
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(BudgetAlreadyExistsException.class)
     public ResponseEntity<Map<String, Object>> handleBudgetAlreadyExists(BudgetAlreadyExistsException ex, HttpServletRequest request) {
         log.warn("Duplicate budget: {}", ex.getMessage());
-        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Budget", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.CREATE, "Budget", "N/A");
         return buildResponse(HttpStatus.CONFLICT, ex.getMessage());
     }
 
@@ -109,7 +109,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EventServiceException.class)
     public ResponseEntity<Map<String, Object>> handleEventServiceException(EventServiceException ex, HttpServletRequest request) {
         log.error("Event Service error: {}", ex.getMessage(), ex);
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Event", "N/A");
 
         if (ex.getMessage() != null && ex.getMessage().contains("not found")) {
             return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", "N/A");
         return buildResponse(HttpStatus.FORBIDDEN, "Access denied");
     }
 
@@ -167,7 +167,7 @@ public class GlobalExceptionHandler {
         String traceId = org.slf4j.MDC.get("traceId");
         if (traceId == null) traceId = java.util.UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", "N/A");
         return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred. Contact support with traceId: " + traceId);
     }
 

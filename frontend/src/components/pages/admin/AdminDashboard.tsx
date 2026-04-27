@@ -21,7 +21,7 @@ export const AdminDashboard: React.FC = () => {
   const { allUsers, loadingUsers } = useAppSelector((state) => state.admin)
 
   useEffect(() => {
-    if (allUsers.length === 0) dispatch(fetchUsers())
+    if (allUsers.length === 0) dispatch(fetchUsers({}))
   }, [dispatch]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const recentUsers    = allUsers.slice(0, 5)
