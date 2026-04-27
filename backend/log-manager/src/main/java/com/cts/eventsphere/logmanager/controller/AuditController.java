@@ -1,16 +1,17 @@
 package com.cts.eventsphere.logmanager.controller;
 
-import com.cts.eventsphere.logmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.logmanager.dto.audit.AuditListResponseDTO;
 import com.cts.eventsphere.logmanager.dto.audit.AuditLogRequestDTO;
 import com.cts.eventsphere.logmanager.dto.shared.GenericResponse;
 import com.cts.eventsphere.logmanager.service.AuditService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * @version 1.0
  * @since 2026-03-16
  */
+@Validated
 @RestController
 @RequestMapping("/audits")
 @RequiredArgsConstructor
@@ -39,20 +41,21 @@ public class AuditController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('SYSTEM')")
     public ResponseEntity<AuditListResponseDTO> getAllAudits(
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "0") int page
+            @RequestParam(defaultValue = "25") @Min(1) @Max(50) int size,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "") String action
     ){
-        log.info("Getting all audits, page {}, size {}", page, size);
-        return ResponseEntity.ok(auditService.getAudits(size, page));
+        log.info("Getting all audits, page {}, size {}, search '{}', action '{}'", page, size, search, action);
+        return ResponseEntity.ok(auditService.getAudits(size, page, search, action));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('SYSTEM')")
     public ResponseEntity<GenericResponse> createAudit(
-            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @RequestBody AuditLogRequestDTO dto
             ){
-    auditService.logAudit(userPrincipal.userId(), dto);
+        auditService.logAudit(dto.userId(), dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(new GenericResponse("Success"));
     }
 }

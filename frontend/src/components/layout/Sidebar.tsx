@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { logout } from '../../store/slices/authSlice'
 import { toggleSidebar } from '../../store/slices/uiSlice'
 import type { UserResponseDto } from '../../types/events'
-import { Nav, Button } from 'react-bootstrap'
+import { Button } from 'react-bootstrap'
 
 // ── Inline SVG icons (keep as-is — no RB icon equivalent for all) ─────────────
 
@@ -175,15 +175,14 @@ export const Sidebar: React.FC = () => {
             {ROLE_LABEL_MAP[role]}
           </p>
         )}
-        <Nav className="flex-column gap-1">
+        <nav className="nav flex-column gap-1">
           {navItems.map((item) => (
-            <Nav.Link
+            <NavLink
               key={item.path}
-              as={NavLink}
               to={item.path}
               title={sidebarCollapsed ? item.label : undefined}
-              className="es-sidebar-link"
-              style={({ isActive }: { isActive: boolean }) => ({
+              className="nav-link es-sidebar-link"
+              style={({ isActive }) => ({
                 background: isActive ? 'var(--blue-subtle)' : undefined,
                 color: isActive ? 'var(--blue)' : 'var(--text-body)',
                 fontWeight: isActive ? 600 : 500,
@@ -201,9 +200,9 @@ export const Sidebar: React.FC = () => {
             >
               <span style={{ flexShrink: 0 }}>{item.icon}</span>
               {!sidebarCollapsed && <span>{item.label}</span>}
-            </Nav.Link>
+            </NavLink>
           ))}
-        </Nav>
+        </nav>
       </div>
 
       {/* User section */}

@@ -79,7 +79,8 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementNotFoundException("No engagements found for event: " + eventId);
         }
 
-        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, eventId);
+        String actorId = getCurrentUserId();
+        results.forEach(e -> auditService.logAudit(actorId, AuditAction.READ, Engagement.class, e.getEngagementId()));
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
@@ -96,7 +97,8 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementNotFoundException("No engagements found for activity type: " + activity);
         }
 
-        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, activity.name());
+        String actorId = getCurrentUserId();
+        results.forEach(e -> auditService.logAudit(actorId, AuditAction.READ, Engagement.class, e.getEngagementId()));
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
