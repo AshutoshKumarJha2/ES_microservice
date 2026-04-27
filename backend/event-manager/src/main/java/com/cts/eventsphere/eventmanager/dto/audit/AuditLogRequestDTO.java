@@ -15,6 +15,7 @@ package com.cts.eventsphere.eventmanager.dto.audit;
  * @since 2026-03-28
  */
 public record AuditLogRequestDTO(
+        String userId,
         AuditAction action,
         String entityId,
         String entityName

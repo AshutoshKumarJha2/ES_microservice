@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<GenericErrorResponse> emailAlreadyExistsException(EmailAlreadyExistsException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(),AuditAction.REGISTRATON_FAILURE,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.REGISTRATON_FAILURE,User.class,"N/A");
         return new ResponseEntity<>(new GenericErrorResponse("Email already exists"), HttpStatus.CONFLICT);
     }
 
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<GenericErrorResponse> invalidPasswordException(InvalidPasswordException e,HttpServletRequest request){
-        auditService.logAudit(resolveUserId(),AuditAction.LOGIN_FAILURE,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.LOGIN_FAILURE,User.class,"N/A");
         return new ResponseEntity<>(new GenericErrorResponse("Invalid password"), HttpStatus.BAD_REQUEST);
     }
 
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(RefreshFailedException.class)
     public ResponseEntity<GenericErrorResponse> handleRefreshFailedException(RefreshFailedException e, HttpServletRequest request){
-        auditService.logAudit(resolveUserId(),AuditAction.PERMISSION_CHANGE,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.PERMISSION_CHANGE,User.class,"N/A");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -106,7 +106,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<GenericErrorResponse> userAlreadyExistsException(UserAlreadyExistsException e, HttpServletRequest request){
-        auditService.logAudit(resolveUserId(),AuditAction.REGISTRATON_FAILURE,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.REGISTRATON_FAILURE,User.class,"N/A");
         return new ResponseEntity<>(new GenericErrorResponse("User already exists"), HttpStatus.CONFLICT);
     }
 
@@ -119,7 +119,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserNotActiveException.class)
     public ResponseEntity<GenericErrorResponse> handleUserNotActiveException(UserNotActiveException e,HttpServletRequest request){
-        auditService.logAudit(resolveUserId(),AuditAction.ACCESS_DENIED,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.ACCESS_DENIED,User.class,"N/A");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<GenericErrorResponse> userNotFoundException(UserNotFoundException e, HttpServletRequest request){
-        auditService.logAudit(resolveUserId(), AuditAction.LOGIN_FAILURE, User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.LOGIN_FAILURE, User.class,"N/A");
         return new ResponseEntity<>(new GenericErrorResponse("User not found"), HttpStatus.NOT_FOUND);
     }
 
@@ -145,7 +145,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(UserSuspendedException.class)
     public ResponseEntity<GenericErrorResponse> handleUserSuspendedException(UserSuspendedException e, HttpServletRequest request){
-        auditService.logAudit(resolveUserId(),AuditAction.ACCESS_DENIED,User.class,request.getRequestURI());
+        auditService.logAudit(resolveUserId(),AuditAction.ACCESS_DENIED,User.class,"N/A");
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new GenericErrorResponse(e.getMessage()));
     }
 
@@ -163,7 +163,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<GenericErrorResponse> handleResponseStatus(ResponseStatusException ex, HttpServletRequest request) {
         log.warn("Request failed: {} {}", ex.getStatusCode(), ex.getReason());
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", "N/A");
         return ResponseEntity.status(ex.getStatusCode())
                 .body(new GenericErrorResponse(ex.getReason()));
     }
@@ -175,7 +175,7 @@ public class GlobalExceptionHandler {
         String traceId = MDC.get("traceId");
         if (traceId == null) traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", "N/A");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new GenericErrorResponse("An unexpected error occurred. Contact support with traceId: " + traceId));
     }

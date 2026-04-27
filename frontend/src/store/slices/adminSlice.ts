@@ -1,13 +1,21 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { adminService } from '../../services/admin/adminService'
 import type { UserResponseDto } from '../../types/events'
-import type { AuditLogsPageDto } from '../../types/admin'
+import type { AuditLogDto } from '../../types/admin'
+
+interface AuditState {
+  audits: AuditLogDto[]
+  totalElements: number
+  totalPages: number
+  currentPage: number
+}
 
 interface AdminState {
   allUsers: UserResponseDto[]
-  auditLogs: AuditLogsPageDto | null
+  auditLogs: AuditState | null
   loadingUsers: boolean
   loadingLogs: boolean
+  loadingMoreLogs: boolean
   error: string | null
 }
 
@@ -16,6 +24,7 @@ const initialState: AdminState = {
   auditLogs: null,
   loadingUsers: false,
   loadingLogs: false,
+  loadingMoreLogs: false,
   error: null,
 }
 
@@ -91,9 +100,30 @@ const adminSlice = createSlice({
         if (idx !== -1) state.allUsers[idx] = action.payload
       })
 
-      .addCase(fetchAuditLogs.pending, (state) => { state.loadingLogs = true; state.error = null })
-      .addCase(fetchAuditLogs.fulfilled, (state, action) => { state.loadingLogs = false; state.auditLogs = action.payload })
-      .addCase(fetchAuditLogs.rejected, (state, action) => { state.loadingLogs = false; state.error = action.payload as string })
+      .addCase(fetchAuditLogs.pending, (state, action) => {
+        const isFirstPage = (action.meta.arg?.page ?? 0) === 0
+        if (isFirstPage) state.loadingLogs = true
+        else state.loadingMoreLogs = true
+        state.error = null
+      })
+      .addCase(fetchAuditLogs.fulfilled, (state, action) => {
+        const isFirstPage = (action.meta.arg?.page ?? 0) === 0
+        const { audits, totalElements, totalPages, page } = action.payload
+        if (isFirstPage) {
+          state.auditLogs = { audits, totalElements, totalPages, currentPage: page }
+        } else if (state.auditLogs && page === state.auditLogs.currentPage + 1) {
+          // Only append sequential pages — drop stale responses from previous filter queries
+          state.auditLogs.audits.push(...audits)
+          state.auditLogs.currentPage = page
+        }
+        state.loadingLogs = false
+        state.loadingMoreLogs = false
+      })
+      .addCase(fetchAuditLogs.rejected, (state, action) => {
+        state.loadingLogs = false
+        state.loadingMoreLogs = false
+        state.error = action.payload as string
+      })
   },
 })
 

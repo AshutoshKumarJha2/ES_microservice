@@ -36,5 +36,5 @@ public interface AuditService {
      * @param page The page number to retrieve.
      * @return An {@link AuditListResponseDTO} containing the requested page of audit logs.
      */
-    public AuditListResponseDTO getAudits(int size, int page);
+    public AuditListResponseDTO getAudits(int size, int page, String search, String action);
 }
