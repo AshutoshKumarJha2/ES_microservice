@@ -15,10 +15,8 @@ export const DarkModeToggle = () => {
       className="d-inline-flex align-items-center gap-1 text-decoration-none px-2 rounded-3"
       style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', fontWeight: 500, height: 34 }}
     >
-      {isDark
-        ? <><SunFill size={14} /> Light</>
-        : <><MoonFill size={14} /> Dark</>
-      }
+      {isDark ? <SunFill size={14} /> : <MoonFill size={14} />}
+      <span className="d-none d-lg-inline">{isDark ? ' Light' : ' Dark'}</span>
     </Button>
   )
 }

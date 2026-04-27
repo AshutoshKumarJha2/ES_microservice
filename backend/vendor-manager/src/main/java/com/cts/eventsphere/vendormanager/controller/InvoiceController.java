@@ -31,7 +31,7 @@ import java.util.List;
  */
 
 @RestController
-@RequestMapping("/api/v1/invoices")
+@RequestMapping("/invoices")
 @RequiredArgsConstructor
 @Slf4j
 @Validated

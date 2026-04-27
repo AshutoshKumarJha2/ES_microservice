@@ -25,6 +25,8 @@ public interface UserService {
      */
     List<UserResponseDto> getAllUsers(String userId);
 
+    List<UserResponseDto> searchUsers(String actorId, String search, String role, String status);
+
     List<UserResponseDto> getUsers(List<String> userIds);
 
     /**

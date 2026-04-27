@@ -3,7 +3,7 @@ import {
   Container, Card, Table, Button, Modal,
   Spinner, Alert, Badge, InputGroup, Form, Row, Col,
 } from 'react-bootstrap'
-import { Search, FileEarmarkArrowDown } from 'react-bootstrap-icons'
+import { Search } from 'react-bootstrap-icons'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -14,7 +14,6 @@ import {
   updateInvoice,
   deleteInvoice,
 } from '../../../store/slices/vendor/vendorSlice'
-import { invoiceService } from '../../../services/vendor/invoiceService'
 import type { InvoiceRequestDto, InvoiceResponseDto, InvoiceStatus } from '../../../types/vendor'
 
 const FILTER_STATUSES: InvoiceStatus[] = ['ISSUED', 'PAID', 'OVERDUE', 'CANCELLED']
@@ -48,8 +47,6 @@ export const FinanceInvoices = () => {
 
   const [search, setSearch]           = useState('')
   const [filter, setFilter]           = useState<InvoiceStatus | 'ALL'>('ALL')
-  const [downloading, setDownloading] = useState<string | null>(null)
-
   // Create / Edit modal
   const [showForm, setShowForm]   = useState(false)
   const [editing, setEditing]     = useState<InvoiceResponseDto | null>(null)
@@ -152,23 +149,6 @@ export const FinanceInvoices = () => {
     }
   }
 
-  const handleDownloadPdf = async (invoiceId: string) => {
-    setDownloading(invoiceId)
-    try {
-      const blob = await invoiceService.downloadInvoicePdf(invoiceId)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
-      a.download = `invoice_${invoiceId}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('PDF downloaded.')
-    } catch {
-      toast.error('PDF generation failed.')
-    } finally {
-      setDownloading(null)
-    }
-  }
 
   return (
     <div>
@@ -277,16 +257,6 @@ export const FinanceInvoices = () => {
                       </td>
                       <td className="align-middle px-3">
                         <div className="d-flex gap-1 flex-wrap">
-                          <Button
-                            size="sm"
-                            variant="outline-danger"
-                            className="rounded-2"
-                            onClick={() => handleDownloadPdf(i.invoiceId)}
-                            disabled={downloading === i.invoiceId}
-                            title="Download Invoice PDF"
-                          >
-                            {downloading === i.invoiceId ? <Spinner animation="border" size="sm" /> : <FileEarmarkArrowDown size={14} />}
-                          </Button>
                           {isFinance && (
                             <Button size="sm" variant="outline-primary" className="rounded-2" onClick={() => openEdit(i)}>
                               Edit

@@ -1,7 +1,7 @@
 import axiosInstance from '../../api/axiosInstance'
 import type { DeliveryRequestDto, DeliveryResponseDto, DeliveryStatus } from '../../types/vendor'
 
-const BASE = '/api/v1/vendor-manager/api/v1'
+const BASE = '/api/v1/vendor-manager'
 
 export const deliveryService = {
   async createDelivery(payload: DeliveryRequestDto): Promise<DeliveryResponseDto> {

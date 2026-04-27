@@ -1,7 +1,7 @@
 import axiosInstance from '../../api/axiosInstance'
 import type { InvoiceRequestDto, InvoiceResponseDto } from '../../types/vendor'
 
-const BASE = '/api/v1/vendor-manager/api/v1'
+const BASE = '/api/v1/vendor-manager'
 
 export const invoiceService = {
   async createInvoice(payload: InvoiceRequestDto): Promise<InvoiceResponseDto> {

@@ -172,7 +172,7 @@ export const OrganizerDashboard = () => {
           {busy ? <Spinner animation="border" size="sm" /> : <IconDotsV />}
         </Dropdown.Toggle>
 
-        <Dropdown.Menu align="end" style={{ fontSize: '0.85rem', minWidth: 160 }}>
+        <Dropdown.Menu align="end" style={{ fontSize: '0.85rem', minWidth: 160, zIndex: 1050 }}>
           {/* Edit — always available */}
           <Dropdown.Item onClick={() => openEdit(event)}>Edit</Dropdown.Item>
 
