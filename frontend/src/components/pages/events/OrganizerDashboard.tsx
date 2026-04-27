@@ -10,9 +10,10 @@ import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { EmptyState } from '../../elements/common/EmptyState'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
-  Spinner, Alert, Dropdown, Pagination,
+  Spinner, Alert, Dropdown,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
@@ -56,7 +57,10 @@ export const OrganizerDashboard = () => {
     return errors
   }
 
-  useEffect(() => { dispatch(fetchAllEvents({ page, size: 10 })) }, [dispatch, page])
+  useEffect(() => {
+    const timer = setTimeout(() => dispatch(fetchAllEvents({ page, size: 10 })), 0)
+    return () => clearTimeout(timer)
+  }, [dispatch, page])
   useEffect(() => { venueService.getAll().then(setVenues).catch(console.error) }, [])
 
   const activeEvents    = events.filter((e) => e.status === 'PUBLISHED').length
@@ -294,18 +298,7 @@ export const OrganizerDashboard = () => {
               </Table>
             )}
 
-            {totalPages > 1 && (
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <small style={{ color: 'var(--text-muted)' }}>Page {page + 1} of {totalPages}</small>
-                <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={page === 0} onClick={() => setPage(page - 1)} />
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => setPage(i)}>{i + 1}</Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => setPage(page + 1)} />
-                </Pagination>
-              </div>
-            )}
+            <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
           </Card.Body>
         </Card>
       </Container>

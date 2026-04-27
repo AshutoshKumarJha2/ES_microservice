@@ -1,72 +1,41 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { registrationService } from '../../../../services/events/registrationService'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
+import { PaginationBar } from '../../../elements/common/PaginationBar'
+import { usePaginatedQuery } from '../../../../hooks/usePaginatedQuery'
 import type { RegistrationDto } from '../../../../types/events'
-import { Card, Table, Button, Spinner, Form, InputGroup, Badge, Pagination } from 'react-bootstrap'
+import { Card, Table, Button, Spinner, Form, InputGroup, Badge } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
 const ATTENDEE_STATUSES = 'CONFIRMED,CHECKED_IN'
 
 export const AttendeesTab = () => {
   const { id: eventId } = useParams<{ id: string }>()
-
-  const [attendees, setAttendees] = useState<RegistrationDto[]>([])
-  const [loading, setLoading] = useState(false)
-  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [search, setSearch] = useState('')
-  const [page, setPage] = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fetcher = useCallback(
+    (params: { search?: string; page: number; size: number }) =>
+      registrationService.getByEventId(
+        eventId!, undefined, ATTENDEE_STATUSES, undefined,
+        params.search, params.page, params.size
+      ),
+    [eventId]
+  )
 
-  const load = useCallback(async (nameSearch?: string, p = 0) => {
-    if (!eventId) return
-    setLoading(true)
-    try {
-      const res = await registrationService.getByEventId(
-        eventId,
-        undefined,            // single status
-        ATTENDEE_STATUSES,    // multi-status: CONFIRMED or CHECKED_IN
-        undefined,            // ticketType
-        nameSearch || undefined,
-        p,
-        20
-      )
-      setAttendees(res.registrations ?? [])
-      setTotalPages(res.totalPages ?? 1)
-    } finally {
-      setLoading(false)
-    }
-  }, [eventId])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    setPage(0)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => load(value, 0), 300)
-  }
-
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    load(search, p)
-  }
-
-  useEffect(() => {
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [])
+  const { data: attendees, page, totalPages, loading, setPage, refetch } = usePaginatedQuery<RegistrationDto, { search?: string }>({
+    fetcher,
+    itemsKey: 'registrations',
+    params: { search: search || undefined },
+    size: 20,
+  })
 
   const handleCheckIn = async (registrationId: string) => {
     setActionLoading(registrationId)
     try {
       await registrationService.checkIn(registrationId)
-      setAttendees((prev) =>
-        prev.map((r) => r.registrationId === registrationId ? { ...r, status: 'CHECKED_IN' } : r)
-      )
+      refetch()
     } finally {
       setActionLoading(null)
     }
@@ -95,11 +64,11 @@ export const AttendeesTab = () => {
           <Form.Control
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             style={{ fontSize: '0.85rem' }}
           />
           {search && (
-            <Button variant="outline-secondary" onClick={() => handleSearchChange('')} style={{ fontSize: '0.85rem' }}>
+            <Button variant="outline-secondary" onClick={() => setSearch('')} style={{ fontSize: '0.85rem' }}>
               ✕
             </Button>
           )}
@@ -165,17 +134,7 @@ export const AttendeesTab = () => {
           </tbody>
         </Table>
 
-        {totalPages > 1 && (
-          <div className="d-flex justify-content-center mt-3">
-            <Pagination size="sm" className="mb-0">
-              <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
-              ))}
-              <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
-            </Pagination>
-          </div>
-        )}
+        <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
       </Card.Body>
     </Card>
   )

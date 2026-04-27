@@ -1,59 +1,36 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axiosInstance from '../../../api/axiosInstance'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { fmtDate } from '../../../utils/dateHelpers'
+import { eventService } from '../../../services/events/eventService'
+import { usePaginatedQuery } from '../../../hooks/usePaginatedQuery'
 import {
-  Container, Card, Table, Button, Form, InputGroup, Row, Col, Pagination,
+  Container, Card, Table, Button, Form, InputGroup, Row, Col,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
-import type { EventResponseDto, EventPageDto } from '../../../types/events'
+import type { EventResponseDto } from '../../../types/events'
 
 const STATUSES = ['ALL', 'PUBLISHED', 'DRAFT', 'COMPLETED', 'CANCELLED']
 const PAGE_SIZE = 10
 
 export const AdminEvents: React.FC = () => {
   const navigate = useNavigate()
-  const [events, setEvents]         = useState<EventResponseDto[]>([])
-  const [totalElements, setTotal]   = useState(0)
-  const [totalPages, setTotalPages] = useState(1)
-  const [loading, setLoading]       = useState(false)
-  const [search, setSearch]         = useState('')
-  const [status, setStatus]         = useState('ALL')
-  const [page, setPage]             = useState(0)
-  const isFirstRender = useRef(true)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('ALL')
 
-  const fetchEvents = (q: string, s: string, p: number) => {
-    setLoading(true)
-    const params: Record<string, string | number> = { page: p, size: PAGE_SIZE }
-    if (q) params.search = q
-    if (s !== 'ALL') params.status = s
-    axiosInstance.get<EventPageDto>('/api/v1/event-manager/events', { params })
-      .then(({ data }) => {
-        setEvents(data.events ?? [])
-        setTotal(data.totalElements ?? 0)
-        setTotalPages(data.totalPages ?? 1)
-      })
-      .catch(() => { setEvents([]); setTotal(0); setTotalPages(1) })
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { fetchEvents('', 'ALL', 0) }, [])
-
-  useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return }
-    setPage(0)
-    const timer = setTimeout(() => fetchEvents(search, status, 0), 300)
-    return () => clearTimeout(timer)
-  }, [search, status])
-
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    fetchEvents(search, status, p)
-  }
+  const { data: events, page, totalPages, totalElements, loading, setPage } = usePaginatedQuery<EventResponseDto, { search?: string; status?: string }>({
+    fetcher: (params) => eventService.getAll(params),
+    itemsKey: 'events',
+    params: {
+      search: search || undefined,
+      status: status !== 'ALL' ? status : undefined,
+    },
+    size: PAGE_SIZE,
+  })
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
@@ -162,21 +139,7 @@ export const AdminEvents: React.FC = () => {
               </tbody>
             </Table>
 
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <small style={{ color: 'var(--text-muted)' }}>
-                  Page {page + 1} of {totalPages} · {totalElements} events
-                </small>
-                <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
-                </Pagination>
-              </div>
-            )}
+            <PaginationBar page={page} totalPages={totalPages} totalElements={totalElements} label="events" onChange={setPage} />
           </Card.Body>
         </Card>
       </Container>

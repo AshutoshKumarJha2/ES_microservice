@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { fetchCurrentUser } from '../../store/slices/authSlice'
+import { fetchNotifications } from '../../store/slices/notificationsSlice'
 import { Header } from './Header'
 import { Footer } from './Footer'
 
@@ -19,6 +20,10 @@ export const AppLayout = () => {
       dispatch(fetchCurrentUser())
     }
   }, [accessToken, user, dispatch])
+
+  useEffect(() => {
+    if (user) dispatch(fetchNotifications())
+  }, [user, dispatch])
 
   return (
     <>

@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Card, Button, Form, Pagination } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap'
 import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
@@ -11,6 +11,8 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { PaginationBar } from '../../elements/common/PaginationBar'
+import { usePaginatedQuery } from '../../../hooks/usePaginatedQuery'
 import { fmtDate } from '../../../utils/dateHelpers'
 import { EVENT_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
@@ -21,52 +23,28 @@ const PAGE_SIZE = 12
 
 export const AttendeeEventBrowser = () => {
   const navigate = useNavigate()
+  const [search, setSearch]   = useState('')
+  const [filter, setFilter]   = useState<StatusFilter>('PUBLISHED')
+  const [regMap, setRegMap]   = useState<Map<string, RegistrationDto>>(new Map())
 
-  const [events, setEvents]       = useState<EventResponseDto[]>([])
-  const [totalPages, setTotalPages] = useState(1)
-  const [regMap, setRegMap]       = useState<Map<string, RegistrationDto>>(new Map())
-  const [loading, setLoading]     = useState(true)
-  const [search, setSearch]       = useState('')
-  const [filter, setFilter]       = useState<StatusFilter>('PUBLISHED')
-  const [page, setPage]           = useState(0)
-  const isFirstRender = useRef(true)
+  const { data: events, page, totalPages, loading, setPage } = usePaginatedQuery<EventResponseDto, { search?: string }>({
+    fetcher: (params) => eventService.getAll(params),
+    itemsKey: 'events',
+    params: { search: search || undefined },
+    size: PAGE_SIZE,
+  })
 
-  const loadEvents = (searchTerm: string, p: number) => {
-    setLoading(true)
-    eventService.getAll(searchTerm ? { search: searchTerm, page: p, size: PAGE_SIZE } : { page: p, size: PAGE_SIZE })
-      .then((data) => { setEvents(data.events ?? []); setTotalPages(data.totalPages ?? 1) })
-      .catch(() => { setEvents([]); setTotalPages(1) })
-      .finally(() => setLoading(false))
-  }
-
+  // Load registrations once on mount
   useEffect(() => {
-    Promise.allSettled([
-      eventService.getAll({ page: 0, size: PAGE_SIZE }),
-      registrationService.getMyRegistrations(),
-    ]).then(([eventsR, regsR]) => {
-      if (eventsR.status === 'fulfilled') {
-        setEvents(eventsR.value.events ?? [])
-        setTotalPages(eventsR.value.totalPages ?? 1)
-      }
-      if (regsR.status === 'fulfilled') {
+    const timer = setTimeout(() => {
+      registrationService.getMyRegistrations().then((res) => {
         const map = new Map<string, RegistrationDto>()
-        regsR.value.registrations.forEach((r) => map.set(r.eventId, r))
+        res.registrations.forEach((r) => map.set(r.eventId, r))
         setRegMap(map)
-      }
-    }).finally(() => setLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return }
-    setPage(0)
-    const timer = setTimeout(() => loadEvents(search, 0), 300)
+      }).catch(() => {})
+    }, 0)
     return () => clearTimeout(timer)
-  }, [search])
-
-  const handlePageChange = (p: number) => {
-    setPage(p)
-    loadEvents(search, p)
-  }
+  }, [])
 
   const visibleEvents  = events.filter((e) => e.status !== 'CANCELLED')
   const published      = visibleEvents.filter((e) => e.status === 'PUBLISHED').length
@@ -220,18 +198,7 @@ export const AttendeeEventBrowser = () => {
           </Row>
         )}
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="d-flex justify-content-center mt-4">
-            <Pagination size="sm" className="mb-0">
-              <Pagination.Prev disabled={page === 0} onClick={() => handlePageChange(page - 1)} />
-              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                <Pagination.Item key={i} active={i === page} onClick={() => handlePageChange(i)}>{i + 1}</Pagination.Item>
-              ))}
-              <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => handlePageChange(page + 1)} />
-            </Pagination>
-          </div>
-        )}
+        <PaginationBar page={page} totalPages={totalPages} onChange={setPage} className="justify-content-center" />
       </Container>
     </div>
   )

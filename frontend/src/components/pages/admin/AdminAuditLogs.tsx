@@ -1,16 +1,21 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAuditLogs } from '../../../store/slices/adminSlice'
+import { adminService } from '../../../services/admin/adminService'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { formatDateTime } from '../../../utils/dateHelpers'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import {
-  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col, Spinner, Modal,
+  Container, Card, Table, Badge, Button, Form, InputGroup, Row, Col,
+  Spinner, Modal,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search, Download, CalendarRange } from 'react-bootstrap-icons'
+import type { AuditLogDto } from '../../../types/admin'
 
-const PAGE_SIZE = 25
+const PAGE_SIZE      = 25
+const DOWNLOAD_BATCH = 200
 
 const AUDIT_ACTIONS = [
   'ACCESS_DENIED', 'APPROVE', 'CANCEL', 'CONFIG_CHANGE', 'CREATE', 'DELETE',
@@ -21,129 +26,108 @@ const AUDIT_ACTIONS = [
 
 export const AdminAuditLogs: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { auditLogs, loadingLogs, loadingMoreLogs } = useAppSelector((state) => state.admin)
+  const { auditLogs, loadingLogs } = useAppSelector((state) => state.admin)
 
-  // Page-level filters
   const [search, setSearch]           = useState('')
   const [from, setFrom]               = useState('')
   const [to, setTo]                   = useState('')
   const [actionFilter, setActionFilter] = useState('')
 
-  // Export modal
-  const [showExport, setShowExport]     = useState(false)
-  const [exportMode, setExportMode]     = useState<'last-n' | 'date-range'>('last-n')
-  const [exportLimit, setExportLimit]   = useState('500')
-  const [exportFrom, setExportFrom]     = useState('')
-  const [exportTo, setExportTo]         = useState('')
+  const [showExport, setShowExport]   = useState(false)
+  const [exportMode, setExportMode]   = useState<'last-n' | 'date-range'>('last-n')
+  const [exportLimit, setExportLimit] = useState('500')
+  const [exportFrom, setExportFrom]   = useState('')
+  const [exportTo, setExportTo]       = useState('')
+  const [dlLoading, setDlLoading]     = useState(false)
 
-  const debounceRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const sentinelRef    = useRef<HTMLDivElement | null>(null)
-  const observerRef    = useRef<IntersectionObserver | null>(null)
-  // Refs always hold the latest filter values so observer closure never stales
-  const searchRef      = useRef(search)
-  const actionRef      = useRef(actionFilter)
-  // True while a page-0 reset is pending — blocks observer from loading a stale next page
-  const pendingResetRef = useRef(false)
+  const [page, setLocalPage]   = useState(0)
 
-  searchRef.current = search
-  actionRef.current = actionFilter
-
-  const hasMore = auditLogs ? auditLogs.currentPage + 1 < auditLogs.totalPages : false
-
-  // Clear the pending-reset guard once page 0 of the new filter lands
-  useEffect(() => {
-    if (auditLogs?.currentPage === 0) pendingResetRef.current = false
-  }, [auditLogs])
-
-  // Search: debounced 300ms → page-0 reset
-  useEffect(() => {
-    pendingResetRef.current = true
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      dispatch(fetchAuditLogs({ page: 0, size: PAGE_SIZE, search: searchRef.current, action: actionRef.current }))
-    }, 300)
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [search, dispatch])
-
-  // Action filter: immediate → cancel pending debounce, page-0 reset
-  useEffect(() => {
-    pendingResetRef.current = true
-    if (debounceRef.current) { clearTimeout(debounceRef.current); debounceRef.current = null }
-    dispatch(fetchAuditLogs({ page: 0, size: PAGE_SIZE, search: searchRef.current, action: actionRef.current }))
-  }, [actionFilter, dispatch])
-
-  // Infinite scroll sentinel — observer does NOT depend on search/actionFilter;
-  // it reads them from refs so it never triggers a stale-filter loadMore
-  useEffect(() => {
-    if (observerRef.current) observerRef.current.disconnect()
-    observerRef.current = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !loadingMoreLogs && !loadingLogs && !pendingResetRef.current) {
-          const nextPage = (auditLogs?.currentPage ?? 0) + 1
-          dispatch(fetchAuditLogs({ page: nextPage, size: PAGE_SIZE, search: searchRef.current, action: actionRef.current }))
-        }
-      },
-      { threshold: 0.1 }
-    )
-    if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
-    return () => observerRef.current?.disconnect()
-  }, [hasMore, loadingMoreLogs, loadingLogs, auditLogs?.currentPage, dispatch])
-
-  // Client-side date filter only (action + search handled server-side)
-  const displayedLogs = useMemo(() => {
-    const logs = auditLogs?.audits ?? []
-    const fromTs = from ? new Date(from).getTime()             : null
-    const toTs   = to   ? new Date(to + 'T23:59:59').getTime() : null
-    if (!fromTs && !toTs) return logs
-    return logs.filter((log) => {
-      const ts = new Date(log.timeStamp).getTime()
-      return (!fromTs || ts >= fromTs) && (!toTs || ts <= toTs)
-    })
-  }, [auditLogs?.audits, from, to])
-
+  const displayedLogs  = auditLogs?.audits ?? []
+  const totalPages     = auditLogs?.totalPages ?? 1
+  const totalElements  = auditLogs?.totalElements ?? 0
   const activeFilterCount = [search, actionFilter, from, to].filter(Boolean).length
   const hasFilters = activeFilterCount > 0
 
-  // --- CSV export ---
-  const buildCSV = (rows: typeof displayedLogs) => {
+  const doFetch = useCallback((q: string, act: string, f: string, t: string, p: number) => {
+    dispatch(fetchAuditLogs({
+      page: p, size: PAGE_SIZE,
+      search:   q   || undefined,
+      action:   act || undefined,
+      fromDate: f   || undefined,
+      toDate:   t   || undefined,
+    }))
+  }, [dispatch])
+
+  useEffect(() => {
+    setLocalPage(0)
+    const timer = setTimeout(() => doFetch(search, actionFilter, from, to, 0), 300)
+    return () => clearTimeout(timer)
+  }, [search, actionFilter, from, to, doFetch])
+
+  const handlePageChange = (p: number) => {
+    setLocalPage(p)
+    doFetch(search, actionFilter, from, to, p)
+  }
+
+  const clearFilters = () => { setSearch(''); setFrom(''); setTo(''); setActionFilter('') }
+
+  // ── CSV export ──────────────────────────────────────────────────────────────
+
+  const buildAndDownloadCSV = (rows: AuditLogDto[]) => {
     const header = 'ID,Timestamp,UserId,Action,EntityId,EntityName\n'
     const body = rows.map((log) =>
       [log.auditId, log.timeStamp, log.userId, log.action, log.entityId,
        `"${log.entityName?.replace(/"/g, '""') ?? ''}"`].join(',')
     ).join('\n')
-    return header + body
-  }
-
-  const handleDownload = () => {
-    let rows = displayedLogs
-    if (exportMode === 'last-n') {
-      const n = Math.max(1, parseInt(exportLimit) || 500)
-      rows = displayedLogs.slice(0, n)
-    } else {
-      const fromTs = exportFrom ? new Date(exportFrom).getTime()             : null
-      const toTs   = exportTo   ? new Date(exportTo + 'T23:59:59').getTime() : null
-      rows = displayedLogs.filter((log) => {
-        const ts = new Date(log.timeStamp).getTime()
-        return (!fromTs || ts >= fromTs) && (!toTs || ts <= toTs)
-      })
-    }
-    if (!rows.length) return
-    const blob = new Blob([buildCSV(rows)], { type: 'text/csv' })
+    const blob = new Blob([header + body], { type: 'text/csv' })
     const url  = URL.createObjectURL(blob)
     const a    = document.createElement('a')
     a.href = url; a.download = 'audit-logs.csv'; a.click()
     URL.revokeObjectURL(url)
-    setShowExport(false)
   }
 
-  const clearFilters = () => { setSearch(''); setFrom(''); setTo(''); setActionFilter('') }
+  const handleDownload = async () => {
+    setDlLoading(true)
+    try {
+      const collected: AuditLogDto[] = []
+
+      if (exportMode === 'last-n') {
+        const target = Math.max(1, parseInt(exportLimit) || 500)
+        let p = 0
+        while (collected.length < target) {
+          const remaining = target - collected.length
+          const res = await adminService.getAuditLogs({
+            page: p, size: Math.min(remaining, DOWNLOAD_BATCH),
+          })
+          collected.push(...res.audits)
+          if (res.audits.length === 0 || p + 1 >= res.totalPages) break
+          p++
+        }
+      } else {
+        let p = 0
+        while (true) {
+          const res = await adminService.getAuditLogs({
+            page: p, size: DOWNLOAD_BATCH,
+            fromDate: exportFrom || undefined,
+            toDate:   exportTo   || undefined,
+          })
+          collected.push(...res.audits)
+          if (res.audits.length === 0 || p + 1 >= res.totalPages) break
+          p++
+        }
+      }
+
+      if (!collected.length) return
+      buildAndDownloadCSV(collected)
+      setShowExport(false)
+    } finally {
+      setDlLoading(false)
+    }
+  }
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      <PageBanner
-        title="Audit Logs"
-        subtitle="Full activity history across the platform"
-      />
+      <PageBanner title="Audit Logs" subtitle="Full activity history across the platform" />
 
       <AdminSubNav />
 
@@ -167,11 +151,7 @@ export const AdminAuditLogs: React.FC = () => {
                 )}
               </div>
               <span className="small" style={{ color: 'var(--text-muted)' }}>
-                {auditLogs
-                  ? activeFilterCount > 0
-                    ? `${displayedLogs.length.toLocaleString()} shown · ${auditLogs.totalElements.toLocaleString()} total`
-                    : `${auditLogs.totalElements.toLocaleString()} total`
-                  : '—'}
+                {auditLogs ? `${totalElements.toLocaleString()} total` : '—'}
               </span>
             </div>
 
@@ -213,42 +193,31 @@ export const AdminAuditLogs: React.FC = () => {
                     <CalendarRange size={14} style={{ color: 'var(--text-muted)' }} />
                   </InputGroup.Text>
                   <Form.Control
-                    type="date"
-                    value={from}
+                    type="date" value={from}
                     onChange={(e) => setFrom(e.target.value)}
-                    className="es-form-control"
-                    title="From date"
+                    className="es-form-control" title="From date"
                     style={{ borderLeft: 0 }}
                   />
                   <InputGroup.Text style={{ background: 'var(--bg-input)', borderColor: 'var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                     →
                   </InputGroup.Text>
                   <Form.Control
-                    type="date"
-                    value={to}
+                    type="date" value={to}
                     onChange={(e) => setTo(e.target.value)}
-                    className="es-form-control"
-                    title="To date"
+                    className="es-form-control" title="To date"
                   />
                 </InputGroup>
               </Col>
               <Col xs="auto" className="ms-auto d-flex gap-2">
                 {hasFilters && (
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    className="rounded-3"
-                    onClick={clearFilters}
-                  >
+                  <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={clearFilters}>
                     Clear
                   </Button>
                 )}
                 <Button
-                  variant="outline-secondary"
-                  size="sm"
+                  variant="outline-secondary" size="sm"
                   className="rounded-3 d-flex align-items-center gap-2"
                   onClick={() => setShowExport(true)}
-                  disabled={!displayedLogs.length}
                 >
                   <Download size={14} /> Export CSV
                 </Button>
@@ -275,60 +244,43 @@ export const AdminAuditLogs: React.FC = () => {
                       No audit logs found
                     </td>
                   </tr>
-                ) : (
-                  displayedLogs.map((log) => (
-                    <tr key={log.auditId}>
-                      <td className="align-middle" style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
-                        {formatDateTime(log.timeStamp)}
-                      </td>
-                      <td className="align-middle">
-                        <div className="d-flex align-items-center gap-2">
-                          <div
-                            className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
-                            style={{ width: 24, height: 24, fontSize: '0.6rem', background: 'var(--blue)' }}
-                          >
-                            {(log.userId || '?').slice(0, 2).toUpperCase()}
-                          </div>
-                          <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{log.userId}</span>
+                ) : displayedLogs.map((log) => (
+                  <tr key={log.auditId}>
+                    <td className="align-middle" style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                      {formatDateTime(log.timeStamp)}
+                    </td>
+                    <td className="align-middle">
+                      <div className="d-flex align-items-center gap-2">
+                        <div
+                          className="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white flex-shrink-0"
+                          style={{ width: 24, height: 24, fontSize: '0.6rem', background: 'var(--blue)' }}
+                        >
+                          {(log.userId || '?').slice(0, 2).toUpperCase()}
                         </div>
-                      </td>
-                      <td className="align-middle">
-                        <code style={{ fontSize: '0.78rem', color: 'var(--saffron)' }}>{log.action}</code>
-                      </td>
-                      <td className="align-middle">
-                        <Badge className="es-badge-draft border-0" style={{ fontSize: '0.65rem' }}>
-                          {log.entityId}
-                        </Badge>
-                      </td>
-                      <td
-                        className="align-middle"
-                        style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}
-                        title={log.entityName}
-                      >
-                        {log.entityName || '—'}
-                      </td>
-                    </tr>
-                  ))
-                )}
-                {loadingMoreLogs && (
-                  <tr>
-                    <td colSpan={5} className="text-center py-3">
-                      <Spinner animation="border" size="sm" style={{ color: 'var(--text-muted)' }} />
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{log.userId}</span>
+                      </div>
+                    </td>
+                    <td className="align-middle">
+                      <code style={{ fontSize: '0.78rem', color: 'var(--saffron)' }}>{log.action}</code>
+                    </td>
+                    <td className="align-middle">
+                      <Badge className="es-badge-draft border-0" style={{ fontSize: '0.65rem' }}>
+                        {log.entityId}
+                      </Badge>
+                    </td>
+                    <td
+                      className="align-middle"
+                      style={{ maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}
+                      title={log.entityName}
+                    >
+                      {log.entityName || '—'}
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </Table>
 
-            {/* Infinite scroll sentinel */}
-            <div ref={sentinelRef} style={{ height: 1 }} />
-
-            {/* End-of-list */}
-            {!loadingLogs && !hasMore && (auditLogs?.audits.length ?? 0) > 0 && (
-              <div className="text-center py-3 small" style={{ color: 'var(--text-muted)' }}>
-                All {auditLogs!.totalElements.toLocaleString()} records loaded
-              </div>
-            )}
+            <PaginationBar page={page} totalPages={totalPages} totalElements={totalElements} label="logs" onChange={handlePageChange} />
           </Card.Body>
         </Card>
       </Container>
@@ -340,13 +292,11 @@ export const AdminAuditLogs: React.FC = () => {
         </Modal.Header>
         <Modal.Body style={{ background: 'var(--bg-surface)' }}>
           <p className="small mb-3" style={{ color: 'var(--text-muted)' }}>
-            Exports rows matching current search &amp; filters.
-            {activeFilterCount > 0 && ` (${activeFilterCount} filter${activeFilterCount !== 1 ? 's' : ''} active)`}
+            Download is independent of current page and filters.
           </p>
 
           <Form.Check
-            type="radio"
-            id="export-last-n"
+            type="radio" id="export-last-n"
             label="Last N records"
             checked={exportMode === 'last-n'}
             onChange={() => setExportMode('last-n')}
@@ -355,9 +305,7 @@ export const AdminAuditLogs: React.FC = () => {
           />
           {exportMode === 'last-n' && (
             <Form.Control
-              type="number"
-              min={1}
-              max={9999}
+              type="number" min={1} max={9999}
               value={exportLimit}
               onChange={(e) => setExportLimit(e.target.value)}
               className="es-form-control mb-3"
@@ -367,8 +315,7 @@ export const AdminAuditLogs: React.FC = () => {
           )}
 
           <Form.Check
-            type="radio"
-            id="export-date-range"
+            type="radio" id="export-date-range"
             label="Date range"
             checked={exportMode === 'date-range'}
             onChange={() => setExportMode('date-range')}
@@ -378,21 +325,17 @@ export const AdminAuditLogs: React.FC = () => {
           {exportMode === 'date-range' && (
             <InputGroup className="mb-3">
               <Form.Control
-                type="date"
-                value={exportFrom}
+                type="date" value={exportFrom}
                 onChange={(e) => setExportFrom(e.target.value)}
-                className="es-form-control"
-                title="Export from"
+                className="es-form-control" title="Export from"
               />
               <InputGroup.Text style={{ background: 'var(--bg-input)', borderColor: 'var(--border-color)', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                 →
               </InputGroup.Text>
               <Form.Control
-                type="date"
-                value={exportTo}
+                type="date" value={exportTo}
                 onChange={(e) => setExportTo(e.target.value)}
-                className="es-form-control"
-                title="Export to"
+                className="es-form-control" title="Export to"
               />
             </InputGroup>
           )}
@@ -402,12 +345,15 @@ export const AdminAuditLogs: React.FC = () => {
             Cancel
           </Button>
           <Button
-            size="sm"
-            className="rounded-3 d-flex align-items-center gap-2"
+            size="sm" className="rounded-3 d-flex align-items-center gap-2"
             style={{ background: 'var(--blue)', border: 'none' }}
             onClick={handleDownload}
+            disabled={dlLoading}
           >
-            <Download size={14} /> Download
+            {dlLoading
+              ? <Spinner animation="border" size="sm" />
+              : <><Download size={14} /> Download</>
+            }
           </Button>
         </Modal.Footer>
       </Modal>
