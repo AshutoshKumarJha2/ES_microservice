@@ -12,27 +12,29 @@ interface AuditState {
 
 interface AdminState {
   allUsers: UserResponseDto[]
+  totalUsers: number
+  totalUserPages: number
   auditLogs: AuditState | null
   loadingUsers: boolean
   loadingLogs: boolean
-  loadingMoreLogs: boolean
   error: string | null
 }
 
 const initialState: AdminState = {
   allUsers: [],
+  totalUsers: 0,
+  totalUserPages: 1,
   auditLogs: null,
   loadingUsers: false,
   loadingLogs: false,
-  loadingMoreLogs: false,
   error: null,
 }
 
 export const fetchUsers = createAsyncThunk(
   'admin/fetchUsers',
-  async (params: { search?: string; role?: string; status?: string } = {}, { rejectWithValue }) => {
+  async (params: { search?: string; role?: string; status?: string; page?: number; size?: number } = {}, { rejectWithValue }) => {
     try {
-      return await adminService.searchUsers(params)
+      return await adminService.getUsers(params)
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string }
       return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch users')
@@ -87,7 +89,9 @@ const adminSlice = createSlice({
       .addCase(fetchUsers.pending, (state) => { state.loadingUsers = true; state.error = null })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loadingUsers = false
-        state.allUsers = action.payload as UserResponseDto[]
+        state.allUsers = action.payload.content ?? []
+        state.totalUsers = action.payload.totalElements ?? 0
+        state.totalUserPages = action.payload.totalPages ?? 1
       })
       .addCase(fetchUsers.rejected, (state, action) => { state.loadingUsers = false; state.error = action.payload as string })
 
@@ -100,28 +104,14 @@ const adminSlice = createSlice({
         if (idx !== -1) state.allUsers[idx] = action.payload
       })
 
-      .addCase(fetchAuditLogs.pending, (state, action) => {
-        const isFirstPage = (action.meta.arg?.page ?? 0) === 0
-        if (isFirstPage) state.loadingLogs = true
-        else state.loadingMoreLogs = true
-        state.error = null
-      })
+      .addCase(fetchAuditLogs.pending, (state) => { state.loadingLogs = true; state.error = null })
       .addCase(fetchAuditLogs.fulfilled, (state, action) => {
-        const isFirstPage = (action.meta.arg?.page ?? 0) === 0
         const { audits, totalElements, totalPages, page } = action.payload
-        if (isFirstPage) {
-          state.auditLogs = { audits, totalElements, totalPages, currentPage: page }
-        } else if (state.auditLogs && page === state.auditLogs.currentPage + 1) {
-          // Only append sequential pages — drop stale responses from previous filter queries
-          state.auditLogs.audits.push(...audits)
-          state.auditLogs.currentPage = page
-        }
+        state.auditLogs = { audits, totalElements, totalPages, currentPage: page }
         state.loadingLogs = false
-        state.loadingMoreLogs = false
       })
       .addCase(fetchAuditLogs.rejected, (state, action) => {
         state.loadingLogs = false
-        state.loadingMoreLogs = false
         state.error = action.payload as string
       })
   },

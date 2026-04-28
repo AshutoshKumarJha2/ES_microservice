@@ -1,12 +1,14 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axiosInstance from '../../../api/axiosInstance'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { fmtDate } from '../../../utils/dateHelpers'
+import { eventService } from '../../../services/events/eventService'
+import { usePaginatedQuery } from '../../../hooks/usePaginatedQuery'
 import {
-  Container, Card, Table, Button, Form, InputGroup, Row, Col, Pagination,
+  Container, Card, Table, Button, Form, InputGroup, Row, Col,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
@@ -17,33 +19,18 @@ const PAGE_SIZE = 10
 
 export const AdminEvents: React.FC = () => {
   const navigate = useNavigate()
-  const [allEvents, setAllEvents] = useState<EventResponseDto[]>([])
-  const [loading, setLoading]     = useState(false)
-  const [search, setSearch]       = useState('')
-  const [status, setStatus]       = useState('ALL')
-  const [page, setPage]           = useState(0)
+  const [search, setSearch] = useState('')
+  const [status, setStatus] = useState('ALL')
 
-  useEffect(() => {
-    setLoading(true)
-    axiosInstance.get('/api/v1/event-manager/events')
-      .then(({ data }) => setAllEvents(Array.isArray(data) ? data : (data.content ?? [])))
-      .catch(() => setAllEvents([]))
-      .finally(() => setLoading(false))
-  }, [])
-
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return allEvents.filter((ev) => {
-      const matchStatus = status === 'ALL' || ev.status === status
-      const matchSearch = !q || ev.eventName.toLowerCase().includes(q)
-      return matchStatus && matchSearch
-    })
-  }, [allEvents, search, status])
-
-  useEffect(() => { setPage(0) }, [search, status])
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageEvents = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const { data: events, page, totalPages, totalElements, loading, setPage } = usePaginatedQuery<EventResponseDto, { search?: string; status?: string }>({
+    fetcher: (params) => eventService.getAll(params),
+    itemsKey: 'events',
+    params: {
+      search: search || undefined,
+      status: status !== 'ALL' ? status : undefined,
+    },
+    size: PAGE_SIZE,
+  })
 
   return (
     <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
@@ -58,7 +45,7 @@ export const AdminEvents: React.FC = () => {
               <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>All Events</Card.Title>
               <div className="d-flex align-items-center gap-3">
                 <span className="small" style={{ color: 'var(--text-muted)' }}>
-                  {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                  {totalElements} result{totalElements !== 1 ? 's' : ''}
                 </span>
                 <Button
                   variant="primary"
@@ -112,9 +99,9 @@ export const AdminEvents: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : pageEvents.length === 0 ? (
+                {loading ? <TableRowsSkeleton rows={10} cols={6} colWidths={['68%','52%','48%','58%','38%','30%']} /> : events.length === 0 ? (
                     <tr><td colSpan={6} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No events found</td></tr>
-                  ) : pageEvents.map((ev) => (
+                  ) : events.map((ev) => (
                     <tr key={ev.id}>
                       <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>{ev.eventName}</td>
                       <td className="align-middle" style={{ color: 'var(--text-secondary)' }}>
@@ -152,21 +139,7 @@ export const AdminEvents: React.FC = () => {
               </tbody>
             </Table>
 
-            {/* Pagination */}
-            {filtered.length > PAGE_SIZE && (
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <small style={{ color: 'var(--text-muted)' }}>
-                  Page {page + 1} of {totalPages} · {filtered.length} events
-                </small>
-                <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={page === 0} onClick={() => setPage((p) => p - 1)} />
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => setPage(i)}>{i + 1}</Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)} />
-                </Pagination>
-              </div>
-            )}
+            <PaginationBar page={page} totalPages={totalPages} totalElements={totalElements} label="events" onChange={setPage} />
           </Card.Body>
         </Card>
       </Container>

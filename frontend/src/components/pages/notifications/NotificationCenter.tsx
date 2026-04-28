@@ -2,8 +2,9 @@ import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
   fetchNotifications,
+  loadMoreNotifications,
   markNotificationRead,
-  markAllReadLocally,
+  markAllNotificationsRead,
   sendNotification,
 } from '../../../store/slices/notificationsSlice'
 import type { AppNotification } from '../../../types/events'
@@ -39,6 +40,10 @@ const BADGE_VARIANT: Record<string, string> = {
   CONTRACT:     'dark',
 }
 
+function isUnread(n: AppNotification): boolean {
+  return n.status?.toUpperCase() === 'UNREAD'
+}
+
 function formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleString(undefined, {
@@ -52,7 +57,7 @@ function formatDate(iso: string): string {
 
 function applyFilter(notifications: AppNotification[], filter: FilterKey): AppNotification[] {
   if (filter === 'ALL')    return notifications
-  if (filter === 'UNREAD') return notifications.filter((n) => n.status === 'UNREAD')
+  if (filter === 'UNREAD') return notifications.filter(isUnread)
   return notifications.filter((n) => n.category?.toUpperCase() === filter)
 }
 
@@ -132,7 +137,7 @@ function SendModal({ show, sending, error, onClose, onSend }: SendModalProps) {
 
 export const NotificationCenter = () => {
   const dispatch = useAppDispatch()
-  const { notifications, loading, sending, error } = useAppSelector((s) => s.notifications)
+  const { notifications, loading, loadingMore, hasMore, sending, error } = useAppSelector((s) => s.notifications)
   const user    = useAppSelector((s) => s.auth.user)
   const isAdmin = user?.role === 'ADMIN'
 
@@ -143,7 +148,7 @@ export const NotificationCenter = () => {
   useEffect(() => { dispatch(fetchNotifications()) }, [dispatch])
 
   const visible     = applyFilter(notifications, filter)
-  const unreadCount = notifications.filter((n) => n.status === 'UNREAD').length
+  const unreadCount = notifications.filter(isUnread).length
 
   const handleSend = async (payload: { userId: string; message: string; category: string }) => {
     setSendError(null)
@@ -177,7 +182,7 @@ export const NotificationCenter = () => {
               {unreadCount > 0 && (
                 <Button
                   variant="outline-light" size="sm" className="rounded-3 fw-semibold"
-                  onClick={() => dispatch(markAllReadLocally())}
+                  onClick={() => dispatch(markAllNotificationsRead())}
                 >
                   <CheckAll size={16} className="me-1" /> Mark All as Read
                 </Button>
@@ -238,11 +243,11 @@ export const NotificationCenter = () => {
                   </td></tr>
                 ) : visible.map((n) => {
                   const cat    = n.category?.toUpperCase() ?? 'SYSTEM'
-                  const isUnread = n.status === 'UNREAD'
+                  const unread = isUnread(n)
                   return (
                     <tr
                       key={n.notificationId}
-                      style={isUnread ? { background: 'color-mix(in srgb, var(--blue) 4%, transparent)' } : {}}
+                      style={unread ? { background: 'color-mix(in srgb, var(--blue) 4%, transparent)' } : {}}
                     >
                       {/* Status dot */}
                       <td className="align-middle ps-4">
@@ -250,7 +255,7 @@ export const NotificationCenter = () => {
                           className="d-inline-block rounded-circle"
                           style={{
                             width: 8, height: 8,
-                            background: isUnread ? 'var(--blue)' : 'var(--border-color)',
+                            background: unread ? 'var(--blue)' : 'var(--border-color)',
                           }}
                         />
                       </td>
@@ -259,7 +264,7 @@ export const NotificationCenter = () => {
                       <td className="align-middle" style={{ maxWidth: 300 }}>
                         <div
                           className="fw-semibold small mb-1"
-                          style={{ color: isUnread ? 'var(--text-primary)' : 'var(--text-secondary)' }}
+                          style={{ color: unread ? 'var(--text-primary)' : 'var(--text-secondary)' }}
                         >
                           {cat.charAt(0) + cat.slice(1).toLowerCase()} Notification
                         </div>
@@ -288,7 +293,7 @@ export const NotificationCenter = () => {
 
                       {/* Actions */}
                       <td className="align-middle">
-                        {isUnread ? (
+                        {unread ? (
                           <Button
                             variant="outline-primary" size="sm" className="rounded-3"
                             style={{ fontSize: '0.75rem' }}
@@ -305,6 +310,19 @@ export const NotificationCenter = () => {
                 })}
               </tbody>
             </Table>
+          )}
+
+          {/* Load More */}
+          {!loading && hasMore && (
+            <div className="text-center py-3 border-top" style={{ borderColor: 'var(--border-color)' }}>
+              <Button
+                variant="outline-secondary" size="sm" className="rounded-3 px-4"
+                disabled={loadingMore}
+                onClick={() => dispatch(loadMoreNotifications())}
+              >
+                {loadingMore ? <Spinner animation="border" size="sm" /> : 'Load More'}
+              </Button>
+            </div>
           )}
         </div>
 

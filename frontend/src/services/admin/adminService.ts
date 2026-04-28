@@ -37,6 +37,8 @@ export const adminService = {
     size?: number
     search?: string
     action?: string
+    fromDate?: string
+    toDate?: string
   }): Promise<AuditLogsPageDto> {
     const { data } = await axiosInstance.get('/api/v1/log-manager/audits', { params })
     if (Array.isArray(data)) {

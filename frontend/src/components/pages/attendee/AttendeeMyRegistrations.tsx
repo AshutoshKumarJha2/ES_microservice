@@ -35,7 +35,7 @@ export const AttendeeMyRegistrations = () => {
       registrationService.getMyRegistrations(),
     ]).then(([eventsR, regsR]) => {
       if (eventsR.status === 'rejected' || regsR.status === 'rejected') return
-      const eventMap = new Map(eventsR.value.map((e) => [e.id, e]))
+      const eventMap = new Map((eventsR.value.events ?? []).map((e) => [e.id, e]))
       const found: RegWithEvent[] = regsR.value.registrations
         .map((reg) => {
           const event = eventMap.get(reg.eventId)
