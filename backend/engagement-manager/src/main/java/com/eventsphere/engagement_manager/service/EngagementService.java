@@ -5,6 +5,7 @@ package com.eventsphere.engagement_manager.service;
 import com.eventsphere.engagement_manager.dto.client.EventAnalyticsDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
+import com.eventsphere.engagement_manager.dto.engagement.SessionAttendanceSummaryDto;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
 
 import java.time.LocalDateTime;
@@ -32,4 +33,10 @@ public interface EngagementService {
 
     /** Counts SESSION_JOIN engagements for a given schedule (session) */
     long getSessionJoinCount(String scheduleId);
+
+    /** Returns all engagements recorded for a given schedule (session) */
+    List<EngagementResponseDto> getByScheduleId(String scheduleId);
+
+    /** Returns attendance summary (totalRegistrations, presentCount, absentCount) for a session */
+    SessionAttendanceSummaryDto getSessionAttendanceSummary(String eventId, String scheduleId);
 }
