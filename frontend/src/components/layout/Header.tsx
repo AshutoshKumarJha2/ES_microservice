@@ -15,6 +15,10 @@ export const Header = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { theme } = useAppSelector((state) => state.ui)
+  const unreadCount = useAppSelector((state) =>
+    state.notifications.notifications.filter((n) => n.status === 'UNREAD').length
+  )
   const [menuOpen, setMenuOpen] = useState(false)
 
   const handleLogout = () => {
@@ -113,9 +117,17 @@ export const Header = () => {
     >
       <Container>
         {/* Logo */}
-        <Navbar.Brand as={Link} to="/" className="es-logo me-4">
-          <span className="es-event">event</span>
-          <span className="es-sphere">sphere</span>
+        <Navbar.Brand as={Link} to="/" className="me-4">
+          <img
+            src={theme === 'dark' ? '/eventsphere_secondary_logo_dark.svg' : '/eventsphere_secondary_logo_light.svg'}
+            alt="EventSphere"
+            height={32}
+            className="d-lg-none"
+          />
+          <span className="es-logo d-none d-lg-inline">
+            <span className="es-event">event</span>
+            <span className="es-sphere">sphere</span>
+          </span>
         </Navbar.Brand>
 
         {/* Desktop: nav links */}
