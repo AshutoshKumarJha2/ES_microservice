@@ -216,6 +216,7 @@ export interface EngagementRequestDto {
   attendeeId: string
   activity: EngagementActivity
   activityTimestamp: string   // LocalDateTime — "YYYY-MM-DDTHH:mm:ss"
+  scheduleId?: string
 }
 
 export interface EngagementResponseDto {

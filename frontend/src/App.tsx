@@ -45,6 +45,7 @@ import { Deliveries } from './components/pages/vendor/Deliveries'
 import { Invoices } from './components/pages/vendor/Invoices'
 import { OrganizerContracts } from './components/pages/events/OrganizerContracts'
 import { FinanceInvoices } from './components/pages/finance/FinanceInvoices'
+import { SessionAttendancePage } from './components/pages/engagement/SessionAttendancePage'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -95,6 +96,7 @@ export const App = () => {
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
+            { path: '/organizer/events/:eventId/sessions/:scheduleId/attendance', element: <SessionAttendancePage /> },
             { path: '/events',                       element: <AttendeeEventBrowser /> },
             { path: '/attendee/events/:id',          element: <AttendeeEventDetail /> },
             { path: '/attendee/registrations',       element: <AttendeeMyRegistrations /> },
