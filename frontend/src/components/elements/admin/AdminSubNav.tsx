@@ -4,6 +4,8 @@ const LINKS = [
   { to: '/admin/dashboard',  label: 'Dashboard' },
   { to: '/admin/users',      label: 'Users' },
   { to: '/admin/events',     label: 'Events' },
+  { to: '/admin/expenses',   label: 'Expenses' },
+  { to: '/admin/budget',     label: 'Budget' },
   { to: '/admin/audit-logs', label: 'Audit Logs' },
 ]
 
