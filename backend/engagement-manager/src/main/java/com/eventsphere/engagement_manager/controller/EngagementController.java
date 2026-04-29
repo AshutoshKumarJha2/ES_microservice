@@ -3,6 +3,7 @@ package com.eventsphere.engagement_manager.controller;
 import com.eventsphere.engagement_manager.dto.client.EventAnalyticsDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
+import com.eventsphere.engagement_manager.dto.engagement.SessionAttendanceSummaryDto;
 import com.eventsphere.engagement_manager.model.data.EngagementType;
 import com.eventsphere.engagement_manager.service.EngagementService;
 
@@ -34,7 +35,7 @@ public class EngagementController {
     private final EngagementService engagementService;
 
     @PostMapping("/log")
-    @PreAuthorize("hasRole('ATTENDEE')")
+    @PreAuthorize("hasAnyRole('ATTENDEE', 'ORGANIZER', 'ADMIN')")
     public ResponseEntity<EngagementResponseDto> logEngagement(@Valid @RequestBody EngagementRequestDto engagementRequestDto) {
         log.info("API: Logging engagement for user={} at event={}",
                 engagementRequestDto.attendeeId(), engagementRequestDto.eventId());
@@ -104,5 +105,29 @@ public class EngagementController {
     public ResponseEntity<Long> getSessionJoinCount(@PathVariable String scheduleId) {
         log.info("API: get session join count for scheduleId={}", scheduleId);
         return ResponseEntity.ok(engagementService.getSessionJoinCount(scheduleId));
+    }
+
+    /**
+     * Returns all engagements for a given schedule (session).
+     * Used by the session attendance page to determine which attendees are already marked present.
+     */
+    @GetMapping("/session/{scheduleId}/log")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN', 'SYS_EVENT_MGR')")
+    public ResponseEntity<List<EngagementResponseDto>> getBySchedule(@PathVariable String scheduleId) {
+        log.info("API: get engagements for scheduleId={}", scheduleId);
+        return ResponseEntity.ok(engagementService.getByScheduleId(scheduleId));
+    }
+
+    /**
+     * Returns a pre-computed attendance summary for a session.
+     * Counts are computed server-side via SQL COUNT — avoids transferring full engagement lists.
+     */
+    @GetMapping("/session/{scheduleId}/summary")
+    @PreAuthorize("hasAnyRole('ORGANIZER', 'ADMIN')")
+    public ResponseEntity<SessionAttendanceSummaryDto> getSessionAttendanceSummary(
+            @PathVariable String scheduleId,
+            @RequestParam String eventId) {
+        log.info("API: get attendance summary for scheduleId={} eventId={}", scheduleId, eventId);
+        return ResponseEntity.ok(engagementService.getSessionAttendanceSummary(eventId, scheduleId));
     }
 }

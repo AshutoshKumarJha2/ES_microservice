@@ -57,6 +57,36 @@ export const analyticsService = {
     }
   },
 
+  /** Returns all engagements for a specific session (used by attendance page) */
+  async getSessionEngagements(scheduleId: string): Promise<EngagementResponseDto[]> {
+    try {
+      const { data } = await axiosInstance.get(
+        `/api/v1/engagement-manager/engagements/session/${scheduleId}/log`
+      )
+      return data
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status
+      if (status === 404) return []
+      throw err
+    }
+  },
+
+  /** Returns pre-computed attendance summary (counts) for a session — avoids full engagement list transfer */
+  async getSessionAttendanceSummary(
+    eventId: string,
+    scheduleId: string,
+  ): Promise<{ scheduleId: string; totalRegistrations: number; presentCount: number; absentCount: number }> {
+    try {
+      const { data } = await axiosInstance.get(
+        `/api/v1/engagement-manager/engagements/session/${scheduleId}/summary`,
+        { params: { eventId } },
+      )
+      return data
+    } catch {
+      return { scheduleId, totalRegistrations: 0, presentCount: 0, absentCount: 0 }
+    }
+  },
+
   /** Fetches the list of scheduled sessions for an event from event-manager */
   async getSchedulesByEvent(eventId: string): Promise<ScheduleResponseDto[]> {
     try {

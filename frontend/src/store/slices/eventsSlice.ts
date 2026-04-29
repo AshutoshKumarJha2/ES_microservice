@@ -13,6 +13,8 @@ function extractMessage(err: unknown): string {
 
 interface EventsState {
   events: EventResponseDto[]
+  totalElements: number
+  totalPages: number
   selectedEvent: EventResponseDto | null
   loading: boolean
   error: string | null
@@ -20,18 +22,23 @@ interface EventsState {
 
 const initialState: EventsState = {
   events: [],
+  totalElements: 0,
+  totalPages: 1,
   selectedEvent: null,
   loading: false,
   error: null,
 }
 
-export const fetchAllEvents = createAsyncThunk('events/fetchAll', async (_, { rejectWithValue }) => {
-  try {
-    return await eventService.getAll()
-  } catch (err: unknown) {
-    return rejectWithValue(extractMessage(err))
+export const fetchAllEvents = createAsyncThunk(
+  'events/fetchAll',
+  async ({ page = 0, size = 20 }: { page?: number; size?: number } = {}, { rejectWithValue }) => {
+    try {
+      return await eventService.getAll({ page, size })
+    } catch (err: unknown) {
+      return rejectWithValue(extractMessage(err))
+    }
   }
-})
+)
 
 export const fetchEventById = createAsyncThunk('events/fetchById', async (id: string, { rejectWithValue }) => {
   try {
@@ -83,7 +90,12 @@ const eventsSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllEvents.pending, (state) => { state.loading = true; state.error = null })
-      .addCase(fetchAllEvents.fulfilled, (state, action) => { state.loading = false; state.events = action.payload })
+      .addCase(fetchAllEvents.fulfilled, (state, action) => {
+        state.loading = false
+        state.events = action.payload.events
+        state.totalElements = action.payload.totalElements
+        state.totalPages = action.payload.totalPages
+      })
       .addCase(fetchAllEvents.rejected, (state, action) => { state.loading = false; state.error = action.payload as string })
 
       .addCase(fetchEventById.pending, (state) => { state.loading = true; state.error = null })

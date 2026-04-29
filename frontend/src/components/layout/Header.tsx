@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { logout } from '../../store/slices/authSlice'
 import { clearAuthHeader } from '../../api/axiosInstance'
-import { Bell, BoxArrowRight, Person } from 'react-bootstrap-icons'
+import { BoxArrowRight, Person } from 'react-bootstrap-icons'
 import { DarkModeToggle } from '../elements/DarkModeToggle'
 import { userInitials, roleBadgeClass } from '../../utils/badgeHelpers'
 import { Nav, Container, NavDropdown, Badge, Navbar, Dropdown } from 'react-bootstrap'
+import { NotificationDropdown } from '../elements/notifications/NotificationDropdown'
 
 const NAV_LINK_STYLE = { fontSize: '0.9rem', color: 'var(--text-primary)' }
 
@@ -14,6 +15,7 @@ export const Header = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAppSelector((state) => state.auth)
+  const { theme } = useAppSelector((state) => state.ui)
   const unreadCount = useAppSelector((state) =>
     state.notifications.notifications.filter((n) => n.status === 'UNREAD').length
   )
@@ -26,28 +28,6 @@ export const Header = () => {
   }
 
   const initials = userInitials(user?.name)
-
-  const bellButton = isAuthenticated && (
-    <Nav.Link
-      as={Link}
-      to="/notifications"
-      aria-label="Notifications"
-      className="position-relative d-inline-flex align-items-center justify-content-center p-0 rounded-3"
-      style={{ color: 'var(--text-secondary)', width: 34, height: 34 }}
-    >
-      <Bell size={17} />
-      {unreadCount > 0 && (
-        <Badge
-          bg="danger"
-          pill
-          className="position-absolute"
-          style={{ fontSize: '0.6rem', top: 2, right: 2, minWidth: 16 }}
-        >
-          {unreadCount > 99 ? '99+' : unreadCount}
-        </Badge>
-      )}
-    </Nav.Link>
-  )
 
   const profileOrAuth = isAuthenticated ? (
     <NavDropdown
@@ -137,9 +117,17 @@ export const Header = () => {
     >
       <Container>
         {/* Logo */}
-        <Navbar.Brand as={Link} to="/" className="es-logo me-4">
-          <span className="es-event">event</span>
-          <span className="es-sphere">sphere</span>
+        <Navbar.Brand as={Link} to="/" className="me-4">
+          <img
+            src={theme === 'dark' ? '/eventsphere_secondary_logo_dark.svg' : '/eventsphere_secondary_logo_light.svg'}
+            alt="EventSphere"
+            height={32}
+            className="d-lg-none"
+          />
+          <span className="es-logo d-none d-lg-inline">
+            <span className="es-event">event</span>
+            <span className="es-sphere">sphere</span>
+          </span>
         </Navbar.Brand>
 
         {/* Desktop: nav links */}
@@ -168,11 +156,11 @@ export const Header = () => {
         {/* Mobile: always-visible right actions */}
         <div className="d-flex d-lg-none align-items-center gap-2 ms-auto me-2 mobile-actions">
           <DarkModeToggle />
-          {bellButton}
+          {isAuthenticated && <NotificationDropdown />}
           {profileOrAuth}
         </div>
 
-        {/* Mobile: hamburger dropdown — same style as profile menu */}
+        {/* Mobile: hamburger dropdown */}
         <Dropdown show={menuOpen} onToggle={setMenuOpen} align="end" className="d-lg-none">
           <Dropdown.Toggle as="button" bsPrefix="btn" className="navbar-toggler p-1">
             <span className="navbar-toggler-icon" />
@@ -185,7 +173,7 @@ export const Header = () => {
         {/* Desktop: right actions */}
         <div className="d-none d-lg-flex align-items-center gap-2">
           <DarkModeToggle />
-          {bellButton}
+          {isAuthenticated && <NotificationDropdown />}
           {profileOrAuth}
         </div>
       </Container>

@@ -4,6 +4,7 @@ import com.cts.eventsphere.eventmanager.client.UserServiceClient;
 import com.cts.eventsphere.eventmanager.client.VenueClient;
 import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
 import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
+import com.cts.eventsphere.eventmanager.dto.event.EventPageResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.user.OrganizerDto;
@@ -20,6 +21,7 @@ import com.cts.eventsphere.eventmanager.model.Event;
 import com.cts.eventsphere.eventmanager.model.Schedule;
 import com.cts.eventsphere.eventmanager.model.data.RegistrationStatus;
 import com.cts.eventsphere.eventmanager.repository.EventRepository;
+import com.cts.eventsphere.eventmanager.repository.EventSpecification;
 import com.cts.eventsphere.eventmanager.repository.RegistrationRepository;
 import com.cts.eventsphere.eventmanager.repository.ScheduleRepository;
 import com.cts.eventsphere.eventmanager.service.AuditService;
@@ -28,6 +30,10 @@ import com.cts.eventsphere.eventmanager.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,30 +175,41 @@ public class EventServiceImpl implements EventService {
     }
 
     /**
-     * Retrieves all events available in the system.
-     * DRAFT events are excluded when the caller's role is {@code ATTENDEE}.
+     * Retrieves a page of events, optionally filtered by name and status.
+     * DRAFT events are always excluded when the caller's role is {@code ATTENDEE}.
      *
-     * @param userId the ID of the requesting user (for audit)
-     * @param role   the role of the requesting user
-     * @return a list of response DTOs representing all visible events
+     * @param userId  the ID of the requesting user (for audit)
+     * @param role    the role of the requesting user
+     * @param search  optional substring to match against event name; ignored when null/blank
+     * @param status  optional event status to filter by; ignored when null, blank, or "ALL"
+     * @param page    zero-based page index
+     * @param size    page size (1–100)
+     * @return paginated response DTO containing matching events and pagination metadata
      */
     @Override
-    public List<EventResponseDto> findAllEvents(String userId, String role) {
-        log.info("Fetching all events from repository");
-        List<Event> events = eventRepository.findAll();
-        if ("ATTENDEE".equals(role)) {
-            events = events.stream()
-                    .filter(e -> e.getStatus() != com.cts.eventsphere.eventmanager.model.data.EventStatus.DRAFT)
-                    .toList();
-        }
+    public EventPageResponseDto findAllEvents(String userId, String role, String search, String status, int page, int size) {
+        log.info("Fetching events page={}, size={}, search={}, status={}, role={}", page, size, search, status, role);
+        boolean isAttendee = "ATTENDEE".equals(role);
+
+        var spec = EventSpecification.builder()
+                .nameContains(search)
+                .statusEquals(status)
+                .excludeStatus(isAttendee ? com.cts.eventsphere.eventmanager.model.data.EventStatus.DRAFT : null)
+                .build();
+
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Event> eventPage = eventRepository.findAll(spec, pageable);
+        List<Event> events = eventPage.getContent();
+
         events.forEach(e -> auditService.logAudit(userId, AuditAction.READ, Event.class, e.getEventId()));
         Map<String, VenueDetailsDto> venueMap = fetchVenueMap(events);
         Map<String, OrganizerDto> organizerMap = fetchOrganizerMap(events);
         List<EventResponseDto> result = events.stream()
                 .map(e -> eventResponseDtoMapper.toDTO(e, venueMap.get(e.getVenueId()), organizerMap.get(e.getOrganizerId())))
                 .toList();
-        log.debug("Found {} events in total", result.size());
-        return result;
+
+        log.debug("Found {} events on page {}/{}", result.size(), page, eventPage.getTotalPages());
+        return new EventPageResponseDto(result, page, size, eventPage.getTotalElements(), eventPage.getTotalPages());
     }
 
     /**

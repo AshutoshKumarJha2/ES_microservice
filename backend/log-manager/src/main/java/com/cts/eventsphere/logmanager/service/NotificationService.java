@@ -13,9 +13,11 @@ import java.util.List;
  * @since 26-03-2026
  */
 public interface NotificationService {
-    List<Notification> getNotificationsScroll(String userId, LocalDateTime lastTimestamp, int limit);
+    List<Notification> getNotificationsScroll(String userId, LocalDateTime lastTimestamp, int limit, String status);
 
     void sendNotification(String userId, String message, String category);
 
     void markAsRead(String notificationId);
+
+    void markAllAsRead(String userId);
 }

@@ -76,6 +76,14 @@ export interface EventResponseDto {
   organizer?: OrganizerDto
 }
 
+export interface EventPageDto {
+  events: EventResponseDto[]
+  page: number
+  size: number
+  totalElements: number
+  totalPages: number
+}
+
 // ── Schedules ─────────────────────────────────────────────────────────────────
 
 export type ScheduleStatus = 'DRAFT' | 'ACTIVE' | 'COMPLETED' | 'TERMINATED'
@@ -208,6 +216,7 @@ export interface EngagementRequestDto {
   attendeeId: string
   activity: EngagementActivity
   activityTimestamp: string   // LocalDateTime — "YYYY-MM-DDTHH:mm:ss"
+  scheduleId?: string
 }
 
 export interface EngagementResponseDto {

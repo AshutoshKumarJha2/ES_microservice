@@ -2,6 +2,7 @@ package com.cts.eventsphere.eventmanager.repository;
 
 import com.cts.eventsphere.eventmanager.model.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Repository;
  * @since 25-03-2026
  */
 @Repository
-public interface EventRepository extends JpaRepository<Event, String> {
+public interface EventRepository extends JpaRepository<Event, String>, JpaSpecificationExecutor<Event> {
     /**
      * Finds an event by its unique identifier.
      * This method queries the underlying data source to retrieve the event

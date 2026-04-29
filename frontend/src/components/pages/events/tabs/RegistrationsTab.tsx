@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../../../../store/hooks'
-import { approveRegistration, rejectRegistration, fetchRegistrationsByEvent } from '../../../../store/slices/registrationsSlice'
+import { registrationService } from '../../../../services/events/registrationService'
+import { usePaginatedQuery } from '../../../../hooks/usePaginatedQuery'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
+import { PaginationBar } from '../../../elements/common/PaginationBar'
+import type { RegistrationDto } from '../../../../types/events'
 import { Card, Table, Button, ButtonGroup, Spinner, Form, InputGroup } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
 
@@ -10,50 +12,52 @@ type RegFilter = 'ALL' | 'PENDING' | 'APPROVED' | 'REJECTED'
 
 export const RegistrationsTab = () => {
   const { id: eventId } = useParams<{ id: string }>()
-  const dispatch = useAppDispatch()
-  const { registrations, loading, actionLoading } = useAppSelector((s) => s.registrations)
 
-  const [regFilter, setRegFilter] = useState<RegFilter>('ALL')
+  const [regFilter, setRegFilter]           = useState<RegFilter>('ALL')
   const [ticketTypeFilter, setTicketTypeFilter] = useState<string>('ALL')
   const [attendeeSearch, setAttendeeSearch] = useState<string>('')
+  const [actionLoading, setActionLoading]   = useState<string | null>(null)
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fetcher = useCallback(
+    (params: { status?: string; ticketType?: string; attendeeName?: string; page: number; size: number }) =>
+      registrationService.getByEventId(
+        eventId!,
+        params.status,
+        undefined,
+        params.ticketType,
+        params.attendeeName,
+        params.page,
+        params.size
+      ),
+    [eventId]
+  )
+
+  const { data: registrations, page, totalPages, loading, setPage, refetch } =
+    usePaginatedQuery<RegistrationDto, { status?: string; ticketType?: string; attendeeName?: string }>({
+      fetcher,
+      itemsKey: 'registrations',
+      params: {
+        status:       regFilter       !== 'ALL' ? regFilter       : undefined,
+        ticketType:   ticketTypeFilter !== 'ALL' ? ticketTypeFilter : undefined,
+        attendeeName: attendeeSearch.trim() || undefined,
+      },
+      size: 10,
+      debounceMs: 300,
+    })
 
   const uniqueTicketTypes = [...new Set(registrations.map((r) => r.ticketType).filter(Boolean))] as string[]
 
-  const dispatchFetch = (status: RegFilter, ticketType: string, search: string) => {
-    if (!eventId) return
-    dispatch(fetchRegistrationsByEvent({
-      eventId,
-      status: status === 'ALL' ? undefined : status,
-      ticketType: ticketType === 'ALL' ? undefined : ticketType,
-      attendeeName: search.trim() || undefined,
-    }))
+  const handleApprove = async (registrationId: string) => {
+    setActionLoading(registrationId)
+    try { await registrationService.approve(registrationId); refetch() }
+    finally { setActionLoading(null) }
   }
 
-  const handleStatusFilter = (f: RegFilter) => {
-    setRegFilter(f)
-    dispatchFetch(f, ticketTypeFilter, attendeeSearch)
+  const handleReject = async (registrationId: string) => {
+    setActionLoading(registrationId)
+    try { await registrationService.reject(registrationId); refetch() }
+    finally { setActionLoading(null) }
   }
-
-  const handleTicketTypeFilter = (t: string) => {
-    setTicketTypeFilter(t)
-    dispatchFetch(regFilter, t, attendeeSearch)
-  }
-
-  const handleSearchChange = (value: string) => {
-    setAttendeeSearch(value)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      dispatchFetch(regFilter, ticketTypeFilter, value)
-    }, 300)
-  }
-
-  useEffect(() => {
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current)
-    }
-  }, [])
 
   return (
     <Card className="es-card border shadow-sm">
@@ -67,11 +71,11 @@ export const RegistrationsTab = () => {
           <Form.Control
             placeholder="Search by name or email..."
             value={attendeeSearch}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setAttendeeSearch(e.target.value)}
             style={{ fontSize: '0.85rem' }}
           />
           {attendeeSearch && (
-            <Button variant="outline-secondary" onClick={() => handleSearchChange('')} style={{ fontSize: '0.85rem' }}>
+            <Button variant="outline-secondary" onClick={() => setAttendeeSearch('')} style={{ fontSize: '0.85rem' }}>
               ✕
             </Button>
           )}
@@ -87,7 +91,7 @@ export const RegistrationsTab = () => {
                 size="sm"
                 variant={regFilter === f ? 'primary' : 'outline-secondary'}
                 className="rounded-pill"
-                onClick={() => handleStatusFilter(f)}
+                onClick={() => setRegFilter(f)}
                 style={{ fontSize: '0.78rem' }}
               >
                 {f}
@@ -105,7 +109,7 @@ export const RegistrationsTab = () => {
                 size="sm"
                 variant={ticketTypeFilter === 'ALL' ? 'primary' : 'outline-secondary'}
                 className="rounded-pill"
-                onClick={() => handleTicketTypeFilter('ALL')}
+                onClick={() => setTicketTypeFilter('ALL')}
                 style={{ fontSize: '0.78rem' }}
               >
                 ALL
@@ -116,7 +120,7 @@ export const RegistrationsTab = () => {
                   size="sm"
                   variant={ticketTypeFilter === t ? 'primary' : 'outline-secondary'}
                   className="rounded-pill"
-                  onClick={() => handleTicketTypeFilter(t)}
+                  onClick={() => setTicketTypeFilter(t)}
                   style={{ fontSize: '0.78rem', textTransform: 'capitalize' }}
                 >
                   {t}
@@ -175,16 +179,16 @@ export const RegistrationsTab = () => {
                         <Button
                           variant="outline-success" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
                           disabled={actionLoading === r.registrationId}
-                          onClick={() => dispatch(approveRegistration(r.registrationId))}
+                          onClick={() => handleApprove(r.registrationId)}
                         >
-                          Approve
+                          {actionLoading === r.registrationId ? <Spinner animation="border" size="sm" /> : 'Approve'}
                         </Button>
                         <Button
                           variant="outline-danger" size="sm" className="rounded-3" style={{ fontSize: '0.78rem' }}
                           disabled={actionLoading === r.registrationId}
-                          onClick={() => dispatch(rejectRegistration(r.registrationId))}
+                          onClick={() => handleReject(r.registrationId)}
                         >
-                          Reject
+                          {actionLoading === r.registrationId ? <Spinner animation="border" size="sm" /> : 'Reject'}
                         </Button>
                       </div>
                     )}
@@ -193,6 +197,8 @@ export const RegistrationsTab = () => {
               ))}
           </tbody>
         </Table>
+
+        <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
       </Card.Body>
     </Card>
   )
