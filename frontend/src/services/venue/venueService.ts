@@ -53,5 +53,10 @@ export const venueService = {
     async getVenuesByDate(date: string): Promise<VenueResponseDto[]> {
         const { data } = await axiosInstance.get(`${BASE}/venues/date/${date}`)
         return data
-    }
+    },
+
+    async getVenuesByManager(managerId: string): Promise<VenueResponseDto[]> {
+        const { data } = await axiosInstance.get(`${BASE}/venues/manager/${managerId}`)
+        return data
+    },
 }

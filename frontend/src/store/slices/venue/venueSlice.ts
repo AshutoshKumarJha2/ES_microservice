@@ -57,6 +57,14 @@ export const fetchAllVenues = createAsyncThunk(
   },
 )
 
+export const fetchVenuesByManager = createAsyncThunk(
+  'venue/fetchVenuesByManager',
+  async (managerId: string, { rejectWithValue }) => {
+    try { return await venueService.getVenuesByManager(managerId) }
+    catch (err: unknown) { return rejectWithValue((err as Error).message) }
+  },
+)
+
 export const createVenue = createAsyncThunk(
   'venue/createVenue',
   async (payload: VenueRequestDto, { rejectWithValue }) => {
@@ -113,6 +121,10 @@ export const fetchResourcesByVenue = createAsyncThunk(
   },
 )
 
+
+
+
+
 export const createResource = createAsyncThunk(
   'venue/createResource',
   async ({ venueId, payload }: { venueId: string; payload: ResourceRequestDto }, { rejectWithValue }) => {
@@ -152,6 +164,11 @@ const venueSlice = createSlice({
       .addCase(fetchAllVenues.pending,    (state) => { state.venuesLoading = true; state.venuesError = null })
       .addCase(fetchAllVenues.fulfilled,  (state, action) => { state.venuesLoading = false; state.venues = action.payload })
       .addCase(fetchAllVenues.rejected,   (state, action) => { state.venuesLoading = false; state.venuesError = action.payload as string })
+
+      // ── fetchVenuesByManager ──────────────────────────────────────────────
+      .addCase(fetchVenuesByManager.pending,   (state) => { state.venuesLoading = true; state.venuesError = null })
+      .addCase(fetchVenuesByManager.fulfilled, (state, action) => { state.venuesLoading = false; state.venues = action.payload })
+      .addCase(fetchVenuesByManager.rejected,  (state, action) => { state.venuesLoading = false; state.venuesError = action.payload as string })
 
       // ── createVenue ───────────────────────────────────────────────────────
       .addCase(createVenue.pending,   (state) => { state.actionLoading = true; state.actionError = null })

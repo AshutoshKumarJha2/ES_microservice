@@ -33,6 +33,9 @@ public class Venue {
     @OneToMany(mappedBy = "venue", cascade = CascadeType.ALL)
     private List<Booking> bookings;
 
+    @Column(columnDefinition = "VARCHAR(36)")
+    private String managerId;
+
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String location;
 

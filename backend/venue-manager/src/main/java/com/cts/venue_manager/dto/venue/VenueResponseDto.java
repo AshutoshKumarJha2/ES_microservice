@@ -14,6 +14,7 @@ public record VenueResponseDto(
         String name,
         String location,
         int capacity,
-        AvailabilityStatus availabilityStatus
+        AvailabilityStatus availabilityStatus,
+        String managerId
 ) {
 }

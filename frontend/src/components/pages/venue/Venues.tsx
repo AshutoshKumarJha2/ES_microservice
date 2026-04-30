@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
-  fetchAllVenues,
+  fetchVenuesByManager,
   createVenue,
   updateVenue,
   deleteVenue,
@@ -55,6 +55,7 @@ export const Venues = () => {
   const dispatch = useAppDispatch()
   const { venues, venuesLoading, venuesError, actionError, actionLoading } =
     useAppSelector((s) => s.venue)
+  const { user } = useAppSelector((s) => s.auth)
 
   const [search, setSearch]               = useState('')
   const [filter, setFilter]               = useState<FilterType>('ALL')
@@ -64,7 +65,9 @@ export const Venues = () => {
   const [form, setForm]                   = useState(emptyForm)
   const [formError, setFormError]         = useState<string | null>(null)
 
-  useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
+  useEffect(() => {
+    if (user?.userId) dispatch(fetchVenuesByManager(user.userId))
+  }, [dispatch, user?.userId])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()

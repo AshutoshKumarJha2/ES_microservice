@@ -83,6 +83,7 @@ public class VenueServiceImpl implements VenueService {
     @Transactional
     public VenueResponseDto create(String actorId, VenueRequestDto dto) {
         Venue venue = venueRequestDtoMapper.toEntity(dto);
+        venue.setManagerId(actorId);
 
         Venue savedVenue = venueRepository.save(venue);
 
@@ -276,6 +277,13 @@ public class VenueServiceImpl implements VenueService {
     public List<VenueResponseDto> findByAvailabilityStatus(String actorId, AvailabilityStatus status) {
         log.info("Fetching venues with status: {} by actor: {}", status, actorId);
         List<Venue> venues = venueRepository.findByAvailabilityStatus(status);
+        return convertAndAudit(actorId, venues);
+    }
+
+    @Override
+    public List<VenueResponseDto> findVenuesByManager(String actorId, String managerId) {
+        log.info("Fetching venues for manager: {} by actor: {}", managerId, actorId);
+        List<Venue> venues = venueRepository.findByManagerId(managerId);
         return convertAndAudit(actorId, venues);
     }
 }

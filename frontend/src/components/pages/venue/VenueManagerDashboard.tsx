@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
-import { fetchAllVenues } from '../../../store/slices/venue/venueSlice'
+import { fetchVenuesByManager } from '../../../store/slices/venue/venueSlice'
 import { Container, Row, Col, Card, Table, Badge, Button } from 'react-bootstrap'
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
@@ -25,7 +25,9 @@ export const VenueManagerDashboard = () => {
   const { venues, venuesLoading } = useAppSelector((s) => s.venue)
   const { user }    = useAppSelector((s) => s.auth)
 
-  useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
+  useEffect(() => {
+    if (user?.userId) dispatch(fetchVenuesByManager(user.userId))
+  }, [dispatch, user?.userId])
 
   const counts = {
     total:       venues.length,

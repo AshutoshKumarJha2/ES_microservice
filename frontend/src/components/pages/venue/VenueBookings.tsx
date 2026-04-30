@@ -1,11 +1,12 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
-  fetchAllVenues,
+  fetchVenuesByManager,
   fetchBookingsByVenue,
   updateBookingStatus,
   clearActionError,
   clearBookings,
+  fetchAllVenues,
 } from '../../../store/slices/venue/venueSlice'
 import type { BookingStatus } from '../../../types/venue'
 import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
