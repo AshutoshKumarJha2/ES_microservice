@@ -122,6 +122,13 @@ public class ResourceServiceImpl implements ResourceService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public ResourceAllocation getResourcesByEventId(String actorId, String eventId) {
+//        log.info("Actor {} fetching resource allocations for event ID: {}", actorId, eventId);
+//        return resourceAllocationRepository.findByEventId(eventId);
+        return  null;
+    }
+
     /**
      * Approves all pending resource allocations for a given event and deducts units from inventory.
      *

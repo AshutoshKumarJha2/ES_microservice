@@ -15,7 +15,7 @@ import static org.springframework.cloud.gateway.server.mvc.handler.HandlerFuncti
 import static org.springframework.cloud.gateway.server.mvc.predicate.GatewayRequestPredicates.path;
 
 @Configuration
-
+// api
 public class GatewayConfig {
     @Bean
     RouterFunction<ServerResponse> customRoutes() {

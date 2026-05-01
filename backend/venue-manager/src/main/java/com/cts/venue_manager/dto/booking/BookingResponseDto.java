@@ -1,6 +1,7 @@
 package com.cts.venue_manager.dto.booking;
 
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
+import com.cts.venue_manager.dto.resource.ResourceVenueManagerResponseDto;
 import com.cts.venue_manager.model.data.BookingStatus;
 
 import java.time.LocalDate;
@@ -20,7 +21,7 @@ public record BookingResponseDto(
         String venueId,
         LocalDate date,
         BookingStatus status,
-        List<ResourceListElementDto> resourceList,
+        List<ResourceVenueManagerResponseDto> resourceList,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {

@@ -7,6 +7,8 @@ import com.cts.venue_manager.dto.mapper.booking.BookingRepsonseVenueManagerDtoMa
 import com.cts.venue_manager.dto.mapper.booking.BookingRequestDtoMapper;
 import com.cts.venue_manager.dto.mapper.booking.BookingResponseDtoMapper;
 import com.cts.venue_manager.dto.mapper.resource.ResourceVenueManagerDtoMapper;
+import com.cts.venue_manager.dto.resource.ResourceListElementDto;
+import com.cts.venue_manager.dto.resource.ResourceResponseDto;
 import com.cts.venue_manager.dto.resource.ResourceVenueManagerResponseDto;
 import com.cts.venue_manager.exception.booking.BookingNotFoundException;
 import com.cts.venue_manager.exception.venue.VenueNotFoundException;
@@ -20,16 +22,13 @@ import com.cts.venue_manager.repository.ResourceAllocationRepository;
 import com.cts.venue_manager.repository.VenueRepository;
 //import com.cts.venue_manager.service.AuditService;
 import com.cts.venue_manager.service.BookingService;
-//import com.cts.venue_manager.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -40,7 +39,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BookingServiceImpl implements BookingService {
-
     private final BookingRepository bookingRepository;
     private final VenueRepository venueRepository;
 //    private final AuditService auditService;
@@ -110,6 +108,43 @@ public class BookingServiceImpl implements BookingService {
 //        sendSafeNotification(actorId, "Booking " + bookingId + " has been successfully removed from the system.", "BOOKING_DELETED");
 
         log.info("Booking {} deleted by actor {}", bookingId, actorId);
+    }
+
+    @Override
+    public List<BookingResponseDto> getBookingByManager(String actorId) {
+        // 1. Fetch venue IDs managed by the actor
+        List<String> venueIds = venueRepository.findByManagerId(actorId).stream()
+                .map(Venue::getVenueId)
+                .toList();
+
+        // 2. Fetch all bookings for these venues
+        List<Booking> bookings = bookingRepository.findByVenue_VenueIdIn(venueIds);
+
+        // 3. Extract all unique event IDs to batch fetch resources
+        List<String> eventIds = bookings.stream()
+                .map(Booking::getEventId)
+                .distinct()
+                .toList();
+
+        // 4. Batch fetch allocations and group them by a unique key (EventID + VenueID)
+        Map<String, List<ResourceVenueManagerResponseDto>> resourceMap = resourceAllocationRepository
+                .findByEventIdInAndVenue_VenueIdIn(eventIds, venueIds)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        alloc -> alloc.getEventId() + "-" + alloc.getVenue().getVenueId(),
+                        Collectors.mapping(alloc -> new ResourceVenueManagerResponseDto(
+                                alloc.getResource().getName(),
+                                alloc.getQuantity()), Collectors.toList())
+                ));
+
+        // 5. Map bookings to DTOs using the pre-fetched map
+        return bookings.stream()
+                .map(booking -> {
+                    String key = booking.getEventId() + "-" + booking.getVenue().getVenueId();
+                    List<ResourceVenueManagerResponseDto> resources = resourceMap.getOrDefault(key, List.of());
+                    return responseMapper.toDto(booking, resources);
+                })
+                .toList();
     }
 
     // Read methods remain unchanged as they don't typically trigger notifications...
