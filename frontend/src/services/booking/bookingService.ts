@@ -27,6 +27,11 @@ export const bookingService = {
             return data
         },
 
+        async getBookingsByManager(): Promise<BookingResponseVenueManagerDto[]> {
+            const { data } = await axiosInstance.get(`${BASE}/bookings/manager`)
+            return data
+        },
+
         async getBookingsByEvent(eventId: string): Promise<BookingResponseDto[]> {
             const { data } = await axiosInstance.get(`${BASE}/bookings/events/${eventId}`)
             return data

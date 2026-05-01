@@ -5,7 +5,6 @@ import com.cts.venue_manager.dto.booking.BookingRequestDto;
 import com.cts.venue_manager.dto.booking.BookingResponseDto;
 import com.cts.venue_manager.dto.booking.BookingResponseVenueManagerDto;
 import com.cts.venue_manager.model.data.BookingStatus;
-import com.cts.venue_manager.auth.dto.UserPrincipal;
 import com.cts.venue_manager.service.BookingService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -70,6 +69,21 @@ public class BookingController {
         String actorId = userPrincipal.userId();
         log.info("REST request to fetch all bookings by actor: {}", actorId);
         return ResponseEntity.ok(bookingService.getAllBookingsServ(actorId));
+    }
+
+    /**
+     * Retrieves all bookings across all venues managed by the authenticated venue manager.
+     *
+     * @param userPrincipal the authenticated user performing the action
+     * @return a ResponseEntity containing a list of booking response DTOs
+     */
+    @GetMapping("/bookings/manager")
+    @PreAuthorize("hasAnyRole('VENUE_MANAGER', 'ADMIN')")
+    public ResponseEntity<List<BookingResponseDto>> getBookingsByManager(
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        String actorId = userPrincipal.userId();
+        log.info("REST request to fetch bookings for manager: {}", actorId);
+        return ResponseEntity.ok(bookingService.getBookingByManager(actorId));
     }
 
     /**

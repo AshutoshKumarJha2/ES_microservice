@@ -105,6 +105,14 @@ export const fetchBookingsByVenue = createAsyncThunk(
   },
 )
 
+export const fetchBookingsByManager = createAsyncThunk(
+  'venue/fetchBookingsByManager',
+  async (_, { rejectWithValue }) => {
+    try { return await bookingService.getBookingsByManager() }
+    catch (err: unknown) { return rejectWithValue((err as Error).message) }
+  },
+)
+
 export const updateBookingStatus = createAsyncThunk(
   'venue/updateBookingStatus',
   async ({ bookingId, status }: { bookingId: string; status: BookingStatus }, { rejectWithValue }) => {
@@ -205,6 +213,11 @@ const venueSlice = createSlice({
       .addCase(fetchBookingsByVenue.pending,   (state) => { state.bookingsLoading = true; state.bookingsError = null })
       .addCase(fetchBookingsByVenue.fulfilled, (state, action) => { state.bookingsLoading = false; state.bookings = action.payload })
       .addCase(fetchBookingsByVenue.rejected,  (state, action) => { state.bookingsLoading = false; state.bookingsError = action.payload as string })
+
+      // ── fetchBookingsByManager ────────────────────────────────────────────
+      .addCase(fetchBookingsByManager.pending,   (state) => { state.bookingsLoading = true; state.bookingsError = null })
+      .addCase(fetchBookingsByManager.fulfilled, (state, action) => { state.bookingsLoading = false; state.bookings = action.payload })
+      .addCase(fetchBookingsByManager.rejected,  (state, action) => { state.bookingsLoading = false; state.bookingsError = action.payload as string })
 
       // ── updateBookingStatus ───────────────────────────────────────────────
       .addCase(updateBookingStatus.pending,   (state) => { state.actionLoading = true; state.actionError = null })
