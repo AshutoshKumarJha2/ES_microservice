@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
-  fetchAllVenues,
+  fetchVenuesByManager,
   createVenue,
   updateVenue,
   deleteVenue,
@@ -55,6 +55,7 @@ export const Venues = () => {
   const dispatch = useAppDispatch()
   const { venues, venuesLoading, venuesError, actionError, actionLoading } =
     useAppSelector((s) => s.venue)
+  const { user } = useAppSelector((s) => s.auth)
 
   const [search, setSearch]               = useState('')
   const [filter, setFilter]               = useState<FilterType>('ALL')
@@ -64,7 +65,9 @@ export const Venues = () => {
   const [form, setForm]                   = useState(emptyForm)
   const [formError, setFormError]         = useState<string | null>(null)
 
-  useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
+  useEffect(() => {
+    if (user?.userId) dispatch(fetchVenuesByManager(user.userId))
+  }, [dispatch, user?.userId])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -195,8 +198,16 @@ export const Venues = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => (
-                    <tr key={venue.id}>
+                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => {
+                    const isUnavailable = venue.availabilityStatus === 'UNAVAILABLE'
+                    return (
+                    <tr
+                      key={venue.id}
+                      style={{
+                        opacity: isUnavailable ? 0.45 : 1,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                    >
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{venue.name}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.location}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.capacity.toLocaleString()}</td>
@@ -221,18 +232,30 @@ export const Venues = () => {
                               <option key={s} value={s}>{statusLabel(s)}</option>
                             ))}
                           </Form.Select>
-                          <Button size="sm" variant="outline-secondary" className="rounded-2"
-                            onClick={() => openEditModal(venue)}>
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            className="rounded-2"
+                            onClick={() => openEditModal(venue)}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Edit
                           </Button>
-                          <Button size="sm" variant="outline-danger" className="rounded-2"
-                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            className="rounded-2"
+                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Delete
                           </Button>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </Table>
             )}

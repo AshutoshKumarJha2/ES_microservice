@@ -29,6 +29,8 @@ public interface VenueRepository extends JpaRepository<Venue, String> {
 
     List<Venue> findByAvailabilityStatus(AvailabilityStatus status);
 
+    List<Venue> findByManagerId(String managerId);
+
     /**
      * Finds venues that are available on a specific date, match the status,
      * and meet the minimum capacity requirement.

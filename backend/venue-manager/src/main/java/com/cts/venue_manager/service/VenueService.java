@@ -114,4 +114,13 @@ public interface VenueService {
      * @return a list of VenueResponseDto for the matched venues
      */
     List<VenueResponseDto> findAllByIds(List<String> ids);
+
+    /**
+     * Retrieves all venues managed by a specific venue manager.
+     *
+     * @param actorId   the unique identifier of the user requesting the data
+     * @param managerId the unique identifier of the venue manager
+     * @return a list of venues assigned to the specified manager
+     */
+    List<VenueResponseDto> findVenuesByManager(String actorId, String managerId);
 }

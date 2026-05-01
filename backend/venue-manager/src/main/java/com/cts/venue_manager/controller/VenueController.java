@@ -218,4 +218,23 @@ public class VenueController {
         log.info("Bulk venue lookup for {} id(s)", ids.size());
         return ResponseEntity.ok(venueService.findAllByIds(ids));
     }
+
+    /**
+     * Retrieves all venues managed by a specific venue manager.
+     * Accessible by VENUE_MANAGER and ADMIN roles.
+     *
+     * @param managerId the unique identifier of the venue manager
+     * @param userPrincipal the authenticated user details for audit tracking
+     * @return a ResponseEntity containing a list of venues for the specified manager
+     */
+    @GetMapping("/manager/{managerId}")
+    @PreAuthorize("hasAnyRole('VENUE_MANAGER', 'ADMIN')")
+    public ResponseEntity<List<VenueResponseDto>> getVenuesByManager(
+            @PathVariable String managerId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        String actorId = userPrincipal.userId();
+        log.info("Fetching venues for manager: {} by actor: {}", managerId, actorId);
+        List<VenueResponseDto> venues = venueService.findVenuesByManager(actorId, managerId);
+        return ResponseEntity.ok(venues);
+    }
 }
