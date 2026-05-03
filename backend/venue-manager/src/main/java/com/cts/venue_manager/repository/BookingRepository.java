@@ -18,6 +18,7 @@ import java.util.List;
 public interface BookingRepository extends JpaRepository<Booking, String> {
     List<Booking> findByEventId(String eventId);
 
-    // Add this method
     List<Booking> findByVenue_VenueId(String venueId);
+
+    List<Booking> findByVenue_VenueIdIn(List<String> venueIds);
 }

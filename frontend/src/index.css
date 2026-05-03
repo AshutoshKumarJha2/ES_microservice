@@ -424,11 +424,31 @@ a {
 [data-theme="dark"] .badge.es-badge-paid     { background: rgba(16,185,129,0.15)  !important; color: #6ee7b7 !important; }
 [data-theme="dark"] .badge.es-badge-submitted{ background: rgba(99,102,241,0.15)  !important; color: #a5b4fc !important; }
 
+.mobile-actions .dropdown-toggle::after {
+  display: none !important;
+}
+
 /* ── Dark mode Bootstrap component overrides ──────────────────────────────────── */
+[data-theme="dark"] .navbar-toggler {
+  border-color: var(--text-muted) !important;
+}
+[data-theme="dark"] .navbar-toggler-icon {
+  filter: invert(1);
+}
 [data-theme="dark"] .modal-content,
 [data-theme="dark"] .dropdown-menu {
   background-color: #1e2330 !important;
   border-color: var(--border-color) !important;
+}
+[data-theme="dark"] .modal-title,
+[data-theme="dark"] .modal-body,
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+[data-theme="dark"] .btn-close {
+  filter: invert(1) grayscale(1);
 }
 [data-theme="dark"] .table {
   --bs-table-bg: var(--bg-surface);

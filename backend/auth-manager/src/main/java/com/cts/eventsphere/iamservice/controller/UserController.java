@@ -47,6 +47,17 @@ public class UserController {
     ){
         return ResponseEntity.ok(userService.getAllUsers(principal.userId()));
     }
+
+    @GetMapping("/users/search")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponseDto>> searchUsers(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String role,
+            @RequestParam(required = false) String status
+    ) {
+        return ResponseEntity.ok(userService.searchUsers(principal.userId(), search, role, status));
+    }
     /**
      * Retrieves a user by their unique identifier.
      *

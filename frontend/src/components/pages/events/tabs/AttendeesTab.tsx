@@ -1,7 +1,9 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { useParams } from 'react-router-dom'
 import { registrationService } from '../../../../services/events/registrationService'
 import { EventStatusBadge } from '../../../elements/events/EventStatusBadge'
+import { PaginationBar } from '../../../elements/common/PaginationBar'
+import { usePaginatedQuery } from '../../../../hooks/usePaginatedQuery'
 import type { RegistrationDto } from '../../../../types/events'
 import { Card, Table, Button, Spinner, Form, InputGroup, Badge } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../../elements/skeletons/PageSkeleton'
@@ -10,54 +12,30 @@ const ATTENDEE_STATUSES = 'CONFIRMED,CHECKED_IN'
 
 export const AttendeesTab = () => {
   const { id: eventId } = useParams<{ id: string }>()
-
-  const [attendees, setAttendees] = useState<RegistrationDto[]>([])
-  const [loading, setLoading] = useState(false)
-  const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const fetcher = useCallback(
+    (params: { search?: string; page: number; size: number }) =>
+      registrationService.getByEventId(
+        eventId!, undefined, ATTENDEE_STATUSES, undefined,
+        params.search, params.page, params.size
+      ),
+    [eventId]
+  )
 
-  const load = useCallback(async (nameSearch?: string) => {
-    if (!eventId) return
-    setLoading(true)
-    try {
-      const res = await registrationService.getByEventId(
-        eventId,
-        undefined,            // single status
-        ATTENDEE_STATUSES,    // multi-status: CONFIRMED or CHECKED_IN
-        undefined,            // ticketType
-        nameSearch || undefined,
-        0,
-        100
-      )
-      setAttendees(res.registrations ?? [])
-    } finally {
-      setLoading(false)
-    }
-  }, [eventId])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value)
-    if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => load(value), 300)
-  }
-
-  useEffect(() => {
-    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
-  }, [])
+  const { data: attendees, page, totalPages, loading, setPage, refetch } = usePaginatedQuery<RegistrationDto, { search?: string }>({
+    fetcher,
+    itemsKey: 'registrations',
+    params: { search: search || undefined },
+    size: 20,
+  })
 
   const handleCheckIn = async (registrationId: string) => {
     setActionLoading(registrationId)
     try {
       await registrationService.checkIn(registrationId)
-      setAttendees((prev) =>
-        prev.map((r) => r.registrationId === registrationId ? { ...r, status: 'CHECKED_IN' } : r)
-      )
+      refetch()
     } finally {
       setActionLoading(null)
     }
@@ -72,10 +50,10 @@ export const AttendeesTab = () => {
         <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
           <Card.Title className="mb-0 fw-semibold" style={{ color: 'var(--text-primary)' }}>Attendees</Card.Title>
           <div className="d-flex gap-2">
-            <Badge bg="success" className="rounded-pill px-3 py-2" style={{ fontSize: '0.78rem' }}>
+            <Badge className="es-badge-approved rounded-pill border-0 px-3 py-2" style={{ fontSize: '0.78rem' }}>
               Checked In: {checkedInCount}
             </Badge>
-            <Badge bg="primary" className="rounded-pill px-3 py-2" style={{ fontSize: '0.78rem' }}>
+            <Badge className="es-badge-submitted rounded-pill border-0 px-3 py-2" style={{ fontSize: '0.78rem' }}>
               Confirmed: {confirmedCount}
             </Badge>
           </div>
@@ -86,11 +64,11 @@ export const AttendeesTab = () => {
           <Form.Control
             placeholder="Search by name or email..."
             value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             style={{ fontSize: '0.85rem' }}
           />
           {search && (
-            <Button variant="outline-secondary" onClick={() => handleSearchChange('')} style={{ fontSize: '0.85rem' }}>
+            <Button variant="outline-secondary" onClick={() => setSearch('')} style={{ fontSize: '0.85rem' }}>
               ✕
             </Button>
           )}
@@ -155,6 +133,8 @@ export const AttendeesTab = () => {
               ))}
           </tbody>
         </Table>
+
+        <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
       </Card.Body>
     </Card>
   )

@@ -1,8 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
-  fetchAllVenues,
-  fetchBookingsByVenue,
+  fetchBookingsByManager,
   updateBookingStatus,
   clearActionError,
   clearBookings,
@@ -10,9 +9,10 @@ import {
 import type { BookingStatus } from '../../../types/venue'
 import { approveRequestedAllocation } from '../../../store/slices/resourceSlice'
 import {
-  Container, Card, Table, Button, Alert, Badge, Spinner, Form, InputGroup,
+  Container, Card, Table, Button, Alert, Badge, Form, InputGroup,
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { ConfirmModal } from '../../elements/common/ConfirmModal'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 
@@ -36,24 +36,18 @@ const formatDate = (d: string) => {
 export const VenueBookings = () => {
   const dispatch = useAppDispatch()
   const {
-    venues, venuesLoading,
     bookings, bookingsLoading, bookingsError,
     actionError, actionLoading,
   } = useAppSelector((s) => s.venue)
 
-  const [selectedVenueId, setSelectedVenueId] = useState<string>('')
-  const [search, setSearch]                   = useState('')
+  const [search, setSearch]                       = useState('')
+  const [confirmCancelId, setConfirmCancelId]     = useState<string | null>(null)
+  const [confirmApproveId, setConfirmApproveId]   = useState<{ bookingId: string; eventId?: string } | null>(null)
 
   useEffect(() => {
-    dispatch(fetchAllVenues())
+    dispatch(fetchBookingsByManager())
     return () => { dispatch(clearBookings()) }
   }, [dispatch])
-
-  useEffect(() => {
-    if (selectedVenueId) dispatch(fetchBookingsByVenue(selectedVenueId))
-    else dispatch(clearBookings())
-    setSearch('')
-  }, [selectedVenueId, dispatch])
 
   const filteredBookings = useMemo(() => {
     const q = search.toLowerCase()
@@ -70,7 +64,17 @@ export const VenueBookings = () => {
     }
   }
 
-  const selectedVenueName = venues.find((v) => v.id === selectedVenueId)?.name ?? ''
+  const handleConfirmApprove = () => {
+    if (!confirmApproveId) return
+    handleStatusChange(confirmApproveId.bookingId, 'CONFIRMED', confirmApproveId.eventId)
+    setConfirmApproveId(null)
+  }
+
+  const handleConfirmCancel = () => {
+    if (!confirmCancelId) return
+    handleStatusChange(confirmCancelId, 'CANCELLED')
+    setConfirmCancelId(null)
+  }
 
   return (
     <div>
@@ -83,30 +87,8 @@ export const VenueBookings = () => {
           </Alert>
         )}
 
-        {/* Venue Selector */}
-        <Card className="es-card border shadow-sm mb-3">
-          <Card.Body className="p-3 d-flex align-items-center gap-3 flex-wrap">
-            <span className="fw-semibold small" style={{ color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>Select Venue</span>
-            {venuesLoading ? (
-              <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-            ) : (
-              <Form.Select
-                className="es-form-control rounded-3"
-                style={{ maxWidth: 360 }}
-                value={selectedVenueId}
-                onChange={(e) => setSelectedVenueId(e.target.value)}
-              >
-                <option value="">— Select a venue —</option>
-                {venues.map((v) => (
-                  <option key={v.id} value={v.id}>{v.name} ({v.location})</option>
-                ))}
-              </Form.Select>
-            )}
-          </Card.Body>
-        </Card>
-
-        {/* Search (shown only when a venue is selected and has bookings) */}
-        {selectedVenueId && bookings.length > 0 && (
+        {/* Search */}
+        {bookings.length > 0 && (
           <InputGroup className="mb-3" style={{ maxWidth: 360 }}>
             <InputGroup.Text className="es-form-control border-end-0 rounded-start-3">
               <Search size={14} style={{ color: 'var(--text-secondary)' }} />
@@ -123,24 +105,19 @@ export const VenueBookings = () => {
         {/* Bookings Table */}
         <Card className="es-card border shadow-sm">
           <Card.Body className="p-0">
-            {selectedVenueId && bookings.length > 0 && (
-              <div className="d-flex justify-content-between align-items-center px-3 pt-3 pb-2">
-                <span className="small fw-semibold" style={{ color: 'var(--text-primary)' }}>{selectedVenueName}</span>
+            {bookings.length > 0 && (
+              <div className="d-flex justify-content-end align-items-center px-3 pt-3 pb-2">
                 <span className="small" style={{ color: 'var(--text-muted)' }}>
                   {filteredBookings.length} booking{filteredBookings.length !== 1 ? 's' : ''}
                 </span>
               </div>
             )}
-            {!selectedVenueId ? (
-              <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
-                Select a venue above to view its bookings.
-              </p>
-            ) : bookingsError ? (
+            {bookingsError ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>{bookingsError}</p>
             ) : (!bookingsLoading && filteredBookings.length === 0) ? (
               <p className="text-center py-4 mb-0" style={{ color: 'var(--text-muted)' }}>
                 {bookings.length === 0
-                  ? `No bookings found for ${selectedVenueName}.`
+                  ? 'No bookings found for your venues.'
                   : 'No bookings match your search.'}
               </p>
             ) : (
@@ -188,7 +165,7 @@ export const VenueBookings = () => {
                               variant="outline-success"
                               className="rounded-2 fw-medium"
                               disabled={actionLoading}
-                              onClick={() => handleStatusChange(b.bookingId, 'CONFIRMED', b.eventId)}
+                              onClick={() => setConfirmApproveId({ bookingId: b.bookingId, eventId: b.eventId })}
                             >
                               Confirm
                             </Button>
@@ -197,7 +174,7 @@ export const VenueBookings = () => {
                               variant="outline-danger"
                               className="rounded-2 fw-medium"
                               disabled={actionLoading}
-                              onClick={() => handleStatusChange(b.bookingId, 'CANCELLED')}
+                              onClick={() => setConfirmCancelId(b.bookingId)}
                             >
                               Cancel
                             </Button>
@@ -214,6 +191,28 @@ export const VenueBookings = () => {
           </Card.Body>
         </Card>
       </Container>
+
+      <ConfirmModal
+        show={!!confirmApproveId}
+        title="Confirm Booking"
+        message="Approve this booking request? The organizer will be notified."
+        confirmLabel="Approve"
+        variant="primary"
+        loading={actionLoading}
+        onConfirm={handleConfirmApprove}
+        onCancel={() => setConfirmApproveId(null)}
+      />
+
+      <ConfirmModal
+        show={!!confirmCancelId}
+        title="Cancel Booking"
+        message="Cancel this booking request? This action cannot be undone."
+        confirmLabel="Cancel Booking"
+        variant="danger"
+        loading={actionLoading}
+        onConfirm={handleConfirmCancel}
+        onCancel={() => setConfirmCancelId(null)}
+      />
     </div>
   )
 }

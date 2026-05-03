@@ -8,6 +8,7 @@ package com.cts.eventsphere.iamservice.dto.audit;
  * @since 31-03-2026
  */
 public record AuditLogRequestDTO(
+        String userId,
         AuditAction action,
         String entityId,
         String entityName

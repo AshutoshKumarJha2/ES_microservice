@@ -10,9 +10,12 @@ const EVENT_MAP: Record<string, string> = {
 }
 
 const REG_MAP: Record<string, string> = {
-  PENDING:  'es-badge-pending',
-  APPROVED: 'es-badge-approved',
-  REJECTED: 'es-badge-rejected',
+  PENDING:    'es-badge-pending',
+  APPROVED:   'es-badge-approved',
+  REJECTED:   'es-badge-rejected',
+  CONFIRMED:  'es-badge-approved',
+  CHECKED_IN: 'es-badge-completed',
+  CANCELLED:  'es-badge-cancelled',
 }
 
 const EXP_MAP: Record<string, string> = {

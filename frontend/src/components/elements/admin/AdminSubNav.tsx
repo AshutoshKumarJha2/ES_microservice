@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom'
-import { Nav } from 'react-bootstrap'
 
 const LINKS = [
   { to: '/admin/dashboard',  label: 'Dashboard' },
   { to: '/admin/users',      label: 'Users' },
   { to: '/admin/events',     label: 'Events' },
+  { to: '/admin/expenses',   label: 'Expenses' },
+  { to: '/admin/budget',     label: 'Budget' },
   { to: '/admin/audit-logs', label: 'Audit Logs' },
 ]
 
@@ -14,14 +15,14 @@ export const AdminSubNav: React.FC = () => (
     style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)', transition: 'background 0.3s' }}
   >
     <div className="container-fluid px-3 px-md-4">
-      <Nav>
+      <nav className="nav">
         {LINKS.map(({ to, label }) => (
-          <Nav.Link
+          <NavLink
             key={to}
-            as={NavLink}
             to={to}
             end={to === '/admin/dashboard'}
-            style={({ isActive }: { isActive: boolean }) => ({
+            className="nav-link"
+            style={({ isActive }) => ({
               color: isActive ? 'var(--blue)' : 'var(--text-secondary)',
               fontWeight: isActive ? 600 : 400,
               borderBottom: isActive ? '2px solid var(--blue)' : '2px solid transparent',
@@ -32,9 +33,9 @@ export const AdminSubNav: React.FC = () => (
             })}
           >
             {label}
-          </Nav.Link>
+          </NavLink>
         ))}
-      </Nav>
+      </nav>
     </div>
   </div>
 )

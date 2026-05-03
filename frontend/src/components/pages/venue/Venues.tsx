@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
-  fetchAllVenues,
+  fetchVenuesByManager,
   createVenue,
   updateVenue,
   deleteVenue,
@@ -14,8 +14,10 @@ import {
   Spinner, Alert, Badge, InputGroup,
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { ConfirmModal } from '../../elements/common/ConfirmModal'
 import { Search } from 'react-bootstrap-icons'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
+import { toast } from 'react-toastify'
 
 /* ── Types ──────────────────────────────────────────────────────────────────── */
 
@@ -53,6 +55,7 @@ export const Venues = () => {
   const dispatch = useAppDispatch()
   const { venues, venuesLoading, venuesError, actionError, actionLoading } =
     useAppSelector((s) => s.venue)
+  const { user } = useAppSelector((s) => s.auth)
 
   const [search, setSearch]               = useState('')
   const [filter, setFilter]               = useState<FilterType>('ALL')
@@ -62,7 +65,9 @@ export const Venues = () => {
   const [form, setForm]                   = useState(emptyForm)
   const [formError, setFormError]         = useState<string | null>(null)
 
-  useEffect(() => { dispatch(fetchAllVenues()) }, [dispatch])
+  useEffect(() => {
+    if (user?.userId) dispatch(fetchVenuesByManager(user.userId))
+  }, [dispatch, user?.userId])
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -103,16 +108,25 @@ export const Venues = () => {
     if (editingVenue) {
       const result = await dispatch(updateVenue({ venueId: editingVenue.id, payload }))
       if (updateVenue.fulfilled.match(result)) closeModal()
+      toast.success("Venue has been updated successfully")
     } else {
       const result = await dispatch(createVenue(payload))
       if (createVenue.fulfilled.match(result)) closeModal()
+      toast.success("Venue has been created successfully")
     }
   }
 
   const handleDelete = async () => {
     if (!confirmDeleteId) return
     const result = await dispatch(deleteVenue(confirmDeleteId))
-    if (deleteVenue.fulfilled.match(result)) setConfirmDeleteId(null)
+    if (deleteVenue.fulfilled.match(result)) {
+      toast.success('Venue deleted successfully.')
+      setConfirmDeleteId(null)
+    } else {
+      setConfirmDeleteId(null)
+      toast.error('Cannot delete venue: it may be associated with existing events or resources.')
+
+    }
   }
 
   const handleStatusChange = (venueId: string, status: AvailabilityStatus) => {
@@ -135,11 +149,7 @@ export const Venues = () => {
       />
 
       <Container fluid className="px-3 px-md-4 py-4">
-        {(actionError || venuesError) && (
-          <Alert variant="danger" className="py-2 mb-3" onClose={() => dispatch(clearActionError())} dismissible>
-            {actionError ?? venuesError}
-          </Alert>
-        )}
+        
 
         {/* Search */}
         <InputGroup className="mb-3" style={{ maxWidth: 360 }}>
@@ -188,8 +198,16 @@ export const Venues = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => (
-                    <tr key={venue.id}>
+                  {venuesLoading ? <TableRowsSkeleton rows={5} cols={5} /> : filtered.map((venue) => {
+                    const isUnavailable = venue.availabilityStatus === 'UNAVAILABLE'
+                    return (
+                    <tr
+                      key={venue.id}
+                      style={{
+                        opacity: isUnavailable ? 0.45 : 1,
+                        transition: 'opacity 0.2s ease',
+                      }}
+                    >
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{venue.name}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.location}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{venue.capacity.toLocaleString()}</td>
@@ -214,18 +232,30 @@ export const Venues = () => {
                               <option key={s} value={s}>{statusLabel(s)}</option>
                             ))}
                           </Form.Select>
-                          <Button size="sm" variant="outline-secondary" className="rounded-2"
-                            onClick={() => openEditModal(venue)}>
+                          <Button
+                            size="sm"
+                            variant="outline-secondary"
+                            className="rounded-2"
+                            onClick={() => openEditModal(venue)}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Edit
                           </Button>
-                          <Button size="sm" variant="outline-danger" className="rounded-2"
-                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}>
+                          <Button
+                            size="sm"
+                            variant="outline-danger"
+                            className="rounded-2"
+                            onClick={() => { dispatch(clearActionError()); setConfirmDeleteId(venue.id) }}
+                            disabled={isUnavailable}
+                            style={isUnavailable ? { pointerEvents: 'none' } : undefined}
+                          >
                             Delete
                           </Button>
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )})}
                 </tbody>
               </Table>
             )}
@@ -296,32 +326,16 @@ export const Venues = () => {
         </Modal.Footer>
       </Modal>
 
-      {/* Delete Confirm Modal */}
-      <Modal show={!!confirmDeleteId} onHide={() => setConfirmDeleteId(null)} centered>
-        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Delete Venue</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          {actionError && (
-            <Alert variant="danger" className="py-2 mb-3" onClose={() => dispatch(clearActionError())} dismissible>
-              {actionError}
-            </Alert>
-          )}
-          <p className="mb-0" style={{ color: 'var(--text-body)' }}>
-            Are you sure you want to delete{' '}
-            <strong>{venues.find((v) => v.id === confirmDeleteId)?.name}</strong>?
-            This action cannot be undone.
-          </p>
-        </Modal.Body>
-        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setConfirmDeleteId(null)} disabled={actionLoading}>
-            Cancel
-          </Button>
-          <Button variant="danger" size="sm" className="fw-semibold rounded-3" onClick={handleDelete} disabled={actionLoading}>
-            {actionLoading ? <><Spinner animation="border" size="sm" className="me-1" />Deleting…</> : 'Delete'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <ConfirmModal
+        show={!!confirmDeleteId}
+        title={`Delete "${venues.find((v) => v.id === confirmDeleteId)?.name ?? 'Venue'}"`}
+        message="This action cannot be undone."
+        confirmLabel="Delete"
+        variant="danger"
+        loading={actionLoading}
+        onConfirm={handleDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   )
 }

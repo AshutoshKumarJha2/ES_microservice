@@ -126,10 +126,11 @@ public class ExpenseServiceImpl implements ExpenseService {
         
         fetchEvent(eventId);
         
-        Page<ExpenseResponseDto> expenses = expenseRepository.findByEventId(eventId, pageable)
-                .map(ExpenseResponseDtoMapper::toDto);
+        Page<Expense> expensePage = expenseRepository.findByEventId(eventId, pageable);
+        String actorId = getCurrentUserId();
+        expensePage.forEach(expense -> auditService.logAudit(actorId, AuditAction.READ, Expense.class, expense.getExpenseId()));
+        Page<ExpenseResponseDto> expenses = expensePage.map(ExpenseResponseDtoMapper::toDto);
         log.info("Retrieved {} expenses for eventId: {}", expenses.getTotalElements(), eventId);
-        auditService.logAudit(getCurrentUserId(), AuditAction.READ, "Expense", "ALL");
         return expenses;
     }
 

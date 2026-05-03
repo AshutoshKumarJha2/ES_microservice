@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Container, Row, Col, Card, Button, Form, Badge } from 'react-bootstrap'
+import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap'
 import { CardGridSkeleton } from '../../elements/skeletons/PageSkeleton'
 import {
   CalendarEventFill, CalendarCheckFill, CheckCircleFill,
@@ -11,33 +11,39 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { PaginationBar } from '../../elements/common/PaginationBar'
+import { usePaginatedQuery } from '../../../hooks/usePaginatedQuery'
 import { fmtDate } from '../../../utils/dateHelpers'
-import { EVENT_LABEL, REG_STATUS_COLOR } from '../../../constants/eventConstants'
+import { EVENT_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
 type StatusFilter = 'ALL' | 'PUBLISHED' | 'COMPLETED' | 'REGISTERED'
 
+const PAGE_SIZE = 12
+
 export const AttendeeEventBrowser = () => {
   const navigate = useNavigate()
-
-  const [events, setEvents]   = useState<EventResponseDto[]>([])
-  const [regMap, setRegMap]   = useState<Map<string, RegistrationDto>>(new Map())
-  const [loading, setLoading] = useState(true)
   const [search, setSearch]   = useState('')
   const [filter, setFilter]   = useState<StatusFilter>('PUBLISHED')
+  const [regMap, setRegMap]   = useState<Map<string, RegistrationDto>>(new Map())
 
+  const { data: events, page, totalPages, loading, setPage } = usePaginatedQuery<EventResponseDto, { search?: string }>({
+    fetcher: (params) => eventService.getAll(params),
+    itemsKey: 'events',
+    params: { search: search || undefined },
+    size: PAGE_SIZE,
+  })
+
+  // Load registrations once on mount
   useEffect(() => {
-    Promise.allSettled([
-      eventService.getAll(),
-      registrationService.getMyRegistrations(),
-    ]).then(([eventsR, regsR]) => {
-      if (eventsR.status === 'fulfilled') setEvents(eventsR.value)
-      if (regsR.status === 'fulfilled') {
+    const timer = setTimeout(() => {
+      registrationService.getMyRegistrations().then((res) => {
         const map = new Map<string, RegistrationDto>()
-        regsR.value.registrations.forEach((r) => map.set(r.eventId, r))
+        res.registrations.forEach((r) => map.set(r.eventId, r))
         setRegMap(map)
-      }
-    }).finally(() => setLoading(false))
+      }).catch(() => {})
+    }, 0)
+    return () => clearTimeout(timer)
   }, [])
 
   const visibleEvents  = events.filter((e) => e.status !== 'CANCELLED')
@@ -46,12 +52,9 @@ export const AttendeeEventBrowser = () => {
   const myEventCount   = [...regMap.values()].filter((r) => r.status !== 'CANCELLED').length
 
   const filtered = visibleEvents.filter((e) => {
-    const matchSearch = e.eventName.toLowerCase().includes(search.toLowerCase())
-    const matchStatus =
-      filter === 'ALL'        ? true :
-      filter === 'REGISTERED' ? (regMap.has(e.id) && regMap.get(e.id)?.status !== 'CANCELLED') :
-      e.status === filter
-    return matchSearch && matchStatus
+    return filter === 'ALL'        ? true :
+           filter === 'REGISTERED' ? (regMap.has(e.id) && regMap.get(e.id)?.status !== 'CANCELLED') :
+           e.status === filter
   })
 
   const STATS = [
@@ -168,9 +171,11 @@ export const AttendeeEventBrowser = () => {
 
                       {reg && reg.status !== 'CANCELLED' && (
                         <div className="mb-2">
-                          <Badge bg={REG_STATUS_COLOR[reg.status] ?? 'secondary'} className="rounded-2" style={{ fontSize: '0.75rem' }}>
-                            {reg.status === 'CHECKED_IN' ? 'Checked In' : reg.status === 'CONFIRMED' ? 'Confirmed' : reg.status === 'PENDING' ? 'Registered' : reg.status}
-                          </Badge>
+                          <EventStatusBadge
+                            variant="registration"
+                            status={reg.status}
+                            label={reg.status === 'CHECKED_IN' ? 'Checked In' : reg.status === 'CONFIRMED' ? 'Confirmed' : 'Registered'}
+                          />
                         </div>
                       )}
 
@@ -192,6 +197,8 @@ export const AttendeeEventBrowser = () => {
             })}
           </Row>
         )}
+
+        <PaginationBar page={page} totalPages={totalPages} onChange={setPage} className="justify-content-center" />
       </Container>
     </div>
   )

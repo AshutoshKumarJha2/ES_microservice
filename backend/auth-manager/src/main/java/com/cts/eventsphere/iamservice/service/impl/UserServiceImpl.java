@@ -12,11 +12,15 @@ import com.cts.eventsphere.iamservice.model.data.UserStatus;
 import com.cts.eventsphere.iamservice.repository.UserRepository;
 import com.cts.eventsphere.iamservice.service.AuditService;
 import com.cts.eventsphere.iamservice.service.UserService;
+import com.cts.eventsphere.iamservice.specification.UserSpecification;
+import org.springframework.data.jpa.domain.Specification;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.cts.eventsphere.iamservice.security.UserPrincipal;
 
 import java.util.List;
 
@@ -59,6 +63,14 @@ public class UserServiceImpl implements UserService {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public List<UserResponseDto> searchUsers(String actorId, String search, String role, String status) {
+        Specification<User> spec = UserSpecification.build(search, role, status);
+        return userRepo.findAll(spec).stream()
+                .map(UserResponseDtoMapper::toDTO)
+                .toList();
+    }
+
     @Override
     public List<UserResponseDto> getUsers(List<String> userIds) {
         return userRepo.findAllById(userIds).stream()
@@ -116,7 +128,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(userId).orElseThrow(() -> new UserNotFoundException(userId));
         String enumStatus = String.valueOf(UserStatus.valueOf(status));
         user.setStatus(UserStatus.valueOf(enumStatus));
-        auditService.logAudit(user.getUserId(),AuditAction.UPDATE,User.class,userId);
+        auditService.logAudit(resolveActorId(), AuditAction.UPDATE, User.class, userId);
         return UserResponseDtoMapper.toDTO(userRepo.save(user));
     }
 
@@ -135,7 +147,7 @@ public class UserServiceImpl implements UserService {
         user.setRole(newRole);
         User updatedUser = userRepo.save(user);
         log.info("changing user role to {} for {}",  newRole.name(), userId);
-        auditService.logAudit(userId,AuditAction.UPDATE,User.class,updatedUser.getUserId());
+        auditService.logAudit(resolveActorId(), AuditAction.UPDATE, User.class, updatedUser.getUserId());
         try{
             String message = "Your role has been changed to " + newRole;
 //            notificationService.sendNotification(userId, message, "INFO");
@@ -145,5 +157,13 @@ public class UserServiceImpl implements UserService {
             log.error("Failed to send notification for role change to {} : {}", userId, e.getMessage());
         }
         return UserResponseDtoMapper.toDTO(updatedUser);
+    }
+
+    private String resolveActorId() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+            return principal.userId();
+        }
+        return "anonymous";
     }
 }

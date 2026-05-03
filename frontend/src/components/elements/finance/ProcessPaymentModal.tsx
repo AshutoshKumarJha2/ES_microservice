@@ -6,15 +6,15 @@ import {
   processPayment,
 } from '../../../store/slices/Finance/financeSlice'
 import type { PaymentMethod } from '../../../types/finance'
-import styles from '../../../css/finance/Finance.module.css'
+import { Modal, Form, Button, Row, Col } from 'react-bootstrap'
 
 const METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
-  { value: 'CREDIT_CARD', label: 'Credit Card' },
-  { value: 'DEBIT_CARD', label: 'Debit Card' },
+  { value: 'CREDIT_CARD',   label: 'Credit Card'   },
+  { value: 'DEBIT_CARD',    label: 'Debit Card'    },
   { value: 'BANK_TRANSFER', label: 'Bank Transfer' },
-  { value: 'CASH', label: 'Cash' },
-  { value: 'UPI', label: 'UPI' },
-  { value: 'PAYPAL', label: 'PayPal' },
+  { value: 'CASH',          label: 'Cash'          },
+  { value: 'UPI',           label: 'UPI'           },
+  { value: 'PAYPAL',        label: 'PayPal'        },
 ]
 
 const formatCurrency = (n: number) =>
@@ -22,10 +22,8 @@ const formatCurrency = (n: number) =>
 
 export const ProcessPaymentModal = () => {
   const dispatch = useAppDispatch()
-  const modal = useAppSelector((s) => s.finance.processPaymentModal)
+  const modal      = useAppSelector((s) => s.finance.processPaymentModal)
   const actionError = useAppSelector((s) => s.finance.actionError)
-
-  if (!modal.open) return null
 
   const handleSubmit = () => {
     if (!modal.expenseId || !modal.selectedMethod) return
@@ -38,53 +36,64 @@ export const ProcessPaymentModal = () => {
   }
 
   return (
-    <div className={styles.modalOverlay}>
-      <div className={styles.modalBox}>
-        <h3 className={styles.modalTitle}>
+    <Modal
+      show={modal.open}
+      onHide={() => dispatch(closeProcessPaymentModal())}
+      centered
+    >
+      <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+        <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>
           Process Payment — {modal.expenseDescription} ({formatCurrency(modal.expenseAmount)})
-        </h3>
+        </Modal.Title>
+      </Modal.Header>
 
-        {actionError && <div className={styles.errorBanner}><span>{actionError}</span></div>}
+      <Modal.Body style={{ background: 'var(--bg-surface)' }}>
+        {actionError && (
+          <div className="alert alert-danger py-2 mb-3" style={{ fontSize: '0.85rem' }}>{actionError}</div>
+        )}
+        <Row className="g-3">
+          <Col xs={12} md={6}>
+            <Form.Group>
+              <Form.Label className="es-label">Payment Method</Form.Label>
+              <Form.Select
+                className="es-form-control"
+                value={modal.selectedMethod}
+                onChange={(e) => dispatch(setPaymentMethod(e.target.value))}
+              >
+                <option value="">Select method…</option>
+                {METHOD_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </Form.Select>
+            </Form.Group>
+          </Col>
+          <Col xs={12} md={6}>
+            <Form.Group>
+              <Form.Label className="es-label">Transaction Reference</Form.Label>
+              <Form.Control
+                className="es-form-control"
+                type="text"
+                placeholder="TXN-XXXXXX"
+                value={modal.transactionRef}
+                onChange={(e) => dispatch(setTransactionRef(e.target.value))}
+              />
+            </Form.Group>
+          </Col>
+        </Row>
+      </Modal.Body>
 
-        <div className={styles.modalGrid}>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Payment Method</label>
-            <select
-              className={styles.formField}
-              value={modal.selectedMethod}
-              onChange={(e) => dispatch(setPaymentMethod(e.target.value))}
-            >
-              <option value="">Select method…</option>
-              {METHOD_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className={styles.formGroup}>
-            <label className={styles.formLabel}>Transaction Reference</label>
-            <input
-              className={styles.formField}
-              type="text"
-              placeholder="TXN-XXXXXX"
-              value={modal.transactionRef}
-              onChange={(e) => dispatch(setTransactionRef(e.target.value))}
-            />
-          </div>
-        </div>
-
-        <div className={styles.btnGroup}>
-          <button
-            className={`${styles.btn} ${styles.btnPrimary}`}
-            onClick={handleSubmit}
-            disabled={!modal.selectedMethod}
-          >
-            Submit Payment
-          </button>
-          <button className={styles.btn} onClick={() => dispatch(closeProcessPaymentModal())}>
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+      <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
+        <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => dispatch(closeProcessPaymentModal())}>
+          Cancel
+        </Button>
+        <Button
+          variant="primary" size="sm" className="rounded-3 fw-semibold"
+          onClick={handleSubmit}
+          disabled={!modal.selectedMethod}
+        >
+          Submit Payment
+        </Button>
+      </Modal.Footer>
+    </Modal>
   )
 }

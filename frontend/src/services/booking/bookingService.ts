@@ -8,7 +8,7 @@ import type {
     
 } from '../../types/venue'
 
-const BASE = '/api/v1/venue-manager/api/v1'
+const BASE = '/api/v1/venue-manager'
 
 export const bookingService = {
 
@@ -24,6 +24,11 @@ export const bookingService = {
 
         async getBookingsByVenue(venueId: string): Promise<BookingResponseVenueManagerDto[]> {
             const { data } = await axiosInstance.get(`${BASE}/venues/${venueId}/bookings`)
+            return data
+        },
+
+        async getBookingsByManager(): Promise<BookingResponseVenueManagerDto[]> {
+            const { data } = await axiosInstance.get(`${BASE}/bookings/manager`)
             return data
         },
 

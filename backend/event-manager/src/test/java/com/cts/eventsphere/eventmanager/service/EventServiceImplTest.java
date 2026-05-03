@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.service;
 
 import com.cts.eventsphere.eventmanager.dto.audit.AuditAction;
+import com.cts.eventsphere.eventmanager.dto.event.EventPageResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.mapper.event.EventRequestDtoMapper;
@@ -26,6 +27,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -145,23 +149,25 @@ class EventServiceImplTest {
         @Test
         @DisplayName("happy path – returns mapped DTOs for every stored event")
         void findAllEvents_happyPath() {
-            when(eventRepository.findAll()).thenReturn(List.of(sampleEvent));
-            when(eventResponseDtoMapper.toDTO(sampleEvent)).thenReturn(sampleEventResponse);
+            when(eventRepository.findAll(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(sampleEvent)));
+            when(eventResponseDtoMapper.toDTO(eq(sampleEvent), any(), any())).thenReturn(sampleEventResponse);
 
-            List<EventResponseDto> result = eventService.findAllEvents(USER_ID);
+            EventPageResponseDto result = eventService.findAllEvents(USER_ID, "ORGANIZER", null, null, 0, 20);
 
-            assertThat(result).hasSize(1).containsExactly(sampleEventResponse);
+            assertThat(result.events()).hasSize(1).containsExactly(sampleEventResponse);
+            assertThat(result.totalElements()).isEqualTo(1);
             verify(auditService).logAudit(USER_ID, AuditAction.READ, Event.class, EVENT_ID);
         }
 
         @Test
         @DisplayName("unhappy path – returns empty list when no events exist")
         void findAllEvents_empty() {
-            when(eventRepository.findAll()).thenReturn(List.of());
+            when(eventRepository.findAll(any(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of()));
 
-            List<EventResponseDto> result = eventService.findAllEvents(USER_ID);
+            EventPageResponseDto result = eventService.findAllEvents(USER_ID, "ORGANIZER", null, null, 0, 20);
 
-            assertThat(result).isEmpty();
+            assertThat(result.events()).isEmpty();
+            assertThat(result.totalElements()).isZero();
             verifyNoMoreInteractions(auditService);
         }
     }

@@ -12,7 +12,7 @@ import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { fmtDate } from '../../../utils/dateHelpers'
-import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
+import { EVENT_LABEL, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type { EventResponseDto, RegistrationDto } from '../../../types/events'
 
 interface RegWithEvent {
@@ -35,7 +35,7 @@ export const AttendeeMyRegistrations = () => {
       registrationService.getMyRegistrations(),
     ]).then(([eventsR, regsR]) => {
       if (eventsR.status === 'rejected' || regsR.status === 'rejected') return
-      const eventMap = new Map(eventsR.value.map((e) => [e.id, e]))
+      const eventMap = new Map((eventsR.value.events ?? []).map((e) => [e.id, e]))
       const found: RegWithEvent[] = regsR.value.registrations
         .map((reg) => {
           const event = eventMap.get(reg.eventId)
@@ -111,9 +111,7 @@ export const AttendeeMyRegistrations = () => {
               {reg.ticketType ?? 'General'}
               {reg.ticketPrice != null ? ` · ₹${reg.ticketPrice.toLocaleString()}` : ''}
             </span>
-            <Badge bg={REG_STATUS_COLOR[reg.status] ?? 'secondary'} className="rounded-2">
-              {REG_STATUS_LABEL[reg.status] ?? reg.status}
-            </Badge>
+            <EventStatusBadge variant="registration" status={reg.status} label={REG_STATUS_LABEL[reg.status] ?? reg.status} />
           </div>
 
           <div className="d-flex gap-2 mt-auto pt-1">
@@ -168,7 +166,7 @@ export const AttendeeMyRegistrations = () => {
             <div className="mb-4">
               <div className="d-flex align-items-center gap-2 mb-3">
                 <h6 className="fw-semibold mb-0" style={{ color: 'var(--text-primary)' }}>Active</h6>
-                <Badge bg="primary" className="rounded-pill">{trueActive.length}</Badge>
+                <Badge className="es-badge-submitted rounded-pill border-0">{trueActive.length}</Badge>
               </div>
               {trueActive.length === 0 ? (
                 <Card className="es-card border shadow-sm">
@@ -194,7 +192,7 @@ export const AttendeeMyRegistrations = () => {
             <div>
               <div className="d-flex align-items-center gap-2 mb-3">
                 <h6 className="fw-semibold mb-0" style={{ color: 'var(--text-primary)' }}>Past & Cancelled</h6>
-                <Badge bg="secondary" className="rounded-pill">{truePast.length}</Badge>
+                <Badge className="es-badge-draft rounded-pill border-0">{truePast.length}</Badge>
               </div>
               {truePast.length === 0 ? (
                 <Card className="es-card border shadow-sm">

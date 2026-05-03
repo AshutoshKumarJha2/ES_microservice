@@ -48,6 +48,9 @@ public interface BookingService {
      */
     void deleteBooking(String actorId, String bookingId);
 
+
+    List<BookingResponseDto> getBookingByManager(String actorId);
+
     /**
      * Retrieves all booking records currently in the system.
      * Provides a comprehensive list of all reservations for administrative overview.

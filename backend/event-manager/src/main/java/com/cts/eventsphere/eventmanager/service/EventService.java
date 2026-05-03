@@ -1,6 +1,7 @@
 package com.cts.eventsphere.eventmanager.service;
 
 import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
+import com.cts.eventsphere.eventmanager.dto.event.EventPageResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -8,6 +9,7 @@ import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.exception.event.EventNotFoundException;
 
 import java.util.List;
+
 
 /**
  * Service Interface for Event Entity.
@@ -29,14 +31,18 @@ public interface EventService {
     EventResponseDto create(String userId, String role, EventRequestDto event);
 
     /**
-     * Retrieves all events available in the system.
-     * DRAFT events are excluded when the caller's role is {@code ATTENDEE}.
+     * Retrieves a page of events, optionally filtered by name and status.
+     * DRAFT events are always excluded when the caller's role is {@code ATTENDEE}.
      *
-     * @param userId the ID of the requesting user (for audit)
-     * @param role   the role of the requesting user
-     * @return a list of response DTOs representing all visible events
+     * @param userId  the ID of the requesting user (for audit)
+     * @param role    the role of the requesting user
+     * @param search  optional substring to match against event name (case-insensitive); ignored when null/blank
+     * @param status  optional event status to filter by (e.g. "PUBLISHED"); ignored when null, blank, or "ALL"
+     * @param page    zero-based page index
+     * @param size    page size (1–100)
+     * @return a paginated response DTO containing matching events and pagination metadata
      */
-    List<EventResponseDto> findAllEvents(String userId, String role);
+    EventPageResponseDto findAllEvents(String userId, String role, String search, String status, int page, int size);
 
     /**
      * Finds an event by its unique identifier.

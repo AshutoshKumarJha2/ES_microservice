@@ -5,7 +5,7 @@ import type {
     AvailabilityStatus
 } from '../../types/venue'
 
-const BASE = '/api/v1/venue-manager/api/v1'
+const BASE = '/api/v1/venue-manager'
 
 export const venueService = {
 
@@ -53,5 +53,10 @@ export const venueService = {
     async getVenuesByDate(date: string): Promise<VenueResponseDto[]> {
         const { data } = await axiosInstance.get(`${BASE}/venues/date/${date}`)
         return data
-    }
+    },
+
+    async getVenuesByManager(managerId: string): Promise<VenueResponseDto[]> {
+        const { data } = await axiosInstance.get(`${BASE}/venues/manager/${managerId}`)
+        return data
+    },
 }

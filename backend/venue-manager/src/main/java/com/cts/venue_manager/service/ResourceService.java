@@ -3,6 +3,7 @@ package com.cts.venue_manager.service;
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
 import com.cts.venue_manager.dto.resource.ResourceRequestDto;
 import com.cts.venue_manager.dto.resource.ResourceResponseDto;
+import com.cts.venue_manager.model.ResourceAllocation;
 
 import java.util.List;
 
@@ -31,6 +32,9 @@ public interface ResourceService {
      * @return a list of all resource response DTOs
      */
     List<ResourceResponseDto> getAllResources(String actorId);
+
+
+    ResourceAllocation getResourcesByEventId(String actorId,String eventId);
 
     /**
      * Approves all pending resource allocations for a given event and updates inventory.

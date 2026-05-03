@@ -2,6 +2,7 @@ package com.cts.venue_manager.dto.mapper.booking;
 
 import com.cts.venue_manager.dto.booking.BookingResponseDto;
 import com.cts.venue_manager.dto.resource.ResourceListElementDto;
+import com.cts.venue_manager.dto.resource.ResourceVenueManagerResponseDto;
 import com.cts.venue_manager.model.Booking;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +23,7 @@ public class BookingResponseDtoMapper {
      * * @param booking the booking entity from the database
      * @return a BookingResponseDto record
      */
-    public BookingResponseDto toDto(Booking booking, List<ResourceListElementDto> resourceReqList) {
+    public BookingResponseDto toDto(Booking booking, List<ResourceVenueManagerResponseDto> resourceReqList) {
         if (booking == null) {
             return null;
         }

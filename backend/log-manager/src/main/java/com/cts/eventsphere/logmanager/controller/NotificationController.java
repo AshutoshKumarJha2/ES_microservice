@@ -32,12 +32,12 @@ public class NotificationController {
 
     /**
      * Retrieves notifications for a user using infinite scroll pagination.
-     * Example usage: {@code /api/v1/notifications/user-123/scroll?limit=10&lastTimestamp=2023-10-27T10:15:30}
+     * Supports optional status filter (e.g. UNREAD) and cursor-based pagination via lastTimestamp.
      *
-     * @param userId the unique identifier of the user
-     * @param lastTimestamp the timestamp of the last notification retrieved (optional)
-     * @param limit the maximum number of notifications to fetch (default is 20)
-     * @return ResponseEntity containing a list of notifications and HTTP status 200 (OK)
+     * @param userId        the unique identifier of the user
+     * @param lastTimestamp the createdAt of the oldest notification already loaded (optional)
+     * @param limit         max notifications to return (default 20)
+     * @param status        optional status filter: UNREAD or READ
      */
     @GetMapping("/{userId}/scroll")
     @PreAuthorize("hasRole('ADMIN') or principal.userId().equals(#userId)")
@@ -45,21 +45,17 @@ public class NotificationController {
             @PathVariable String userId,
             @Valid @RequestParam(required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime lastTimestamp,
-            @Valid @RequestParam(defaultValue = "20") int limit) {
+            @Valid @RequestParam(defaultValue = "20") int limit,
+            @RequestParam(required = false) String status) {
 
-        log.info("Fetching notifications for user: {} with limit: {} and lastTimestamp: {}", userId, limit, lastTimestamp);
-        List<Notification> notifications = notificationService.getNotificationsScroll(userId, lastTimestamp, limit);
+        log.info("Fetching notifications for user: {} limit={} lastTimestamp={} status={}", userId, limit, lastTimestamp, status);
+        List<Notification> notifications = notificationService.getNotificationsScroll(userId, lastTimestamp, limit, status);
         log.info("Retrieved {} notifications for user: {}", notifications.size(), userId);
         return ResponseEntity.ok(notifications);
     }
 
     /**
      * Sends a new notification to a user (In-App + Email).
-     *
-     * @param userId the unique identifier of the user
-     * @param message the notification message content
-     * @param category the category of the notification (e.g., INFO, ALERT)
-     * @return ResponseEntity with HTTP status 201 (CREATED) if notification is successfully sent
      */
     @PostMapping("/send")
     @PreAuthorize("hasRole('SYSTEM')")
@@ -69,22 +65,29 @@ public class NotificationController {
             @Valid @RequestParam String category) {
 
         log.info("Request to send notification to user: {} (Category: {})", userId, category);
-        notificationService.sendNotification(userId,message, category);
+        notificationService.sendNotification(userId, message, category);
         log.info("Notification sent successfully to user: {}", userId);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     /**
      * Marks a specific notification as read.
-     *
-     * @param notificationId the unique identifier of the notification
-     * @return ResponseEntity with HTTP status 204 (NO_CONTENT) if update is successful
      */
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable String notificationId) {
         log.info("Request to mark notification {} as read", notificationId);
         notificationService.markAsRead(notificationId);
-        log.info("Notification {} marked as read", notificationId);
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * Marks all unread notifications for a user as read.
+     */
+    @PatchMapping("/{userId}/read-all")
+    @PreAuthorize("hasRole('ADMIN') or principal.userId().equals(#userId)")
+    public ResponseEntity<Void> markAllAsRead(@PathVariable String userId) {
+        log.info("Request to mark all notifications as read for user: {}", userId);
+        notificationService.markAllAsRead(userId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -132,7 +132,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthorizationDeniedException.class)
     public ResponseEntity<GenericErrorResponse> handleAuthorizationDenied(
             AuthorizationDeniedException e, HttpServletRequest request) {
-        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), AuditAction.ACCESS_DENIED, "Request", "N/A");
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new GenericErrorResponse(e.getMessage()));
     }
@@ -144,7 +144,7 @@ public class GlobalExceptionHandler {
         String traceId = MDC.get("traceId");
         if (traceId == null) traceId = UUID.randomUUID().toString();
         log.error("Unhandled exception. traceId={}", traceId, ex);
-        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", request.getRequestURI());
+        auditService.logAudit(resolveUserId(), resolveActionByMethod(request), "Request", "N/A");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new GenericErrorResponse(
                         "An unexpected error occurred. Contact support with traceId: " + traceId

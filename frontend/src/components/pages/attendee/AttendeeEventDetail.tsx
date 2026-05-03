@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import {
   Container, Row, Col, Card, Nav, Spinner, Alert, Button,
-  Form, Table, Badge,
+  Form, Table,
 } from 'react-bootstrap'
 import { TableRowsSkeleton, InlineFieldSkeleton } from '../../elements/skeletons/PageSkeleton'
 import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
@@ -17,17 +17,11 @@ import { registrationService } from '../../../services/events/registrationServic
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { PanelHeader } from '../../elements/events/PanelHeader'
 import { fmtDate } from '../../../utils/dateHelpers'
-import { EVENT_LABEL, REG_STATUS_COLOR, REG_STATUS_LABEL } from '../../../constants/eventConstants'
+import { EVENT_LABEL, REG_STATUS_LABEL } from '../../../constants/eventConstants'
 import type {
   EventResponseDto, ScheduleResponseDto, TicketResponseDto, RegistrationDto,
 } from '../../../types/events'
 
-const REG_BADGE_COLOR: Record<string, string> = {
-  PENDING:    '#f59e0b',
-  CONFIRMED:  '#22c55e',
-  CHECKED_IN: '#3b82f6',
-  CANCELLED:  '#6b7280',
-}
 
 type Tab = 'overview' | 'schedule' | 'registration'
 
@@ -159,16 +153,11 @@ export const AttendeeEventDetail = () => {
               />
             )}
             {!loading && registration && (
-              <span
-                className="rounded-2 px-2 py-1 fw-semibold"
-                style={{
-                  fontSize: '0.75rem',
-                  background: REG_BADGE_COLOR[registration.status] ?? '#6b7280',
-                  color: '#fff',
-                }}
-              >
-                {REG_STATUS_LABEL[registration.status] ?? registration.status}
-              </span>
+              <EventStatusBadge
+                variant="registration"
+                status={registration.status}
+                label={REG_STATUS_LABEL[registration.status] ?? registration.status}
+              />
             )}
           </div>
         </Container>
@@ -296,40 +285,38 @@ export const AttendeeEventDetail = () => {
               </Card>
             </Col>
 
-            {/* Community Rating — only when avgRating has loaded */}
-            {avgRating && (
-              <Col xs={12}>
-                <Card className="es-card border shadow-sm">
-                  <Card.Body className="p-3 p-md-4 d-flex flex-wrap align-items-center gap-3">
-                    <div>
-                      <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Community Rating</div>
-                      <div className="d-flex align-items-center gap-2">
-                        <div className="d-flex gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span key={star} style={{ color: star <= Math.round(avgRating.score) ? 'var(--amber)' : 'var(--border-color)' }}>
-                              {star <= Math.round(avgRating.score) ? <StarFill size={16} /> : <Star size={16} />}
-                            </span>
-                          ))}
-                        </div>
-                        <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
-                          {avgRating.score.toFixed(1)}
-                        </span>
-                        <span className="small" style={{ color: 'var(--text-muted)' }}>
-                          · {avgRating.count} review{avgRating.count !== 1 ? 's' : ''}
-                        </span>
+            {/* Community Rating — always visible */}
+            <Col xs={12}>
+              <Card className="es-card border shadow-sm">
+                <Card.Body className="p-3 p-md-4 d-flex flex-wrap align-items-center gap-3">
+                  <div>
+                    <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>Community Rating</div>
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} style={{ color: avgRating && star <= Math.round(avgRating.score) ? 'var(--amber)' : 'var(--border-color)' }}>
+                            {avgRating && star <= Math.round(avgRating.score) ? <StarFill size={16} /> : <Star size={16} />}
+                          </span>
+                        ))}
                       </div>
+                      <span className="fw-bold" style={{ color: 'var(--text-primary)', fontSize: '1rem' }}>
+                        {avgRating ? avgRating.score.toFixed(1) : '0.0'}
+                      </span>
+                      <span className="small" style={{ color: 'var(--text-muted)' }}>
+                        {avgRating ? `· ${avgRating.count} review${avgRating.count !== 1 ? 's' : ''}` : '· No reviews yet'}
+                      </span>
                     </div>
-                    {canFeedback && (
-                      <Link to={`/attendee/feedback/${event!.id}`} className="ms-auto">
-                        <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium" style={{ fontSize: '0.82rem' }}>
-                          Submit Feedback
-                        </Button>
-                      </Link>
-                    )}
-                  </Card.Body>
-                </Card>
-              </Col>
-            )}
+                  </div>
+                  {canFeedback && (
+                    <Link to={`/attendee/feedback/${event!.id}`} className="ms-auto">
+                      <Button variant="outline-primary" size="sm" className="rounded-3 fw-medium" style={{ fontSize: '0.82rem' }}>
+                        Submit Feedback
+                      </Button>
+                    </Link>
+                  )}
+                </Card.Body>
+              </Card>
+            </Col>
           </Row>
         )}
 
@@ -413,9 +400,7 @@ export const AttendeeEventDetail = () => {
                           </Col>
                           <Col xs={5} className="fw-medium" style={{ color: 'var(--text-secondary)' }}>Status</Col>
                           <Col xs={7}>
-                            <Badge bg={REG_STATUS_COLOR[registration.status] ?? 'secondary'} className="rounded-2">
-                              {registration.status}
-                            </Badge>
+                            <EventStatusBadge variant="registration" status={registration.status} />
                           </Col>
                         </Row>
                       </dl>

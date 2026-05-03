@@ -1,12 +1,20 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import { adminService } from '../../services/admin/adminService'
 import type { UserResponseDto } from '../../types/events'
-import type { AuditLogsPageDto } from '../../types/admin'
-import axiosInstance from '../../api/axiosInstance'
+import type { AuditLogDto } from '../../types/admin'
+
+interface AuditState {
+  audits: AuditLogDto[]
+  totalElements: number
+  totalPages: number
+  currentPage: number
+}
 
 interface AdminState {
   allUsers: UserResponseDto[]
-  auditLogs: AuditLogsPageDto | null
+  totalUsers: number
+  totalUserPages: number
+  auditLogs: AuditState | null
   loadingUsers: boolean
   loadingLogs: boolean
   error: string | null
@@ -14,6 +22,8 @@ interface AdminState {
 
 const initialState: AdminState = {
   allUsers: [],
+  totalUsers: 0,
+  totalUserPages: 1,
   auditLogs: null,
   loadingUsers: false,
   loadingLogs: false,
@@ -22,10 +32,9 @@ const initialState: AdminState = {
 
 export const fetchUsers = createAsyncThunk(
   'admin/fetchUsers',
-  async (_, { rejectWithValue }) => {
+  async (params: { search?: string; role?: string; status?: string; page?: number; size?: number } = {}, { rejectWithValue }) => {
     try {
-      const { data } = await axiosInstance.get('/api/v1/auth-manager/users')
-      return Array.isArray(data) ? data : (data.content ?? [])
+      return await adminService.getUsers(params)
     } catch (err: unknown) {
       const error = err as { response?: { data?: { message?: string } }; message?: string }
       return rejectWithValue(error.response?.data?.message || error.message || 'Failed to fetch users')
@@ -80,7 +89,9 @@ const adminSlice = createSlice({
       .addCase(fetchUsers.pending, (state) => { state.loadingUsers = true; state.error = null })
       .addCase(fetchUsers.fulfilled, (state, action) => {
         state.loadingUsers = false
-        state.allUsers = action.payload as UserResponseDto[]
+        state.allUsers = action.payload.content ?? []
+        state.totalUsers = action.payload.totalElements ?? 0
+        state.totalUserPages = action.payload.totalPages ?? 1
       })
       .addCase(fetchUsers.rejected, (state, action) => { state.loadingUsers = false; state.error = action.payload as string })
 
@@ -94,8 +105,15 @@ const adminSlice = createSlice({
       })
 
       .addCase(fetchAuditLogs.pending, (state) => { state.loadingLogs = true; state.error = null })
-      .addCase(fetchAuditLogs.fulfilled, (state, action) => { state.loadingLogs = false; state.auditLogs = action.payload })
-      .addCase(fetchAuditLogs.rejected, (state, action) => { state.loadingLogs = false; state.error = action.payload as string })
+      .addCase(fetchAuditLogs.fulfilled, (state, action) => {
+        const { audits, totalElements, totalPages, page } = action.payload
+        state.auditLogs = { audits, totalElements, totalPages, currentPage: page }
+        state.loadingLogs = false
+      })
+      .addCase(fetchAuditLogs.rejected, (state, action) => {
+        state.loadingLogs = false
+        state.error = action.payload as string
+      })
   },
 })
 

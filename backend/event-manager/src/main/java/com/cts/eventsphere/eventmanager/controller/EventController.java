@@ -2,12 +2,15 @@ package com.cts.eventsphere.eventmanager.controller;
 
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
 import com.cts.eventsphere.eventmanager.dto.event.EventAnalyticsResponseDto;
+import com.cts.eventsphere.eventmanager.dto.event.EventPageResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleResponseDto;
 import com.cts.eventsphere.eventmanager.service.EventService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -17,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 
 /**
  * Rest Controller for Event Entity.
@@ -51,16 +55,26 @@ public class EventController {
     }
 
     /**
-     * Retrieves all events.
-     * @return ResponseEntity containing a list of event DTOs and HTTP status 200 (OK)
+     * Retrieves a page of events, optionally filtered by name and status.
+     *
+     * @param search optional substring to match against event name (case-insensitive)
+     * @param status optional event status filter (e.g. "PUBLISHED", "DRAFT"); omit or "ALL" for no filter
+     * @param page   zero-based page index (default 0)
+     * @param size   page size 1–100 (default 20)
+     * @return ResponseEntity containing the paginated event response and HTTP status 200 (OK)
      */
     @GetMapping
-    public ResponseEntity<List<EventResponseDto>> readAll(@AuthenticationPrincipal UserPrincipal userDetails) {
+    public ResponseEntity<EventPageResponseDto> readAll(
+            @AuthenticationPrincipal UserPrincipal userDetails,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "20") @Min(1) @Max(100) int size) {
         var userId = userDetails.userId();
-        log.info("Received request to fetch all events");
-        List<EventResponseDto> events = eventService.findAllEvents(userId, userDetails.role());
-        log.info("Successfully retrieved {} events", events.size());
-        return ResponseEntity.ok(events);
+        log.info("Received request to fetch events: search={}, status={}, page={}, size={}", search, status, page, size);
+        EventPageResponseDto result = eventService.findAllEvents(userId, userDetails.role(), search, status, page, size);
+        log.info("Successfully retrieved {} events (page {}/{})", result.events().size(), page, result.totalPages());
+        return ResponseEntity.ok(result);
     }
 
     /**

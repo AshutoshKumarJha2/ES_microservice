@@ -1,48 +1,60 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchUsers, updateUserRole, updateUserStatus } from '../../../store/slices/adminSlice'
 import type { UserResponseDto } from '../../../types/events'
 import { AdminSubNav } from '../../elements/admin/AdminSubNav'
 import { PageBanner } from '../../elements/common/PageBanner'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import { roleBadgeClass, userStatusBadgeClass, userInitials } from '../../../utils/badgeHelpers'
 import {
   Container, Card, Table, Badge, Button, Modal, Form,
-  InputGroup, ButtonGroup, Spinner, Pagination,
+  InputGroup, ButtonGroup, Spinner,
 } from 'react-bootstrap'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { Search } from 'react-bootstrap-icons'
 
-const ROLES: UserResponseDto['role'][] = ['ADMIN', 'ORGANIZER', 'ATTENDEE', 'VENDOR', 'VENUE_MANAGER', 'FINANCE_OFFICER']
+const ROLES: UserResponseDto['role'][]     = ['ADMIN', 'ORGANIZER', 'ATTENDEE', 'VENDOR', 'VENUE_MANAGER', 'FINANCE_OFFICER']
+const STATUSES: UserResponseDto['status'][] = ['ACTIVE', 'INACTIVE', 'SUSPENDED']
 const PAGE_SIZE = 10
 
 interface EditRoleModal { userId: string; name: string }
 
 export const AdminUsers: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { allUsers, loadingUsers } = useAppSelector((state) => state.admin)
+  const { allUsers, loadingUsers, totalUsers, totalUserPages } = useAppSelector((state) => state.admin)
 
-  const [search, setSearch]         = useState('')
-  const [roleFilter, setRoleFilter]  = useState<string>('ALL')
-  const [page, setPage]              = useState(0)
-  const [editModal, setEditModal]    = useState<EditRoleModal | null>(null)
+  const [search, setSearch]             = useState('')
+  const [roleFilter, setRoleFilter]     = useState<string>('ALL')
+  const [statusFilter, setStatusFilter] = useState<string>('ALL')
+  const [page, setPage]                 = useState(0)
+  const [editModal, setEditModal]       = useState<EditRoleModal | null>(null)
   const [selectedRole, setSelectedRole] = useState<UserResponseDto['role']>('ATTENDEE')
-  const [saving, setSaving]          = useState(false)
+  const [saving, setSaving]             = useState(false)
 
-  useEffect(() => { dispatch(fetchUsers()) }, [dispatch])
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300)
+    return () => clearTimeout(t)
+  }, [search])
 
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase()
-    return allUsers.filter((u) => {
-      const matchRole   = roleFilter === 'ALL' || u.role === roleFilter
-      const matchSearch = !q || u.name?.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
-      return matchRole && matchSearch
-    })
-  }, [allUsers, search, roleFilter])
+  const buildParams = (p: number) => ({
+    search: debouncedSearch || undefined,
+    role:   roleFilter   !== 'ALL' ? roleFilter   : undefined,
+    status: statusFilter !== 'ALL' ? statusFilter : undefined,
+    page:   p,
+    size:   PAGE_SIZE,
+  })
 
-  useEffect(() => { setPage(0) }, [search, roleFilter])
+  useEffect(() => {
+    setPage(0)
+    dispatch(fetchUsers(buildParams(0)))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearch, roleFilter, statusFilter, dispatch])
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
-  const pageUsers  = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+  const handlePageChange = (p: number) => {
+    setPage(p)
+    dispatch(fetchUsers(buildParams(p)))
+  }
 
   const openEditModal = (u: UserResponseDto) => {
     setSelectedRole(u.role)
@@ -76,7 +88,7 @@ export const AdminUsers: React.FC = () => {
                 All Users
               </Card.Title>
               <span className="small" style={{ color: 'var(--text-muted)' }}>
-                {filtered.length} result{filtered.length !== 1 ? 's' : ''}
+                {totalUsers} result{totalUsers !== 1 ? 's' : ''}
               </span>
             </div>
 
@@ -94,6 +106,7 @@ export const AdminUsers: React.FC = () => {
             </InputGroup>
 
             {/* Role filters */}
+            <div className="mb-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Role</div>
             <ButtonGroup className="flex-wrap gap-1 mb-3">
               {['ALL', ...ROLES].map((r) => (
                 <Button
@@ -105,6 +118,23 @@ export const AdminUsers: React.FC = () => {
                   style={{ fontSize: '0.78rem' }}
                 >
                   {r === 'ALL' ? 'All' : r.replace('_', ' ')}
+                </Button>
+              ))}
+            </ButtonGroup>
+
+            {/* Status filters */}
+            <div className="mb-1" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Status</div>
+            <ButtonGroup className="flex-wrap gap-1 mb-3">
+              {['ALL', ...STATUSES].map((s) => (
+                <Button
+                  key={s}
+                  size="sm"
+                  variant={statusFilter === s ? 'primary' : 'outline-secondary'}
+                  className="rounded-pill"
+                  onClick={() => setStatusFilter(s)}
+                  style={{ fontSize: '0.78rem' }}
+                >
+                  {s === 'ALL' ? 'All' : s}
                 </Button>
               ))}
             </ButtonGroup>
@@ -121,9 +151,9 @@ export const AdminUsers: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {loadingUsers ? <TableRowsSkeleton rows={10} cols={5} colWidths={['55%','78%','38%','34%','58%']} /> : pageUsers.length === 0 ? (
+                {loadingUsers ? <TableRowsSkeleton rows={10} cols={5} colWidths={['55%','78%','38%','34%','58%']} /> : allUsers.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-4" style={{ color: 'var(--text-muted)' }}>No users found</td></tr>
-                  ) : pageUsers.map((u) => (
+                  ) : allUsers.map((u) => (
                     <tr key={u.userId}>
                       <td className="align-middle">
                         <div className="d-flex align-items-center gap-2">
@@ -164,21 +194,7 @@ export const AdminUsers: React.FC = () => {
               </tbody>
             </Table>
 
-            {/* Pagination */}
-            {filtered.length > PAGE_SIZE && (
-              <div className="d-flex justify-content-between align-items-center mt-3">
-                <small style={{ color: 'var(--text-muted)' }}>
-                  Page {page + 1} of {totalPages} · {filtered.length} users
-                </small>
-                <Pagination size="sm" className="mb-0">
-                  <Pagination.Prev disabled={page === 0} onClick={() => setPage((p) => p - 1)} />
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => (
-                    <Pagination.Item key={i} active={i === page} onClick={() => setPage(i)}>{i + 1}</Pagination.Item>
-                  ))}
-                  <Pagination.Next disabled={page + 1 >= totalPages} onClick={() => setPage((p) => p + 1)} />
-                </Pagination>
-              </div>
-            )}
+            <PaginationBar page={page} totalPages={totalUserPages} totalElements={totalUsers} label="users" onChange={handlePageChange} />
           </Card.Body>
         </Card>
       </Container>

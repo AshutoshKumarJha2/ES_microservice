@@ -23,7 +23,7 @@ public class AuditServiceImpl implements AuditService {
 
     @Override
     public void logAudit(String userId, AuditAction action, String entityName, String entityId) {
-        var dto = new AuditLogRequestDto(action, entityId, entityName);
+        var dto = new AuditLogRequestDto(userId, action, entityId, entityName);
         log.debug("Sending audit request: userId={}, payload={}", userId, dto);
         try {
             auditClient.createAudit(dto);

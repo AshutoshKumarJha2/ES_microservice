@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { SessionFormFields, parseTimeSlot, buildTimeSlot } from './SessionFormFields'
 import { EventStatusBadge } from './EventStatusBadge'
 import { eventService } from '../../../services/events/eventService'
 import type { ScheduleRequestDto, ScheduleStatus } from '../../../types/events'
-import { Card, Form, Button, Spinner, Alert } from 'react-bootstrap'
+import { Card, Form, Button, Spinner, Alert, Modal } from 'react-bootstrap'
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -141,6 +142,7 @@ export const SessionManager = ({
   onCountChange,
 }: Props) => {
   const isApiMode = Boolean(eventId)
+  const navigate = useNavigate()
 
   // ── Internal state (API mode) ─────────────────────────────────────────────
   const [internalSessions, setInternalSessions] = useState<SessionRow[]>([])
@@ -204,6 +206,10 @@ export const SessionManager = ({
   const [editDraft, setEditDraft]           = useState<Omit<ScheduleRequestDto, 'eventId'>>(emptyDraft())
   const [editError, setEditError]           = useState<string | null>(null)
   const [sessionUpdating, setSessionUpdating] = useState(false)
+
+  // ── Delete modal state ────────────────────────────────────────────────────
+  const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
+  const [deleteLoading, setDeleteLoading]   = useState(false)
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const evtStartDate = isoToDate(eventStartAt)
@@ -392,44 +398,52 @@ export const SessionManager = ({
   }
 
   // ── Delete session ────────────────────────────────────────────────────────
-  const handleDeleteSession = async (localId: number) => {
-    if (!window.confirm('Delete this session?')) return
-    const target = sorted.find((s) => s.localId === localId)
-    const idx    = sorted.findIndex((s) => s.localId === localId)
+  const handleDeleteSession = (localId: number) => setDeleteTargetId(localId)
 
-    if (isApiMode && eventId && target?.scheduleId) {
-      await eventService.deleteSchedule(eventId, target.scheduleId)
-      const { start: delStart, end: delEnd } = parseTimeSlot(target.timeSlot)
-      const gapMins    = timeToMins(delEnd) - timeToMins(delStart)
-      const afterGroup = sorted.slice(idx + 1).filter((s) => s.date === target.date)
-      for (const s of afterGroup) {
-        const { start, end } = parseTimeSlot(s.timeSlot)
-        await eventService.updateSchedule(eventId, s.scheduleId!, {
-          ...s, eventId,
-          timeSlot: buildTimeSlot(minsToTime(timeToMins(start) - gapMins), minsToTime(timeToMins(end) - gapMins)),
-        })
-      }
-      loadFromApi()
-    } else {
-      // Local mode: close the gap by shifting same-date sessions after the deleted one
-      if (target) {
+  const confirmDelete = async () => {
+    if (deleteTargetId === null) return
+    const localId = deleteTargetId
+    const target  = sorted.find((s) => s.localId === localId)
+    const idx     = sorted.findIndex((s) => s.localId === localId)
+
+    setDeleteLoading(true)
+    try {
+      if (isApiMode && eventId && target?.scheduleId) {
+        await eventService.deleteSchedule(eventId, target.scheduleId)
         const { start: delStart, end: delEnd } = parseTimeSlot(target.timeSlot)
         const gapMins    = timeToMins(delEnd) - timeToMins(delStart)
         const afterGroup = sorted.slice(idx + 1).filter((s) => s.date === target.date)
-        updateSessions((prev) =>
-          prev
-            .filter((s) => s.localId !== localId)
-            .map((s) => {
-              if (afterGroup.some((a) => a.localId === s.localId) && gapMins > 0) {
-                const { start, end } = parseTimeSlot(s.timeSlot)
-                return { ...s, timeSlot: buildTimeSlot(minsToTime(timeToMins(start) - gapMins), minsToTime(timeToMins(end) - gapMins)) }
-              }
-              return s
-            })
-        )
+        for (const s of afterGroup) {
+          const { start, end } = parseTimeSlot(s.timeSlot)
+          await eventService.updateSchedule(eventId, s.scheduleId!, {
+            ...s, eventId,
+            timeSlot: buildTimeSlot(minsToTime(timeToMins(start) - gapMins), minsToTime(timeToMins(end) - gapMins)),
+          })
+        }
+        loadFromApi()
       } else {
-        updateSessions((prev) => prev.filter((s) => s.localId !== localId))
+        if (target) {
+          const { start: delStart, end: delEnd } = parseTimeSlot(target.timeSlot)
+          const gapMins    = timeToMins(delEnd) - timeToMins(delStart)
+          const afterGroup = sorted.slice(idx + 1).filter((s) => s.date === target.date)
+          updateSessions((prev) =>
+            prev
+              .filter((s) => s.localId !== localId)
+              .map((s) => {
+                if (afterGroup.some((a) => a.localId === s.localId) && gapMins > 0) {
+                  const { start, end } = parseTimeSlot(s.timeSlot)
+                  return { ...s, timeSlot: buildTimeSlot(minsToTime(timeToMins(start) - gapMins), minsToTime(timeToMins(end) - gapMins)) }
+                }
+                return s
+              })
+          )
+        } else {
+          updateSessions((prev) => prev.filter((s) => s.localId !== localId))
+        }
       }
+    } finally {
+      setDeleteLoading(false)
+      setDeleteTargetId(null)
     }
   }
 
@@ -488,7 +502,6 @@ export const SessionManager = ({
       <Card.Body className="p-3 p-md-4">
         <Card.Title className="mb-3 fw-semibold" style={{ color: 'var(--text-primary)' }}>
           Schedule
-          <span className="ms-2 small fw-normal" style={{ color: 'var(--text-muted)' }}>(Optional)</span>
         </Card.Title>
 
         {apiLoading ? (
@@ -571,7 +584,24 @@ export const SessionManager = ({
                   >
                     <div style={{ ...colBase, color: 'var(--text-secondary)' }}>{s.date}</div>
                     <div style={{ ...colBase, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>{s.timeSlot}</div>
-                    <div style={{ ...colBase, color: 'var(--text-primary)' }}>{s.activity}</div>
+                    <div style={colBase}>
+                      {isApiMode && s.scheduleId ? (
+                        <button
+                          onClick={() => navigate(`/organizer/events/${eventId}/sessions/${s.scheduleId}/attendance`)}
+                          style={{
+                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                            color: 'var(--text-primary)', fontWeight: 500,
+                            textDecoration: 'underline', textDecorationColor: 'var(--border-color)',
+                            textUnderlineOffset: '3px',
+                          }}
+                          title="Take attendance for this session"
+                        >
+                          {s.activity}
+                        </button>
+                      ) : (
+                        <span style={{ color: 'var(--text-primary)' }}>{s.activity}</span>
+                      )}
+                    </div>
                     <div style={colBase}>
                       <EventStatusBadge status={s.status?.toLowerCase()} variant="schedule" />
                     </div>
@@ -611,6 +641,23 @@ export const SessionManager = ({
           </div>
         )}
       </Card.Body>
+
+      <Modal show={deleteTargetId !== null} onHide={() => setDeleteTargetId(null)} centered size="sm">
+        <Modal.Header closeButton className="border-0 pb-1">
+          <Modal.Title style={{ fontSize: '1rem' }}>Delete Session</Modal.Title>
+        </Modal.Header>
+        <Modal.Body style={{ fontSize: '0.9rem', paddingTop: '0.5rem' }}>
+          Are you sure you want to delete?
+        </Modal.Body>
+        <Modal.Footer className="border-0 pt-1">
+          <Button variant="outline-secondary" size="sm" onClick={() => setDeleteTargetId(null)} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button variant="danger" size="sm" onClick={confirmDelete} disabled={deleteLoading}>
+            {deleteLoading ? <><Spinner animation="border" size="sm" className="me-1" />Deleting…</> : 'Delete'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Card>
   )
 }

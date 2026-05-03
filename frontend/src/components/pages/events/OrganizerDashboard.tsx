@@ -4,10 +4,13 @@ import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchAllEvents, deleteEvent, createEvent, updateEvent } from '../../../store/slices/eventsSlice'
 import { venueService } from '../../../services/events/venueService'
 import type { EventResponseDto, EventRequestDto, VenueResponseDto, EventStatus } from '../../../types/events'
+import { useConfirm } from '../../../hooks/useConfirm'
+import type { ConfirmVariant } from '../../elements/common/ConfirmModal'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { EmptyState } from '../../elements/common/EmptyState'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
@@ -30,7 +33,8 @@ const EMPTY_FORM: EventRequestDto = {
 export const OrganizerDashboard = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { events, loading } = useAppSelector((state) => state.events)
+  const { events, loading, totalPages } = useAppSelector((state) => state.events)
+  const [page, setPage] = useState(0)
   const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
 
   const [venues, setVenues]               = useState<VenueResponseDto[]>([])
@@ -41,6 +45,7 @@ export const OrganizerDashboard = () => {
   const [formError, setFormError]         = useState<string | null>(null)
   const [fieldErrors, setFieldErrors]     = useState<{ startDate?: string; endDate?: string }>({})
   const [actionLoading, setActionLoading] = useState<string | null>(null)   // event ID being status-mutated
+  const { confirm, ConfirmDialog } = useConfirm()
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -52,7 +57,10 @@ export const OrganizerDashboard = () => {
     return errors
   }
 
-  useEffect(() => { dispatch(fetchAllEvents()) }, [dispatch])
+  useEffect(() => {
+    const timer = setTimeout(() => dispatch(fetchAllEvents({ page, size: 10 })), 0)
+    return () => clearTimeout(timer)
+  }, [dispatch, page])
   useEffect(() => { venueService.getAll().then(setVenues).catch(console.error) }, [])
 
   const activeEvents    = events.filter((e) => e.status === 'PUBLISHED').length
@@ -113,7 +121,7 @@ export const OrganizerDashboard = () => {
       } else {
         await dispatch(createEvent({ ...form, organizerId: userId })).unwrap()
       }
-      dispatch(fetchAllEvents())
+      dispatch(fetchAllEvents({ page, size: 10 }))
       closeModal()
     } catch (err: unknown) {
       setFormError((err as string) ?? `Failed to ${editId ? 'update' : 'create'} event.`)
@@ -124,17 +132,25 @@ export const OrganizerDashboard = () => {
 
   // ── Table actions ──────────────────────────────────────────────────────────
 
-  const handleDelete = (id: string) => {
-    if (!window.confirm('Delete this event? This cannot be undone.')) return
-    dispatch(deleteEvent(id))
+  const handleDelete = async (id: string) => {
+    const ok = await confirm({
+      title: 'Delete Event',
+      message: 'Delete this event? This cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'danger',
+    })
+    if (!ok) return
+    await dispatch(deleteEvent(id))
+    dispatch(fetchAllEvents({ page, size: 10 }))
   }
 
   const handleStatusChange = async (event: EventResponseDto, newStatus: EventStatus) => {
-    const confirmMsgs: Partial<Record<EventStatus, string>> = {
-      CANCELLED: 'Cancel this event? Attendees will be notified.',
-      COMPLETED: 'Mark this event as Completed?',
+    const confirmMsgs: Partial<Record<EventStatus, { title: string; message: string; variant: ConfirmVariant }>> = {
+      CANCELLED: { title: 'Cancel Event',   message: 'Cancel this event? Attendees will be notified.', variant: 'warning' },
+      COMPLETED: { title: 'Mark Complete',  message: 'Mark this event as Completed?',                  variant: 'primary' },
     }
-    if (confirmMsgs[newStatus] && !window.confirm(confirmMsgs[newStatus])) return
+    const opts = confirmMsgs[newStatus]
+    if (opts && !(await confirm(opts))) return
 
     setActionLoading(event.id)
     try {
@@ -149,7 +165,7 @@ export const OrganizerDashboard = () => {
           status: newStatus,
         },
       })).unwrap()
-      dispatch(fetchAllEvents())
+      dispatch(fetchAllEvents({ page, size: 10 }))
     } catch { /* error already in Redux */ } finally {
       setActionLoading(null)
     }
@@ -172,7 +188,7 @@ export const OrganizerDashboard = () => {
           {busy ? <Spinner animation="border" size="sm" /> : <IconDotsV />}
         </Dropdown.Toggle>
 
-        <Dropdown.Menu align="end" style={{ fontSize: '0.85rem', minWidth: 160 }}>
+        <Dropdown.Menu align="end" style={{ fontSize: '0.85rem', minWidth: 160, zIndex: 1050 }}>
           {/* Edit — always available */}
           <Dropdown.Item onClick={() => openEdit(event)}>Edit</Dropdown.Item>
 
@@ -281,9 +297,13 @@ export const OrganizerDashboard = () => {
                 </tbody>
               </Table>
             )}
+
+            <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
           </Card.Body>
         </Card>
       </Container>
+
+      {ConfirmDialog}
 
       {/* Create / Edit Modal */}
       <Modal show={showModal} onHide={closeModal} centered size="lg">
