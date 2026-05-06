@@ -15,6 +15,7 @@ import {
   updateDeliveryStatus,
   deleteDelivery,
 } from '../../../store/slices/vendor/vendorSlice'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import type { DeliveryResponseDto, DeliveryRequestDto, DeliveryStatus } from '../../../types/vendor'
 
 const STATUSES: DeliveryStatus[] = ['SCHEDULED', 'IN_TRANSIT', 'DELIVERED', 'FAILED', 'CANCELLED']
@@ -196,11 +197,7 @@ export const Deliveries = () => {
                 </thead>
                 <tbody>
                   {deliveriesLoading ? (
-                    <tr>
-                      <td colSpan={6} className="text-center py-4">
-                        <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                      </td>
-                    </tr>
+                    <TableRowsSkeleton rows={5} cols={6} />
                   ) : filtered.map(d => (
                     <tr key={d.deliveryId}>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{d.item}</td>

@@ -250,7 +250,14 @@ const vendorSlice = createSlice({
       .addCase(fetchAllVendors.fulfilled, (s, a) => { s.vendorsLoading = false; s.vendors = a.payload })
       .addCase(fetchAllVendors.rejected, (s, a) => { s.vendorsLoading = false; s.vendorsError = a.payload as string })
 
-      .addCase(createVendor.fulfilled, (s, a) => { s.vendors.push(a.payload) })
+      .addCase(createVendor.fulfilled, (s, a) => {
+        const now = new Date().toISOString()
+        s.vendors.push({
+          ...a.payload,
+          createdAt: a.payload.createdAt || now,
+          updatedAt: a.payload.updatedAt || now,
+        })
+      })
       .addCase(updateVendor.fulfilled, (s, a) => {
         const idx = s.vendors.findIndex(v => v.vendorId === a.payload.vendorId)
         if (idx !== -1) s.vendors[idx] = a.payload

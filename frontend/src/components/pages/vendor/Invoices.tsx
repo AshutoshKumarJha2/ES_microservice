@@ -13,6 +13,7 @@ import {
   fetchAllVendors,
   createInvoice,
 } from '../../../store/slices/vendor/vendorSlice'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { invoiceService } from '../../../services/vendor/invoiceService'
 import type { InvoiceRequestDto, InvoiceStatus } from '../../../types/vendor'
 
@@ -185,11 +186,7 @@ export const Invoices = () => {
                 </thead>
                 <tbody>
                   {invoicesLoading ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-4">
-                        <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                      </td>
-                    </tr>
+                    <TableRowsSkeleton rows={5} cols={8} />
                   ) : filtered.map(i => (
                     <tr key={i.invoiceId}>
                       <td className="align-middle px-3 fw-semibold" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>

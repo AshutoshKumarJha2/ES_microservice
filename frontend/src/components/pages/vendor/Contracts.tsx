@@ -14,6 +14,7 @@ import {
   updateContractStatus,
   createInvoiceViaContract,
 } from '../../../store/slices/vendor/vendorSlice'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { fetchAllEvents } from '../../../store/slices/eventsSlice'
 import type {
   ContractResponseDto, ContractRequestDto, ContractStatus,
@@ -223,11 +224,7 @@ export const Contracts = () => {
                 </thead>
                 <tbody>
                   {contractsLoading ? (
-                    <tr>
-                      <td colSpan={8} className="text-center py-4">
-                        <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                      </td>
-                    </tr>
+                    <TableRowsSkeleton rows={5} cols={8} />
                   ) : filtered.map(c => (
                     <tr key={c.contractId}>
                       <td className="align-middle px-3 fw-semibold" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>

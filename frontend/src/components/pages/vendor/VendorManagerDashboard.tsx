@@ -7,9 +7,10 @@ import {
   fetchAllDeliveries,
   fetchAllInvoices,
 } from '../../../store/slices/vendor/vendorSlice'
-import { Container, Row, Col, Card, Table, Badge, Alert, Button, Spinner } from 'react-bootstrap'
+import { Container, Row, Col, Card, Table, Badge, Alert, Button } from 'react-bootstrap'
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { SUB_TABS } from '../../layout/VendorLayout'
 import { TabBar } from '../../elements/TabBar'
 
@@ -168,11 +169,7 @@ export const VendorManagerDashboard = () => {
                     </thead>
                     <tbody>
                       {contractsLoading ? (
-                        <tr>
-                          <td colSpan={5} className="text-center py-4">
-                            <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                          </td>
-                        </tr>
+                        <TableRowsSkeleton rows={5} cols={5} />
                       ) : recentContracts.map(c => (
                         <tr key={c.contractId}>
                           <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>

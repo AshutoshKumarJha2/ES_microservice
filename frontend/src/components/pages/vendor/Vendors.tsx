@@ -14,6 +14,7 @@ import {
   deleteVendor,
 } from '../../../store/slices/vendor/vendorSlice'
 import type { VendorResponseDto, VendorRequestDto, VendorStatus } from '../../../types/vendor'
+import { TableRowsSkeleton, BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 
 const STATUSES: VendorStatus[]        = ['ACTIVE', 'INACTIVE', 'BLACKLISTED']
 const VENDOR_STATUSES: VendorStatus[] = ['ACTIVE', 'INACTIVE']
@@ -157,8 +158,15 @@ export const Vendors = () => {
   if (isVendor) {
     if (vendorsLoading) {
       return (
-        <div className="d-flex justify-content-center py-5">
-          <Spinner animation="border" style={{ color: 'var(--blue)' }} />
+        <div>
+          <PageBanner title="Vendor" subtitle="Your registered vendor profile" />
+          <Container fluid className="px-3 px-md-4 py-4">
+            <Card className="es-card border shadow-sm" style={{ maxWidth: 520 }}>
+              <Card.Body className="p-4">
+                <BlockSkeleton rows={6} />
+              </Card.Body>
+            </Card>
+          </Container>
         </div>
       )
     }
@@ -403,11 +411,7 @@ export const Vendors = () => {
                 </thead>
                 <tbody>
                   {vendorsLoading ? (
-                    <tr>
-                      <td colSpan={5} className="text-center py-4">
-                        <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
-                      </td>
-                    </tr>
+                    <TableRowsSkeleton rows={5} cols={5} />
                   ) : filtered.map(v => (
                     <tr key={v.vendorId}>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{v.name}</td>
