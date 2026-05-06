@@ -10,6 +10,7 @@ import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import { StatCard } from '../../elements/common/StatCard'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { EmptyState } from '../../elements/common/EmptyState'
+import { PaginationBar } from '../../elements/common/PaginationBar'
 import {
   Container, Row, Col, Card, Table, Button, Modal, Form,
   Spinner, Alert, Dropdown,
@@ -32,7 +33,8 @@ const EMPTY_FORM: EventRequestDto = {
 export const OrganizerDashboard = () => {
   const dispatch = useAppDispatch()
   const navigate = useNavigate()
-  const { events, loading } = useAppSelector((state) => state.events)
+  const { events, loading, totalPages } = useAppSelector((state) => state.events)
+  const [page, setPage] = useState(0)
   const userId = useAppSelector((state) => state.auth.user?.userId ?? '')
 
   const [venues, setVenues]               = useState<VenueResponseDto[]>([])
@@ -55,7 +57,10 @@ export const OrganizerDashboard = () => {
     return errors
   }
 
-  useEffect(() => { dispatch(fetchAllEvents()) }, [dispatch])
+  useEffect(() => {
+    const timer = setTimeout(() => dispatch(fetchAllEvents({ page, size: 10 })), 0)
+    return () => clearTimeout(timer)
+  }, [dispatch, page])
   useEffect(() => { venueService.getAll().then(setVenues).catch(console.error) }, [])
 
   const activeEvents    = events.filter((e) => e.status === 'PUBLISHED').length
@@ -116,7 +121,7 @@ export const OrganizerDashboard = () => {
       } else {
         await dispatch(createEvent({ ...form, organizerId: userId })).unwrap()
       }
-      dispatch(fetchAllEvents())
+      dispatch(fetchAllEvents({ page, size: 10 }))
       closeModal()
     } catch (err: unknown) {
       setFormError((err as string) ?? `Failed to ${editId ? 'update' : 'create'} event.`)
@@ -135,7 +140,8 @@ export const OrganizerDashboard = () => {
       variant: 'danger',
     })
     if (!ok) return
-    dispatch(deleteEvent(id))
+    await dispatch(deleteEvent(id))
+    dispatch(fetchAllEvents({ page, size: 10 }))
   }
 
   const handleStatusChange = async (event: EventResponseDto, newStatus: EventStatus) => {
@@ -159,7 +165,7 @@ export const OrganizerDashboard = () => {
           status: newStatus,
         },
       })).unwrap()
-      dispatch(fetchAllEvents())
+      dispatch(fetchAllEvents({ page, size: 10 }))
     } catch { /* error already in Redux */ } finally {
       setActionLoading(null)
     }
@@ -298,6 +304,8 @@ export const OrganizerDashboard = () => {
                 </tbody>
               </Table>
             )}
+
+            <PaginationBar page={page} totalPages={totalPages} onChange={setPage} />
           </Card.Body>
         </Card>
       </Container>

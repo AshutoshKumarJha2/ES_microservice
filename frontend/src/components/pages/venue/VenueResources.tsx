@@ -8,6 +8,7 @@ import {
   deleteResource,
   clearActionError,
   clearResources,
+  fetchVenuesByManager,
 } from '../../../store/slices/venue/venueSlice'
 import type { ResourceResponseDto, ResourceType, Availability } from '../../../types/venue'
 import {
@@ -42,6 +43,8 @@ export const VenueResources = () => {
     actionError, actionLoading,
   } = useAppSelector((s) => s.venue)
 
+  const user = useAppSelector((s) => s.auth).user
+
   const [selectedVenueId, setSelectedVenueId] = useState<string>('')
   const [search, setSearch]                   = useState('')
   const [showModal, setShowModal]             = useState(false)
@@ -51,9 +54,9 @@ export const VenueResources = () => {
   const [formError, setFormError]             = useState<string | null>(null)
 
   useEffect(() => {
-    dispatch(fetchAllVenues())
+    if (user?.userId) dispatch(fetchVenuesByManager(user?.userId))
     return () => { dispatch(clearResources()) }
-  }, [dispatch])
+  }, [dispatch,user?.userId])
 
   useEffect(() => {
     if (selectedVenueId) dispatch(fetchResourcesByVenue(selectedVenueId))

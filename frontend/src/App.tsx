@@ -25,6 +25,8 @@ import { AdminDashboard } from './components/pages/admin/AdminDashboard'
 import { AdminUsers } from './components/pages/admin/AdminUsers'
 import { AdminEvents } from './components/pages/admin/AdminEvents'
 import { AdminAuditLogs } from './components/pages/admin/AdminAuditLogs'
+import { AdminExpenses } from './components/pages/admin/AdminExpenses'
+import { AdminBudget } from './components/pages/admin/AdminBudget'
 import { CreateEvent } from './components/pages/events/CreateEvent'
 import { AttendeeEventBrowser } from './components/pages/attendee/AttendeeEventBrowser'
 import { AttendeeEventDetail } from './components/pages/attendee/AttendeeEventDetail'
@@ -44,6 +46,7 @@ import { Deliveries } from './components/pages/vendor/Deliveries'
 import { Invoices } from './components/pages/vendor/Invoices'
 import { OrganizerContracts } from './components/pages/events/OrganizerContracts'
 import { FinanceInvoices } from './components/pages/finance/FinanceInvoices'
+import { SessionAttendancePage } from './components/pages/engagement/SessionAttendancePage'
 
 export const App = () => {
   const router = createBrowserRouter([
@@ -94,6 +97,7 @@ export const App = () => {
             { path: '/organizer/events/:id',         element: <EventDetail /> },
             { path: '/organizer/analytics/:eventId', element: <EngagementAnalytics /> },
             { path: '/attendee/feedback/:eventId',   element: <SubmitFeedback /> },
+            { path: '/organizer/events/:eventId/sessions/:scheduleId/attendance', element: <SessionAttendancePage /> },
             { path: '/events',                       element: <AttendeeEventBrowser /> },
             { path: '/attendee/events/:id',          element: <AttendeeEventDetail /> },
             { path: '/attendee/registrations',       element: <AttendeeMyRegistrations /> },
@@ -121,13 +125,15 @@ export const App = () => {
         {
           element: <AppLayout />,
           children: [
-            { path: '/admin/dashboard',     element: <AdminDashboard /> },
-            { path: '/admin/users',         element: <AdminUsers /> },
+            { path: '/admin/dashboard',       element: <AdminDashboard /> },
+            { path: '/admin/users',           element: <AdminUsers /> },
             { path: '/admin/events',          element: <AdminEvents /> },
             { path: '/admin/events/create',   element: <CreateEvent /> },
             { path: '/admin/events/:id',      element: <EventDetail /> },
             { path: '/admin/events/:id/edit', element: <CreateEvent /> },
-            { path: '/admin/audit-logs',    element: <AdminAuditLogs /> },
+            { path: '/admin/expenses',        element: <AdminExpenses /> },
+            { path: '/admin/budget',          element: <AdminBudget /> },
+            { path: '/admin/audit-logs',      element: <AdminAuditLogs /> },
           ],
         },
       ],

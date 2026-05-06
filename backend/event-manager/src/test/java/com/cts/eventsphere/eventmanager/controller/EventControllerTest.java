@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.cts.eventsphere.eventmanager.auth.dto.UserPrincipal;
+import com.cts.eventsphere.eventmanager.dto.event.EventPageResponseDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventRequestDto;
 import com.cts.eventsphere.eventmanager.dto.event.EventResponseDto;
 import com.cts.eventsphere.eventmanager.dto.schedule.ScheduleRequestDto;
@@ -37,6 +38,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -152,24 +154,28 @@ class EventControllerTest {
     class GetAllEvents {
 
         @Test
-        @DisplayName("happy path – returns 200 with list of events")
+        @DisplayName("happy path – returns 200 with paginated events")
         void readAll_happyPath() throws Exception {
-            when(eventService.findAllEvents(USER_ID)).thenReturn(List.of(eventResponse));
+            var pagedResponse = new EventPageResponseDto(List.of(eventResponse), 0, 20, 1L, 1);
+            when(eventService.findAllEvents(eq(USER_ID), any(), any(), any(), anyInt(), anyInt())).thenReturn(pagedResponse);
 
             mockMvc.perform(get("/events"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(1)))
-                    .andExpect(jsonPath("$[0].id").value(EVENT_ID));
+                    .andExpect(jsonPath("$.events", hasSize(1)))
+                    .andExpect(jsonPath("$.events[0].id").value(EVENT_ID))
+                    .andExpect(jsonPath("$.totalElements").value(1));
         }
 
         @Test
-        @DisplayName("happy path – returns 200 with empty list when no events exist")
+        @DisplayName("happy path – returns 200 with empty events when no events exist")
         void readAll_empty() throws Exception {
-            when(eventService.findAllEvents(USER_ID)).thenReturn(List.of());
+            var pagedResponse = new EventPageResponseDto(List.of(), 0, 20, 0L, 0);
+            when(eventService.findAllEvents(eq(USER_ID), any(), any(), any(), anyInt(), anyInt())).thenReturn(pagedResponse);
 
             mockMvc.perform(get("/events"))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$", hasSize(0)));
+                    .andExpect(jsonPath("$.events", hasSize(0)))
+                    .andExpect(jsonPath("$.totalElements").value(0));
         }
     }
 

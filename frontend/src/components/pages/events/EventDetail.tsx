@@ -3,7 +3,6 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchEventById } from '../../../store/slices/eventsSlice'
 import { fetchTicketsByEvent } from '../../../store/slices/ticketsSlice'
-import { fetchRegistrationsByEvent } from '../../../store/slices/registrationsSlice'
 import { fetchBudget, fetchExpenses } from '../../../store/slices/budgetSlice'
 import { OverviewTab } from './tabs/OverviewTab'
 import { TicketsTab } from './tabs/TicketsTab'
@@ -43,11 +42,13 @@ export const EventDetail = () => {
 
   useEffect(() => {
     if (!id) return
-    dispatch(fetchEventById(id))
-    dispatch(fetchTicketsByEvent({ eventId: id }))
-    dispatch(fetchRegistrationsByEvent({ eventId: id }))
-    dispatch(fetchBudget(id))
-    dispatch(fetchExpenses({ eventId: id }))
+    const timer = setTimeout(() => {
+      dispatch(fetchEventById(id))
+      dispatch(fetchTicketsByEvent({ eventId: id }))
+      dispatch(fetchBudget(id))
+      dispatch(fetchExpenses({ eventId: id }))
+    }, 0)
+    return () => clearTimeout(timer)
   }, [id, dispatch])
 
   return (

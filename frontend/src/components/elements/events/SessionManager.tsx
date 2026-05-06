@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { SessionFormFields, parseTimeSlot, buildTimeSlot } from './SessionFormFields'
 import { EventStatusBadge } from './EventStatusBadge'
 import { eventService } from '../../../services/events/eventService'
@@ -141,6 +142,7 @@ export const SessionManager = ({
   onCountChange,
 }: Props) => {
   const isApiMode = Boolean(eventId)
+  const navigate = useNavigate()
 
   // ── Internal state (API mode) ─────────────────────────────────────────────
   const [internalSessions, setInternalSessions] = useState<SessionRow[]>([])
@@ -500,7 +502,6 @@ export const SessionManager = ({
       <Card.Body className="p-3 p-md-4">
         <Card.Title className="mb-3 fw-semibold" style={{ color: 'var(--text-primary)' }}>
           Schedule
-          <span className="ms-2 small fw-normal" style={{ color: 'var(--text-muted)' }}>(Optional)</span>
         </Card.Title>
 
         {apiLoading ? (
@@ -583,7 +584,24 @@ export const SessionManager = ({
                   >
                     <div style={{ ...colBase, color: 'var(--text-secondary)' }}>{s.date}</div>
                     <div style={{ ...colBase, color: 'var(--text-secondary)', fontVariantNumeric: 'tabular-nums' }}>{s.timeSlot}</div>
-                    <div style={{ ...colBase, color: 'var(--text-primary)' }}>{s.activity}</div>
+                    <div style={colBase}>
+                      {isApiMode && s.scheduleId ? (
+                        <button
+                          onClick={() => navigate(`/organizer/events/${eventId}/sessions/${s.scheduleId}/attendance`)}
+                          style={{
+                            background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+                            color: 'var(--text-primary)', fontWeight: 500,
+                            textDecoration: 'underline', textDecorationColor: 'var(--border-color)',
+                            textUnderlineOffset: '3px',
+                          }}
+                          title="Take attendance for this session"
+                        >
+                          {s.activity}
+                        </button>
+                      ) : (
+                        <span style={{ color: 'var(--text-primary)' }}>{s.activity}</span>
+                      )}
+                    </div>
                     <div style={colBase}>
                       <EventStatusBadge status={s.status?.toLowerCase()} variant="schedule" />
                     </div>

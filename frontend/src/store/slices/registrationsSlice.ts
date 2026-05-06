@@ -5,6 +5,7 @@ import type { RegistrationDto } from '../../types/events'
 interface RegistrationsState {
   registrations: RegistrationDto[]
   totalElements: number
+  totalPages: number
   loading: boolean
   actionLoading: string | null
   error: string | null
@@ -13,6 +14,7 @@ interface RegistrationsState {
 const initialState: RegistrationsState = {
   registrations: [],
   totalElements: 0,
+  totalPages: 1,
   loading: false,
   actionLoading: null,
   error: null,
@@ -83,6 +85,7 @@ const registrationsSlice = createSlice({
     clearRegistrations(state) {
       state.registrations = []
       state.totalElements = 0
+      state.totalPages = 1
     },
   },
   extraReducers: (builder) => {
@@ -92,6 +95,7 @@ const registrationsSlice = createSlice({
         state.loading = false
         state.registrations = action.payload.registrations ?? []
         state.totalElements = action.payload.totalElements ?? 0
+        state.totalPages = action.payload.totalPages ?? 1
       })
       .addCase(fetchRegistrationsByEvent.rejected, (state, action) => { state.loading = false; state.error = action.payload as string })
 

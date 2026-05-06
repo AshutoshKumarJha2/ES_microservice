@@ -9,6 +9,7 @@ import com.eventsphere.engagement_manager.dto.audit.AuditAction;
 import com.eventsphere.engagement_manager.dto.client.EventAnalyticsDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementRequestDto;
 import com.eventsphere.engagement_manager.dto.engagement.EngagementResponseDto;
+import com.eventsphere.engagement_manager.dto.engagement.SessionAttendanceSummaryDto;
 import com.eventsphere.engagement_manager.dto.mapper.engagement.EngagementRequestDtoMapper;
 import com.eventsphere.engagement_manager.dto.mapper.engagement.EngagementResponseDtoMapper;
 import com.eventsphere.engagement_manager.model.Engagement;
@@ -79,7 +80,8 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementNotFoundException("No engagements found for event: " + eventId);
         }
 
-        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, eventId);
+        String actorId = getCurrentUserId();
+        results.forEach(e -> auditService.logAudit(actorId, AuditAction.READ, Engagement.class, e.getEngagementId()));
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
@@ -96,7 +98,8 @@ public class EngagementServiceImpl implements EngagementService {
             throw new EngagementNotFoundException("No engagements found for activity type: " + activity);
         }
 
-        auditService.logAudit(getCurrentUserId(), AuditAction.READ, Engagement.class, activity.name());
+        String actorId = getCurrentUserId();
+        results.forEach(e -> auditService.logAudit(actorId, AuditAction.READ, Engagement.class, e.getEngagementId()));
 
         return results.stream()
                 .map(EngagementResponseDtoMapper::toDTO)
@@ -144,6 +147,33 @@ public class EngagementServiceImpl implements EngagementService {
     public long getSessionJoinCount(String scheduleId) {
         log.info("Counting SESSION_JOIN engagements for scheduleId={}", scheduleId);
         return engagementRepository.countByScheduleIdAndActivity(scheduleId, EngagementType.SESSION_JOIN);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EngagementResponseDto> getByScheduleId(String scheduleId) {
+        log.info("Fetching engagements for scheduleId={}", scheduleId);
+        return engagementRepository.findByScheduleId(scheduleId)
+                .stream()
+                .map(EngagementResponseDtoMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public SessionAttendanceSummaryDto getSessionAttendanceSummary(String eventId, String scheduleId) {
+        log.info("Fetching attendance summary for scheduleId={} eventId={}", scheduleId, eventId);
+        long presentCount = engagementRepository.countByScheduleIdAndActivity(scheduleId, EngagementType.SESSION_JOIN);
+        long totalRegistrations;
+        try {
+            EventAnalyticsDto analytics = eventServiceClient.getEventAnalytics(eventId);
+            totalRegistrations = analytics.confirmed() + analytics.checkedIn();
+        } catch (FeignException e) {
+            log.warn("Could not fetch analytics from event-manager for event={}: {}", eventId, e.getMessage());
+            totalRegistrations = 0L;
+        }
+        long absentCount = Math.max(0L, totalRegistrations - presentCount);
+        return new SessionAttendanceSummaryDto(scheduleId, totalRegistrations, presentCount, absentCount);
     }
 
     private void notifyUser(String userId, String message) {

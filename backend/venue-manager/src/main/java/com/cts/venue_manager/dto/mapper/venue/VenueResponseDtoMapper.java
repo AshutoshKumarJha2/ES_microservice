@@ -32,7 +32,8 @@ public class VenueResponseDtoMapper {
                 venue.getName(),
                 venue.getLocation(),
                 venue.getCapacity(),
-                venue.getAvailabilityStatus()
+                venue.getAvailabilityStatus(),
+                venue.getManagerId()
         );
     }
 }
