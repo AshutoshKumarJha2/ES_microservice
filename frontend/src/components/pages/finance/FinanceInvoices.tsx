@@ -15,10 +15,12 @@ import {
   updateInvoice,
   deleteInvoice,
 } from '../../../store/slices/vendor/vendorSlice'
-import { invoiceService } from '../../../services/vendor/invoiceService'
 import type { InvoiceRequestDto, InvoiceResponseDto, InvoiceStatus } from '../../../types/vendor'
 
 const FILTER_STATUSES: InvoiceStatus[] = ['ISSUED', 'PAID', 'OVERDUE', 'CANCELLED']
+
+const toLocalDT = (s: string) => s.length === 16 ? s + ':00' : s
+const parseDate = (s: string | null | undefined) => s ? new Date(s.slice(0, 19)) : null
 
 const statusBadgeClass = (s: InvoiceStatus): string => {
   if (s === 'ISSUED')    return 'es-badge-pending'
@@ -46,8 +48,6 @@ export const FinanceInvoices = () => {
 
   const [search, setSearch]           = useState('')
   const [filter, setFilter]           = useState<InvoiceStatus | 'ALL'>('ALL')
-  const [downloading, setDownloading] = useState<string | null>(null)
-
   // Create / Edit modal
   const [showForm, setShowForm]   = useState(false)
   const [editing, setEditing]     = useState<InvoiceResponseDto | null>(null)
@@ -70,7 +70,7 @@ export const FinanceInvoices = () => {
   const contractLabel = (id: string) => {
     const c = contracts.find(c => c.contractId === id)
     if (!c) return `Contract #${id.slice(0, 8)}…`
-    return `${vendorName(c.vendorId)} — $${Number(c.value).toLocaleString()} (${c.status})`
+    return vendorName(c.vendorId)
   }
 
   const filtered = useMemo(() => {
@@ -111,7 +111,7 @@ export const FinanceInvoices = () => {
     setSubmitting(true)
     const payload: InvoiceRequestDto = {
       ...form,
-      dueDate: new Date(form.dueDate).toISOString(),
+      dueDate: toLocalDT(form.dueDate),
       transactionId: form.transactionId?.trim() || undefined,
     }
 
@@ -150,23 +150,6 @@ export const FinanceInvoices = () => {
     }
   }
 
-  const handleDownloadPdf = async (invoiceId: string) => {
-    setDownloading(invoiceId)
-    try {
-      const blob = await invoiceService.downloadInvoicePdf(invoiceId)
-      const url  = URL.createObjectURL(blob)
-      const a    = document.createElement('a')
-      a.href     = url
-      a.download = `invoice_${invoiceId}.pdf`
-      a.click()
-      URL.revokeObjectURL(url)
-      toast.success('PDF downloaded.')
-    } catch {
-      toast.error('PDF generation failed.')
-    } finally {
-      setDownloading(null)
-    }
-  }
 
   return (
     <div>
@@ -242,7 +225,7 @@ export const FinanceInvoices = () => {
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
-                    {['Invoice ID', 'Contract', 'Amount', 'Issue Date', 'Due Date', 'Status', 'Transaction', 'Actions'].map(h => (
+                    {['Invoice ID', 'Contract', 'Amount', 'Issue Date', 'Due Date', 'Status', 'Transaction ID', 'Actions'].map(h => (
                       <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
                     ))}
                   </tr>
@@ -250,8 +233,8 @@ export const FinanceInvoices = () => {
                 <tbody>
                   {filtered.map(i => (
                     <tr key={i.invoiceId}>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {i.invoiceId.slice(0, 8)}…
+                      <td className="align-middle px-3 fw-semibold" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                        INV-{i.invoiceId.slice(0, 8).toUpperCase()}
                       </td>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
                         {contractLabel(i.contractId)}
@@ -260,10 +243,10 @@ export const FinanceInvoices = () => {
                         ${Number(i.totalAmount).toLocaleString()}
                       </td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
-                        {i.issueDate ? new Date(i.issueDate).toLocaleDateString() : '—'}
+                        {(parseDate(i.issueDate) ?? parseDate(i.createdAt))?.toLocaleDateString() ?? '—'}
                       </td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
-                        {new Date(i.dueDate).toLocaleDateString()}
+                        {parseDate(i.dueDate)?.toLocaleDateString() ?? '—'}
                       </td>
                       <td className="align-middle px-3">
                         <Badge className={`${statusBadgeClass(i.status)} border-0`} style={{ fontSize: '0.7rem' }}>
@@ -271,20 +254,12 @@ export const FinanceInvoices = () => {
                         </Badge>
                       </td>
                       <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {i.transactionId ? `${i.transactionId.slice(0, 8)}…` : '—'}
+                        {i.transactionId
+                          ? i.transactionId.length > 12 ? i.transactionId.slice(0, 12) + '…' : i.transactionId
+                          : '—'}
                       </td>
                       <td className="align-middle px-3">
                         <div className="d-flex gap-1 flex-wrap">
-                          <Button
-                            size="sm"
-                            variant="outline-secondary"
-                            className="rounded-2"
-                            onClick={() => handleDownloadPdf(i.invoiceId)}
-                            disabled={downloading === i.invoiceId}
-                            title="Download PDF"
-                          >
-                            {downloading === i.invoiceId ? <Spinner animation="border" size="sm" /> : '⬇ PDF'}
-                          </Button>
                           {isFinance && (
                             <Button size="sm" variant="outline-primary" className="rounded-2" onClick={() => openEdit(i)}>
                               Edit

@@ -12,8 +12,6 @@ import { BudgetTab } from './tabs/BudgetTab'
 import {
   Container, Button, Nav,
 } from 'react-bootstrap'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 import { ArrowLeft } from 'react-bootstrap-icons'
 import { EventStatusBadge } from '../../elements/events/EventStatusBadge'
 import BookingVenueAndResource from '../booking/BookingVenueAndResource'
@@ -67,10 +65,10 @@ export const EventDetail = () => {
               <ArrowLeft size={13} /> {backLabel}
             </button>
             {loading ? (
-              <SkeletonTheme baseColor="rgba(255,255,255,0.15)" highlightColor="rgba(255,255,255,0.28)">
-                <Skeleton width="52%" height={26} borderRadius={6} style={{ marginBottom: 8, display: 'block' }} />
-                <Skeleton width="32%" height={13} borderRadius={4} style={{ display: 'block' }} />
-              </SkeletonTheme>
+              <div className="placeholder-glow">
+                <span className="placeholder rounded d-block" style={{ width: '52%', height: 26, marginBottom: 8, background: 'rgba(255,255,255,0.25)' }} />
+                <span className="placeholder rounded d-block" style={{ width: '32%', height: 13, background: 'rgba(255,255,255,0.25)' }} />
+              </div>
             ) : (
               <>
                 <h1 className="fw-bold fs-3 mb-1">{selectedEvent?.eventName}</h1>

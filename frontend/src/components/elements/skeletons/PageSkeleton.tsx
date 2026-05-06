@@ -1,7 +1,7 @@
 /**
  * PageSkeleton.tsx
  * ─────────────────
- * Reusable skeleton-loading components built with react-loading-skeleton.
+ * Reusable skeleton-loading components built with Bootstrap placeholder utilities.
  * Import whichever variant fits the page layout.
  */
 import React from 'react'
@@ -27,7 +27,6 @@ const ThemedSkeletonTheme = ({ children }: { children: React.ReactNode }) => {
 export const TableRowsSkeleton = ({
   rows = 5,
   cols = 4,
-  colWidths,
 }: {
   rows?: number
   cols?: number
@@ -38,7 +37,9 @@ export const TableRowsSkeleton = ({
       <tr key={i}>
         {Array.from({ length: cols }).map((_, j) => (
           <td key={j} style={{ padding: '10px 8px' }}>
-            <Skeleton height={14} borderRadius={4} width={colWidths?.[j] ?? '72%'} />
+            <div className="placeholder-glow">
+              <span className="placeholder rounded" style={{ width: '72%', height: 14, display: 'block' }} />
+            </div>
           </td>
         ))}
       </tr>

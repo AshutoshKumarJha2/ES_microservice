@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Container, Card, Form, Button, Spinner, Badge, Modal } from 'react-bootstrap'
-import { BlockSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
@@ -26,6 +25,13 @@ export const VendorProfile = () => {
   const dispatch   = useAppDispatch()
   const navigate   = useNavigate()
   const { vendors, vendorsLoading } = useAppSelector((s) => s.vendor)
+  const { user }   = useAppSelector((s) => s.auth)
+
+  // Role gates — mirrors VendorController @PreAuthorize rules:
+  // POST /vendors, PUT /vendors/{id} → VENDOR
+  // DELETE /vendors/{id}             → VENDOR | ADMIN
+  const isVendor  = user?.role === 'VENDOR'
+  const canDelete = user?.role === 'VENDOR' || user?.role === 'ADMIN'
 
   // A vendor user sees their own profile — the first (and typically only) vendor record
   const profile: VendorResponseDto | null = vendors[0] ?? null
@@ -82,30 +88,56 @@ export const VendorProfile = () => {
   }
 
   const handleDelete = async () => {
-    if (!profile) return
-    setDeleting(true)
+    if (!profile) return;
+    setDeleting(true);
+    
     try {
-      await dispatch(deleteVendor(profile.vendorId)).unwrap()
-      toast.success('Vendor profile deleted.')
-      setShowDelete(false)
-      navigate('/vendor/dashboard')
-    } catch {
-      toast.error('Delete failed. Please try again.')
+        await dispatch(deleteVendor(profile.vendorId)).unwrap();
+        toast.success('Vendor profile deleted.');
+        setShowDelete(false);
+        navigate('/vendor/dashboard');
+    } catch (err: any) {
+        if (err.status === 409 || err.statusCode === 409) {
+            toast.error(
+                'Cannot delete vendor: This vendor is currently linked to active contracts. ' +
+                'Please remove the contracts first.'
+            );
+        } else if (err.status === 404) {
+            toast.error('Vendor profile not found.');
+        } else {
+            toast.error('Delete failed. Please try again later.');
+        }
+        
+        console.error('Delete operation failed:', err);
     } finally {
-      setDeleting(false)
+        setDeleting(false);
     }
-  }
+};
 
   if (vendorsLoading) {
     return (
-      <div className="px-3 px-md-4 py-4">
-        <BlockSkeleton rows={6} />
+      <div className="d-flex justify-content-center py-5">
+        <Spinner animation="border" style={{ color: 'var(--blue)' }} />
       </div>
     )
   }
 
-  // ── No profile yet — show registration form ────────────────────────────────
-  if (!profile || registering) {
+  // ── Non-VENDOR visiting the profile page — read-only info ────────────────
+  if (!isVendor && !profile) {
+    return (
+      <div>
+        <PageBanner title="Vendor Profile" subtitle="View vendor registration details" />
+        <Container fluid className="px-3 px-md-4 py-4">
+          <p className="py-4 text-center" style={{ color: 'var(--text-muted)' }}>
+            No vendor profile registered yet. Only users with the <strong>Vendor</strong> role can register a vendor profile.
+          </p>
+        </Container>
+      </div>
+    )
+  }
+
+  // ── No profile yet — show registration form (VENDOR only) ──────────────
+  if ((!profile || registering) && isVendor) {
     return (
       <div>
         <PageBanner title="Register as Vendor" subtitle="Create your vendor profile to start receiving contracts" />
@@ -169,12 +201,18 @@ export const VendorProfile = () => {
         title="My Vendor Profile"
         subtitle="Your registered vendor details"
         actions={!editing ? <>
-          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => setShowDelete(true)}>
-            Delete Profile
-          </Button>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => setEditing(true)}>
-            Edit Profile
-          </Button>
+          {/* Only VENDOR or ADMIN can delete a vendor profile */}
+          {canDelete && (
+            <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => setShowDelete(true)}>
+              Delete Profile
+            </Button>
+          )}
+          {/* Only VENDOR can edit their own profile */}
+          {isVendor && (
+            <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => setEditing(true)}>
+              Edit Profile
+            </Button>
+          )}
         </> : undefined}
       />
 
@@ -245,7 +283,7 @@ export const VendorProfile = () => {
                 {/* Details */}
                 <div className="d-flex flex-column gap-3">
                   {[
-                    { label: 'Vendor ID',     value: profile.vendorId,   mono: true },
+                    { label: 'Vendor ID',     value: `VEN-${profile.vendorId.slice(0, 8).toUpperCase()}`,   mono: true },
                     { label: 'Contact Info',  value: profile.contactInfo            },
                     { label: 'Registered On', value: new Date(profile.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },
                     { label: 'Last Updated',  value: new Date(profile.updatedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) },

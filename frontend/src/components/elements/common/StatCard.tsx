@@ -1,6 +1,4 @@
 import { Card } from 'react-bootstrap'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 
 interface StatCardProps {
   label: string
@@ -20,9 +18,9 @@ export const StatCard = ({ label, value, accent, icon, iconBg, iconColor, loadin
           <div className="small fw-medium mb-1" style={{ color: 'var(--text-secondary)' }}>{label}</div>
           <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
             {loading
-              ? <SkeletonTheme baseColor="#e8eaed" highlightColor="#f4f5f7">
-                  <Skeleton width={56} height={30} borderRadius={4} />
-                </SkeletonTheme>
+              ? <span className="placeholder-glow d-block">
+                  <span className="placeholder rounded" style={{ width: 56, height: 30, display: 'inline-block' }} />
+                </span>
               : value
             }
           </div>

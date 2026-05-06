@@ -11,7 +11,8 @@ import { Container, Row, Col, Card, Table, Badge, Alert, Button } from 'react-bo
 import { StatCard } from '../../elements/shared/StatCard'
 import { ActionCard } from '../../elements/shared/ActionCard'
 import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
-import { PageBanner } from '../../elements/common/PageBanner'
+import { SUB_TABS } from '../../layout/VendorLayout'
+import { TabBar } from '../../elements/TabBar'
 
 const contractBadgeClass = (status: string): string => {
   if (status === 'ACTIVE')     return 'es-badge-active'
@@ -38,7 +39,7 @@ export const VendorManagerDashboard = () => {
     dispatch(fetchAllInvoices())
   }, [dispatch])
 
-  const firstName = user?.name?.split(' ')[0] ?? 'Vendor'
+  const isVendor  = user?.role === 'VENDOR'
   const hasProfile = vendors.length > 0
 
   const draftContracts      = contracts.filter(c => c.status === 'DRAFT').length
@@ -60,26 +61,33 @@ export const VendorManagerDashboard = () => {
   ]
 
   const ACTIONS = [
-    {
+    // "My Profile" / "Register" is only meaningful for VENDOR role (POST /vendors requires VENDOR)
+    ...(isVendor ? [{
       to:     '/vendor/profile',
       title:  hasProfile ? 'My Profile' : 'Register as Vendor',
       desc:   hasProfile ? 'View and update your vendor profile' : 'Create your vendor profile to start',
       accent: 'es-stat-card-blue',
-    },
+    }] : []),
     {
       to:     '/vendor/contracts',
-      title:  'My Contracts',
+      title:  'Contracts',
       desc:   draftContracts > 0
-        ? `${draftContracts} contract${draftContracts > 1 ? 's' : ''} waiting to be signed`
-        : 'View all your vendor agreements',
+        ? `${draftContracts} contract${draftContracts > 1 ? 's' : ''} awaiting signature`
+        : 'View all vendor agreements',
       accent: 'es-stat-card-green',
     },
-    {
+    // "Log Delivery" action is only for VENDOR (POST /deliveries requires VENDOR)
+    ...(isVendor ? [{
       to:     '/vendor/deliveries',
       title:  'Log Delivery',
       desc:   'Confirm and track goods & equipment delivered',
       accent: 'es-stat-card-amber',
-    },
+    }] : [{
+      to:     '/vendor/deliveries',
+      title:  'Deliveries',
+      desc:   'View delivery records and statuses',
+      accent: 'es-stat-card-amber',
+    }]),
     {
       to:     '/vendor/invoices',
       title:  'Invoices',
@@ -92,22 +100,19 @@ export const VendorManagerDashboard = () => {
 
   const recentContracts = contracts.slice(0, 5)
 
+  const firstName = user?.name?.split(' ')[0] ?? 'User'
+
   return (
     <div>
-      <PageBanner
-        title={`Welcome back, ${firstName}`}
-        subtitle={hasProfile
-          ? `${draftContracts} contract${draftContracts !== 1 ? 's' : ''} to sign · ${scheduledDeliveries + inTransitDeliveries} active deliveries · ${pendingInvoices + overdueInvoices} unpaid invoices`
-          : 'Get started by registering your vendor profile below.'}
-        actions={<>
-          <Button variant="outline-light" size="sm" className="rounded-3" onClick={() => navigate('/vendor/contracts')}>
-            View Contracts
-          </Button>
-          <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={() => navigate('/vendor/profile')}>
-            My Profile
-          </Button>
-        </>}
-      />
+      <div className="es-banner">
+        <Container fluid className="px-3 px-md-4 py-3">
+          <h1 className="fw-bold fs-4 mb-1" style={{ color: '#fff' }}>Welcome back, {firstName}</h1>
+          <p className="mb-0 small" style={{ color: 'rgba(255,255,255,0.72)' }}>Vendor Portal</p>
+        </Container>
+      </div>
+
+
+      <TabBar SUB_TABS={SUB_TABS} />
 
       <Container fluid className="px-3 px-md-4 py-4">
         {/* Alert banners */}
@@ -157,16 +162,18 @@ export const VendorManagerDashboard = () => {
                   <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                     <thead style={{ background: 'var(--bg-subtle)' }}>
                       <tr>
-                        {['Contract ID', 'Value', 'Start Date', 'End Date', 'Status'].map(h => (
+                        {['Vendor', 'Value', 'Start Date', 'End Date', 'Status'].map(h => (
                           <th key={h} className="fw-semibold border-0 pb-2" style={{ color: 'var(--text-primary)' }}>{h}</th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {contractsLoading ? <TableRowsSkeleton rows={5} cols={5} /> : recentContracts.map(c => (
+                      {contractsLoading ? (
+                        <TableRowsSkeleton rows={5} cols={5} />
+                      ) : recentContracts.map(c => (
                         <tr key={c.contractId}>
-                          <td className="align-middle" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                            {c.contractId.slice(0, 8)}…
+                          <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>
+                            {vendors.find(v => v.vendorId === c.vendorId)?.name ?? '—'}
                           </td>
                           <td className="align-middle fw-semibold" style={{ color: 'var(--text-primary)' }}>
                             ${Number(c.value).toLocaleString()}

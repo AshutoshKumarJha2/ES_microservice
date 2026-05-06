@@ -12,7 +12,6 @@ import {
   createContract,
   updateContract,
   updateContractStatus,
-  deleteContract,
 } from '../../../store/slices/vendor/vendorSlice'
 import { fetchAllEvents } from '../../../store/slices/eventsSlice'
 import type { ContractResponseDto, ContractRequestDto, ContractStatus } from '../../../types/vendor'
@@ -37,19 +36,12 @@ export const OrganizerContracts = () => {
   const { contracts, contractsLoading, contractsError, vendors } = useAppSelector((s) => s.vendor)
   const events = useAppSelector((s) => s.events.events)
 
-  const [search, setSearch]               = useState('')
-  const [filter, setFilter]               = useState<ContractStatus | 'ALL'>('ALL')
-  const [showModal, setShowModal]         = useState(false)
-  const [editing, setEditing]             = useState<ContractResponseDto | null>(null)
-  const [form, setForm]                   = useState<ContractRequestDto>(EMPTY_FORM)
-  const [saving, setSaving]               = useState(false)
-  const [showStatusModal, setShowStatusModal] = useState(false)
-  const [statusTarget, setStatusTarget]   = useState<ContractResponseDto | null>(null)
-  const [newStatus, setNewStatus]         = useState<ContractStatus>('ACTIVE')
-  const [updatingStatus, setUpdatingStatus] = useState(false)
-  const [showDelete, setShowDelete]       = useState(false)
-  const [deleteTarget, setDeleteTarget]   = useState<ContractResponseDto | null>(null)
-  const [deleting, setDeleting]           = useState(false)
+  const [search, setSearch] = useState('')
+  const [filter, setFilter] = useState<ContractStatus | 'ALL'>('ALL')
+  const [showModal, setShowModal] = useState(false)
+  const [editing, setEditing] = useState<ContractResponseDto | null>(null)
+  const [form, setForm] = useState<ContractRequestDto>(EMPTY_FORM)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     dispatch(fetchAllContracts())
@@ -57,7 +49,8 @@ export const OrganizerContracts = () => {
     dispatch(fetchAllEvents())
   }, [dispatch])
 
-  const vendorName = (id: string) => vendors.find(v => v.vendorId === id)?.name ?? id.slice(0, 8) + '…'
+  const vendorName = (id: string) => vendors.find(v => v.vendorId === id)?.name ?? '—'
+  const eventName  = (id: string) => events.find(e => e.id === id)?.eventName ?? '—'
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
@@ -65,11 +58,10 @@ export const OrganizerContracts = () => {
       const matchStatus = filter === 'ALL' || c.status === filter
       const matchSearch = !q
         || vendorName(c.vendorId).toLowerCase().includes(q)
-        || c.contractId.toLowerCase().includes(q)
-        || c.eventId.toLowerCase().includes(q)
+        || eventName(c.eventId).toLowerCase().includes(q)
       return matchStatus && matchSearch
     })
-  }, [contracts, search, filter, vendors])
+  }, [contracts, search, filter, vendors, events])
 
   const openCreate = () => {
     setEditing(null)
@@ -105,10 +97,11 @@ export const OrganizerContracts = () => {
     }
     setSaving(true)
     try {
+      const toLocalDT = (s: string) => s.length === 16 ? s + ':00' : s
       const payload = {
         ...form,
-        startDate: new Date(form.startDate).toISOString(),
-        endDate: new Date(form.endDate).toISOString(),
+        startDate: toLocalDT(form.startDate),
+        endDate: toLocalDT(form.endDate),
       }
       if (editing) {
         await dispatch(updateContract({ contractId: editing.contractId, payload })).unwrap()
@@ -123,39 +116,12 @@ export const OrganizerContracts = () => {
     } finally { setSaving(false) }
   }
 
-  const openStatusChange = (c: ContractResponseDto) => {
-    setStatusTarget(c)
-    setNewStatus(c.status)
-    setShowStatusModal(true)
-  }
-
-  const handleStatusUpdate = async () => {
-    if (!statusTarget) return
-    setUpdatingStatus(true)
-    try {
-      await dispatch(updateContractStatus({ contractId: statusTarget.contractId, status: newStatus })).unwrap()
-      toast.success(`Status updated to ${newStatus}.`)
-      setShowStatusModal(false)
-    } catch {
-      toast.error('Status update failed.')
-    } finally { setUpdatingStatus(false) }
-  }
-
-  const openDelete = (c: ContractResponseDto) => { setDeleteTarget(c); setShowDelete(true) }
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    setDeleting(true)
-    try {
-      await dispatch(deleteContract(deleteTarget.contractId)).unwrap()
-      toast.success('Contract deleted.')
-      setShowDelete(false)
-    } catch {
-      toast.error('Delete failed.')
-    } finally { setDeleting(false) }
+  const handleStatusChange = (contractId: string, status: ContractStatus) => {
+    dispatch(updateContractStatus({ contractId, status }))
   }
 
   return (
-    <div>
+    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
       {/* Banner */}
       <div className="es-banner text-white">
         <Container fluid className="px-3 px-md-4 py-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
@@ -222,7 +188,7 @@ export const OrganizerContracts = () => {
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
-                    {['Contract ID', 'Vendor', 'Event ID', 'Value', 'Start', 'End', 'Status', 'Actions'].map(h => (
+                    {['Contract ID', 'Vendor', 'Event', 'Value', 'Start', 'End', 'Status', 'Actions'].map(h => (
                       <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
                     ))}
                   </tr>
@@ -230,13 +196,11 @@ export const OrganizerContracts = () => {
                 <tbody>
                   {filtered.map(c => (
                     <tr key={c.contractId}>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {c.contractId.slice(0, 8)}…
+                      <td className="align-middle px-3 fw-semibold" style={{ color: 'var(--text-secondary)', fontSize: '0.82rem' }}>
+                        CON-{c.contractId.slice(0, 8).toUpperCase()}
                       </td>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{vendorName(c.vendorId)}</td>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {c.eventId.slice(0, 8)}…
-                      </td>
+                      <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{eventName(c.eventId)}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>
                         ${Number(c.value).toLocaleString()}
                       </td>
@@ -252,10 +216,17 @@ export const OrganizerContracts = () => {
                         </Badge>
                       </td>
                       <td className="align-middle px-3">
-                        <div className="d-flex gap-1 flex-wrap">
+                        <div className="d-flex gap-2 align-items-center">
+                          <Form.Select
+                            size="sm"
+                            className="es-form-control rounded-2"
+                            style={{ width: 'auto' }}
+                            value={c.status}
+                            onChange={e => handleStatusChange(c.contractId, e.target.value as ContractStatus)}
+                          >
+                            {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                          </Form.Select>
                           <Button size="sm" variant="outline-secondary" className="rounded-2" onClick={() => openEdit(c)}>Edit</Button>
-                          <Button size="sm" variant="outline-primary" className="rounded-2" onClick={() => openStatusChange(c)}>Status</Button>
-                          <Button size="sm" variant="outline-danger" className="rounded-2" onClick={() => openDelete(c)}>Delete</Button>
                         </div>
                       </td>
                     </tr>
@@ -363,52 +334,6 @@ export const OrganizerContracts = () => {
           <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowModal(false)}>Cancel</Button>
           <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleSave} disabled={saving}>
             {saving ? <Spinner animation="border" size="sm" /> : editing ? 'Save Changes' : 'Create Contract'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Update Status Modal */}
-      <Modal show={showStatusModal} onHide={() => setShowStatusModal(false)} centered>
-        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Update Contract Status</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          <p className="small mb-3" style={{ color: 'var(--text-secondary)' }}>
-            Contract: <code>{statusTarget?.contractId?.slice(0, 8)}…</code>
-          </p>
-          <Form.Group>
-            <Form.Label className="es-label">New Status</Form.Label>
-            <Form.Select
-              className="es-form-control rounded-3"
-              value={newStatus}
-              onChange={e => setNewStatus(e.target.value as ContractStatus)}
-            >
-              {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
-            </Form.Select>
-          </Form.Group>
-        </Modal.Body>
-        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowStatusModal(false)}>Cancel</Button>
-          <Button variant="primary" size="sm" className="fw-semibold rounded-3" onClick={handleStatusUpdate} disabled={updatingStatus}>
-            {updatingStatus ? <Spinner animation="border" size="sm" /> : 'Update Status'}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Delete Confirm Modal */}
-      <Modal show={showDelete} onHide={() => setShowDelete(false)} centered>
-        <Modal.Header closeButton style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Modal.Title className="fs-6 fw-semibold" style={{ color: 'var(--text-primary)' }}>Delete Contract</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ background: 'var(--bg-surface)' }}>
-          <p className="mb-0" style={{ color: 'var(--text-body)' }}>
-            Delete contract <strong>{deleteTarget?.contractId?.slice(0, 8)}…</strong>? This cannot be undone.
-          </p>
-        </Modal.Body>
-        <Modal.Footer style={{ background: 'var(--bg-surface)', borderColor: 'var(--border-color)' }}>
-          <Button variant="outline-secondary" size="sm" className="rounded-3" onClick={() => setShowDelete(false)}>Cancel</Button>
-          <Button variant="danger" size="sm" className="fw-semibold rounded-3" onClick={handleDelete} disabled={deleting}>
-            {deleting ? <Spinner animation="border" size="sm" /> : 'Delete'}
           </Button>
         </Modal.Footer>
       </Modal>

@@ -5,7 +5,6 @@ import {
 } from 'react-bootstrap'
 import { PageBanner } from '../../elements/common/PageBanner'
 import { Search } from 'react-bootstrap-icons'
-import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import { toast } from 'react-toastify'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import {
@@ -16,6 +15,7 @@ import {
   updateDeliveryStatus,
   deleteDelivery,
 } from '../../../store/slices/vendor/vendorSlice'
+import { TableRowsSkeleton } from '../../elements/skeletons/PageSkeleton'
 import type { DeliveryResponseDto, DeliveryRequestDto, DeliveryStatus } from '../../../types/vendor'
 
 const STATUSES: DeliveryStatus[] = ['SCHEDULED', 'IN_TRANSIT', 'DELIVERED', 'FAILED', 'CANCELLED']
@@ -30,6 +30,7 @@ const statusBadgeClass = (s: DeliveryStatus): string => {
 }
 
 const toDatetimeLocal = (iso: string) => iso ? iso.slice(0, 16) : ''
+const toLocalDT = (s: string) => s.length === 16 ? s + ':00' : s
 
 const EMPTY_FORM: DeliveryRequestDto = {
   invoiceId: '', item: '', quantity: 1,
@@ -39,15 +40,26 @@ const EMPTY_FORM: DeliveryRequestDto = {
 export const Deliveries = () => {
   const dispatch = useAppDispatch()
   const { deliveries, deliveriesLoading, deliveriesError, invoices } = useAppSelector((s) => s.vendor)
+  const { user } = useAppSelector((s) => s.auth)
+
+  // Role gates — mirrors DeliveryController @PreAuthorize rules:
+  // POST /deliveries, PATCH /{id}/status, PUT /{id} → VENDOR
+  // DELETE /{id} → VENDOR | ADMIN
+  const isVendor  = user?.role === 'VENDOR'
+  const canDelete = user?.role === 'VENDOR' || user?.role === 'ADMIN'
 
   const [search, setSearch]         = useState('')
   const [filter, setFilter]         = useState<DeliveryStatus | 'ALL'>('ALL')
+
+  // Create / Edit modal
   const [showModal, setShowModal]   = useState(false)
-  const [showDelete, setShowDelete] = useState(false)
   const [editing, setEditing]       = useState<DeliveryResponseDto | null>(null)
-  const [target, setTarget]         = useState<DeliveryResponseDto | null>(null)
   const [form, setForm]             = useState<DeliveryRequestDto>(EMPTY_FORM)
   const [saving, setSaving]         = useState(false)
+
+  // Delete modal
+  const [showDelete, setShowDelete] = useState(false)
+  const [target, setTarget]         = useState<DeliveryResponseDto | null>(null)
 
   useEffect(() => {
     dispatch(fetchAllDeliveries())
@@ -76,6 +88,9 @@ export const Deliveries = () => {
     })
     setShowModal(true)
   }
+  const handleStatusChange = (deliveryId: string, status: DeliveryStatus) => {
+    dispatch(updateDeliveryStatus({ deliveryId, status }))
+  }
   const openDelete = (d: DeliveryResponseDto) => { setTarget(d); setShowDelete(true) }
 
   const handleSave = async () => {
@@ -85,7 +100,7 @@ export const Deliveries = () => {
     }
     setSaving(true)
     try {
-      const payload = { ...form, deliveryDate: new Date(form.deliveryDate).toISOString() }
+      const payload = { ...form, deliveryDate: toLocalDT(form.deliveryDate) }
       if (editing) {
         await dispatch(updateDelivery({ deliveryId: editing.deliveryId, payload })).unwrap()
         toast.success('Delivery updated.')
@@ -98,15 +113,6 @@ export const Deliveries = () => {
       toast.error('Operation failed. Please try again.')
     } finally {
       setSaving(false)
-    }
-  }
-
-  const handleStatusChange = async (deliveryId: string, status: DeliveryStatus) => {
-    try {
-      await dispatch(updateDeliveryStatus({ deliveryId, status })).unwrap()
-      toast.success('Status updated.')
-    } catch {
-      toast.error('Status update failed.')
     }
   }
 
@@ -126,7 +132,11 @@ export const Deliveries = () => {
       <PageBanner
         title="Deliveries"
         subtitle="Log and track goods & equipment deliveries"
-        actions={<Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>+ Log Delivery</Button>}
+        actions={
+          isVendor
+            ? <Button variant="light" size="sm" className="fw-semibold rounded-3" onClick={openCreate}>+ Log Delivery</Button>
+            : undefined
+        }
       />
 
       <Container fluid className="px-3 px-md-4 py-4">
@@ -180,17 +190,16 @@ export const Deliveries = () => {
               <Table hover responsive className="mb-0" style={{ fontSize: '0.88rem' }}>
                 <thead style={{ background: 'var(--bg-subtle)' }}>
                   <tr>
-                    {['Delivery ID', 'Item', 'Qty', 'Tracking #', 'Delivery Date', 'Status', 'Actions'].map(h => (
+                    {['Item', 'Qty', 'Tracking #', 'Delivery Date', 'Status', 'Actions'].map(h => (
                       <th key={h} className="fw-semibold border-0 pb-2 px-3 pt-3" style={{ color: 'var(--text-primary)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {deliveriesLoading ? <TableRowsSkeleton rows={5} cols={7} /> : filtered.map(d => (
+                  {deliveriesLoading ? (
+                    <TableRowsSkeleton rows={5} cols={6} />
+                  ) : filtered.map(d => (
                     <tr key={d.deliveryId}>
-                      <td className="align-middle px-3" style={{ fontFamily: 'monospace', fontSize: 11, color: 'var(--text-secondary)' }}>
-                        {d.deliveryId.slice(0, 8)}…
-                      </td>
                       <td className="align-middle fw-semibold px-3" style={{ color: 'var(--text-primary)' }}>{d.item}</td>
                       <td className="align-middle px-3" style={{ color: 'var(--text-secondary)' }}>{d.quantity}</td>
                       <td className="align-middle px-3">
@@ -200,25 +209,33 @@ export const Deliveries = () => {
                         {new Date(d.deliveryDate).toLocaleDateString()}
                       </td>
                       <td className="align-middle px-3">
-                        <div className="d-flex align-items-center gap-2">
-                          <Badge className={`${statusBadgeClass(d.status)} border-0`} style={{ fontSize: '0.7rem' }}>
-                            {d.status.replace('_', ' ')}
-                          </Badge>
-                          <Form.Select
-                            size="sm"
-                            className="es-form-control rounded-2"
-                            style={{ width: 'auto', fontSize: '0.78rem' }}
-                            value={d.status}
-                            onChange={e => handleStatusChange(d.deliveryId, e.target.value as DeliveryStatus)}
-                          >
-                            {STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
-                          </Form.Select>
-                        </div>
+                        <Badge className={`${statusBadgeClass(d.status)} border-0`} style={{ fontSize: '0.7rem' }}>
+                          {d.status.replace('_', ' ')}
+                        </Badge>
                       </td>
                       <td className="align-middle px-3">
-                        <div className="d-flex gap-2">
-                          <Button size="sm" variant="outline-secondary" className="rounded-2" onClick={() => openEdit(d)}>Edit</Button>
-                          <Button size="sm" variant="outline-danger" className="rounded-2" onClick={() => openDelete(d)}>Delete</Button>
+                        <div className="d-flex gap-1 flex-wrap align-items-center">
+                          {isVendor && (
+                            <>
+                              <Form.Select
+                                size="sm"
+                                className="es-form-control rounded-2"
+                                style={{ width: 'auto' }}
+                                value={d.status}
+                                onChange={e => handleStatusChange(d.deliveryId, e.target.value as DeliveryStatus)}
+                              >
+                                {STATUSES.map(s => <option key={s} value={s}>{s.replace('_', ' ')}</option>)}
+                              </Form.Select>
+                              <Button size="sm" variant="outline-secondary" className="rounded-2" onClick={() => openEdit(d)}>
+                                Edit
+                              </Button>
+                            </>
+                          )}
+                          {canDelete && (
+                            <Button size="sm" variant="outline-danger" className="rounded-2" onClick={() => openDelete(d)}>
+                              Delete
+                            </Button>
+                          )}
                         </div>
                       </td>
                     </tr>

@@ -1,5 +1,4 @@
-import { Col, Card } from 'react-bootstrap'
-import { InlineFieldSkeleton } from '../skeletons/PageSkeleton'
+import { Col, Card, Spinner } from 'react-bootstrap'
 
 interface Props {
   label: string
@@ -16,7 +15,9 @@ export const StatCard = ({ label, value, accent, loading }: Props) => (
           {label}
         </div>
         <div className="fw-bold" style={{ fontSize: '1.8rem', color: 'var(--text-primary)', lineHeight: 1.1 }}>
-          {loading ? <InlineFieldSkeleton width="50%" /> : value}
+          {loading
+            ? <Spinner animation="border" size="sm" style={{ color: 'var(--blue)' }} />
+            : value}
         </div>
       </Card.Body>
     </Card>

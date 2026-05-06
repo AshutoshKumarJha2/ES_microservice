@@ -9,7 +9,7 @@ import type {
   InvoiceResponseDto,
 } from '../../types/vendor'
 
-const BASE = '/api/v1/vendor-manager/api/v1'
+const BASE = '/api/v1/vendor-manager'
 
 export const contractService = {
   async createContract(payload: ContractRequestDto): Promise<ContractResponseDto> {

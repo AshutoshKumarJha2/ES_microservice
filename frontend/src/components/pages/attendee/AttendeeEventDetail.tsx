@@ -5,8 +5,6 @@ import {
   Form, Table,
 } from 'react-bootstrap'
 import { TableRowsSkeleton, InlineFieldSkeleton } from '../../elements/skeletons/PageSkeleton'
-import Skeleton, { SkeletonTheme } from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
 import { ArrowLeft, StarFill, Star } from 'react-bootstrap-icons'
 import { useAppDispatch, useAppSelector } from '../../../store/hooks'
 import { fetchFeedback } from '../../../store/slices/analyticsSlice'
@@ -132,10 +130,10 @@ export const AttendeeEventDetail = () => {
           <div className="d-flex flex-wrap align-items-center gap-3">
             <div>
               {loading ? (
-                <SkeletonTheme baseColor="rgba(255,255,255,0.15)" highlightColor="rgba(255,255,255,0.28)">
-                  <Skeleton width="52%" height={26} borderRadius={6} style={{ marginBottom: 8, display: 'block' }} />
-                  <Skeleton width="30%" height={13} borderRadius={4} style={{ display: 'block' }} />
-                </SkeletonTheme>
+                <div className="placeholder-glow">
+                  <span className="placeholder rounded d-block" style={{ width: '52%', height: 26, marginBottom: 8, background: 'rgba(255,255,255,0.25)' }} />
+                  <span className="placeholder rounded d-block" style={{ width: '30%', height: 13, background: 'rgba(255,255,255,0.25)' }} />
+                </div>
               ) : (
                 <>
                   <h1 className="fw-bold fs-3 mb-1">{event!.eventName}</h1>

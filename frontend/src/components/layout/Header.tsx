@@ -144,6 +144,9 @@ export const Header = () => {
           {user?.role === 'ADMIN' && (
             <Nav.Link as={Link} to="/admin/dashboard" style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
           )}
+          {user?.role === 'VENDOR' && (
+            <Nav.Link as={Link} to="/vendor" style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+          )}
           {user?.role === 'FINANCE_OFFICER' && (
             <>
               <Nav.Link as={Link} to="/finance/expenses" style={NAV_LINK_STYLE}>Expenses</Nav.Link>
@@ -153,6 +156,24 @@ export const Header = () => {
           )}
         </Nav>
 
+          <Nav className="me-auto">
+            {user?.role === 'ATTENDEE' && (
+              <>
+                <Nav.Link as={Link} to="/events"                   style={NAV_LINK_STYLE}>Browse Events</Nav.Link>
+                <Nav.Link as={Link} to="/attendee/registrations"   style={NAV_LINK_STYLE}>My Registrations</Nav.Link>
+              </>
+            )}
+            {user?.role === 'ADMIN' && (
+              <Nav.Link as={Link} to="/admin/dashboard"  style={NAV_LINK_STYLE}>Dashboard</Nav.Link>
+            )}
+            {user?.role === 'FINANCE_OFFICER' && (
+              <>
+                <Nav.Link as={Link} to="/finance/expenses"  style={NAV_LINK_STYLE}>Expenses</Nav.Link>
+                <Nav.Link as={Link} to="/finance/payments"  style={NAV_LINK_STYLE}>Payments</Nav.Link>
+                <Nav.Link as={Link} to="/finance/budget"    style={NAV_LINK_STYLE}>Budget</Nav.Link>
+              </>
+            )}
+          </Nav>
         {/* Mobile: always-visible right actions */}
         <div className="d-flex d-lg-none align-items-center gap-2 ms-auto me-2 mobile-actions">
           <DarkModeToggle />

@@ -82,6 +82,7 @@ public class InvoiceController {
      * @throws InvoiceNotFoundException if the invoice record is not found for the given ID
      */
     @GetMapping({"/{invoiceId}/download", "/{invoiceId}/pdf"})
+    @PreAuthorize("hasRole('VENDOR')")
     public ResponseEntity<byte[]> downloadPdf(@AuthenticationPrincipal UserPrincipal user, @PathVariable String invoiceId) {
         var actorId = user.userId();
         log.info("REST request to download invoice as PDF for invoice ID: {} by actorId={}", invoiceId, actorId);
